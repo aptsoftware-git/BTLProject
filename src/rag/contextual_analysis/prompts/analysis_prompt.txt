@@ -1,0 +1,9 @@
+Review the following comparison group of document segments for any potential inconsistencies, conflicting numbers, dates, naming styles, policy expiry durations, or contradictions.
+
+Context group concept: {context_section}
+
+Segments:
+{objects_text}
+
+Perform a rigorous review. Examine all segments. List all verified conflicts. Keep the tone completely objective and non-accusatory.
+If no issues are found, return an empty JSON array [].

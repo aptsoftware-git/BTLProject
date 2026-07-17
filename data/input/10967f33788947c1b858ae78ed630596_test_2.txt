@@ -1,0 +1,180 @@
+AI Document Proofreading System - Comprehensive Test Document
+
+Prepared on: 14 July 2026
+
+--------------------------------------------------------------------
+
+My name is Sanjukta Mukherjee and I am currently working on an AI Document Proofreading System. Dr. Ramesh Kumar reviewed the first prototype yesterday, while Prof. Michael Brown and Lt Gen Arvind Kumar will review the second version next week.
+
+John Smith and Alice Johnson also participated in the testing process. They carefully analysed the generated reports and they agreed that the application was performing well.
+
+OpenAI recently released improvements that inspired several interface ideas. Microsoft, Google, NVIDIA, TensorFlow, PyTorch, React, FastAPI, LanguageTool, SymSpell, Ollama and Docling are frequently referenced throughout this document and should ideally remain protected from unnecessary corrections.
+
+I have also added MyCustomFrameworkX as a user-defined protected term. MyCustomFrameworkX should never be modified even if it appears multiple times. MyCustomFrameworkX is important for testing the whitelist functionality.
+
+--------------------------------------------------------------------
+
+Paragraph 1
+
+Yesterday I goes to the office because the meeting were important. The manager tell me that every engineers are responsible for reviewing the document before it are published.
+
+--------------------------------------------------------------------
+
+Paragraph 2
+
+This application detect spelling mistakes, grammar mistakes, punctuation mistakes and style issues. It also identify duplicated words words inside the same sentence. The software have improved significantly over the last few weeks.
+
+--------------------------------------------------------------------
+
+Paragraph 3
+
+He give her the report because she ask him yesterday. They was waiting outside while we is discussing the implementation. I think it have become much easier than before.
+
+--------------------------------------------------------------------
+
+Paragraph 4
+
+There is alot of possibilites for improvment in this sysem. The algoritm should definately recieve additional optimizaton before releese.
+
+--------------------------------------------------------------------
+
+Paragraph 5
+
+The document contains severel intentional erors. Some sentenses are writen incorrectly while others contains punctuation mistakes without proper commas or periods the reader might become confused because the sentence never seems to end
+
+--------------------------------------------------------------------
+
+Paragraph 6
+
+React is used for the frontend and FastAPI powers the backend. TensorFlow and PyTorch are mentioned only for testing purposes. OpenAI and Microsoft should never be modified. Ollama is configured to run local language models.
+
+--------------------------------------------------------------------
+
+Paragraph 7
+
+Dr. Ramesh Kumar said that Sanjukta Mukherjee had completed the project successfully. John Smith thanked Alice Johnson because she helped him throughout the implementation. Prof. Michael Brown later congratulated them.
+
+--------------------------------------------------------------------
+
+Paragraph 8
+
+I gave my notebook to him because he forgot his notebook. She told me that they would bring their laptops tomorrow. We are confident that our implementation will satisfy their expectations.
+
+--------------------------------------------------------------------
+
+Paragraph 9
+
+On 12 July 2026, the team processed 245 documents. Approximately 98.7 percent of the documents were analysed successfully. API version v2.3.1 was deployed at 10:45 AM.
+
+--------------------------------------------------------------------
+
+Paragraph 10
+
+The system was running correctly but suddenly it stop responding. After restarting the backend, everything work normally again.
+
+--------------------------------------------------------------------
+
+Paragraph 11
+
+This sentence have inconsistent tense because yesterday we are testing the application and tomorrow we completed the deployment.
+
+--------------------------------------------------------------------
+
+Paragraph 12
+
+The results is impressive. Each developers have contributed their best effort. Every report were reviewed before publishing.
+
+--------------------------------------------------------------------
+
+Paragraph 13
+
+FastAPI FastAPI FastAPI appears multiple times intentionally. TensorFlow TensorFlow TensorFlow also appears repeatedly. OpenAI OpenAI OpenAI is repeated to verify duplicate protected terms handling.
+
+--------------------------------------------------------------------
+
+Paragraph 14
+
+The following names should remain protected:
+
+Sanjukta Mukherjee
+
+John Smith
+
+Alice Johnson
+
+Dr. Ramesh Kumar
+
+Prof. Michael Brown
+
+Lt Gen Arvind Kumar
+
+--------------------------------------------------------------------
+
+Paragraph 15
+
+The following pronouns should never be treated as spelling mistakes:
+
+I
+me
+my
+mine
+myself
+
+you
+your
+yours
+yourself
+
+he
+him
+his
+himself
+
+she
+her
+hers
+herself
+
+it
+its
+itself
+
+we
+us
+our
+ours
+ourselves
+
+they
+them
+their
+theirs
+themselves
+
+--------------------------------------------------------------------
+
+Paragraph 16
+
+This sentence contains style issues. In my personal opinion, I personally think that this particular feature is absolutely completely essential and very unique in every single possible way.
+
+--------------------------------------------------------------------
+
+Paragraph 17
+
+Please dont modify OpenAI, Microsoft, TensorFlow, FastAPI, React, PyTorch, LanguageTool, SymSpell, Ollama, Docling or MyCustomFrameworkX because these are protected terms.
+
+--------------------------------------------------------------------
+
+Paragraph 18
+
+Thiss sentencee containss severall misspelledd wordss thatt shouldd bee detectedd byy thee proofreaderr.
+
+--------------------------------------------------------------------
+
+Paragraph 19
+
+The project has been developed using React, FastAPI, and TypeScript. The backend communicates with the frontend through REST APIs. The application generates annotated HTML reports and corrected outputs automatically.
+
+--------------------------------------------------------------------
+
+End of Document

@@ -1,0 +1,144 @@
+:root {
+  --brand: #6C5CE7;
+  --brand-dark: #5B4BD6;
+  --brand-light: #EEECFB;
+
+  --amber: #F5A623;
+  --amber-light: #FDF1DC;
+
+  --green: #22C55E;
+  --green-light: #E4F9EC;
+
+  --blue-light: #E9EEFB;
+  --blue-icon: #6C7FE8;
+
+  --red: #E15555;
+  --red-light: #FDECEC;
+
+  --bg-page: #F7F7FB;
+  --bg-card: #FFFFFF;
+  --border: #ECECF3;
+
+  --text-primary: #1A1A2E;
+  --text-secondary: #6B6B80;
+  --text-muted: #9E9EB3;
+
+  --radius-card: 12px;
+  --radius-lg: 16px;
+  --radius-pill: 999px;
+
+  --shadow-card: 0 1px 2px rgba(20, 20, 43, 0.04), 0 1px 8px rgba(20, 20, 43, 0.03);
+}
+
+[data-theme="dark"] {
+  --bg-page: #0F172A;
+  --bg-card: #1E293B;
+  --border: #334155;
+  --text-primary: #F8FAFC;
+  --text-secondary: #94A3B8;
+  --text-muted: #64748B;
+  --brand-light: #2E2A54;
+  --shadow-card: none;
+}
+
+mark.spelling {
+  background-color: #FEF3C7 !important; /* Soft Amber */
+  color: #92400E !important;
+  border-bottom: 2px solid #D97706 !important;
+  padding: 1px 3px !important;
+  border-radius: 4px !important;
+  cursor: pointer !important;
+  outline: none !important;
+  transition: all 0.2s ease;
+}
+mark.spelling:hover, mark.spelling.active-highlight {
+  background-color: #FDE68A !important;
+}
+
+mark.grammar {
+  background-color: #FEE2E2 !important; /* Soft Red */
+  color: #991B1B !important;
+  border-bottom: 2px solid #DC2626 !important;
+  padding: 1px 3px !important;
+  border-radius: 4px !important;
+  cursor: pointer !important;
+  outline: none !important;
+  transition: all 0.2s ease;
+}
+mark.grammar:hover, mark.grammar.active-highlight {
+  background-color: #FCA5A5 !important;
+}
+
+mark.active-glow {
+  outline: 2px solid var(--brand) !important;
+  outline-offset: 1px !important;
+}
+
+.clean-corrected-view mark.corrected {
+  background-color: transparent !important;
+  color: inherit !important;
+  padding: 0 !important;
+  border: none !important;
+  outline: none !important;
+  border-radius: 0 !important;
+}
+
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  font-family: "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  background: var(--bg-page);
+  color: var(--text-primary);
+  -webkit-font-smoothing: antialiased;
+}
+
+button {
+  font-family: inherit;
+  cursor: pointer;
+}
+
+a {
+  text-decoration: none;
+}
+
+.app-shell {
+  display: flex;
+  min-height: 100vh;
+}
+
+.main-column {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+}
+
+/* Typing Indicator Animation (Phase 6) */
+@keyframes typingBlink {
+  0% { opacity: 0.2; }
+  20% { opacity: 1; }
+  100% { opacity: 0.2; }
+}
+
+.assistant-typing-dot {
+  width: 6px;
+  height: 6px;
+  background: var(--text-secondary);
+  border-radius: 50%;
+  animation: typingBlink 1.4s infinite both;
+  display: inline-block;
+  margin: 0 2px;
+}
+
+.assistant-typing-dot:nth-child(2) {
+  animation-delay: 0.2s;
+}
+
+.assistant-typing-dot:nth-child(3) {
+  animation-delay: 0.4s;
+}
+

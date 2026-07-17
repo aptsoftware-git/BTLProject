@@ -1,0 +1,64 @@
+from __future__ import annotations
+
+from typing import Any, Dict, List, Optional
+from pydantic import BaseModel
+
+
+class UploadResponse(BaseModel):
+    job_id: str
+    filename: str
+
+
+class ProofreadRequest(BaseModel):
+    job_id: str
+
+
+class JobStatusResponse(BaseModel):
+    job_id: str
+    filename: str
+    status: str  # pending, processing, completed, failed
+    current_stage: str
+    progress_percentage: float
+    created_at: str
+    completed_at: Optional[str] = None
+    error: Optional[str] = None
+
+
+class ResultsResponse(BaseModel):
+    job_id: str
+    status: str
+    statistics: Dict[str, Any]
+    issues: List[Any]
+    protected_terms: List[Any]
+    annotated_html: str
+    corrected_html: str
+    reports: Dict[str, str]
+    raw_text: str = ""
+
+
+class ProtectedTermsRequest(BaseModel):
+    terms: List[str]
+
+
+class PreferencesRequest(BaseModel):
+    preferences: Dict[str, Any]
+
+
+class RagChatRequest(BaseModel):
+    document_id: str
+    question: str
+    selected_model: Optional[str] = None
+    conversation_history_depth: Optional[int] = None
+
+
+class RagIndexRequest(BaseModel):
+    document_id: str
+
+
+class RagModelResponse(BaseModel):
+    id: str
+    display_name: str
+    description: str
+    recommended: bool
+
+

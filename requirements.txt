@@ -1,0 +1,19 @@
+# Document extraction
+docling>=2.0.0
+PyMuPDF>=1.24.0          # fallback PDF extraction if Docling is unavailable
+python-docx>=1.1.0       # fallback DOCX extraction
+
+# NLP / sentence splitting / protected-term NER
+spacy>=3.7.0
+# After installing requirements, download the spaCy model separately:
+#   python -m spacy download en_core_web_sm
+
+# Spell checking
+language-tool-python>=2.8.0   # requires a local Java runtime (JRE 17+)
+symspellpy>=6.7.7
+# SymSpell also needs a frequency dictionary file at
+# models/frequency_dictionary_en_82_765.txt (download from the symspellpy
+# repo's `symspellpy/frequency_dictionary_en_82_765.txt`).
+
+# Local LLM (grammar review + semantic validation) via Ollama's HTTP API
+requests>=2.31.0

@@ -1,0 +1,2036 @@
+{
+  "id": "ae213cbbe4144a739d340b2718f55e44",
+  "filename": "comprehensive_test_doc.txt",
+  "fileType": "TXT",
+  "uploadedLabel": "Uploaded Jul 14, 2026",
+  "size": "0.0 MB",
+  "status": "completed",
+  "current_stage": "Completed",
+  "progress_percentage": 100.0,
+  "error": null,
+  "issues": [
+    {
+      "sentence_id": 2,
+      "char_start": 119,
+      "char_end": 123,
+      "original_text": " and",
+      "suggested_text": ", and",
+      "issue_type": "grammar",
+      "source": "languagetool",
+      "reason": "Use a comma before \u2018and\u2019 if it connects two independent clauses (unless they are closely connected and short).",
+      "confidence": 0.75,
+      "is_protected": false,
+      "protected_reason": null,
+      "agreement_count": 1,
+      "final_confidence": 0.73,
+      "contributing_sources": [
+        "languagetool"
+      ],
+      "severity": "high"
+    },
+    {
+      "sentence_id": 5,
+      "char_start": 452,
+      "char_end": 456,
+      "original_text": " and",
+      "suggested_text": ", and",
+      "issue_type": "grammar",
+      "source": "languagetool",
+      "reason": "Use a comma before \u2018and\u2019 if it connects two independent clauses (unless they are closely connected and short).",
+      "confidence": 0.75,
+      "is_protected": false,
+      "protected_reason": null,
+      "agreement_count": 1,
+      "final_confidence": 0.73,
+      "contributing_sources": [
+        "languagetool"
+      ],
+      "severity": "high"
+    },
+    {
+      "sentence_id": 12,
+      "char_start": 1063,
+      "char_end": 1067,
+      "original_text": "goes",
+      "suggested_text": "went",
+      "issue_type": "tense",
+      "source": "llm",
+      "reason": "Incorrect verb tense",
+      "confidence": 0.7,
+      "is_protected": false,
+      "protected_reason": null,
+      "agreement_count": 1,
+      "final_confidence": 0.8,
+      "contributing_sources": [
+        "llm"
+      ],
+      "severity": "high"
+    },
+    {
+      "sentence_id": 12,
+      "char_start": 1102,
+      "char_end": 1106,
+      "original_text": "were",
+      "suggested_text": "was",
+      "issue_type": "grammar",
+      "source": "llm",
+      "reason": "Incorrect verb agreement",
+      "confidence": 0.7,
+      "is_protected": false,
+      "protected_reason": null,
+      "agreement_count": 1,
+      "final_confidence": 0.8,
+      "contributing_sources": [
+        "llm"
+      ],
+      "severity": "high"
+    },
+    {
+      "sentence_id": 13,
+      "char_start": 1212,
+      "char_end": 1225,
+      "original_text": "are published",
+      "suggested_text": "is published",
+      "issue_type": "grammar",
+      "source": "llm",
+      "reason": "Incorrect subject-verb agreement",
+      "confidence": 0.7,
+      "is_protected": false,
+      "protected_reason": null,
+      "agreement_count": 1,
+      "final_confidence": 0.8,
+      "contributing_sources": [
+        "llm"
+      ],
+      "severity": "high"
+    },
+    {
+      "sentence_id": 15,
+      "char_start": 1258,
+      "char_end": 1264,
+      "original_text": "detect",
+      "suggested_text": "detects",
+      "issue_type": "grammar",
+      "source": "llm",
+      "reason": "Subject-verb agreement error",
+      "confidence": 0.7,
+      "is_protected": false,
+      "protected_reason": null,
+      "agreement_count": 1,
+      "final_confidence": 0.8,
+      "contributing_sources": [
+        "llm"
+      ],
+      "severity": "high"
+    },
+    {
+      "sentence_id": 16,
+      "char_start": 1349,
+      "char_end": 1357,
+      "original_text": "identify",
+      "suggested_text": "identifies",
+      "issue_type": "grammar",
+      "source": "llm",
+      "reason": "Subject-verb agreement error",
+      "confidence": 0.7,
+      "is_protected": false,
+      "protected_reason": null,
+      "agreement_count": 2,
+      "final_confidence": 0.95,
+      "contributing_sources": [
+        "languagetool",
+        "llm"
+      ],
+      "severity": "critical"
+    },
+    {
+      "sentence_id": 16,
+      "char_start": 1369,
+      "char_end": 1380,
+      "original_text": "words words",
+      "suggested_text": "words",
+      "issue_type": "spelling",
+      "source": "llm",
+      "reason": "Redundant word",
+      "confidence": 0.7,
+      "is_protected": false,
+      "protected_reason": null,
+      "agreement_count": 2,
+      "final_confidence": 0.95,
+      "contributing_sources": [
+        "languagetool",
+        "llm"
+      ],
+      "severity": "high"
+    },
+    {
+      "sentence_id": 17,
+      "char_start": 1420,
+      "char_end": 1424,
+      "original_text": "have",
+      "suggested_text": "has",
+      "issue_type": "grammar",
+      "source": "llm",
+      "reason": "Subject-verb agreement error",
+      "confidence": 0.7,
+      "is_protected": false,
+      "protected_reason": null,
+      "agreement_count": 1,
+      "final_confidence": 0.8,
+      "contributing_sources": [
+        "llm"
+      ],
+      "severity": "high"
+    },
+    {
+      "sentence_id": 19,
+      "char_start": 1522,
+      "char_end": 1525,
+      "original_text": "ask",
+      "suggested_text": "asked",
+      "issue_type": "tense",
+      "source": "llm",
+      "reason": "Past tense required to match the context",
+      "confidence": 0.7,
+      "is_protected": false,
+      "protected_reason": null,
+      "agreement_count": 1,
+      "final_confidence": 0.8,
+      "contributing_sources": [
+        "llm"
+      ],
+      "severity": "high"
+    },
+    {
+      "sentence_id": 20,
+      "char_start": 1546,
+      "char_end": 1549,
+      "original_text": "was",
+      "suggested_text": "were",
+      "issue_type": "grammar",
+      "source": "llm",
+      "reason": "Plural subject requires plural verb",
+      "confidence": 0.7,
+      "is_protected": false,
+      "protected_reason": null,
+      "agreement_count": 1,
+      "final_confidence": 0.8,
+      "contributing_sources": [
+        "llm"
+      ],
+      "severity": "high"
+    },
+    {
+      "sentence_id": 21,
+      "char_start": 1620,
+      "char_end": 1624,
+      "original_text": "have",
+      "suggested_text": "has",
+      "issue_type": "grammar",
+      "source": "llm",
+      "reason": "Subject-verb agreement error with singular subject",
+      "confidence": 0.7,
+      "is_protected": false,
+      "protected_reason": null,
+      "agreement_count": 2,
+      "final_confidence": 0.95,
+      "contributing_sources": [
+        "languagetool",
+        "llm"
+      ],
+      "severity": "critical"
+    },
+    {
+      "sentence_id": 23,
+      "char_start": 1680,
+      "char_end": 1684,
+      "original_text": "alot",
+      "suggested_text": "a lot",
+      "issue_type": "spelling",
+      "source": "llm",
+      "reason": "Incorrect spelling",
+      "confidence": 0.7,
+      "is_protected": false,
+      "protected_reason": null,
+      "agreement_count": 2,
+      "final_confidence": 0.95,
+      "contributing_sources": [
+        "languagetool",
+        "llm"
+      ],
+      "severity": "high"
+    },
+    {
+      "sentence_id": 23,
+      "char_start": 1688,
+      "char_end": 1700,
+      "original_text": "possibilites",
+      "suggested_text": "possibilities",
+      "issue_type": "spelling",
+      "source": "llm",
+      "reason": "Incorrect spelling",
+      "confidence": 0.7,
+      "is_protected": false,
+      "protected_reason": null,
+      "agreement_count": 2,
+      "final_confidence": 0.95,
+      "contributing_sources": [
+        "languagetool",
+        "llm"
+      ],
+      "severity": "high"
+    },
+    {
+      "sentence_id": 23,
+      "char_start": 1705,
+      "char_end": 1715,
+      "original_text": "improvment",
+      "suggested_text": "improvement",
+      "issue_type": "spelling",
+      "source": "llm",
+      "reason": "Incorrect spelling",
+      "confidence": 0.7,
+      "is_protected": false,
+      "protected_reason": null,
+      "agreement_count": 2,
+      "final_confidence": 0.95,
+      "contributing_sources": [
+        "languagetool",
+        "llm"
+      ],
+      "severity": "high"
+    },
+    {
+      "sentence_id": 23,
+      "char_start": 1724,
+      "char_end": 1729,
+      "original_text": "sysem",
+      "suggested_text": "system",
+      "issue_type": "spelling",
+      "source": "llm",
+      "reason": "Incorrect spelling",
+      "confidence": 0.7,
+      "is_protected": false,
+      "protected_reason": null,
+      "agreement_count": 2,
+      "final_confidence": 0.95,
+      "contributing_sources": [
+        "languagetool",
+        "llm"
+      ],
+      "severity": "high"
+    },
+    {
+      "sentence_id": 24,
+      "char_start": 1735,
+      "char_end": 1743,
+      "original_text": "algoritm",
+      "suggested_text": "algorithm",
+      "issue_type": "spelling",
+      "source": "llm",
+      "reason": "Incorrect spelling",
+      "confidence": 0.7,
+      "is_protected": false,
+      "protected_reason": null,
+      "agreement_count": 2,
+      "final_confidence": 0.95,
+      "contributing_sources": [
+        "languagetool",
+        "llm"
+      ],
+      "severity": "high"
+    },
+    {
+      "sentence_id": 24,
+      "char_start": 1751,
+      "char_end": 1761,
+      "original_text": "definately",
+      "suggested_text": "definitely",
+      "issue_type": "spelling",
+      "source": "llm",
+      "reason": "Incorrect spelling",
+      "confidence": 0.7,
+      "is_protected": false,
+      "protected_reason": null,
+      "agreement_count": 2,
+      "final_confidence": 0.95,
+      "contributing_sources": [
+        "languagetool",
+        "llm"
+      ],
+      "severity": "high"
+    },
+    {
+      "sentence_id": 24,
+      "char_start": 1762,
+      "char_end": 1769,
+      "original_text": "recieve",
+      "suggested_text": "receive",
+      "issue_type": "spelling",
+      "source": "llm",
+      "reason": "Incorrect spelling",
+      "confidence": 0.7,
+      "is_protected": false,
+      "protected_reason": null,
+      "agreement_count": 2,
+      "final_confidence": 0.95,
+      "contributing_sources": [
+        "languagetool",
+        "llm"
+      ],
+      "severity": "high"
+    },
+    {
+      "sentence_id": 24,
+      "char_start": 1781,
+      "char_end": 1792,
+      "original_text": "optimizaton",
+      "suggested_text": "optimization",
+      "issue_type": "spelling",
+      "source": "llm",
+      "reason": "Incorrect spelling",
+      "confidence": 0.7,
+      "is_protected": false,
+      "protected_reason": null,
+      "agreement_count": 2,
+      "final_confidence": 0.95,
+      "contributing_sources": [
+        "languagetool",
+        "llm"
+      ],
+      "severity": "high"
+    },
+    {
+      "sentence_id": 24,
+      "char_start": 1800,
+      "char_end": 1807,
+      "original_text": "releese",
+      "suggested_text": "release",
+      "issue_type": "spelling",
+      "source": "llm",
+      "reason": "Incorrect spelling",
+      "confidence": 0.7,
+      "is_protected": false,
+      "protected_reason": null,
+      "agreement_count": 2,
+      "final_confidence": 0.95,
+      "contributing_sources": [
+        "languagetool",
+        "llm"
+      ],
+      "severity": "high"
+    },
+    {
+      "sentence_id": 26,
+      "char_start": 1845,
+      "char_end": 1852,
+      "original_text": "severel",
+      "suggested_text": "several",
+      "issue_type": "spelling",
+      "source": "llm",
+      "reason": "Incorrect spelling",
+      "confidence": 0.7,
+      "is_protected": false,
+      "protected_reason": null,
+      "agreement_count": 2,
+      "final_confidence": 0.95,
+      "contributing_sources": [
+        "languagetool",
+        "llm"
+      ],
+      "severity": "high"
+    },
+    {
+      "sentence_id": 26,
+      "char_start": 1865,
+      "char_end": 1870,
+      "original_text": "erors",
+      "suggested_text": "errors",
+      "issue_type": "spelling",
+      "source": "llm",
+      "reason": "Incorrect spelling",
+      "confidence": 0.7,
+      "is_protected": false,
+      "protected_reason": null,
+      "agreement_count": 2,
+      "final_confidence": 0.95,
+      "contributing_sources": [
+        "languagetool",
+        "llm"
+      ],
+      "severity": "high"
+    },
+    {
+      "sentence_id": 27,
+      "char_start": 1877,
+      "char_end": 1886,
+      "original_text": "sentenses",
+      "suggested_text": "sentences",
+      "issue_type": "spelling",
+      "source": "llm",
+      "reason": "Incorrect spelling",
+      "confidence": 0.7,
+      "is_protected": false,
+      "protected_reason": null,
+      "agreement_count": 2,
+      "final_confidence": 0.95,
+      "contributing_sources": [
+        "languagetool",
+        "llm"
+      ],
+      "severity": "high"
+    },
+    {
+      "sentence_id": 27,
+      "char_start": 1891,
+      "char_end": 1897,
+      "original_text": "writen",
+      "suggested_text": "written",
+      "issue_type": "spelling",
+      "source": "llm",
+      "reason": "Incorrect spelling",
+      "confidence": 0.7,
+      "is_protected": false,
+      "protected_reason": null,
+      "agreement_count": 2,
+      "final_confidence": 0.95,
+      "contributing_sources": [
+        "languagetool",
+        "llm"
+      ],
+      "severity": "high"
+    },
+    {
+      "sentence_id": 46,
+      "char_start": 2964,
+      "char_end": 2968,
+      "original_text": " but",
+      "suggested_text": ", but",
+      "issue_type": "grammar",
+      "source": "languagetool",
+      "reason": "Use a comma before \u2018but\u2019 if it connects two independent clauses (unless they are closely connected and short).",
+      "confidence": 0.75,
+      "is_protected": false,
+      "protected_reason": null,
+      "agreement_count": 1,
+      "final_confidence": 0.73,
+      "contributing_sources": [
+        "languagetool"
+      ],
+      "severity": "high"
+    },
+    {
+      "sentence_id": 46,
+      "char_start": 2981,
+      "char_end": 2985,
+      "original_text": "stop",
+      "suggested_text": "stopped",
+      "issue_type": "tense",
+      "source": "llm",
+      "reason": "Incorrect verb form",
+      "confidence": 0.7,
+      "is_protected": false,
+      "protected_reason": null,
+      "agreement_count": 1,
+      "final_confidence": 0.8,
+      "contributing_sources": [
+        "llm"
+      ],
+      "severity": "high"
+    },
+    {
+      "sentence_id": 47,
+      "char_start": 3039,
+      "char_end": 3043,
+      "original_text": "work",
+      "suggested_text": "worked",
+      "issue_type": "tense",
+      "source": "llm",
+      "reason": "Incorrect verb form",
+      "confidence": 0.7,
+      "is_protected": false,
+      "protected_reason": null,
+      "agreement_count": 1,
+      "final_confidence": 0.8,
+      "contributing_sources": [
+        "llm"
+      ],
+      "severity": "high"
+    },
+    {
+      "sentence_id": 49,
+      "char_start": 3075,
+      "char_end": 3093,
+      "original_text": "This sentence have",
+      "suggested_text": "This sentence has",
+      "issue_type": "grammar",
+      "source": "languagetool",
+      "reason": "The verb \u2018have\u2019 is plural.",
+      "confidence": 0.75,
+      "is_protected": false,
+      "protected_reason": null,
+      "agreement_count": 1,
+      "final_confidence": 0.73,
+      "contributing_sources": [
+        "languagetool"
+      ],
+      "severity": "high"
+    },
+    {
+      "sentence_id": 51,
+      "char_start": 3223,
+      "char_end": 3233,
+      "original_text": "results is",
+      "suggested_text": "results are",
+      "issue_type": "grammar",
+      "source": "llm",
+      "reason": "subject-verb agreement",
+      "confidence": 0.7,
+      "is_protected": false,
+      "protected_reason": null,
+      "agreement_count": 1,
+      "final_confidence": 0.8,
+      "contributing_sources": [
+        "languagetool",
+        "llm"
+      ],
+      "severity": "high"
+    },
+    {
+      "sentence_id": 53,
+      "char_start": 3311,
+      "char_end": 3324,
+      "original_text": "were reviewed",
+      "suggested_text": "was reviewed",
+      "issue_type": "grammar",
+      "source": "llm",
+      "reason": "subject-verb agreement",
+      "confidence": 0.7,
+      "is_protected": false,
+      "protected_reason": null,
+      "agreement_count": 1,
+      "final_confidence": 0.8,
+      "contributing_sources": [
+        "llm"
+      ],
+      "severity": "high"
+    },
+    {
+      "sentence_id": 77,
+      "char_start": 4100,
+      "char_end": 4121,
+      "original_text": "absolutely completely",
+      "suggested_text": "absolutely",
+      "issue_type": "grammar",
+      "source": "llm",
+      "reason": "redundant phrase",
+      "confidence": 0.7,
+      "is_protected": false,
+      "protected_reason": null,
+      "agreement_count": 1,
+      "final_confidence": 0.8,
+      "contributing_sources": [
+        "llm"
+      ],
+      "severity": "high"
+    },
+    {
+      "sentence_id": 77,
+      "char_start": 4136,
+      "char_end": 4147,
+      "original_text": "very unique",
+      "suggested_text": "unique",
+      "issue_type": "grammar",
+      "source": "languagetool",
+      "reason": "Consider using \u201cunique\u201d.",
+      "confidence": 0.75,
+      "is_protected": false,
+      "protected_reason": null,
+      "agreement_count": 1,
+      "final_confidence": 0.73,
+      "contributing_sources": [
+        "languagetool"
+      ],
+      "severity": "high"
+    },
+    {
+      "sentence_id": 79,
+      "char_start": 4200,
+      "char_end": 4204,
+      "original_text": "dont",
+      "suggested_text": "don't",
+      "issue_type": "grammar",
+      "source": "llm",
+      "reason": "Missing apostrophe in contraction",
+      "confidence": 0.7,
+      "is_protected": false,
+      "protected_reason": null,
+      "agreement_count": 2,
+      "final_confidence": 0.95,
+      "contributing_sources": [
+        "languagetool",
+        "llm"
+      ],
+      "severity": "critical"
+    },
+    {
+      "sentence_id": 81,
+      "char_start": 4380,
+      "char_end": 4385,
+      "original_text": "Thiss",
+      "suggested_text": "This",
+      "issue_type": "spelling",
+      "source": "llm",
+      "reason": "Incorrect spelling",
+      "confidence": 0.7,
+      "is_protected": false,
+      "protected_reason": null,
+      "agreement_count": 2,
+      "final_confidence": 0.95,
+      "contributing_sources": [
+        "languagetool",
+        "llm"
+      ],
+      "severity": "high"
+    },
+    {
+      "sentence_id": 81,
+      "char_start": 4386,
+      "char_end": 4395,
+      "original_text": "sentencee",
+      "suggested_text": "sentence",
+      "issue_type": "spelling",
+      "source": "llm",
+      "reason": "Incorrect spelling",
+      "confidence": 0.7,
+      "is_protected": false,
+      "protected_reason": null,
+      "agreement_count": 2,
+      "final_confidence": 0.95,
+      "contributing_sources": [
+        "languagetool",
+        "llm"
+      ],
+      "severity": "high"
+    },
+    {
+      "sentence_id": 81,
+      "char_start": 4396,
+      "char_end": 4405,
+      "original_text": "containss",
+      "suggested_text": "contains",
+      "issue_type": "spelling",
+      "source": "llm",
+      "reason": "Incorrect spelling",
+      "confidence": 0.7,
+      "is_protected": false,
+      "protected_reason": null,
+      "agreement_count": 2,
+      "final_confidence": 0.95,
+      "contributing_sources": [
+        "languagetool",
+        "llm"
+      ],
+      "severity": "high"
+    },
+    {
+      "sentence_id": 81,
+      "char_start": 4406,
+      "char_end": 4414,
+      "original_text": "severall",
+      "suggested_text": "several",
+      "issue_type": "spelling",
+      "source": "languagetool",
+      "reason": "Possible spelling mistake found.",
+      "confidence": 0.75,
+      "is_protected": false,
+      "protected_reason": null,
+      "agreement_count": 1,
+      "final_confidence": 0.78,
+      "contributing_sources": [
+        "languagetool"
+      ],
+      "severity": "medium"
+    },
+    {
+      "sentence_id": 81,
+      "char_start": 4415,
+      "char_end": 4426,
+      "original_text": "misspelledd",
+      "suggested_text": "misspelled",
+      "issue_type": "spelling",
+      "source": "llm",
+      "reason": "Incorrect spelling",
+      "confidence": 0.7,
+      "is_protected": false,
+      "protected_reason": null,
+      "agreement_count": 2,
+      "final_confidence": 0.95,
+      "contributing_sources": [
+        "languagetool",
+        "llm"
+      ],
+      "severity": "high"
+    },
+    {
+      "sentence_id": 81,
+      "char_start": 4427,
+      "char_end": 4433,
+      "original_text": "wordss",
+      "suggested_text": "words",
+      "issue_type": "spelling",
+      "source": "llm",
+      "reason": "Incorrect spelling",
+      "confidence": 0.7,
+      "is_protected": false,
+      "protected_reason": null,
+      "agreement_count": 2,
+      "final_confidence": 0.95,
+      "contributing_sources": [
+        "languagetool",
+        "llm"
+      ],
+      "severity": "high"
+    },
+    {
+      "sentence_id": 81,
+      "char_start": 4434,
+      "char_end": 4439,
+      "original_text": "thatt",
+      "suggested_text": "that",
+      "issue_type": "spelling",
+      "source": "languagetool",
+      "reason": "Possible spelling mistake found.",
+      "confidence": 0.75,
+      "is_protected": false,
+      "protected_reason": null,
+      "agreement_count": 1,
+      "final_confidence": 0.78,
+      "contributing_sources": [
+        "languagetool"
+      ],
+      "severity": "medium"
+    },
+    {
+      "sentence_id": 81,
+      "char_start": 4440,
+      "char_end": 4447,
+      "original_text": "shouldd",
+      "suggested_text": "should",
+      "issue_type": "spelling",
+      "source": "llm",
+      "reason": "Incorrect spelling",
+      "confidence": 0.7,
+      "is_protected": false,
+      "protected_reason": null,
+      "agreement_count": 2,
+      "final_confidence": 0.95,
+      "contributing_sources": [
+        "languagetool",
+        "llm"
+      ],
+      "severity": "high"
+    },
+    {
+      "sentence_id": 81,
+      "char_start": 4466,
+      "char_end": 4470,
+      "original_text": "thee",
+      "suggested_text": "the",
+      "issue_type": "spelling",
+      "source": "llm",
+      "reason": "Incorrect spelling",
+      "confidence": 0.7,
+      "is_protected": false,
+      "protected_reason": null,
+      "agreement_count": 1,
+      "final_confidence": 0.8,
+      "contributing_sources": [
+        "llm"
+      ],
+      "severity": "medium"
+    },
+    {
+      "sentence_id": 81,
+      "char_start": 4471,
+      "char_end": 4483,
+      "original_text": "proofreaderr",
+      "suggested_text": "proofreader",
+      "issue_type": "spelling",
+      "source": "languagetool",
+      "reason": "Possible spelling mistake found.",
+      "confidence": 0.75,
+      "is_protected": false,
+      "protected_reason": null,
+      "agreement_count": 1,
+      "final_confidence": 0.78,
+      "contributing_sources": [
+        "languagetool"
+      ],
+      "severity": "medium"
+    }
+  ],
+  "protected_terms": [
+    {
+      "text": "AI Document Proofreading System - Comprehensive Test Document\n\nPrepared on",
+      "char_start": 0,
+      "char_end": 74,
+      "reason": "NER:ORG"
+    },
+    {
+      "text": "AI",
+      "char_start": 0,
+      "char_end": 2,
+      "reason": "ALLCAPS acronym"
+    },
+    {
+      "text": "AI Document Proofreading",
+      "char_start": 0,
+      "char_end": 24,
+      "reason": "person name"
+    },
+    {
+      "text": "Proofreading",
+      "char_start": 12,
+      "char_end": 24,
+      "reason": "first page proper noun/author"
+    },
+    {
+      "text": "My",
+      "char_start": 90,
+      "char_end": 92,
+      "reason": "pronoun"
+    },
+    {
+      "text": "Sanjukta Mukherjee",
+      "char_start": 101,
+      "char_end": 119,
+      "reason": "NER:PERSON"
+    },
+    {
+      "text": "Sanjukta",
+      "char_start": 101,
+      "char_end": 109,
+      "reason": "first page proper noun/author"
+    },
+    {
+      "text": "Mukherjee",
+      "char_start": 110,
+      "char_end": 119,
+      "reason": "first page proper noun/author"
+    },
+    {
+      "text": "I",
+      "char_start": 124,
+      "char_end": 125,
+      "reason": "roman numeral"
+    },
+    {
+      "text": "AI",
+      "char_start": 153,
+      "char_end": 155,
+      "reason": "ALLCAPS acronym"
+    },
+    {
+      "text": "AI Document Proofreading",
+      "char_start": 153,
+      "char_end": 177,
+      "reason": "person name"
+    },
+    {
+      "text": "Proofreading",
+      "char_start": 165,
+      "char_end": 177,
+      "reason": "first page proper noun/author"
+    },
+    {
+      "text": "Dr",
+      "char_start": 186,
+      "char_end": 188,
+      "reason": "first page proper noun/author"
+    },
+    {
+      "text": "Dr. Ramesh Kumar",
+      "char_start": 186,
+      "char_end": 202,
+      "reason": "person name"
+    },
+    {
+      "text": "Ramesh Kumar",
+      "char_start": 190,
+      "char_end": 202,
+      "reason": "NER:PERSON"
+    },
+    {
+      "text": "Ramesh",
+      "char_start": 190,
+      "char_end": 196,
+      "reason": "first page proper noun/author"
+    },
+    {
+      "text": "Kumar",
+      "char_start": 197,
+      "char_end": 202,
+      "reason": "first page proper noun/author"
+    },
+    {
+      "text": "Prof",
+      "char_start": 249,
+      "char_end": 253,
+      "reason": "first page proper noun/author"
+    },
+    {
+      "text": "Prof. Michael Brown",
+      "char_start": 249,
+      "char_end": 268,
+      "reason": "person name"
+    },
+    {
+      "text": "Michael Brown",
+      "char_start": 255,
+      "char_end": 268,
+      "reason": "NER:PERSON"
+    },
+    {
+      "text": "Lt Gen Arvind Kumar",
+      "char_start": 273,
+      "char_end": 292,
+      "reason": "NER:PERSON"
+    },
+    {
+      "text": "Lt",
+      "char_start": 273,
+      "char_end": 275,
+      "reason": "first page proper noun/author"
+    },
+    {
+      "text": "Lt Gen Arvind",
+      "char_start": 273,
+      "char_end": 286,
+      "reason": "person name"
+    },
+    {
+      "text": "Arvind",
+      "char_start": 280,
+      "char_end": 286,
+      "reason": "first page proper noun/author"
+    },
+    {
+      "text": "Kumar",
+      "char_start": 287,
+      "char_end": 292,
+      "reason": "first page proper noun/author"
+    },
+    {
+      "text": "John Smith",
+      "char_start": 336,
+      "char_end": 346,
+      "reason": "NER:PERSON"
+    },
+    {
+      "text": "Alice Johnson",
+      "char_start": 351,
+      "char_end": 364,
+      "reason": "NER:PERSON"
+    },
+    {
+      "text": "They",
+      "char_start": 407,
+      "char_end": 411,
+      "reason": "pronoun"
+    },
+    {
+      "text": "analysed",
+      "char_start": 422,
+      "char_end": 430,
+      "reason": "repeated 2x valid term"
+    },
+    {
+      "text": "they",
+      "char_start": 457,
+      "char_end": 461,
+      "reason": "pronoun"
+    },
+    {
+      "text": "OpenAI",
+      "char_start": 512,
+      "char_end": 518,
+      "reason": "mixedCase/technical identifier"
+    },
+    {
+      "text": "Microsoft",
+      "char_start": 589,
+      "char_end": 598,
+      "reason": "NER:ORG"
+    },
+    {
+      "text": "Google",
+      "char_start": 600,
+      "char_end": 606,
+      "reason": "NER:ORG"
+    },
+    {
+      "text": "NVIDIA",
+      "char_start": 608,
+      "char_end": 614,
+      "reason": "ALLCAPS acronym"
+    },
+    {
+      "text": "TensorFlow",
+      "char_start": 616,
+      "char_end": 626,
+      "reason": "NER:ORG"
+    },
+    {
+      "text": "PyTorch",
+      "char_start": 628,
+      "char_end": 635,
+      "reason": "NER:ORG"
+    },
+    {
+      "text": "React",
+      "char_start": 637,
+      "char_end": 642,
+      "reason": "NER:GPE"
+    },
+    {
+      "text": "FastAPI",
+      "char_start": 644,
+      "char_end": 651,
+      "reason": "mixedCase/technical identifier"
+    },
+    {
+      "text": "LanguageTool",
+      "char_start": 653,
+      "char_end": 665,
+      "reason": "NER:ORG"
+    },
+    {
+      "text": "SymSpell",
+      "char_start": 667,
+      "char_end": 675,
+      "reason": "NER:ORG"
+    },
+    {
+      "text": "Ollama and Docling",
+      "char_start": 677,
+      "char_end": 695,
+      "reason": "NER:ORG"
+    },
+    {
+      "text": "Ollama",
+      "char_start": 677,
+      "char_end": 683,
+      "reason": "programming language/library/framework"
+    },
+    {
+      "text": "Docling",
+      "char_start": 688,
+      "char_end": 695,
+      "reason": "programming language/library/framework"
+    },
+    {
+      "text": "I",
+      "char_start": 814,
+      "char_end": 815,
+      "reason": "roman numeral"
+    },
+    {
+      "text": "MyCustomFrameworkX",
+      "char_start": 832,
+      "char_end": 850,
+      "reason": "mixedCase/technical identifier"
+    },
+    {
+      "text": "user-defined",
+      "char_start": 856,
+      "char_end": 868,
+      "reason": "math operator/function"
+    },
+    {
+      "text": "MyCustomFrameworkX",
+      "char_start": 885,
+      "char_end": 903,
+      "reason": "mixedCase/technical identifier"
+    },
+    {
+      "text": "it",
+      "char_start": 937,
+      "char_end": 939,
+      "reason": "pronoun"
+    },
+    {
+      "text": "MyCustomFrameworkX",
+      "char_start": 964,
+      "char_end": 982,
+      "reason": "mixedCase/technical identifier"
+    },
+    {
+      "text": "I",
+      "char_start": 1061,
+      "char_end": 1062,
+      "reason": "roman numeral"
+    },
+    {
+      "text": "me",
+      "char_start": 1135,
+      "char_end": 1137,
+      "reason": "pronoun"
+    },
+    {
+      "text": "it",
+      "char_start": 1209,
+      "char_end": 1211,
+      "reason": "pronoun"
+    },
+    {
+      "text": "spelling",
+      "char_start": 1265,
+      "char_end": 1273,
+      "reason": "repeated 2x valid term"
+    },
+    {
+      "text": "mistakes",
+      "char_start": 1274,
+      "char_end": 1282,
+      "reason": "repeated 5x valid term"
+    },
+    {
+      "text": "mistakes",
+      "char_start": 1292,
+      "char_end": 1300,
+      "reason": "repeated 5x valid term"
+    },
+    {
+      "text": "punctuation",
+      "char_start": 1302,
+      "char_end": 1313,
+      "reason": "repeated 2x valid term"
+    },
+    {
+      "text": "mistakes",
+      "char_start": 1314,
+      "char_end": 1322,
+      "reason": "repeated 5x valid term"
+    },
+    {
+      "text": "It",
+      "char_start": 1341,
+      "char_end": 1343,
+      "reason": "pronoun"
+    },
+    {
+      "text": "He",
+      "char_start": 1487,
+      "char_end": 1489,
+      "reason": "pronoun"
+    },
+    {
+      "text": "her",
+      "char_start": 1495,
+      "char_end": 1498,
+      "reason": "pronoun"
+    },
+    {
+      "text": "she",
+      "char_start": 1518,
+      "char_end": 1521,
+      "reason": "pronoun"
+    },
+    {
+      "text": "him",
+      "char_start": 1526,
+      "char_end": 1529,
+      "reason": "pronoun"
+    },
+    {
+      "text": "They",
+      "char_start": 1541,
+      "char_end": 1545,
+      "reason": "pronoun"
+    },
+    {
+      "text": "we",
+      "char_start": 1572,
+      "char_end": 1574,
+      "reason": "pronoun"
+    },
+    {
+      "text": "I",
+      "char_start": 1609,
+      "char_end": 1610,
+      "reason": "roman numeral"
+    },
+    {
+      "text": "it",
+      "char_start": 1617,
+      "char_end": 1619,
+      "reason": "pronoun"
+    },
+    {
+      "text": "punctuation",
+      "char_start": 1932,
+      "char_end": 1943,
+      "reason": "repeated 2x valid term"
+    },
+    {
+      "text": "mistakes",
+      "char_start": 1944,
+      "char_end": 1952,
+      "reason": "repeated 5x valid term"
+    },
+    {
+      "text": "React",
+      "char_start": 2073,
+      "char_end": 2078,
+      "reason": "first page proper noun/author"
+    },
+    {
+      "text": "FastAPI",
+      "char_start": 2108,
+      "char_end": 2115,
+      "reason": "mixedCase/technical identifier"
+    },
+    {
+      "text": "TensorFlow",
+      "char_start": 2136,
+      "char_end": 2146,
+      "reason": "NER:ORG"
+    },
+    {
+      "text": "PyTorch",
+      "char_start": 2151,
+      "char_end": 2158,
+      "reason": "NER:ORG"
+    },
+    {
+      "text": "OpenAI",
+      "char_start": 2200,
+      "char_end": 2206,
+      "reason": "mixedCase/technical identifier"
+    },
+    {
+      "text": "Microsoft",
+      "char_start": 2211,
+      "char_end": 2220,
+      "reason": "NER:ORG"
+    },
+    {
+      "text": "Ollama",
+      "char_start": 2247,
+      "char_end": 2253,
+      "reason": "NER:ORG"
+    },
+    {
+      "text": "models",
+      "char_start": 2290,
+      "char_end": 2296,
+      "reason": "DL/CS terminology"
+    },
+    {
+      "text": "Dr",
+      "char_start": 2312,
+      "char_end": 2314,
+      "reason": "first page proper noun/author"
+    },
+    {
+      "text": "Dr. Ramesh Kumar",
+      "char_start": 2312,
+      "char_end": 2328,
+      "reason": "person name"
+    },
+    {
+      "text": "Ramesh Kumar",
+      "char_start": 2316,
+      "char_end": 2328,
+      "reason": "NER:PERSON"
+    },
+    {
+      "text": "Ramesh",
+      "char_start": 2316,
+      "char_end": 2322,
+      "reason": "first page proper noun/author"
+    },
+    {
+      "text": "Kumar",
+      "char_start": 2323,
+      "char_end": 2328,
+      "reason": "first page proper noun/author"
+    },
+    {
+      "text": "Sanjukta Mukherjee",
+      "char_start": 2339,
+      "char_end": 2357,
+      "reason": "NER:PERSON"
+    },
+    {
+      "text": "Sanjukta",
+      "char_start": 2339,
+      "char_end": 2347,
+      "reason": "first page proper noun/author"
+    },
+    {
+      "text": "Mukherjee",
+      "char_start": 2348,
+      "char_end": 2357,
+      "reason": "first page proper noun/author"
+    },
+    {
+      "text": "John Smith",
+      "char_start": 2398,
+      "char_end": 2408,
+      "reason": "NER:PERSON"
+    },
+    {
+      "text": "Alice Johnson",
+      "char_start": 2417,
+      "char_end": 2430,
+      "reason": "NER:PERSON"
+    },
+    {
+      "text": "she",
+      "char_start": 2439,
+      "char_end": 2442,
+      "reason": "pronoun"
+    },
+    {
+      "text": "him",
+      "char_start": 2450,
+      "char_end": 2453,
+      "reason": "pronoun"
+    },
+    {
+      "text": "Prof",
+      "char_start": 2485,
+      "char_end": 2489,
+      "reason": "first page proper noun/author"
+    },
+    {
+      "text": "Prof. Michael Brown",
+      "char_start": 2485,
+      "char_end": 2504,
+      "reason": "person name"
+    },
+    {
+      "text": "Michael Brown",
+      "char_start": 2491,
+      "char_end": 2504,
+      "reason": "NER:PERSON"
+    },
+    {
+      "text": "them",
+      "char_start": 2525,
+      "char_end": 2529,
+      "reason": "pronoun"
+    },
+    {
+      "text": "I",
+      "char_start": 2545,
+      "char_end": 2546,
+      "reason": "roman numeral"
+    },
+    {
+      "text": "my",
+      "char_start": 2552,
+      "char_end": 2554,
+      "reason": "pronoun"
+    },
+    {
+      "text": "him",
+      "char_start": 2567,
+      "char_end": 2570,
+      "reason": "pronoun"
+    },
+    {
+      "text": "he",
+      "char_start": 2579,
+      "char_end": 2581,
+      "reason": "pronoun"
+    },
+    {
+      "text": "his",
+      "char_start": 2589,
+      "char_end": 2592,
+      "reason": "pronoun"
+    },
+    {
+      "text": "She",
+      "char_start": 2603,
+      "char_end": 2606,
+      "reason": "pronoun"
+    },
+    {
+      "text": "me",
+      "char_start": 2612,
+      "char_end": 2614,
+      "reason": "pronoun"
+    },
+    {
+      "text": "they",
+      "char_start": 2620,
+      "char_end": 2624,
+      "reason": "pronoun"
+    },
+    {
+      "text": "their",
+      "char_start": 2637,
+      "char_end": 2642,
+      "reason": "pronoun"
+    },
+    {
+      "text": "We",
+      "char_start": 2661,
+      "char_end": 2663,
+      "reason": "pronoun"
+    },
+    {
+      "text": "our",
+      "char_start": 2683,
+      "char_end": 2686,
+      "reason": "pronoun"
+    },
+    {
+      "text": "their",
+      "char_start": 2715,
+      "char_end": 2720,
+      "reason": "pronoun"
+    },
+    {
+      "text": "98.7",
+      "char_start": 2814,
+      "char_end": 2818,
+      "reason": "file name"
+    },
+    {
+      "text": "analysed",
+      "char_start": 2849,
+      "char_end": 2857,
+      "reason": "repeated 2x valid term"
+    },
+    {
+      "text": "API",
+      "char_start": 2872,
+      "char_end": 2875,
+      "reason": "NER:ORG"
+    },
+    {
+      "text": "v2.3",
+      "char_start": 2884,
+      "char_end": 2888,
+      "reason": "file name"
+    },
+    {
+      "text": "AM",
+      "char_start": 2913,
+      "char_end": 2915,
+      "reason": "ALLCAPS acronym"
+    },
+    {
+      "text": "it",
+      "char_start": 2978,
+      "char_end": 2980,
+      "reason": "pronoun"
+    },
+    {
+      "text": "we",
+      "char_start": 3131,
+      "char_end": 3133,
+      "reason": "pronoun"
+    },
+    {
+      "text": "we",
+      "char_start": 3175,
+      "char_end": 3177,
+      "reason": "pronoun"
+    },
+    {
+      "text": "their",
+      "char_start": 3279,
+      "char_end": 3284,
+      "reason": "pronoun"
+    },
+    {
+      "text": "FastAPI FastAPI FastAPI",
+      "char_start": 3359,
+      "char_end": 3382,
+      "reason": "NER:PERSON"
+    },
+    {
+      "text": "FastAPI",
+      "char_start": 3359,
+      "char_end": 3366,
+      "reason": "mixedCase/technical identifier"
+    },
+    {
+      "text": "FastAPI",
+      "char_start": 3367,
+      "char_end": 3374,
+      "reason": "mixedCase/technical identifier"
+    },
+    {
+      "text": "FastAPI",
+      "char_start": 3375,
+      "char_end": 3382,
+      "reason": "mixedCase/technical identifier"
+    },
+    {
+      "text": "TensorFlow TensorFlow TensorFlow",
+      "char_start": 3421,
+      "char_end": 3453,
+      "reason": "NER:PRODUCT"
+    },
+    {
+      "text": "TensorFlow",
+      "char_start": 3421,
+      "char_end": 3431,
+      "reason": "mixedCase/technical identifier"
+    },
+    {
+      "text": "TensorFlow",
+      "char_start": 3432,
+      "char_end": 3442,
+      "reason": "mixedCase/technical identifier"
+    },
+    {
+      "text": "TensorFlow",
+      "char_start": 3443,
+      "char_end": 3453,
+      "reason": "mixedCase/technical identifier"
+    },
+    {
+      "text": "OpenAI",
+      "char_start": 3479,
+      "char_end": 3485,
+      "reason": "mixedCase/technical identifier"
+    },
+    {
+      "text": "OpenAI OpenAI OpenAI",
+      "char_start": 3479,
+      "char_end": 3499,
+      "reason": "person name"
+    },
+    {
+      "text": "OpenAI",
+      "char_start": 3486,
+      "char_end": 3492,
+      "reason": "mixedCase/technical identifier"
+    },
+    {
+      "text": "OpenAI",
+      "char_start": 3493,
+      "char_end": 3499,
+      "reason": "mixedCase/technical identifier"
+    },
+    {
+      "text": "Sanjukta Mukherjee\n\nJohn",
+      "char_start": 3619,
+      "char_end": 3643,
+      "reason": "person name"
+    },
+    {
+      "text": "Sanjukta",
+      "char_start": 3619,
+      "char_end": 3627,
+      "reason": "repeated 3x proper noun/code"
+    },
+    {
+      "text": "Mukherjee",
+      "char_start": 3628,
+      "char_end": 3637,
+      "reason": "repeated 3x proper noun/code"
+    },
+    {
+      "text": "John Smith",
+      "char_start": 3639,
+      "char_end": 3649,
+      "reason": "NER:PERSON"
+    },
+    {
+      "text": "Alice Johnson",
+      "char_start": 3651,
+      "char_end": 3664,
+      "reason": "NER:PERSON"
+    },
+    {
+      "text": "Dr. Ramesh Kumar\n\nProf",
+      "char_start": 3666,
+      "char_end": 3688,
+      "reason": "person name"
+    },
+    {
+      "text": "Ramesh Kumar",
+      "char_start": 3670,
+      "char_end": 3682,
+      "reason": "NER:PERSON"
+    },
+    {
+      "text": "Ramesh",
+      "char_start": 3670,
+      "char_end": 3676,
+      "reason": "repeated 3x proper noun/code"
+    },
+    {
+      "text": "Kumar",
+      "char_start": 3677,
+      "char_end": 3682,
+      "reason": "repeated 5x proper noun/code"
+    },
+    {
+      "text": "Prof",
+      "char_start": 3684,
+      "char_end": 3688,
+      "reason": "repeated 3x valid term"
+    },
+    {
+      "text": "Michael Brown",
+      "char_start": 3690,
+      "char_end": 3703,
+      "reason": "NER:PERSON"
+    },
+    {
+      "text": "Arvind",
+      "char_start": 3712,
+      "char_end": 3718,
+      "reason": "repeated 2x proper noun/code"
+    },
+    {
+      "text": "Kumar",
+      "char_start": 3719,
+      "char_end": 3724,
+      "reason": "repeated 5x proper noun/code"
+    },
+    {
+      "text": "spelling",
+      "char_start": 3790,
+      "char_end": 3798,
+      "reason": "repeated 2x valid term"
+    },
+    {
+      "text": "mistakes",
+      "char_start": 3799,
+      "char_end": 3807,
+      "reason": "repeated 5x valid term"
+    },
+    {
+      "text": "I",
+      "char_start": 3810,
+      "char_end": 3811,
+      "reason": "roman numeral"
+    },
+    {
+      "text": "me",
+      "char_start": 3812,
+      "char_end": 3814,
+      "reason": "pronoun"
+    },
+    {
+      "text": "my",
+      "char_start": 3815,
+      "char_end": 3817,
+      "reason": "pronoun"
+    },
+    {
+      "text": "mine",
+      "char_start": 3818,
+      "char_end": 3822,
+      "reason": "pronoun"
+    },
+    {
+      "text": "myself",
+      "char_start": 3823,
+      "char_end": 3829,
+      "reason": "pronoun"
+    },
+    {
+      "text": "you",
+      "char_start": 3831,
+      "char_end": 3834,
+      "reason": "pronoun"
+    },
+    {
+      "text": "your",
+      "char_start": 3835,
+      "char_end": 3839,
+      "reason": "pronoun"
+    },
+    {
+      "text": "yours",
+      "char_start": 3840,
+      "char_end": 3845,
+      "reason": "pronoun"
+    },
+    {
+      "text": "yourself",
+      "char_start": 3846,
+      "char_end": 3854,
+      "reason": "pronoun"
+    },
+    {
+      "text": "he",
+      "char_start": 3856,
+      "char_end": 3858,
+      "reason": "pronoun"
+    },
+    {
+      "text": "him",
+      "char_start": 3859,
+      "char_end": 3862,
+      "reason": "pronoun"
+    },
+    {
+      "text": "his",
+      "char_start": 3863,
+      "char_end": 3866,
+      "reason": "pronoun"
+    },
+    {
+      "text": "himself",
+      "char_start": 3867,
+      "char_end": 3874,
+      "reason": "pronoun"
+    },
+    {
+      "text": "she",
+      "char_start": 3876,
+      "char_end": 3879,
+      "reason": "pronoun"
+    },
+    {
+      "text": "her",
+      "char_start": 3880,
+      "char_end": 3883,
+      "reason": "pronoun"
+    },
+    {
+      "text": "hers",
+      "char_start": 3884,
+      "char_end": 3888,
+      "reason": "pronoun"
+    },
+    {
+      "text": "herself",
+      "char_start": 3889,
+      "char_end": 3896,
+      "reason": "pronoun"
+    },
+    {
+      "text": "it",
+      "char_start": 3898,
+      "char_end": 3900,
+      "reason": "pronoun"
+    },
+    {
+      "text": "its",
+      "char_start": 3901,
+      "char_end": 3904,
+      "reason": "pronoun"
+    },
+    {
+      "text": "itself",
+      "char_start": 3905,
+      "char_end": 3911,
+      "reason": "pronoun"
+    },
+    {
+      "text": "we",
+      "char_start": 3913,
+      "char_end": 3915,
+      "reason": "pronoun"
+    },
+    {
+      "text": "us",
+      "char_start": 3916,
+      "char_end": 3918,
+      "reason": "pronoun"
+    },
+    {
+      "text": "our",
+      "char_start": 3919,
+      "char_end": 3922,
+      "reason": "pronoun"
+    },
+    {
+      "text": "ours",
+      "char_start": 3923,
+      "char_end": 3927,
+      "reason": "pronoun"
+    },
+    {
+      "text": "ourselves",
+      "char_start": 3928,
+      "char_end": 3937,
+      "reason": "pronoun"
+    },
+    {
+      "text": "they",
+      "char_start": 3939,
+      "char_end": 3943,
+      "reason": "pronoun"
+    },
+    {
+      "text": "them",
+      "char_start": 3944,
+      "char_end": 3948,
+      "reason": "pronoun"
+    },
+    {
+      "text": "their",
+      "char_start": 3949,
+      "char_end": 3954,
+      "reason": "pronoun"
+    },
+    {
+      "text": "theirs",
+      "char_start": 3955,
+      "char_end": 3961,
+      "reason": "pronoun"
+    },
+    {
+      "text": "themselves",
+      "char_start": 3962,
+      "char_end": 3972,
+      "reason": "pronoun"
+    },
+    {
+      "text": "my",
+      "char_start": 4028,
+      "char_end": 4030,
+      "reason": "pronoun"
+    },
+    {
+      "text": "I",
+      "char_start": 4049,
+      "char_end": 4050,
+      "reason": "roman numeral"
+    },
+    {
+      "text": "OpenAI",
+      "char_start": 4212,
+      "char_end": 4218,
+      "reason": "NER:ORG"
+    },
+    {
+      "text": "Microsoft",
+      "char_start": 4220,
+      "char_end": 4229,
+      "reason": "NER:ORG"
+    },
+    {
+      "text": "TensorFlow",
+      "char_start": 4231,
+      "char_end": 4241,
+      "reason": "NER:ORG"
+    },
+    {
+      "text": "FastAPI",
+      "char_start": 4243,
+      "char_end": 4250,
+      "reason": "mixedCase/technical identifier"
+    },
+    {
+      "text": "React",
+      "char_start": 4252,
+      "char_end": 4257,
+      "reason": "NER:GPE"
+    },
+    {
+      "text": "PyTorch",
+      "char_start": 4259,
+      "char_end": 4266,
+      "reason": "NER:ORG"
+    },
+    {
+      "text": "LanguageTool",
+      "char_start": 4268,
+      "char_end": 4280,
+      "reason": "NER:ORG"
+    },
+    {
+      "text": "SymSpell",
+      "char_start": 4282,
+      "char_end": 4290,
+      "reason": "NER:ORG"
+    },
+    {
+      "text": "Ollama, Docling",
+      "char_start": 4292,
+      "char_end": 4307,
+      "reason": "NER:ORG"
+    },
+    {
+      "text": "Ollama",
+      "char_start": 4292,
+      "char_end": 4298,
+      "reason": "programming language/library/framework"
+    },
+    {
+      "text": "Docling",
+      "char_start": 4300,
+      "char_end": 4307,
+      "reason": "programming language/library/framework"
+    },
+    {
+      "text": "MyCustomFrameworkX",
+      "char_start": 4311,
+      "char_end": 4329,
+      "reason": "mixedCase/technical identifier"
+    },
+    {
+      "text": "bee detectedd byy",
+      "char_start": 4448,
+      "char_end": 4465,
+      "reason": "NER:PERSON"
+    },
+    {
+      "text": "React",
+      "char_start": 4537,
+      "char_end": 4542,
+      "reason": "NER:GPE"
+    },
+    {
+      "text": "FastAPI",
+      "char_start": 4544,
+      "char_end": 4551,
+      "reason": "mixedCase/technical identifier"
+    },
+    {
+      "text": "TypeScript",
+      "char_start": 4557,
+      "char_end": 4567,
+      "reason": "NER:ORG"
+    },
+    {
+      "text": "REST",
+      "char_start": 4620,
+      "char_end": 4624,
+      "reason": "ALLCAPS acronym"
+    },
+    {
+      "text": "APIs",
+      "char_start": 4625,
+      "char_end": 4629,
+      "reason": "ALLCAPS acronym"
+    },
+    {
+      "text": "HTML",
+      "char_start": 4667,
+      "char_end": 4671,
+      "reason": "NER:ORG"
+    }
+  ],
+  "annotated_html": "<!DOCTYPE html>\n<html lang=\"en\">\n<head>\n<meta charset=\"utf-8\">\n<title>Annotated Original</title>\n<style>\nbody { font-family: -apple-system, Segoe UI, Roboto, Arial, sans-serif;\n       max-width: 900px; margin: 40px auto; padding: 0 20px; line-height: 1.7; color: #1a1a1a; }\nh1 { font-size: 1.4rem; }\n.legend { margin-bottom: 24px; padding: 12px 16px; background: #f6f6f6; border-radius: 8px; font-size: 0.9rem; }\n.legend span { display: inline-block; padding: 2px 8px; border-radius: 4px; margin-right: 12px; }\n.legend span.sev-low { background: #fef3c7; }\n.legend span.sev-medium { background: #fed7aa; }\n.legend span.sev-high { background: #fecaca; }\n.legend span.sev-critical { background: #fca5a5; border: 1px solid #b91c1c; }\n.legend span.corrected { background: #b2f2bb; }\n.paragraph { margin-bottom: 18px; white-space: pre-wrap; }\nmark.sev-low { background: #fef3c7; padding: 1px 2px; border-radius: 3px; cursor: help; }\nmark.sev-medium { background: #fed7aa; padding: 1px 2px; border-radius: 3px; cursor: help; }\nmark.sev-high { background: #fecaca; padding: 1px 2px; border-radius: 3px; cursor: help; }\nmark.sev-critical { background: #fca5a5; outline: 2px solid #b91c1c; padding: 1px 2px; border-radius: 3px; cursor: help; }\nmark.corrected { background: #b2f2bb; padding: 1px 2px; border-radius: 3px; }\nmark.agreed { outline: 2px solid #444; }\nmark.single { outline: 1px dashed #888; }\nmark[data-tooltip] { position: relative; }\nmark[data-tooltip]:hover::after {\n  content: attr(data-tooltip);\n  position: absolute; bottom: 125%; left: 0; white-space: pre-wrap;\n  background: #222; color: #fff; padding: 8px 10px; border-radius: 6px;\n  font-size: 0.8rem; z-index: 10; width: 260px; box-shadow: 0 4px 12px rgba(0,0,0,.2);\n}\n.meta { color: #666; font-size: 0.85rem; margin-bottom: 4px; }\n</style>\n</head>\n<body>\n<h1>Annotated Original</h1>\n<div class=\"legend\"><span class=\"sev-low\">Low</span><span class=\"sev-medium\">Medium</span><span class=\"sev-high\">High</span><span class=\"sev-critical\">Critical</span></div><div class=\"paragraph\">AI Document Proofreading System - Comprehensive Test Document\n\nPrepared on: 14 July 2026\n\nMy name is Sanjukta Mukherjee<mark class=\"sev-high single\" data-tooltip=\"Issue Type: Grammar\nOriginal:  and\nSuggestion: , and\nReason: Use a comma before \u2018and\u2019 if it connects two independent clauses (unless they are closely connected and short).\nConfidence: 0.73\nSeverity: High\nSource: languagetool\nAgreement Count: 1\"> and</mark> I am currently working on an AI Document Proofreading System. Dr. Ramesh Kumar reviewed the first prototype yesterday, while Prof. Michael Brown and Lt Gen Arvind Kumar will review the second version next week.\n\nJohn Smith and Alice Johnson also participated in the testing process. They carefully analysed the generated reports<mark class=\"sev-high single\" data-tooltip=\"Issue Type: Grammar\nOriginal:  and\nSuggestion: , and\nReason: Use a comma before \u2018and\u2019 if it connects two independent clauses (unless they are closely connected and short).\nConfidence: 0.73\nSeverity: High\nSource: languagetool\nAgreement Count: 1\"> and</mark> they agreed that the application was performing well.\n\nOpenAI recently released improvements that inspired several interface ideas. Microsoft, Google, NVIDIA, TensorFlow, PyTorch, React, FastAPI, LanguageTool, SymSpell, Ollama and Docling are frequently referenced throughout this document and should ideally remain protected from unnecessary corrections.\n\nI have also added MyCustomFrameworkX as a user-defined protected term. MyCustomFrameworkX should never be modified even if it appears multiple times. MyCustomFrameworkX is important for testing the whitelist functionality.\n\nParagraph 1\n\nYesterday I <mark class=\"sev-high single\" data-tooltip=\"Issue Type: Tense\nOriginal: goes\nSuggestion: went\nReason: Incorrect verb tense\nConfidence: 0.80\nSeverity: High\nSource: llm\nAgreement Count: 1\">goes</mark> to the office because the meeting <mark class=\"sev-high single\" data-tooltip=\"Issue Type: Grammar\nOriginal: were\nSuggestion: was\nReason: Incorrect verb agreement\nConfidence: 0.80\nSeverity: High\nSource: llm\nAgreement Count: 1\">were</mark> important. The manager tell me that every engineers are responsible for reviewing the document before it <mark class=\"sev-high single\" data-tooltip=\"Issue Type: Grammar\nOriginal: are published\nSuggestion: is published\nReason: Incorrect subject-verb agreement\nConfidence: 0.80\nSeverity: High\nSource: llm\nAgreement Count: 1\">are published</mark>.\n\nParagraph 2\n\nThis application <mark class=\"sev-high single\" data-tooltip=\"Issue Type: Grammar\nOriginal: detect\nSuggestion: detects\nReason: Subject-verb agreement error\nConfidence: 0.80\nSeverity: High\nSource: llm\nAgreement Count: 1\">detect</mark> spelling mistakes, grammar mistakes, punctuation mistakes and style issues. It also <mark class=\"sev-critical agreed\" data-tooltip=\"Issue Type: Grammar\nOriginal: identify\nSuggestion: identifies\nReason: Subject-verb agreement error\nConfidence: 0.95\nSeverity: Critical\nSource: languagetool, llm\nAgreement Count: 2\">identify</mark> duplicated <mark class=\"sev-high agreed\" data-tooltip=\"Issue Type: Spelling\nOriginal: words words\nSuggestion: words\nReason: Redundant word\nConfidence: 0.95\nSeverity: High\nSource: languagetool, llm\nAgreement Count: 2\">words words</mark> inside the same sentence. The software <mark class=\"sev-high single\" data-tooltip=\"Issue Type: Grammar\nOriginal: have\nSuggestion: has\nReason: Subject-verb agreement error\nConfidence: 0.80\nSeverity: High\nSource: llm\nAgreement Count: 1\">have</mark> improved significantly over the last few weeks.\n\nParagraph 3\n\nHe give her the report because she <mark class=\"sev-high single\" data-tooltip=\"Issue Type: Tense\nOriginal: ask\nSuggestion: asked\nReason: Past tense required to match the context\nConfidence: 0.80\nSeverity: High\nSource: llm\nAgreement Count: 1\">ask</mark> him yesterday. They <mark class=\"sev-high single\" data-tooltip=\"Issue Type: Grammar\nOriginal: was\nSuggestion: were\nReason: Plural subject requires plural verb\nConfidence: 0.80\nSeverity: High\nSource: llm\nAgreement Count: 1\">was</mark> waiting outside while we is discussing the implementation. I think it <mark class=\"sev-critical agreed\" data-tooltip=\"Issue Type: Grammar\nOriginal: have\nSuggestion: has\nReason: Subject-verb agreement error with singular subject\nConfidence: 0.95\nSeverity: Critical\nSource: languagetool, llm\nAgreement Count: 2\">have</mark> become much easier than before.\n\nParagraph 4\n\nThere is <mark class=\"sev-high agreed\" data-tooltip=\"Issue Type: Spelling\nOriginal: alot\nSuggestion: a lot\nReason: Incorrect spelling\nConfidence: 0.95\nSeverity: High\nSource: languagetool, llm\nAgreement Count: 2\">alot</mark> of <mark class=\"sev-high agreed\" data-tooltip=\"Issue Type: Spelling\nOriginal: possibilites\nSuggestion: possibilities\nReason: Incorrect spelling\nConfidence: 0.95\nSeverity: High\nSource: languagetool, llm\nAgreement Count: 2\">possibilites</mark> for <mark class=\"sev-high agreed\" data-tooltip=\"Issue Type: Spelling\nOriginal: improvment\nSuggestion: improvement\nReason: Incorrect spelling\nConfidence: 0.95\nSeverity: High\nSource: languagetool, llm\nAgreement Count: 2\">improvment</mark> in this <mark class=\"sev-high agreed\" data-tooltip=\"Issue Type: Spelling\nOriginal: sysem\nSuggestion: system\nReason: Incorrect spelling\nConfidence: 0.95\nSeverity: High\nSource: languagetool, llm\nAgreement Count: 2\">sysem</mark>. The <mark class=\"sev-high agreed\" data-tooltip=\"Issue Type: Spelling\nOriginal: algoritm\nSuggestion: algorithm\nReason: Incorrect spelling\nConfidence: 0.95\nSeverity: High\nSource: languagetool, llm\nAgreement Count: 2\">algoritm</mark> should <mark class=\"sev-high agreed\" data-tooltip=\"Issue Type: Spelling\nOriginal: definately\nSuggestion: definitely\nReason: Incorrect spelling\nConfidence: 0.95\nSeverity: High\nSource: languagetool, llm\nAgreement Count: 2\">definately</mark> <mark class=\"sev-high agreed\" data-tooltip=\"Issue Type: Spelling\nOriginal: recieve\nSuggestion: receive\nReason: Incorrect spelling\nConfidence: 0.95\nSeverity: High\nSource: languagetool, llm\nAgreement Count: 2\">recieve</mark> additional <mark class=\"sev-high agreed\" data-tooltip=\"Issue Type: Spelling\nOriginal: optimizaton\nSuggestion: optimization\nReason: Incorrect spelling\nConfidence: 0.95\nSeverity: High\nSource: languagetool, llm\nAgreement Count: 2\">optimizaton</mark> before <mark class=\"sev-high agreed\" data-tooltip=\"Issue Type: Spelling\nOriginal: releese\nSuggestion: release\nReason: Incorrect spelling\nConfidence: 0.95\nSeverity: High\nSource: languagetool, llm\nAgreement Count: 2\">releese</mark>.\n\nParagraph 5\n\nThe document contains <mark class=\"sev-high agreed\" data-tooltip=\"Issue Type: Spelling\nOriginal: severel\nSuggestion: several\nReason: Incorrect spelling\nConfidence: 0.95\nSeverity: High\nSource: languagetool, llm\nAgreement Count: 2\">severel</mark> intentional <mark class=\"sev-high agreed\" data-tooltip=\"Issue Type: Spelling\nOriginal: erors\nSuggestion: errors\nReason: Incorrect spelling\nConfidence: 0.95\nSeverity: High\nSource: languagetool, llm\nAgreement Count: 2\">erors</mark>. Some <mark class=\"sev-high agreed\" data-tooltip=\"Issue Type: Spelling\nOriginal: sentenses\nSuggestion: sentences\nReason: Incorrect spelling\nConfidence: 0.95\nSeverity: High\nSource: languagetool, llm\nAgreement Count: 2\">sentenses</mark> are <mark class=\"sev-high agreed\" data-tooltip=\"Issue Type: Spelling\nOriginal: writen\nSuggestion: written\nReason: Incorrect spelling\nConfidence: 0.95\nSeverity: High\nSource: languagetool, llm\nAgreement Count: 2\">writen</mark> incorrectly while others contains punctuation mistakes without proper commas or periods the reader might become confused because the sentence never seems to end\n\nParagraph 6\n\nReact is used for the frontend and FastAPI powers the backend. TensorFlow and PyTorch are mentioned only for testing purposes. OpenAI and Microsoft should never be modified. Ollama is configured to run local language models.\n\nParagraph 7\n\nDr. Ramesh Kumar said that Sanjukta Mukherjee had completed the project successfully. John Smith thanked Alice Johnson because she helped him throughout the implementation. Prof. Michael Brown later congratulated them.\n\nParagraph 8\n\nI gave my notebook to him because he forgot his notebook. She told me that they would bring their laptops tomorrow. We are confident that our implementation will satisfy their expectations.\n\nParagraph 9\n\nOn 12 July 2026, the team processed 245 documents. Approximately 98.7 percent of the documents were analysed successfully. API version v2.3.1 was deployed at 10:45 AM.\n\nParagraph 10\n\nThe system was running correctly<mark class=\"sev-high single\" data-tooltip=\"Issue Type: Grammar\nOriginal:  but\nSuggestion: , but\nReason: Use a comma before \u2018but\u2019 if it connects two independent clauses (unless they are closely connected and short).\nConfidence: 0.73\nSeverity: High\nSource: languagetool\nAgreement Count: 1\"> but</mark> suddenly it <mark class=\"sev-high single\" data-tooltip=\"Issue Type: Tense\nOriginal: stop\nSuggestion: stopped\nReason: Incorrect verb form\nConfidence: 0.80\nSeverity: High\nSource: llm\nAgreement Count: 1\">stop</mark> responding. After restarting the backend, everything <mark class=\"sev-high single\" data-tooltip=\"Issue Type: Tense\nOriginal: work\nSuggestion: worked\nReason: Incorrect verb form\nConfidence: 0.80\nSeverity: High\nSource: llm\nAgreement Count: 1\">work</mark> normally again.\n\nParagraph 11\n\n<mark class=\"sev-high single\" data-tooltip=\"Issue Type: Grammar\nOriginal: This sentence have\nSuggestion: This sentence has\nReason: The verb \u2018have\u2019 is plural.\nConfidence: 0.73\nSeverity: High\nSource: languagetool\nAgreement Count: 1\">This sentence have</mark> inconsistent tense because yesterday we are testing the application and tomorrow we completed the deployment.\n\nParagraph 12\n\nThe <mark class=\"sev-high single\" data-tooltip=\"Issue Type: Grammar\nOriginal: results is\nSuggestion: results are\nReason: subject-verb agreement\nConfidence: 0.80\nSeverity: High\nSource: languagetool, llm\nAgreement Count: 1\">results is</mark> impressive. Each developers have contributed their best effort. Every report <mark class=\"sev-high single\" data-tooltip=\"Issue Type: Grammar\nOriginal: were reviewed\nSuggestion: was reviewed\nReason: subject-verb agreement\nConfidence: 0.80\nSeverity: High\nSource: llm\nAgreement Count: 1\">were reviewed</mark> before publishing.\n\nParagraph 13\n\nFastAPI FastAPI FastAPI appears multiple times intentionally. TensorFlow TensorFlow TensorFlow also appears repeatedly. OpenAI OpenAI OpenAI is repeated to verify duplicate protected terms handling.\n\nParagraph 14\n\nThe following names should remain protected:\n\nSanjukta Mukherjee\n\nJohn Smith\n\nAlice Johnson\n\nDr. Ramesh Kumar\n\nProf. Michael Brown\n\nLt Gen Arvind Kumar\n\nParagraph 15\n\nThe following pronouns should never be treated as spelling mistakes:\n\nI me my mine myself\n\nyou your yours yourself\n\nhe him his himself\n\nshe her hers herself\n\nit its itself\n\nwe us our ours ourselves\n\nthey them their theirs themselves\n\nParagraph 16\n\nThis sentence contains style issues. In my personal opinion, I personally think that this particular feature is <mark class=\"sev-high single\" data-tooltip=\"Issue Type: Grammar\nOriginal: absolutely completely\nSuggestion: absolutely\nReason: redundant phrase\nConfidence: 0.80\nSeverity: High\nSource: llm\nAgreement Count: 1\">absolutely completely</mark> essential and <mark class=\"sev-high single\" data-tooltip=\"Issue Type: Grammar\nOriginal: very unique\nSuggestion: unique\nReason: Consider using \u201cunique\u201d.\nConfidence: 0.73\nSeverity: High\nSource: languagetool\nAgreement Count: 1\">very unique</mark> in every single possible way.\n\nParagraph 17\n\nPlease <mark class=\"sev-critical agreed\" data-tooltip=\"Issue Type: Grammar\nOriginal: dont\nSuggestion: don&#x27;t\nReason: Missing apostrophe in contraction\nConfidence: 0.95\nSeverity: Critical\nSource: languagetool, llm\nAgreement Count: 2\">dont</mark> modify OpenAI, Microsoft, TensorFlow, FastAPI, React, PyTorch, LanguageTool, SymSpell, Ollama, Docling or MyCustomFrameworkX because these are protected terms.\n\nParagraph 18\n\n<mark class=\"sev-high agreed\" data-tooltip=\"Issue Type: Spelling\nOriginal: Thiss\nSuggestion: This\nReason: Incorrect spelling\nConfidence: 0.95\nSeverity: High\nSource: languagetool, llm\nAgreement Count: 2\">Thiss</mark> <mark class=\"sev-high agreed\" data-tooltip=\"Issue Type: Spelling\nOriginal: sentencee\nSuggestion: sentence\nReason: Incorrect spelling\nConfidence: 0.95\nSeverity: High\nSource: languagetool, llm\nAgreement Count: 2\">sentencee</mark> <mark class=\"sev-high agreed\" data-tooltip=\"Issue Type: Spelling\nOriginal: containss\nSuggestion: contains\nReason: Incorrect spelling\nConfidence: 0.95\nSeverity: High\nSource: languagetool, llm\nAgreement Count: 2\">containss</mark> <mark class=\"sev-medium single\" data-tooltip=\"Issue Type: Spelling\nOriginal: severall\nSuggestion: several\nReason: Possible spelling mistake found.\nConfidence: 0.78\nSeverity: Medium\nSource: languagetool\nAgreement Count: 1\">severall</mark> <mark class=\"sev-high agreed\" data-tooltip=\"Issue Type: Spelling\nOriginal: misspelledd\nSuggestion: misspelled\nReason: Incorrect spelling\nConfidence: 0.95\nSeverity: High\nSource: languagetool, llm\nAgreement Count: 2\">misspelledd</mark> <mark class=\"sev-high agreed\" data-tooltip=\"Issue Type: Spelling\nOriginal: wordss\nSuggestion: words\nReason: Incorrect spelling\nConfidence: 0.95\nSeverity: High\nSource: languagetool, llm\nAgreement Count: 2\">wordss</mark> <mark class=\"sev-medium single\" data-tooltip=\"Issue Type: Spelling\nOriginal: thatt\nSuggestion: that\nReason: Possible spelling mistake found.\nConfidence: 0.78\nSeverity: Medium\nSource: languagetool\nAgreement Count: 1\">thatt</mark> <mark class=\"sev-high agreed\" data-tooltip=\"Issue Type: Spelling\nOriginal: shouldd\nSuggestion: should\nReason: Incorrect spelling\nConfidence: 0.95\nSeverity: High\nSource: languagetool, llm\nAgreement Count: 2\">shouldd</mark> bee detectedd byy <mark class=\"sev-medium single\" data-tooltip=\"Issue Type: Spelling\nOriginal: thee\nSuggestion: the\nReason: Incorrect spelling\nConfidence: 0.80\nSeverity: Medium\nSource: llm\nAgreement Count: 1\">thee</mark> <mark class=\"sev-medium single\" data-tooltip=\"Issue Type: Spelling\nOriginal: proofreaderr\nSuggestion: proofreader\nReason: Possible spelling mistake found.\nConfidence: 0.78\nSeverity: Medium\nSource: languagetool\nAgreement Count: 1\">proofreaderr</mark>.\n\nParagraph 19\n\nThe project has been developed using React, FastAPI, and TypeScript. The backend communicates with the frontend through REST APIs. The application generates annotated HTML reports and corrected outputs automatically.\n\nEnd of Document</div>\n</body>\n</html>\n",
+  "corrected_html": "<!DOCTYPE html>\n<html lang=\"en\">\n<head>\n<meta charset=\"utf-8\">\n<title>Corrected Document</title>\n<style>\nbody { font-family: -apple-system, Segoe UI, Roboto, Arial, sans-serif;\n       max-width: 900px; margin: 40px auto; padding: 0 20px; line-height: 1.7; color: #1a1a1a; }\nh1 { font-size: 1.4rem; }\n.legend { margin-bottom: 24px; padding: 12px 16px; background: #f6f6f6; border-radius: 8px; font-size: 0.9rem; }\n.legend span { display: inline-block; padding: 2px 8px; border-radius: 4px; margin-right: 12px; }\n.legend span.sev-low { background: #fef3c7; }\n.legend span.sev-medium { background: #fed7aa; }\n.legend span.sev-high { background: #fecaca; }\n.legend span.sev-critical { background: #fca5a5; border: 1px solid #b91c1c; }\n.legend span.corrected { background: #b2f2bb; }\n.paragraph { margin-bottom: 18px; white-space: pre-wrap; }\nmark.sev-low { background: #fef3c7; padding: 1px 2px; border-radius: 3px; cursor: help; }\nmark.sev-medium { background: #fed7aa; padding: 1px 2px; border-radius: 3px; cursor: help; }\nmark.sev-high { background: #fecaca; padding: 1px 2px; border-radius: 3px; cursor: help; }\nmark.sev-critical { background: #fca5a5; outline: 2px solid #b91c1c; padding: 1px 2px; border-radius: 3px; cursor: help; }\nmark.corrected { background: #b2f2bb; padding: 1px 2px; border-radius: 3px; }\nmark.agreed { outline: 2px solid #444; }\nmark.single { outline: 1px dashed #888; }\nmark[data-tooltip] { position: relative; }\nmark[data-tooltip]:hover::after {\n  content: attr(data-tooltip);\n  position: absolute; bottom: 125%; left: 0; white-space: pre-wrap;\n  background: #222; color: #fff; padding: 8px 10px; border-radius: 6px;\n  font-size: 0.8rem; z-index: 10; width: 260px; box-shadow: 0 4px 12px rgba(0,0,0,.2);\n}\n.meta { color: #666; font-size: 0.85rem; margin-bottom: 4px; }\n</style>\n</head>\n<body>\n<h1>Corrected Document</h1>\n<div class=\"legend\"><span class=\"corrected\">Corrected</span></div><div class=\"paragraph\">AI Document Proofreading System - Comprehensive Test Document\n\nPrepared on: 14 July 2026\n\nMy name is Sanjukta Mukherjee<mark class=\"corrected\">, and</mark> I am currently working on an AI Document Proofreading System. Dr. Ramesh Kumar reviewed the first prototype yesterday, while Prof. Michael Brown and Lt Gen Arvind Kumar will review the second version next week.\n\nJohn Smith and Alice Johnson also participated in the testing process. They carefully analysed the generated reports<mark class=\"corrected\">, and</mark> they agreed that the application was performing well.\n\nOpenAI recently released improvements that inspired several interface ideas. Microsoft, Google, NVIDIA, TensorFlow, PyTorch, React, FastAPI, LanguageTool, SymSpell, Ollama and Docling are frequently referenced throughout this document and should ideally remain protected from unnecessary corrections.\n\nI have also added MyCustomFrameworkX as a user-defined protected term. MyCustomFrameworkX should never be modified even if it appears multiple times. MyCustomFrameworkX is important for testing the whitelist functionality.\n\nParagraph 1\n\nYesterday I <mark class=\"corrected\">went</mark> to the office because the meeting <mark class=\"corrected\">was</mark> important. The manager tell me that every engineers are responsible for reviewing the document before it <mark class=\"corrected\">is published</mark>.\n\nParagraph 2\n\nThis application <mark class=\"corrected\">detects</mark> spelling mistakes, grammar mistakes, punctuation mistakes and style issues. It also <mark class=\"corrected\">identifies</mark> duplicated <mark class=\"corrected\">words</mark> inside the same sentence. The software <mark class=\"corrected\">has</mark> improved significantly over the last few weeks.\n\nParagraph 3\n\nHe give her the report because she <mark class=\"corrected\">asked</mark> him yesterday. They <mark class=\"corrected\">were</mark> waiting outside while we is discussing the implementation. I think it <mark class=\"corrected\">has</mark> become much easier than before.\n\nParagraph 4\n\nThere is <mark class=\"corrected\">a lot</mark> of <mark class=\"corrected\">possibilities</mark> for <mark class=\"corrected\">improvement</mark> in this <mark class=\"corrected\">system</mark>. The <mark class=\"corrected\">algorithm</mark> should <mark class=\"corrected\">definitely</mark> <mark class=\"corrected\">receive</mark> additional <mark class=\"corrected\">optimization</mark> before <mark class=\"corrected\">release</mark>.\n\nParagraph 5\n\nThe document contains <mark class=\"corrected\">several</mark> intentional <mark class=\"corrected\">errors</mark>. Some <mark class=\"corrected\">sentences</mark> are <mark class=\"corrected\">written</mark> incorrectly while others contains punctuation mistakes without proper commas or periods the reader might become confused because the sentence never seems to end\n\nParagraph 6\n\nReact is used for the frontend and FastAPI powers the backend. TensorFlow and PyTorch are mentioned only for testing purposes. OpenAI and Microsoft should never be modified. Ollama is configured to run local language models.\n\nParagraph 7\n\nDr. Ramesh Kumar said that Sanjukta Mukherjee had completed the project successfully. John Smith thanked Alice Johnson because she helped him throughout the implementation. Prof. Michael Brown later congratulated them.\n\nParagraph 8\n\nI gave my notebook to him because he forgot his notebook. She told me that they would bring their laptops tomorrow. We are confident that our implementation will satisfy their expectations.\n\nParagraph 9\n\nOn 12 July 2026, the team processed 245 documents. Approximately 98.7 percent of the documents were analysed successfully. API version v2.3.1 was deployed at 10:45 AM.\n\nParagraph 10\n\nThe system was running correctly<mark class=\"corrected\">, but</mark> suddenly it <mark class=\"corrected\">stopped</mark> responding. After restarting the backend, everything <mark class=\"corrected\">worked</mark> normally again.\n\nParagraph 11\n\n<mark class=\"corrected\">This sentence has</mark> inconsistent tense because yesterday we are testing the application and tomorrow we completed the deployment.\n\nParagraph 12\n\nThe <mark class=\"corrected\">results are</mark> impressive. Each developers have contributed their best effort. Every report <mark class=\"corrected\">was reviewed</mark> before publishing.\n\nParagraph 13\n\nFastAPI FastAPI FastAPI appears multiple times intentionally. TensorFlow TensorFlow TensorFlow also appears repeatedly. OpenAI OpenAI OpenAI is repeated to verify duplicate protected terms handling.\n\nParagraph 14\n\nThe following names should remain protected:\n\nSanjukta Mukherjee\n\nJohn Smith\n\nAlice Johnson\n\nDr. Ramesh Kumar\n\nProf. Michael Brown\n\nLt Gen Arvind Kumar\n\nParagraph 15\n\nThe following pronouns should never be treated as spelling mistakes:\n\nI me my mine myself\n\nyou your yours yourself\n\nhe him his himself\n\nshe her hers herself\n\nit its itself\n\nwe us our ours ourselves\n\nthey them their theirs themselves\n\nParagraph 16\n\nThis sentence contains style issues. In my personal opinion, I personally think that this particular feature is <mark class=\"corrected\">absolutely</mark> essential and <mark class=\"corrected\">unique</mark> in every single possible way.\n\nParagraph 17\n\nPlease <mark class=\"corrected\">don&#x27;t</mark> modify OpenAI, Microsoft, TensorFlow, FastAPI, React, PyTorch, LanguageTool, SymSpell, Ollama, Docling or MyCustomFrameworkX because these are protected terms.\n\nParagraph 18\n\n<mark class=\"corrected\">This</mark> <mark class=\"corrected\">sentence</mark> <mark class=\"corrected\">contains</mark> <mark class=\"corrected\">several</mark> <mark class=\"corrected\">misspelled</mark> <mark class=\"corrected\">words</mark> <mark class=\"corrected\">that</mark> <mark class=\"corrected\">should</mark> bee detectedd byy <mark class=\"corrected\">the</mark> <mark class=\"corrected\">proofreader</mark>.\n\nParagraph 19\n\nThe project has been developed using React, FastAPI, and TypeScript. The backend communicates with the frontend through REST APIs. The application generates annotated HTML reports and corrected outputs automatically.\n\nEnd of Document</div>\n</body>\n</html>\n",
+  "reports": {
+    "changes.md": "# Changes Report\n\n## Page 1, Sentence 2\n\n**Original**\n\nMy name is Sanjukta Mukherjee and I am currently working on an AI Document Proofreading System.\n\n**Corrected**\n\nMy name is Sanjukta Mukherjee, and I am currently working on an AI Document Proofreading System.\n\n---\n\n` and` \u2192 `, and`  \n*Use a comma before \u2018and\u2019 if it connects two independent clauses (unless they are closely connected and short).* (Confidence: 0.73, Agreement Count: 1, Source Agents: languagetool, Protected Reason: None)\n\n\n\n## Page 1, Sentence 5\n\n**Original**\n\nThey carefully analysed the generated reports and they agreed that the application was performing well.\n\n**Corrected**\n\nThey carefully analysed the generated reports, and they agreed that the application was performing well.\n\n---\n\n` and` \u2192 `, and`  \n*Use a comma before \u2018and\u2019 if it connects two independent clauses (unless they are closely connected and short).* (Confidence: 0.73, Agreement Count: 1, Source Agents: languagetool, Protected Reason: None)\n\n\n\n## Page 1, Sentence 12\n\n**Original**\n\nYesterday I goes to the office because the meeting were important.\n\n**Corrected**\n\nYesterday I went to the office because the meeting was important.\n\n---\n\n`goes` \u2192 `went`  \n*Incorrect verb tense* (Confidence: 0.80, Agreement Count: 1, Source Agents: llm, Protected Reason: None)\n\n`were` \u2192 `was`  \n*Incorrect verb agreement* (Confidence: 0.80, Agreement Count: 1, Source Agents: llm, Protected Reason: None)\n\n\n\n## Page 1, Sentence 13\n\n**Original**\n\nThe manager tell me that every engineers are responsible for reviewing the document before it are published.\n\n**Corrected**\n\nThe manager tell me that every engineers are responsible for reviewing the document before it is published.\n\n---\n\n`are published` \u2192 `is published`  \n*Incorrect subject-verb agreement* (Confidence: 0.80, Agreement Count: 1, Source Agents: llm, Protected Reason: None)\n\n\n\n## Page 1, Sentence 15\n\n**Original**\n\nThis application detect spelling mistakes, grammar mistakes, punctuation mistakes and style issues.\n\n**Corrected**\n\nThis application detects spelling mistakes, grammar mistakes, punctuation mistakes and style issues.\n\n---\n\n`detect` \u2192 `detects`  \n*Subject-verb agreement error* (Confidence: 0.80, Agreement Count: 1, Source Agents: llm, Protected Reason: None)\n\n\n\n## Page 1, Sentence 16\n\n**Original**\n\nIt also identify duplicated words words inside the same sentence.\n\n**Corrected**\n\nIt also identifies duplicated words inside the same sentence.\n\n---\n\n`identify` \u2192 `identifies`  \n*Subject-verb agreement error* (Confidence: 0.95, Agreement Count: 2, Source Agents: languagetool, llm, Protected Reason: None)\n\n`words words` \u2192 `words`  \n*Redundant word* (Confidence: 0.95, Agreement Count: 2, Source Agents: languagetool, llm, Protected Reason: None)\n\n\n\n## Page 1, Sentence 17\n\n**Original**\n\nThe software have improved significantly over the last few weeks.\n\n**Corrected**\n\nThe software has improved significantly over the last few weeks.\n\n---\n\n`have` \u2192 `has`  \n*Subject-verb agreement error* (Confidence: 0.80, Agreement Count: 1, Source Agents: llm, Protected Reason: None)\n\n\n\n## Page 1, Sentence 19\n\n**Original**\n\nHe give her the report because she ask him yesterday.\n\n**Corrected**\n\nHe give her the report because she asked him yesterday.\n\n---\n\n`ask` \u2192 `asked`  \n*Past tense required to match the context* (Confidence: 0.80, Agreement Count: 1, Source Agents: llm, Protected Reason: None)\n\n\n\n## Page 1, Sentence 20\n\n**Original**\n\nThey was waiting outside while we is discussing the implementation.\n\n**Corrected**\n\nThey were waiting outside while we is discussing the implementation.\n\n---\n\n`was` \u2192 `were`  \n*Plural subject requires plural verb* (Confidence: 0.80, Agreement Count: 1, Source Agents: llm, Protected Reason: None)\n\n\n\n## Page 1, Sentence 21\n\n**Original**\n\nI think it have become much easier than before.\n\n**Corrected**\n\nI think it has become much easier than before.\n\n---\n\n`have` \u2192 `has`  \n*Subject-verb agreement error with singular subject* (Confidence: 0.95, Agreement Count: 2, Source Agents: languagetool, llm, Protected Reason: None)\n\n\n\n## Page 1, Sentence 23\n\n**Original**\n\nThere is alot of possibilites for improvment in this sysem.\n\n**Corrected**\n\nThere is a lot of possibilities for improvement in this system.\n\n---\n\n`alot` \u2192 `a lot`  \n*Incorrect spelling* (Confidence: 0.95, Agreement Count: 2, Source Agents: languagetool, llm, Protected Reason: None)\n\n`possibilites` \u2192 `possibilities`  \n*Incorrect spelling* (Confidence: 0.95, Agreement Count: 2, Source Agents: languagetool, llm, Protected Reason: None)\n\n`improvment` \u2192 `improvement`  \n*Incorrect spelling* (Confidence: 0.95, Agreement Count: 2, Source Agents: languagetool, llm, Protected Reason: None)\n\n`sysem` \u2192 `system`  \n*Incorrect spelling* (Confidence: 0.95, Agreement Count: 2, Source Agents: languagetool, llm, Protected Reason: None)\n\n\n\n## Page 1, Sentence 24\n\n**Original**\n\nThe algoritm should definately recieve additional optimizaton before releese.\n\n**Corrected**\n\nThe algorithm should definitely receive additional optimization before release.\n\n---\n\n`algoritm` \u2192 `algorithm`  \n*Incorrect spelling* (Confidence: 0.95, Agreement Count: 2, Source Agents: languagetool, llm, Protected Reason: None)\n\n`definately` \u2192 `definitely`  \n*Incorrect spelling* (Confidence: 0.95, Agreement Count: 2, Source Agents: languagetool, llm, Protected Reason: None)\n\n`recieve` \u2192 `receive`  \n*Incorrect spelling* (Confidence: 0.95, Agreement Count: 2, Source Agents: languagetool, llm, Protected Reason: None)\n\n`optimizaton` \u2192 `optimization`  \n*Incorrect spelling* (Confidence: 0.95, Agreement Count: 2, Source Agents: languagetool, llm, Protected Reason: None)\n\n`releese` \u2192 `release`  \n*Incorrect spelling* (Confidence: 0.95, Agreement Count: 2, Source Agents: languagetool, llm, Protected Reason: None)\n\n\n\n## Page 1, Sentence 26\n\n**Original**\n\nThe document contains severel intentional erors.\n\n**Corrected**\n\nThe document contains several intentional errors.\n\n---\n\n`severel` \u2192 `several`  \n*Incorrect spelling* (Confidence: 0.95, Agreement Count: 2, Source Agents: languagetool, llm, Protected Reason: None)\n\n`erors` \u2192 `errors`  \n*Incorrect spelling* (Confidence: 0.95, Agreement Count: 2, Source Agents: languagetool, llm, Protected Reason: None)\n\n\n\n## Page 1, Sentence 27\n\n**Original**\n\nSome sentenses are writen incorrectly while others contains punctuation mistakes without proper commas or periods the reader might become confused because the sentence never seems to end\n\n**Corrected**\n\nSome sentences are written incorrectly while others contains punctuation mistakes without proper commas or periods the reader might become confused because the sentence never seems to end\n\n---\n\n`sentenses` \u2192 `sentences`  \n*Incorrect spelling* (Confidence: 0.95, Agreement Count: 2, Source Agents: languagetool, llm, Protected Reason: None)\n\n`writen` \u2192 `written`  \n*Incorrect spelling* (Confidence: 0.95, Agreement Count: 2, Source Agents: languagetool, llm, Protected Reason: None)\n\n\n\n## Page 1, Sentence 46\n\n**Original**\n\nThe system was running correctly but suddenly it stop responding.\n\n**Corrected**\n\nThe system was running correctly, but suddenly it stopped responding.\n\n---\n\n` but` \u2192 `, but`  \n*Use a comma before \u2018but\u2019 if it connects two independent clauses (unless they are closely connected and short).* (Confidence: 0.73, Agreement Count: 1, Source Agents: languagetool, Protected Reason: None)\n\n`stop` \u2192 `stopped`  \n*Incorrect verb form* (Confidence: 0.80, Agreement Count: 1, Source Agents: llm, Protected Reason: None)\n\n\n\n## Page 1, Sentence 47\n\n**Original**\n\nAfter restarting the backend, everything work normally again.\n\n**Corrected**\n\nAfter restarting the backend, everything worked normally again.\n\n---\n\n`work` \u2192 `worked`  \n*Incorrect verb form* (Confidence: 0.80, Agreement Count: 1, Source Agents: llm, Protected Reason: None)\n\n\n\n## Page 1, Sentence 49\n\n**Original**\n\nThis sentence have inconsistent tense because yesterday we are testing the application and tomorrow we completed the deployment.\n\n**Corrected**\n\nThis sentence has inconsistent tense because yesterday we are testing the application and tomorrow we completed the deployment.\n\n---\n\n`This sentence have` \u2192 `This sentence has`  \n*The verb \u2018have\u2019 is plural.* (Confidence: 0.73, Agreement Count: 1, Source Agents: languagetool, Protected Reason: None)\n\n\n\n## Page 1, Sentence 51\n\n**Original**\n\nThe results is impressive.\n\n**Corrected**\n\nThe results are impressive.\n\n---\n\n`results is` \u2192 `results are`  \n*subject-verb agreement* (Confidence: 0.80, Agreement Count: 1, Source Agents: languagetool, llm, Protected Reason: None)\n\n\n\n## Page 1, Sentence 53\n\n**Original**\n\nEvery report were reviewed before publishing.\n\n**Corrected**\n\nEvery report was reviewed before publishing.\n\n---\n\n`were reviewed` \u2192 `was reviewed`  \n*subject-verb agreement* (Confidence: 0.80, Agreement Count: 1, Source Agents: llm, Protected Reason: None)\n\n\n\n## Page 1, Sentence 77\n\n**Original**\n\nIn my personal opinion, I personally think that this particular feature is absolutely completely essential and very unique in every single possible way.\n\n**Corrected**\n\nIn my personal opinion, I personally think that this particular feature is absolutely essential and unique in every single possible way.\n\n---\n\n`absolutely completely` \u2192 `absolutely`  \n*redundant phrase* (Confidence: 0.80, Agreement Count: 1, Source Agents: llm, Protected Reason: None)\n\n`very unique` \u2192 `unique`  \n*Consider using \u201cunique\u201d.* (Confidence: 0.73, Agreement Count: 1, Source Agents: languagetool, Protected Reason: None)\n\n\n\n## Page 1, Sentence 79\n\n**Original**\n\nPlease dont modify OpenAI, Microsoft, TensorFlow, FastAPI, React, PyTorch, LanguageTool, SymSpell, Ollama, Docling or MyCustomFrameworkX because these are protected terms.\n\n**Corrected**\n\nPlease don't modify OpenAI, Microsoft, TensorFlow, FastAPI, React, PyTorch, LanguageTool, SymSpell, Ollama, Docling or MyCustomFrameworkX because these are protected terms.\n\n---\n\n`dont` \u2192 `don't`  \n*Missing apostrophe in contraction* (Confidence: 0.95, Agreement Count: 2, Source Agents: languagetool, llm, Protected Reason: None)\n\n\n\n## Page 1, Sentence 81\n\n**Original**\n\nThiss sentencee containss severall misspelledd wordss thatt shouldd bee detectedd byy thee proofreaderr.\n\n**Corrected**\n\nThis sentence contains several misspelled words that should bee detectedd byy the proofreader.\n\n---\n\n`Thiss` \u2192 `This`  \n*Incorrect spelling* (Confidence: 0.95, Agreement Count: 2, Source Agents: languagetool, llm, Protected Reason: None)\n\n`sentencee` \u2192 `sentence`  \n*Incorrect spelling* (Confidence: 0.95, Agreement Count: 2, Source Agents: languagetool, llm, Protected Reason: None)\n\n`containss` \u2192 `contains`  \n*Incorrect spelling* (Confidence: 0.95, Agreement Count: 2, Source Agents: languagetool, llm, Protected Reason: None)\n\n`severall` \u2192 `several`  \n*Possible spelling mistake found.* (Confidence: 0.78, Agreement Count: 1, Source Agents: languagetool, Protected Reason: None)\n\n`misspelledd` \u2192 `misspelled`  \n*Incorrect spelling* (Confidence: 0.95, Agreement Count: 2, Source Agents: languagetool, llm, Protected Reason: None)\n\n`wordss` \u2192 `words`  \n*Incorrect spelling* (Confidence: 0.95, Agreement Count: 2, Source Agents: languagetool, llm, Protected Reason: None)\n\n`thatt` \u2192 `that`  \n*Possible spelling mistake found.* (Confidence: 0.78, Agreement Count: 1, Source Agents: languagetool, Protected Reason: None)\n\n`shouldd` \u2192 `should`  \n*Incorrect spelling* (Confidence: 0.95, Agreement Count: 2, Source Agents: languagetool, llm, Protected Reason: None)\n\n`thee` \u2192 `the`  \n*Incorrect spelling* (Confidence: 0.80, Agreement Count: 1, Source Agents: llm, Protected Reason: None)\n\n`proofreaderr` \u2192 `proofreader`  \n*Possible spelling mistake found.* (Confidence: 0.78, Agreement Count: 1, Source Agents: languagetool, Protected Reason: None)\n\n\n",
+    "summary.csv": "page,paragraph,sentence,issue_type,original,replacement,confidence,agreement_count,source_agents,reason,protected_reason\n\n1,2,2,grammar, and,\", and\",0.73,1,languagetool,Use a comma before \u2018and\u2019 if it connects two independent clauses (unless they are closely connected and short).,None\n\n1,3,5,grammar, and,\", and\",0.73,1,languagetool,Use a comma before \u2018and\u2019 if it connects two independent clauses (unless they are closely connected and short).,None\n\n1,7,12,tense,goes,went,0.80,1,llm,Incorrect verb tense,None\n\n1,7,12,grammar,were,was,0.80,1,llm,Incorrect verb agreement,None\n\n1,7,13,grammar,are published,is published,0.80,1,llm,Incorrect subject-verb agreement,None\n\n1,9,15,grammar,detect,detects,0.80,1,llm,Subject-verb agreement error,None\n\n1,9,16,grammar,identify,identifies,0.95,2,languagetool|llm,Subject-verb agreement error,None\n\n1,9,16,spelling,words words,words,0.95,2,languagetool|llm,Redundant word,None\n\n1,9,17,grammar,have,has,0.80,1,llm,Subject-verb agreement error,None\n\n1,11,19,tense,ask,asked,0.80,1,llm,Past tense required to match the context,None\n\n1,11,20,grammar,was,were,0.80,1,llm,Plural subject requires plural verb,None\n\n1,11,21,grammar,have,has,0.95,2,languagetool|llm,Subject-verb agreement error with singular subject,None\n\n1,13,23,spelling,alot,a lot,0.95,2,languagetool|llm,Incorrect spelling,None\n\n1,13,23,spelling,possibilites,possibilities,0.95,2,languagetool|llm,Incorrect spelling,None\n\n1,13,23,spelling,improvment,improvement,0.95,2,languagetool|llm,Incorrect spelling,None\n\n1,13,23,spelling,sysem,system,0.95,2,languagetool|llm,Incorrect spelling,None\n\n1,13,24,spelling,algoritm,algorithm,0.95,2,languagetool|llm,Incorrect spelling,None\n\n1,13,24,spelling,definately,definitely,0.95,2,languagetool|llm,Incorrect spelling,None\n\n1,13,24,spelling,recieve,receive,0.95,2,languagetool|llm,Incorrect spelling,None\n\n1,13,24,spelling,optimizaton,optimization,0.95,2,languagetool|llm,Incorrect spelling,None\n\n1,13,24,spelling,releese,release,0.95,2,languagetool|llm,Incorrect spelling,None\n\n1,15,26,spelling,severel,several,0.95,2,languagetool|llm,Incorrect spelling,None\n\n1,15,26,spelling,erors,errors,0.95,2,languagetool|llm,Incorrect spelling,None\n\n1,15,27,spelling,sentenses,sentences,0.95,2,languagetool|llm,Incorrect spelling,None\n\n1,15,27,spelling,writen,written,0.95,2,languagetool|llm,Incorrect spelling,None\n\n1,25,46,grammar, but,\", but\",0.73,1,languagetool,Use a comma before \u2018but\u2019 if it connects two independent clauses (unless they are closely connected and short).,None\n\n1,25,46,tense,stop,stopped,0.80,1,llm,Incorrect verb form,None\n\n1,25,47,tense,work,worked,0.80,1,llm,Incorrect verb form,None\n\n1,27,49,grammar,This sentence have,This sentence has,0.73,1,languagetool,The verb \u2018have\u2019 is plural.,None\n\n1,29,51,grammar,results is,results are,0.80,1,languagetool|llm,subject-verb agreement,None\n\n1,29,53,grammar,were reviewed,was reviewed,0.80,1,llm,subject-verb agreement,None\n\n1,50,77,grammar,absolutely completely,absolutely,0.80,1,llm,redundant phrase,None\n\n1,50,77,grammar,very unique,unique,0.73,1,languagetool,Consider using \u201cunique\u201d.,None\n\n1,52,79,grammar,dont,don't,0.95,2,languagetool|llm,Missing apostrophe in contraction,None\n\n1,54,81,spelling,Thiss,This,0.95,2,languagetool|llm,Incorrect spelling,None\n\n1,54,81,spelling,sentencee,sentence,0.95,2,languagetool|llm,Incorrect spelling,None\n\n1,54,81,spelling,containss,contains,0.95,2,languagetool|llm,Incorrect spelling,None\n\n1,54,81,spelling,severall,several,0.78,1,languagetool,Possible spelling mistake found.,None\n\n1,54,81,spelling,misspelledd,misspelled,0.95,2,languagetool|llm,Incorrect spelling,None\n\n1,54,81,spelling,wordss,words,0.95,2,languagetool|llm,Incorrect spelling,None\n\n1,54,81,spelling,thatt,that,0.78,1,languagetool,Possible spelling mistake found.,None\n\n1,54,81,spelling,shouldd,should,0.95,2,languagetool|llm,Incorrect spelling,None\n\n1,54,81,spelling,thee,the,0.80,1,llm,Incorrect spelling,None\n\n1,54,81,spelling,proofreaderr,proofreader,0.78,1,languagetool,Possible spelling mistake found.,None\n\n"
+  },
+  "raw_text": "AI Document Proofreading System - Comprehensive Test Document\n\nPrepared on: 14 July 2026\n\nMy name is Sanjukta Mukherjee and I am currently working on an AI Document Proofreading System. Dr. Ramesh Kumar reviewed the first prototype yesterday, while Prof. Michael Brown and Lt Gen Arvind Kumar will review the second version next week.\n\nJohn Smith and Alice Johnson also participated in the testing process. They carefully analysed the generated reports and they agreed that the application was performing well.\n\nOpenAI recently released improvements that inspired several interface ideas. Microsoft, Google, NVIDIA, TensorFlow, PyTorch, React, FastAPI, LanguageTool, SymSpell, Ollama and Docling are frequently referenced throughout this document and should ideally remain protected from unnecessary corrections.\n\nI have also added MyCustomFrameworkX as a user-defined protected term. MyCustomFrameworkX should never be modified even if it appears multiple times. MyCustomFrameworkX is important for testing the whitelist functionality.\n\nParagraph 1\n\nYesterday I goes to the office because the meeting were important. The manager tell me that every engineers are responsible for reviewing the document before it are published.\n\nParagraph 2\n\nThis application detect spelling mistakes, grammar mistakes, punctuation mistakes and style issues. It also identify duplicated words words inside the same sentence. The software have improved significantly over the last few weeks.\n\nParagraph 3\n\nHe give her the report because she ask him yesterday. They was waiting outside while we is discussing the implementation. I think it have become much easier than before.\n\nParagraph 4\n\nThere is alot of possibilites for improvment in this sysem. The algoritm should definately recieve additional optimizaton before releese.\n\nParagraph 5\n\nThe document contains severel intentional erors. Some sentenses are writen incorrectly while others contains punctuation mistakes without proper commas or periods the reader might become confused because the sentence never seems to end\n\nParagraph 6\n\nReact is used for the frontend and FastAPI powers the backend. TensorFlow and PyTorch are mentioned only for testing purposes. OpenAI and Microsoft should never be modified. Ollama is configured to run local language models.\n\nParagraph 7\n\nDr. Ramesh Kumar said that Sanjukta Mukherjee had completed the project successfully. John Smith thanked Alice Johnson because she helped him throughout the implementation. Prof. Michael Brown later congratulated them.\n\nParagraph 8\n\nI gave my notebook to him because he forgot his notebook. She told me that they would bring their laptops tomorrow. We are confident that our implementation will satisfy their expectations.\n\nParagraph 9\n\nOn 12 July 2026, the team processed 245 documents. Approximately 98.7 percent of the documents were analysed successfully. API version v2.3.1 was deployed at 10:45 AM.\n\nParagraph 10\n\nThe system was running correctly but suddenly it stop responding. After restarting the backend, everything work normally again.\n\nParagraph 11\n\nThis sentence have inconsistent tense because yesterday we are testing the application and tomorrow we completed the deployment.\n\nParagraph 12\n\nThe results is impressive. Each developers have contributed their best effort. Every report were reviewed before publishing.\n\nParagraph 13\n\nFastAPI FastAPI FastAPI appears multiple times intentionally. TensorFlow TensorFlow TensorFlow also appears repeatedly. OpenAI OpenAI OpenAI is repeated to verify duplicate protected terms handling.\n\nParagraph 14\n\nThe following names should remain protected:\n\nSanjukta Mukherjee\n\nJohn Smith\n\nAlice Johnson\n\nDr. Ramesh Kumar\n\nProf. Michael Brown\n\nLt Gen Arvind Kumar\n\nParagraph 15\n\nThe following pronouns should never be treated as spelling mistakes:\n\nI me my mine myself\n\nyou your yours yourself\n\nhe him his himself\n\nshe her hers herself\n\nit its itself\n\nwe us our ours ourselves\n\nthey them their theirs themselves\n\nParagraph 16\n\nThis sentence contains style issues. In my personal opinion, I personally think that this particular feature is absolutely completely essential and very unique in every single possible way.\n\nParagraph 17\n\nPlease dont modify OpenAI, Microsoft, TensorFlow, FastAPI, React, PyTorch, LanguageTool, SymSpell, Ollama, Docling or MyCustomFrameworkX because these are protected terms.\n\nParagraph 18\n\nThiss sentencee containss severall misspelledd wordss thatt shouldd bee detectedd byy thee proofreaderr.\n\nParagraph 19\n\nThe project has been developed using React, FastAPI, and TypeScript. The backend communicates with the frontend through REST APIs. The application generates annotated HTML reports and corrected outputs automatically.\n\nEnd of Document",
+  "statistics": {
+    "run_dir": "C:\\Users\\sanju\\INTERNSHIP-APT\\DocumentProofreadingSystem\\data\\output\\ae213cbbe4144a739d340b2718f55e44",
+    "total_issues": 44,
+    "accepted": 85,
+    "rejected_protected": 32,
+    "rejected_semantic": 17,
+    "rejected_confidence": 0
+  }
+}
