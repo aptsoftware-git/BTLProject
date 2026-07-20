@@ -1,19 +1,47 @@
-# Document extraction
-docling>=2.0.0
-PyMuPDF>=1.24.0          # fallback PDF extraction if Docling is unavailable
-python-docx>=1.1.0       # fallback DOCX extraction
+############################################################
+    # Document Extraction & Layout Parsing
+    ############################################################
+    docling>=2.0.0
+    PyMuPDF>=1.24.0
+    python-docx>=1.1.0
+    Pillow>=10.0.0
 
-# NLP / sentence splitting / protected-term NER
-spacy>=3.7.0
-# After installing requirements, download the spaCy model separately:
-#   python -m spacy download en_core_web_sm
+    ############################################################
+    # Natural Language Processing (NLP)
+    ############################################################
+    spacy>=3.7.0
+    # Requires model: python -m spacy download en_core_web_sm
 
-# Spell checking
-language-tool-python>=2.8.0   # requires a local Java runtime (JRE 17+)
-symspellpy>=6.7.7
-# SymSpell also needs a frequency dictionary file at
-# models/frequency_dictionary_en_82_765.txt (download from the symspellpy
-# repo's `symspellpy/frequency_dictionary_en_82_765.txt`).
+    ############################################################
+    # Proofreading & Grammar
+    ############################################################
+    language-tool-python>=2.8.0
+    # Requires Java Runtime Environment (JRE) installed
+    symspellpy>=6.7.7
 
-# Local LLM (grammar review + semantic validation) via Ollama's HTTP API
-requests>=2.31.0
+    ############################################################
+    # Web Backend & Server
+    ############################################################
+    fastapi>=0.116.0
+    uvicorn[standard]>=0.35.0
+    python-multipart>=0.0.20
+
+    ############################################################
+    # Network & APIs
+    ############################################################
+    requests>=2.32.0
+
+    ############################################################
+    # RAG & Semantic Retrieval
+    ############################################################
+    chromadb>=1.0.0
+    sentence-transformers>=5.0.0
+    torch>=2.8.0
+    rank_bm25>=0.2.2
+
+    ############################################################
+    # System & Token Utilities
+    ############################################################
+    pydantic>=2.11.0
+    psutil>=5.9.0
+    tiktoken>=0.7.0

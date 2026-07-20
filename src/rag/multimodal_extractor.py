@@ -661,14 +661,35 @@ class MultimodalExtractor:
                     with open(image_json_path, "w", encoding="utf-8") as f:
                         json.dump(img_json_data, f, indent=2, ensure_ascii=False)
 
-            # Part 3 & 4: Incremental Knowledge Extraction & Vector DB Updates
+            # Part 3 & 4: Incremental Knowledge Extraction & Vector DB Updates (Semantic Chunks reasoning unit)
             self._update_job_status(doc_id, "Building Embeddings", percent, batch_start+1, total_pages, batch_size, batch_index, total_batches, est_time_str)
             batch_objects = []
             for obj in agent._generate_objects(batch_structured_doc, doc_id, output_dir):
                 batch_objects.append(obj)
+                t = obj.chunk_type
+                agent.stats["by_type"][t] = agent.stats["by_type"].get(t, 0) + 1
+                agent.stats["total_objects"] += 1
             
-            if batch_objects:
-                agent._process_batch(batch_objects, doc_id, output_dir)
+            if batch_objects and output_dir:
+                jsonl_path = output_dir / "03_knowledge_objects" / "knowledge_objects.jsonl"
+                with open(jsonl_path, "a", encoding="utf-8") as f:
+                    for obj in batch_objects:
+                        obj.embedding_status = "Pending"
+                        obj_dict = obj.dict() if hasattr(obj, "dict") else obj.model_dump()
+                        f.write(json.dumps(obj_dict, ensure_ascii=False) + "\n")
+            
+            # Rebuilt Semantic Chunking (Tasks 1-8)
+            from src.rag.chunk_builder import ChunkBuilder
+            overlap_size = getattr(agent.config, "chunk_overlap_tokens", 50)
+            chunk_builder = ChunkBuilder(
+                target_tokens_min=250, 
+                target_tokens_max=500, 
+                overlap_tokens=overlap_size
+            )
+            
+            batch_chunks = chunk_builder.build_chunks(batch_structured_doc, doc_id)
+            if batch_chunks:
+                agent._process_chunks_batch(batch_chunks, doc_id, output_dir)
 
             # Part 6: Memory Management - Release layout objects and tensors
             del docling_doc
@@ -700,6 +721,18 @@ class MultimodalExtractor:
         self._update_job_status(doc_id, "Updating Vector Database", 82.0, total_pages, total_pages, batch_size, total_batches, total_batches, "0s")
         if output_dir:
             agent._finalize_outputs(doc_id, output_dir, master_structured_doc)
+            
+            # Save structured_document.json copy at root of output_dir for compatibility
+            try:
+                legacy_doc_path = output_dir / "structured_document.json"
+                if hasattr(master_structured_doc, "model_dump_json"):
+                    json_data = master_structured_doc.model_dump_json(indent=2)
+                else:
+                    json_data = master_structured_doc.json(indent=2)
+                legacy_doc_path.write_text(json_data, encoding="utf-8")
+                logger.info(f"Saved structured_document.json copy to {legacy_doc_path}")
+            except Exception as save_err:
+                logger.error(f"Failed to save structured_document.json copy: {save_err}")
 
         # Ingestion Completed
         self._update_job_status(doc_id, "Ingestion Completed", 100.0, total_pages, total_pages, batch_size, total_batches, total_batches, "0s")

@@ -110,6 +110,8 @@ class VectorStore:
             # Serialize list fields to JSON strings
             flat_metadata["hierarchy_path"] = json.dumps(meta.hierarchy_path)
             flat_metadata["source_element_ids"] = json.dumps(meta.source_element_ids)
+            flat_metadata["element_types"] = json.dumps(getattr(meta, "element_types", []))
+            flat_metadata["relationships"] = json.dumps(getattr(meta, "relationships", {}))
             
             # Enriched metadata serialization (Phase 6 Optimization)
             if getattr(meta, "report_number", None):

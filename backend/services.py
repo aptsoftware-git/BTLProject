@@ -302,6 +302,45 @@ def run_context_analysis_bg(job_id: str, job_dir: Path) -> None:
             consistency_pipeline = ContextAnalysisPipeline(model_name=model_name)
             consistency_pipeline.run_analysis(job_dir, job_id)
             
+            # Run Ambiguity Pipeline (Phase 1 Clustering & Phase 2A Claim Extraction)
+            try:
+                from src.rag.ambiguity_pipeline import AmbiguityPipeline
+                ambiguity_pipeline = AmbiguityPipeline()
+                ambiguity_pipeline.run_clustering(job_dir, job_id)
+                backend_logger.info("Generated ambiguity semantic clusters for job %s", job_id)
+                
+                from src.rag.ambiguity_extractor import AmbiguityExtractor
+                ambiguity_extractor = AmbiguityExtractor()
+                ambiguity_extractor.run_extraction(job_dir, job_id)
+                backend_logger.info("Generated ambiguity claims extraction index for job %s", job_id)
+                
+                from src.rag.ambiguity_chunk_analyzer import AmbiguityChunkAnalyzer
+                chunk_analyzer = AmbiguityChunkAnalyzer()
+                chunk_analyzer.run_analysis(job_dir, job_id)
+                backend_logger.info("Generated ambiguity chunk-level analysis for job %s", job_id)
+                
+                from src.rag.ambiguity_cluster_analyzer import AmbiguityClusterAnalyzer
+                cluster_analyzer = AmbiguityClusterAnalyzer()
+                cluster_analyzer.run_analysis(job_dir, job_id)
+                backend_logger.info("Generated ambiguity cluster-level analysis for job %s", job_id)
+                
+                from src.rag.claude_input_builder import ClaudeInputBuilder
+                input_builder = ClaudeInputBuilder()
+                input_builder.run_packaging(job_dir, job_id)
+                backend_logger.info("Generated Claude input package for job %s", job_id)
+                
+                from src.rag.claude.verification_service import ClaudeVerificationService
+                verification_service = ClaudeVerificationService()
+                verification_service.run_verification(job_dir, job_id)
+                backend_logger.info("Generated Claude verification report for job %s", job_id)
+                
+                from src.rag.final_report_generator import FinalReportGenerator
+                report_generator = FinalReportGenerator()
+                report_generator.run_generation(job_dir, job_id)
+                backend_logger.info("Generated final business report for job %s", job_id)
+            except Exception as amb_err:
+                backend_logger.error("Failed to execute ambiguity pipeline phases: %s", amb_err)
+            
             # Set completion status
             issues_count = 0
             report_file = job_dir / "report.json"

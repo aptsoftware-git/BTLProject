@@ -1,4 +1,4 @@
-from typing import List, Optional
+from typing import List, Optional, Dict, Any
 from pydantic import BaseModel, Field
 from src.rag.document_schema import BoundingBox
 
@@ -19,6 +19,8 @@ class ChunkMetadata(BaseModel):
     bounding_boxes: List[BoundingBox] = Field(default_factory=list, description="Bounding boxes of the source elements")
     image_id: Optional[str] = Field(None, description="Referenced image ID if chunk is an image")
     table_id: Optional[str] = Field(None, description="Referenced table ID if chunk is a table")
+    element_types: List[str] = Field(default_factory=list, description="Types of source elements composing this chunk")
+    relationships: Dict[str, Any] = Field(default_factory=dict, description="Relationships to other chunks or elements")
     
     # Enriched Metadata Fields (Phase 6 Optimization)
     report_number: Optional[str] = Field(None, description="Extracted report number context")

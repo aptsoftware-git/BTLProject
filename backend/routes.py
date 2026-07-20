@@ -961,6 +961,150 @@ async def get_context_analysis_report(job_id: str):
         raise HTTPException(status_code=500, detail=f"Failed to read report: {str(e)}")
 
 
+def get_report_meta(job_id: str, relative_file_path: Path):
+    from backend.services import get_job_dir, get_job
+    job_dir = get_job_dir(job_id)
+    full_path = job_dir / relative_file_path
+    
+    if not full_path.exists():
+        return {
+            "job_id": job_id,
+            "status": "not_found",
+            "message": "Report file does not exist yet. Please run contextual analysis first."
+        }
+        
+    import os
+    import datetime
+    mtime = os.path.getmtime(full_path)
+    creation_time = datetime.datetime.fromtimestamp(mtime).isoformat()
+    
+    parent_dir = relative_file_path.parent
+    name = relative_file_path.name
+    stem = relative_file_path.stem
+    
+    html_name = f"{stem}_inspector.html"
+    if stem == "semantic_clusters":
+        html_name = "cluster_inspector.html"
+    elif stem == "chunk_claims":
+        html_name = "claim_inspector.html"
+    elif stem == "chunk_reasoning":
+        html_name = "chunk_reasoning_inspector.html"
+    elif stem == "cluster_reasoning":
+        html_name = "cluster_reasoning_inspector.html"
+    elif stem == "claude_response":
+        html_name = "verification_inspector.html"
+    elif stem == "final_report":
+        html_name = "final_report.html"
+        
+    md_name = f"{stem}.md"
+    if stem == "claude_response":
+         md_name = "verification_summary.md"
+         
+    return {
+        "job_id": job_id,
+        "creation_time": creation_time,
+        "processing_time": 0.0,
+        "status": "completed",
+        "download_urls": {
+            "json": f"/outputs/{job_id}/{parent_dir.as_posix()}/{name}",
+            "markdown": f"/outputs/{job_id}/{parent_dir.as_posix()}/{md_name}",
+            "html": f"/outputs/{job_id}/{parent_dir.as_posix()}/{html_name}"
+        }
+    }
+
+
+@router.get("/reports/{job_id}/semantic-clusters", summary="Get Semantic Clusters Report")
+async def get_report_semantic_clusters(job_id: str):
+    from backend.services import get_job_dir
+    job_dir = get_job_dir(job_id)
+    report_file = job_dir / "09_semantic_clusters" / "semantic_clusters.json"
+    if not report_file.exists():
+        raise HTTPException(status_code=404, detail="Semantic clusters report not found.")
+    try:
+        with open(report_file, "r", encoding="utf-8") as f:
+            data = json.load(f)
+        meta = get_report_meta(job_id, Path("09_semantic_clusters/semantic_clusters.json"))
+        return {"metadata": meta, "data": data}
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+
+@router.get("/reports/{job_id}/claim-extraction", summary="Get Claim Extraction Report")
+async def get_report_claim_extraction(job_id: str):
+    from backend.services import get_job_dir
+    report_file = get_job_dir(job_id) / "10_claim_extraction" / "chunk_claims.json"
+    if not report_file.exists():
+        raise HTTPException(status_code=404, detail="Claim extraction report not found.")
+    try:
+        with open(report_file, "r", encoding="utf-8") as f:
+            data = json.load(f)
+        meta = get_report_meta(job_id, Path("10_claim_extraction/chunk_claims.json"))
+        return {"metadata": meta, "data": data}
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+
+@router.get("/reports/{job_id}/chunk-reasoning", summary="Get Chunk-Level Reasoning Report")
+async def get_report_chunk_reasoning(job_id: str):
+    from backend.services import get_job_dir
+    report_file = get_job_dir(job_id) / "11_chunk_reasoning" / "chunk_reasoning.json"
+    if not report_file.exists():
+        raise HTTPException(status_code=404, detail="Chunk-level reasoning report not found.")
+    try:
+        with open(report_file, "r", encoding="utf-8") as f:
+            data = json.load(f)
+        meta = get_report_meta(job_id, Path("11_chunk_reasoning/chunk_reasoning.json"))
+        return {"metadata": meta, "data": data}
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+
+@router.get("/reports/{job_id}/cluster-reasoning", summary="Get Cluster-Level Reasoning Report")
+async def get_report_cluster_reasoning(job_id: str):
+    from backend.services import get_job_dir
+    report_file = get_job_dir(job_id) / "12_cluster_reasoning" / "cluster_reasoning.json"
+    if not report_file.exists():
+        raise HTTPException(status_code=404, detail="Cluster-level reasoning report not found.")
+    try:
+        with open(report_file, "r", encoding="utf-8") as f:
+            data = json.load(f)
+        meta = get_report_meta(job_id, Path("12_cluster_reasoning/cluster_reasoning.json"))
+        return {"metadata": meta, "data": data}
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+
+@router.get("/reports/{job_id}/claude-verification", summary="Get Claude Verification Report")
+async def get_report_claude_verification(job_id: str):
+    from backend.services import get_job_dir
+    report_file = get_job_dir(job_id) / "14_claude_verification" / "claude_response.json"
+    if not report_file.exists():
+        raise HTTPException(status_code=404, detail="Claude verification report not found.")
+    try:
+        with open(report_file, "r", encoding="utf-8") as f:
+            data = json.load(f)
+        meta = get_report_meta(job_id, Path("14_claude_verification/claude_response.json"))
+        return {"metadata": meta, "data": data}
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+
+@router.get("/reports/{job_id}/final-report", summary="Get Final Business Compliance Report")
+async def get_report_final_report(job_id: str):
+    from backend.services import get_job_dir
+    report_file = get_job_dir(job_id) / "15_final_report" / "final_report.json"
+    if not report_file.exists():
+        raise HTTPException(status_code=404, detail="Final business compliance report not found.")
+    try:
+        with open(report_file, "r", encoding="utf-8") as f:
+            data = json.load(f)
+        meta = get_report_meta(job_id, Path("15_final_report/final_report.json"))
+        return {"metadata": meta, "data": data}
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+
+
 
 
 

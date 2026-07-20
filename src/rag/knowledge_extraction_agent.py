@@ -56,6 +56,7 @@ class KnowledgeExtractionAgent:
             "total_embedding_time": 0.0,
             "total_vlm_time": 0.0
         }
+        self.all_chunks = []
 
     def _parse_vlm_output(self, text: str) -> dict:
         """Parses VLM response sections using regex/line rules."""
@@ -624,112 +625,51 @@ class KnowledgeExtractionAgent:
                 created_time=created_time
             )
 
-    def _process_batch(
+    def _process_chunks_batch(
         self, 
-        batch: List[KnowledgeObject], 
+        chunks: List[DocumentChunk], 
         doc_id: str, 
         output_dir: Optional[Path] = None
     ) -> None:
         """
-        Embeds a batch of Knowledge Objects, indexes them in ChromaDB,
-        and saves them as JSONL. Checks self.existing_ids to skip redundant embeddings.
-        Immediately clears intermediate memory.
+        Processes a batch of semantic chunks: estimates embeddings, indexes in ChromaDB,
+        and saves them.
         """
-        if not batch:
+        if not chunks:
             return
             
-        logger.info(f"Processing batch of {len(batch)} Knowledge Object(s)...")
+        logger.info(f"Processing batch of {len(chunks)} semantic chunk(s)...")
         
-        # Check existing IDs to avoid duplicate work
+        # Accumulate in memory for serialization at finalization stage
+        self.all_chunks.extend(chunks)
+        
         existing_ids = getattr(self, "existing_ids", None)
         if existing_ids is None:
             existing_ids = self.vector_store.get_existing_chunk_ids(doc_id)
             self.existing_ids = existing_ids
             
-        filtered_batch = [obj for obj in batch if obj.knowledge_id not in existing_ids]
+        chunks_to_index = [c for c in chunks if c.metadata.chunk_id not in existing_ids]
         
-        if not filtered_batch:
-            logger.info("All elements in this batch are already indexed. Skipping embedding and vector DB updates.")
-            for obj in batch:
-                t = obj.chunk_type
+        if not chunks_to_index:
+            logger.info("All chunks in this batch are already indexed. Skipping embedding and vector DB updates.")
+            # Still update stats
+            for chunk in chunks:
+                t = chunk.metadata.chunk_type
                 self.stats["by_type"][t] = self.stats["by_type"].get(t, 0) + 1
-                self.stats["total_objects"] += 1
-            if output_dir:
-                jsonl_path = output_dir / "03_knowledge_objects" / "knowledge_objects.jsonl"
-                with open(jsonl_path, "a", encoding="utf-8") as f:
-                    for obj in batch:
-                        obj.embedding_status = "Embedded"
-                        obj_dict = obj.dict() if hasattr(obj, "dict") else obj.model_dump()
-                        f.write(json.dumps(obj_dict, ensure_ascii=False) + "\n")
             # Update backend status if running in services
             try:
                 from backend.services import JOBS, save_job_metadata
                 if doc_id in JOBS:
                     job = JOBS[doc_id]
-                    job["knowledge_objects_generated"] = self.stats["total_objects"]
+                    job["knowledge_objects_generated"] = len(self.all_chunks)
                     job["embeddings_completed"] = self.stats["embedding_count"]
-                    job["index_progress"] = int((self.stats["embedding_count"] / max(1, self.stats["total_objects"])) * 100)
+                    job["index_progress"] = int((self.stats["embedding_count"] / max(1, len(self.all_chunks))) * 100)
                     save_job_metadata(doc_id)
             except Exception:
                 pass
             return
 
-        # 1. Map to DocumentChunk objects for backward compatibility
-        chunks_to_index = []
-        for obj in filtered_batch:
-            # Map type to backward compatible category
-            compat_type = "text"
-            t = obj.chunk_type
-            if t == "Table":
-                compat_type = "table"
-            elif t in ("Image", "Image Description (VLM)", "OCR Block"):
-                compat_type = "image"
-            elif t in ("List", "Bullet List"):
-                compat_type = "list"
-            elif t == "Code Block":
-                compat_type = "code"
-            elif t == "Footnote":
-                compat_type = "footnote"
-            
-            # Build list-compatible metadata structure
-            from src.rag.chunk_builder import ChunkBuilder
-            temp_builder = ChunkBuilder()
-            enriched = temp_builder._enrich_chunk_metadata(obj.text, obj.page_number, obj.section_path)
-            
-            meta_dict = obj.metadata or {}
-            h_path = meta_dict.get("hierarchy_path", [])
-            s_el_ids = meta_dict.get("source_element_ids", [])
-            w_cnt = meta_dict.get("word_count", count_words(obj.text))
-            t_est = meta_dict.get("token_estimate", estimate_tokens(obj.text))
-            
-            # Bboxes conversion
-            bboxes_data = meta_dict.get("bounding_boxes", [])
-            bboxes = []
-            for b in bboxes_data:
-                if isinstance(b, dict):
-                    bboxes.append(BoundingBox(**b))
-                elif isinstance(b, BoundingBox):
-                    bboxes.append(b)
-            if not bboxes and obj.bounding_box:
-                bboxes.append(BoundingBox(**obj.bounding_box))
-                
-            meta = ChunkMetadata(
-                chunk_id=obj.knowledge_id,
-                document_id=obj.document_id,
-                page_number=obj.page_number,
-                chunk_type=compat_type,
-                heading=obj.heading,
-                section=obj.section_path,
-                hierarchy_path=h_path,
-                source_element_ids=s_el_ids,
-                word_count=w_cnt,
-                token_estimate=t_est,
-                bounding_boxes=bboxes,
-                **enriched
-            )
-            chunks_to_index.append(DocumentChunk(content=obj.text, metadata=meta))
-
-        # 2. Run Embedder
+        # Generate Embeddings
         emb_start = time.time()
         embeddings = self.embedder.generate_embeddings(
             chunks_to_index,
@@ -738,35 +678,36 @@ class KnowledgeExtractionAgent:
         self.stats["total_embedding_time"] += (time.time() - emb_start)
         self.stats["embedding_count"] += len(chunks_to_index)
 
-        # 3. Ingest in ChromaDB
+        # Index in ChromaDB
         self.vector_store.index_chunks(doc_id, chunks_to_index, embeddings)
         
-        # 4. Save to JSONL file
-        if output_dir:
-            jsonl_path = output_dir / "03_knowledge_objects" / "knowledge_objects.jsonl"
-            with open(jsonl_path, "a", encoding="utf-8") as f:
-                for obj in batch:
-                    obj.embedding_status = "Embedded"
-                    obj_dict = obj.dict() if hasattr(obj, "dict") else obj.model_dump()
-                    f.write(json.dumps(obj_dict, ensure_ascii=False) + "\n")
-                    
         # Update metrics
-        for obj in batch:
-            t = obj.chunk_type
+        for chunk in chunks:
+            t = chunk.metadata.chunk_type
             self.stats["by_type"][t] = self.stats["by_type"].get(t, 0) + 1
-            self.stats["total_objects"] += 1
 
         # Update backend status if running in services
         try:
             from backend.services import JOBS, save_job_metadata
             if doc_id in JOBS:
                 job = JOBS[doc_id]
-                job["knowledge_objects_generated"] = self.stats["total_objects"]
+                job["knowledge_objects_generated"] = len(self.all_chunks)
                 job["embeddings_completed"] = self.stats["embedding_count"]
-                job["index_progress"] = int((self.stats["embedding_count"] / max(1, self.stats["total_objects"])) * 100)
+                job["index_progress"] = int((self.stats["embedding_count"] / max(1, len(self.all_chunks))) * 100)
                 save_job_metadata(doc_id)
         except Exception:
             pass
+
+    def _process_batch(
+        self, 
+        batch: List[KnowledgeObject], 
+        doc_id: str, 
+        output_dir: Optional[Path] = None
+    ) -> None:
+        """
+        Deprecated. Converting KnowledgeObjects to DocumentChunks directly is bypassed.
+        """
+        logger.warning("_process_batch called with raw KnowledgeObjects. Use _process_chunks_batch instead.")
 
     def extract_and_index(
         self, 
@@ -776,8 +717,8 @@ class KnowledgeExtractionAgent:
         output_dir: Optional[Path] = None
     ) -> None:
         """
-        Orchestrates Knowledge Object extraction, smart image vision parsing,
-        memory-efficient batch indexing, and HTML dashboard report generation.
+        Orchestrates Knowledge Object extraction, VLM image vision parsing,
+        semantic chunking, and batch vector indexing.
         """
         # Ensure directories exist
         if output_dir:
@@ -797,15 +738,36 @@ class KnowledgeExtractionAgent:
             if jsonl_path.exists():
                 jsonl_path.unlink()
 
-        # Run generator and process in memory-optimized batches
-        batch = []
+        # 1. Generate and save raw KnowledgeObjects for structural tracking
+        batch_objects = []
         for obj in self._generate_objects(structured_doc, doc_id, output_dir):
-            batch.append(obj)
-            if len(batch) >= 16:
-                self._process_batch(batch, doc_id, output_dir)
-                batch = []
-        if batch:
-            self._process_batch(batch, doc_id, output_dir)
+            batch_objects.append(obj)
+            t = obj.chunk_type
+            self.stats["by_type"][t] = self.stats["by_type"].get(t, 0) + 1
+            self.stats["total_objects"] += 1
+            
+        if batch_objects and output_dir:
+            jsonl_path = output_dir / "03_knowledge_objects" / "knowledge_objects.jsonl"
+            with open(jsonl_path, "a", encoding="utf-8") as f:
+                for obj in batch_objects:
+                    obj.embedding_status = "Pending"
+                    obj_dict = obj.dict() if hasattr(obj, "dict") else obj.model_dump()
+                    f.write(json.dumps(obj_dict, ensure_ascii=False) + "\n")
+
+        # 2. Build semantic and context-aware chunks using ChunkBuilder (Task 1)
+        from src.rag.chunk_builder import ChunkBuilder
+        overlap_size = getattr(self.config, "chunk_overlap_tokens", 50)
+        chunk_builder = ChunkBuilder(
+            target_tokens_min=250, 
+            target_tokens_max=500, 
+            overlap_tokens=overlap_size
+        )
+        
+        chunks = chunk_builder.build_chunks(structured_doc, doc_id)
+        
+        # 3. Index these semantic chunks (Task 1)
+        if chunks:
+            self._process_chunks_batch(chunks, doc_id, output_dir)
 
         # Post-processing: Convert JSONL to final JSON list, HTML and Markdown
         if output_dir:
@@ -832,38 +794,55 @@ class KnowledgeExtractionAgent:
         with open(json_path, "w", encoding="utf-8") as f:
             json.dump(objects_list, f, indent=2, ensure_ascii=False)
             
-        # Recreate compat document_chunks.json for unit tests and stats
+        # Recreate compat document_chunks.json from self.all_chunks (Task 1)
         compat_chunks = []
-        for obj in objects_list:
-            compat_type = "text"
-            t = obj.get("chunk_type")
-            if t == "Table":
-                compat_type = "table"
-            elif t in ("Image", "Image Description (VLM)", "OCR Block"):
-                compat_type = "image"
-            elif t in ("List", "Bullet List"):
-                compat_type = "list"
-            elif t == "Code Block":
-                compat_type = "code"
-            elif t == "Footnote":
-                compat_type = "footnote"
+        for chunk in self.all_chunks:
+            meta = chunk.metadata
+            bboxes = []
+            for b in meta.bounding_boxes:
+                # BoundingBox can be Pydantic BaseModel or dict
+                if hasattr(b, "l"):
+                    bboxes.append({
+                        "l": b.l,
+                        "t": b.t,
+                        "r": b.r,
+                        "b": b.b,
+                        "coord_origin": getattr(b, "coord_origin", "BOTTOMLEFT")
+                    })
+                elif isinstance(b, dict):
+                    bboxes.append(b)
             
+            meta_dict = {
+                "chunk_id": meta.chunk_id,
+                "document_id": meta.document_id,
+                "page_number": meta.page_number,
+                "chunk_type": meta.chunk_type,
+                "heading": meta.heading,
+                "section": meta.section,
+                "hierarchy_path": meta.hierarchy_path,
+                "source_element_ids": meta.source_element_ids,
+                "word_count": meta.word_count,
+                "token_estimate": meta.token_estimate,
+                "bounding_boxes": bboxes,
+                "element_types": getattr(meta, "element_types", []),
+                "relationships": getattr(meta, "relationships", {})
+            }
+            if meta.image_id:
+                meta_dict["image_id"] = meta.image_id
+            if meta.table_id:
+                meta_dict["table_id"] = meta.table_id
+                
+            # Enriched metadata (NER etc.) (Task 8)
+            for extra in ["report_number", "state", "region", "district", "people", "organizations", "groups", "dates", "weapons", "locations", "keywords"]:
+                val = getattr(meta, extra, None)
+                if val is not None:
+                    meta_dict[extra] = val
+                    
             compat_chunks.append({
-                "content": obj.get("text"),
-                "metadata": {
-                    "chunk_id": obj.get("knowledge_id"),
-                    "document_id": doc_id,
-                    "page_number": obj.get("page_number"),
-                    "chunk_type": compat_type,
-                    "heading": obj.get("heading"),
-                    "section": obj.get("section_path"),
-                    "hierarchy_path": obj.get("metadata", {}).get("hierarchy_path", []),
-                    "source_element_ids": obj.get("metadata", {}).get("source_element_ids", []),
-                    "word_count": obj.get("metadata", {}).get("word_count", 0),
-                    "token_estimate": obj.get("metadata", {}).get("token_estimate", 0),
-                    "bounding_boxes": obj.get("metadata", {}).get("bounding_boxes", [])
-                }
+                "content": chunk.content,
+                "metadata": meta_dict
             })
+            
         with open(compat_chunks_path, "w", encoding="utf-8") as f:
             json.dump({
                 "document_id": doc_id, 
@@ -925,9 +904,9 @@ class KnowledgeExtractionAgent:
             json.dump(vdb_meta, f, indent=2)
 
         # Generate HTML inspect report (inspection_report.html)
-        self._generate_html_inspector(output_dir, doc_id, objects_list, structured_doc)
+        self._generate_html_inspector(output_dir, doc_id, objects_list, structured_doc, self.all_chunks)
 
-    def _generate_html_inspector(self, output_dir: Path, doc_id: str, objects_list: List[dict], structured_doc: StructuredDocument) -> None:
+    def _generate_html_inspector(self, output_dir: Path, doc_id: str, objects_list: List[dict], structured_doc: StructuredDocument, chunks_list: List[DocumentChunk]) -> None:
         """Upgraded inspect report supporting filtering by type, displaying metadata, VLM details, and relationships."""
         cards_html = []
         for obj in objects_list:
@@ -978,7 +957,7 @@ class KnowledgeExtractionAgent:
                 extra_content = f"<br/><img src='./05_images/{seq_name}.png' style='max-width:280px; border:1px solid #ddd; border-radius:6px; background:#fff; display:block; margin:8px 0;' onerror='this.style.display=\"none\"'/>"
 
             cards_html.append(
-                f"<div class='card chunk-item filter-{filter_cls}' style='margin-bottom:12px; padding:15px; border:1px solid #e2e8f0; text-align:left; background:#fff;'>"
+                f"<div class='card raw-item filter-{filter_cls}' style='margin-bottom:12px; padding:15px; border:1px solid #e2e8f0; text-align:left; background:#fff;'>"
                 f"  <div style='display:flex; justify-content:space-between; font-size:11.5px; color:#64748b; margin-bottom:8px;'>"
                 f"    <span><strong>Knowledge ID</strong>: {c_id} | <span class='badge {badge_cls}'>{c_type}</span></span>"
                 f"    <span>Page {page} | {section}</span>"
@@ -988,6 +967,60 @@ class KnowledgeExtractionAgent:
                 f"  <div style='font-size:11px; color:#64748b; margin-top:8px; border-top:1px dotted #e2e8f0; padding-top:6px;'>"
                 f"    <strong>Relationships</strong>: {rels_str} <br/>"
                 f"    <strong>Metadata</strong>: {meta_str} | <strong>Status</strong>: {status}"
+                f"  </div>"
+                f"</div>"
+            )
+
+        chunks_html = []
+        for chunk in chunks_list:
+            meta = chunk.metadata
+            c_id = meta.chunk_id
+            c_type = meta.chunk_type
+            page = meta.page_number
+            section = meta.section or "Root"
+            text = chunk.content
+            tokens = meta.token_estimate
+            source_ids = meta.source_element_ids or []
+            
+            # Extract metadata dict safely
+            meta_dict = meta.dict() if hasattr(meta, "dict") else meta.model_dump()
+            
+            flat_meta = {
+                k: v for k, v in meta_dict.items() 
+                if k not in (
+                    "chunk_id", "document_id", "page_number", "chunk_type", "heading", "section", 
+                    "hierarchy_path", "source_element_ids", "word_count", "token_estimate", 
+                    "bounding_boxes", "element_types", "relationships", "image_id", "table_id"
+                ) and v
+            }
+            meta_str = ", ".join(f"<strong>{k}</strong>: {v}" for k, v in flat_meta.items()) if flat_meta else "None"
+            
+            hierarchy_str = " -> ".join(meta.hierarchy_path) if meta.hierarchy_path else "None"
+            source_ids_str = ", ".join(source_ids)
+            
+            # Image visual injection
+            extra_content = ""
+            if c_type == "image" and meta.image_id:
+                img_idx = idx_img(meta.image_id, structured_doc.images)
+                seq_name = f"image_{img_idx:03d}"
+                extra_content = f"<br/><img src='./05_images/{seq_name}.png' style='max-width:280px; border:1px solid #ddd; border-radius:6px; background:#fff; display:block; margin:8px 0;' onerror='this.style.display=\"none\"'/>"
+
+            sem_filter_cls = "text"
+            if c_type in ("text", "heading", "table", "image", "list", "code", "footnote"):
+                sem_filter_cls = c_type
+                
+            chunks_html.append(
+                f"<div class='card semantic-item filter-{sem_filter_cls}' style='margin-bottom:12px; padding:15px; border:1px solid #c7d2fe; border-left: 5px solid #4f46e5; text-align:left; background:#fff;'>"
+                f"  <div style='display:flex; justify-content:space-between; font-size:11.5px; color:#64748b; margin-bottom:8px;'>"
+                f"    <span><strong>Chunk ID</strong>: {c_id} | <span class='badge' style='background:#4f46e5;'>{c_type.upper()}</span></span>"
+                f"    <span>Page {page} | {section}</span>"
+                f"  </div>"
+                f"  <pre style='background:#f8fafc; padding:10px; border-radius:6px; font-size:12.5px; overflow-x:auto; white-space:pre-wrap; font-family:monospace; margin:0; border: 1px solid #e2e8f0;'>{text}</pre>"
+                f"  {extra_content}"
+                f"  <div style='font-size:11px; color:#475569; margin-top:8px; border-top:1px dotted #cbd5e1; padding-top:6px; line-height: 1.5;'>"
+                f"    <strong>Heading Path</strong>: {hierarchy_str} <br/>"
+                f"    <strong>Source Element IDs</strong>: {source_ids_str} | <strong>Tokens</strong>: {tokens} <br/>"
+                f"    <strong>Enriched Metadata</strong>: {meta_str}"
                 f"  </div>"
                 f"</div>"
             )
@@ -1027,7 +1060,6 @@ class KnowledgeExtractionAgent:
     .filter-btn.active {{ background: #4f46e5; color: #fff; border-color: #4f46e5; }}
   </style>
   <script>
-    var currentFilter = "all";
     function openTab(evt, tabName) {{
       var i, tabcontent, tablinks;
       tabcontent = document.getElementsByClassName("tab-content");
@@ -1041,21 +1073,49 @@ class KnowledgeExtractionAgent:
       document.getElementById(tabName).style.display = "block";
       evt.currentTarget.className += " active";
     }}
-    function filterType(type) {{
-      currentFilter = type;
-      var buttons = document.getElementsByClassName("filter-btn");
+    
+    var currentRawFilter = "all";
+    function filterTypeRaw(type) {{
+      currentRawFilter = type;
+      var buttons = document.getElementsByClassName("filter-raw-btn");
       for (var i=0; i < buttons.length; i++) {{
         buttons[i].classList.remove("active");
       }}
-      document.getElementById("btn-" + type).classList.add("active");
-      runFilter();
+      document.getElementById("btn-raw-" + type).classList.add("active");
+      runFilterRaw();
     }}
-    function runFilter() {{
-      var items = document.getElementsByClassName("chunk-item");
-      var searchVal = document.getElementById("search").value.toLowerCase();
+    
+    function runFilterRaw() {{
+      var items = document.getElementsByClassName("raw-item");
+      var searchVal = document.getElementById("search-raw").value.toLowerCase();
       for (var i=0; i < items.length; i++) {{
         var matchesSearch = items[i].innerText.toLowerCase().indexOf(searchVal) > -1;
-        var matchesType = currentFilter === "all" || items[i].classList.contains("filter-" + currentFilter);
+        var matchesType = currentRawFilter === "all" || items[i].classList.contains("filter-" + currentRawFilter);
+        if (matchesSearch && matchesType) {{
+          items[i].style.display = "block";
+        }} else {{
+          items[i].style.display = "none";
+        }}
+      }}
+    }}
+    
+    var currentSemanticFilter = "all";
+    function filterTypeSemantic(type) {{
+      currentSemanticFilter = type;
+      var buttons = document.getElementsByClassName("filter-semantic-btn");
+      for (var i=0; i < buttons.length; i++) {{
+        buttons[i].classList.remove("active");
+      }}
+      document.getElementById("btn-sem-" + type).classList.add("active");
+      runFilterSemantic();
+    }}
+    
+    function runFilterSemantic() {{
+      var items = document.getElementsByClassName("semantic-item");
+      var searchVal = document.getElementById("search-semantic").value.toLowerCase();
+      for (var i=0; i < items.length; i++) {{
+        var matchesSearch = items[i].innerText.toLowerCase().indexOf(searchVal) > -1;
+        var matchesType = currentSemanticFilter === "all" || items[i].classList.contains("filter-" + currentSemanticFilter);
         if (matchesSearch && matchesType) {{
           items[i].style.display = "block";
         }} else {{
@@ -1072,36 +1132,54 @@ class KnowledgeExtractionAgent:
     
     <div class="stat-row">
       <div class="stat-card"><div class="stat-num">{structured_doc.page_count}</div><div class="stat-lbl">Pages</div></div>
-      <div class="stat-card"><div class="stat-num">{self.stats["total_objects"]}</div><div class="stat-lbl">Knowledge Objects</div></div>
+      <div class="stat-card"><div class="stat-num">{self.stats["total_objects"]}</div><div class="stat-lbl">Raw Objects</div></div>
+      <div class="stat-card"><div class="stat-num">{len(chunks_list)}</div><div class="stat-lbl">Semantic Chunks</div></div>
       <div class="stat-card"><div class="stat-num">{self.stats["table_count"]}</div><div class="stat-lbl">Tables</div></div>
       <div class="stat-card"><div class="stat-num">{len(structured_doc.images)}</div><div class="stat-lbl">Images</div></div>
-      <div class="stat-card"><div class="stat-num">{self.stats["vision_processed_images"]}</div><div class="stat-lbl">VLM Processed</div></div>
       <div class="stat-card"><div class="stat-num">{(self.stats["total_embedding_time"]):.1f}s</div><div class="stat-lbl">Emb Time</div></div>
     </div>
     
     <div class="tabs">
       <button class="tab-btn active" onclick="openTab(event, 'Structure')">Document Tree</button>
-      <button class="tab-btn" onclick="openTab(event, 'Chunks')">Knowledge Objects</button>
+      <button class="tab-btn" onclick="openTab(event, 'SemanticChunks')">Semantic Chunks (ChromaDB)</button>
+      <button class="tab-btn" onclick="openTab(event, 'RawObjects')">Raw Knowledge Objects</button>
     </div>
     
     <div id="Structure" class="tab-content active">
       <div class="card" style="padding:0; overflow:hidden; border:1px solid #e2e8f0;">
-        <iframe src="./03_text/extracted_text.html" style="width:100%; height:550px; border:none; margin:0;" onerror="this.style.display='none'"></iframe>
+        <iframe src="./10_final/annotated_original.html" style="width:100%; height:550px; border:none; margin:0;" onerror="this.style.display='none'"></iframe>
       </div>
     </div>
     
-    <div id="Chunks" class="tab-content" style="display:none;">
-      <input type="text" id="search" class="search-box" placeholder="Search knowledge objects..." oninput="runFilter()"/>
+    <div id="SemanticChunks" class="tab-content" style="display:none;">
+      <input type="text" id="search-semantic" class="search-box" placeholder="Search final semantic chunks..." oninput="runFilterSemantic()"/>
       <div class="filters-bar">
-        <button id="btn-all" class="filter-btn active" onclick="filterType('all')">All</button>
-        <button id="btn-text" class="filter-btn" onclick="filterType('text')">Text (Paragraphs/Headings)</button>
-        <button id="btn-table" class="filter-btn" onclick="filterType('table')">Tables & Cells</button>
-        <button id="btn-image" class="filter-btn" onclick="filterType('image')">Images & Descriptions</button>
-        <button id="btn-ocr" class="filter-btn" onclick="filterType('ocr')">OCR Blocks</button>
-        <button id="btn-caption" class="filter-btn" onclick="filterType('caption')">Captions</button>
-        <button id="btn-list" class="filter-btn" onclick="filterType('list')">Lists & Codes</button>
+        <button id="btn-sem-all" class="filter-btn filter-semantic-btn active" onclick="filterTypeSemantic('all')">All</button>
+        <button id="btn-sem-text" class="filter-btn filter-semantic-btn" onclick="filterTypeSemantic('text')">Text (Paragraphs)</button>
+        <button id="btn-sem-heading" class="filter-btn filter-semantic-btn" onclick="filterTypeSemantic('heading')">Headings</button>
+        <button id="btn-sem-table" class="filter-btn filter-semantic-btn" onclick="filterTypeSemantic('table')">Tables</button>
+        <button id="btn-sem-image" class="filter-btn filter-semantic-btn" onclick="filterTypeSemantic('image')">Images</button>
+        <button id="btn-sem-list" class="filter-btn filter-semantic-btn" onclick="filterTypeSemantic('list')">Lists</button>
+        <button id="btn-sem-code" class="filter-btn filter-semantic-btn" onclick="filterTypeSemantic('code')">Codes</button>
+        <button id="btn-sem-footnote" class="filter-btn filter-semantic-btn" onclick="filterTypeSemantic('footnote')">Footnotes</button>
       </div>
-      <div style="max-height:500px; overflow-y:auto;">
+      <div style="max-height:550px; overflow-y:auto; border: 1px solid #cbd5e1; border-radius: 8px; padding: 10px; background: #f8fafc;">
+        {"".join(chunks_html)}
+      </div>
+    </div>
+    
+    <div id="RawObjects" class="tab-content" style="display:none;">
+      <input type="text" id="search-raw" class="search-box" placeholder="Search raw knowledge objects..." oninput="runFilterRaw()"/>
+      <div class="filters-bar">
+        <button id="btn-raw-all" class="filter-btn filter-raw-btn active" onclick="filterTypeRaw('all')">All</button>
+        <button id="btn-raw-text" class="filter-btn filter-raw-btn" onclick="filterTypeRaw('text')">Text</button>
+        <button id="btn-raw-table" class="filter-btn filter-raw-btn" onclick="filterTypeRaw('table')">Tables & Cells</button>
+        <button id="btn-raw-image" class="filter-btn filter-raw-btn" onclick="filterTypeRaw('image')">Images</button>
+        <button id="btn-raw-ocr" class="filter-btn filter-raw-btn" onclick="filterTypeRaw('ocr')">OCR Blocks</button>
+        <button id="btn-raw-caption" class="filter-btn filter-raw-btn" onclick="filterTypeRaw('caption')">Captions</button>
+        <button id="btn-raw-list" class="filter-btn filter-raw-btn" onclick="filterTypeRaw('list')">Lists & Codes</button>
+      </div>
+      <div style="max-height:550px; overflow-y:auto; border: 1px solid #e2e8f0; border-radius: 8px; padding: 10px; background: #f8fafc;">
         {"".join(cards_html)}
       </div>
     </div>

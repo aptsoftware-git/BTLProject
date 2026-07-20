@@ -89,19 +89,24 @@ def test_chunk_builder_on_txt():
     
     assert len(chunks) > 0
     
-    # Verify Heading + Paragraph is attached
-    # Heading "1. Introduction" and "This is paragraph one..." should be grouped
+    # Verify Headings are separate chunks
+    heading_chunks = [c for c in chunks if c.metadata.chunk_type == "heading"]
+    assert len(heading_chunks) == 2
+    assert "1. Introduction" in heading_chunks[0].content
+    assert "2. Details" in heading_chunks[1].content
+    
+    # Verify Paragraphs are correct text chunks
     text_chunks = [c for c in chunks if c.metadata.chunk_type == "text"]
     assert len(text_chunks) >= 2
     
     chunk_1 = text_chunks[0]
-    assert "1. Introduction" in chunk_1.content
+    assert "Document Section: 1. Introduction" in chunk_1.content
     assert "This is paragraph one" in chunk_1.content
     assert chunk_1.metadata.heading == "1. Introduction"
     assert chunk_1.metadata.section == "1. Introduction"
     
     chunk_2 = text_chunks[1]
-    assert "2. Details" in chunk_2.content
+    assert "Document Section: 2. Details" in chunk_2.content
     assert "This is paragraph two" in chunk_2.content
     assert chunk_2.metadata.heading == "2. Details"
     
@@ -130,7 +135,7 @@ def test_chunk_builder_on_txt():
         assert meta.chunk_id is not None
         assert meta.document_id == "test_doc_id"
         assert meta.page_number == 1
-        assert meta.chunk_type in ("text", "list", "table", "image")
+        assert meta.chunk_type in ("text", "list", "table", "image", "heading")
         assert meta.word_count > 0
         assert meta.token_estimate > 0
         assert isinstance(meta.source_element_ids, list)
