@@ -1,0 +1,23 @@
+{
+  "collection_name": "doc_bdfaa68d8984f0dc",
+  "embedding_model": "BAAI/bge-small-en-v1.5",
+  "total_embeddings": 75,
+  "embedding_count_by_type": {
+    "Paragraph": 68,
+    "Heading": 27,
+    "Footnote": 5,
+    "Image": 6,
+    "Caption": 9,
+    "Formula": 5,
+    "Bullet List": 22,
+    "Table": 4,
+    "List": 21,
+    "text": 35,
+    "heading": 27,
+    "footnote": 3,
+    "list": 6,
+    "table": 4
+  },
+  "average_embedding_time_seconds": 0.19749226252237956,
+  "timestamp": "2026-07-23T06:40:55Z"
+}

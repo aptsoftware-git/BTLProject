@@ -75,7 +75,15 @@ async def upload_document(file: UploadFile = File(...)) -> UploadResponse:
 
         # Generate unique ID and save file to data/input
         import uuid
-        job_id = str(uuid.uuid4().hex)
+        from backend.services import get_all_jobs
+        
+        existing_job_id = None
+        for j in get_all_jobs():
+            if j.get("filename") == file.filename:
+                existing_job_id = j.get("job_id")
+                break
+                
+        job_id = existing_job_id or str(uuid.uuid4().hex)
         safe_filename = f"{job_id}_{file.filename}"
         dest_path = input_dir / safe_filename
 
@@ -85,7 +93,7 @@ async def upload_document(file: UploadFile = File(...)) -> UploadResponse:
                 buffer.write(chunk)
 
         # Create job entry
-        job = create_job(file.filename, dest_path)
+        job = create_job(file.filename, dest_path, job_id=job_id)
         backend_logger.info("Uploaded file %s successfully. Job ID: %s", file.filename, job["job_id"])
         
         return UploadResponse(job_id=job["job_id"], filename=file.filename)
@@ -412,7 +420,15 @@ async def upload_and_start_document(file: UploadFile = File(...)):
         input_dir.mkdir(parents=True, exist_ok=True)
 
         import uuid
-        job_id = str(uuid.uuid4().hex)
+        from backend.services import get_all_jobs
+
+        existing_job_id = None
+        for j in get_all_jobs():
+            if j.get("filename") == file.filename:
+                existing_job_id = j.get("job_id")
+                break
+
+        job_id = existing_job_id or str(uuid.uuid4().hex)
         safe_filename = f"{job_id}_{file.filename}"
         dest_path = input_dir / safe_filename
 
@@ -421,7 +437,7 @@ async def upload_and_start_document(file: UploadFile = File(...)):
                 buffer.write(chunk)
 
         # Create job
-        job = create_job(file.filename, dest_path)
+        job = create_job(file.filename, dest_path, job_id=job_id)
         # Queue job
         queue_job(job["job_id"])
         
@@ -965,12 +981,20 @@ def get_report_meta(job_id: str, relative_file_path: Path):
     from backend.services import get_job_dir, get_job
     job_dir = get_job_dir(job_id)
     full_path = job_dir / relative_file_path
+    job = get_job(job_id)
     
     if not full_path.exists():
+        if job and (job.get("status") in ("processing", "pending", "running") or job.get("context_analysis_status") in ("running", "pending")):
+            return {
+                "job_id": job_id,
+                "status": "generating",
+                "current_stage": job.get("current_stage", "Generating Executive Report..."),
+                "message": "Generating Executive Report..."
+            }
         return {
             "job_id": job_id,
             "status": "not_found",
-            "message": "Report file does not exist yet. Please run contextual analysis first."
+            "message": "Report file does not exist yet."
         }
         
     import os
@@ -1013,95 +1037,278 @@ def get_report_meta(job_id: str, relative_file_path: Path):
     }
 
 
-@router.get("/reports/{job_id}/semantic-clusters", summary="Get Semantic Clusters Report")
-async def get_report_semantic_clusters(job_id: str):
-    from backend.services import get_job_dir
+def _handle_report_response(job_id: str, relative_path: Path):
+    from backend.services import get_job_dir, get_job
+    job = get_job(job_id)
+    if not job:
+        raise HTTPException(status_code=404, detail=f"Job '{job_id}' not found.")
+
     job_dir = get_job_dir(job_id)
-    report_file = job_dir / "09_semantic_clusters" / "semantic_clusters.json"
+    report_file = job_dir / relative_path
     if not report_file.exists():
-        raise HTTPException(status_code=404, detail="Semantic clusters report not found.")
+        if job.get("status") in ("processing", "pending", "running") or job.get("context_analysis_status") in ("running", "pending"):
+            meta = get_report_meta(job_id, relative_path)
+            return {"metadata": meta, "data": None}
+        raise HTTPException(status_code=404, detail=f"Report file '{relative_path.name}' not found.")
+
     try:
         with open(report_file, "r", encoding="utf-8") as f:
             data = json.load(f)
-        meta = get_report_meta(job_id, Path("09_semantic_clusters/semantic_clusters.json"))
+        meta = get_report_meta(job_id, relative_path)
         return {"metadata": meta, "data": data}
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
+
+
+REPORT_PATH_MAP = {
+    "semantic-clusters": Path("09_semantic_clusters/semantic_clusters.json"),
+    "semantic_clusters": Path("09_semantic_clusters/semantic_clusters.json"),
+    "claim-extraction": Path("10_claim_extraction/chunk_claims.json"),
+    "claim_extraction": Path("10_claim_extraction/chunk_claims.json"),
+    "chunk_claims": Path("10_claim_extraction/chunk_claims.json"),
+    "chunk-reasoning": Path("11_chunk_reasoning/chunk_reasoning.json"),
+    "chunk_reasoning": Path("11_chunk_reasoning/chunk_reasoning.json"),
+    "cluster-reasoning": Path("12_cluster_reasoning/cluster_reasoning.json"),
+    "cluster_reasoning": Path("12_cluster_reasoning/cluster_reasoning.json"),
+    "claude-verification": Path("14_claude_verification/claude_response.json"),
+    "claude_verification": Path("14_claude_verification/claude_response.json"),
+    "verification": Path("14_claude_verification/claude_response.json"),
+    "final-report": Path("15_final_report/final_report.json"),
+    "final_report": Path("15_final_report/final_report.json"),
+    "executive": Path("15_final_report/final_report.json"),
+    "consistency": Path("report.json"),
+}
+
+
+@router.get("/reports/{job_id}/semantic-clusters", summary="Get Semantic Clusters Report")
+async def get_report_semantic_clusters(job_id: str):
+    return _handle_report_response(job_id, Path("09_semantic_clusters/semantic_clusters.json"))
+
+
+@router.get("/reports/{job_id}/semantic_clusters", summary="Get Semantic Clusters Report (Alias)")
+async def get_report_semantic_clusters_alias(job_id: str):
+    return _handle_report_response(job_id, Path("09_semantic_clusters/semantic_clusters.json"))
 
 
 @router.get("/reports/{job_id}/claim-extraction", summary="Get Claim Extraction Report")
 async def get_report_claim_extraction(job_id: str):
-    from backend.services import get_job_dir
-    report_file = get_job_dir(job_id) / "10_claim_extraction" / "chunk_claims.json"
-    if not report_file.exists():
-        raise HTTPException(status_code=404, detail="Claim extraction report not found.")
-    try:
-        with open(report_file, "r", encoding="utf-8") as f:
-            data = json.load(f)
-        meta = get_report_meta(job_id, Path("10_claim_extraction/chunk_claims.json"))
-        return {"metadata": meta, "data": data}
-    except Exception as e:
-        raise HTTPException(status_code=500, detail=str(e))
+    return _handle_report_response(job_id, Path("10_claim_extraction/chunk_claims.json"))
+
+
+@router.get("/reports/{job_id}/claim_extraction", summary="Get Claim Extraction Report (Alias)")
+async def get_report_claim_extraction_alias(job_id: str):
+    return _handle_report_response(job_id, Path("10_claim_extraction/chunk_claims.json"))
 
 
 @router.get("/reports/{job_id}/chunk-reasoning", summary="Get Chunk-Level Reasoning Report")
 async def get_report_chunk_reasoning(job_id: str):
-    from backend.services import get_job_dir
-    report_file = get_job_dir(job_id) / "11_chunk_reasoning" / "chunk_reasoning.json"
-    if not report_file.exists():
-        raise HTTPException(status_code=404, detail="Chunk-level reasoning report not found.")
-    try:
-        with open(report_file, "r", encoding="utf-8") as f:
-            data = json.load(f)
-        meta = get_report_meta(job_id, Path("11_chunk_reasoning/chunk_reasoning.json"))
-        return {"metadata": meta, "data": data}
-    except Exception as e:
-        raise HTTPException(status_code=500, detail=str(e))
+    return _handle_report_response(job_id, Path("11_chunk_reasoning/chunk_reasoning.json"))
+
+
+@router.get("/reports/{job_id}/chunk_reasoning", summary="Get Chunk-Level Reasoning Report (Alias)")
+async def get_report_chunk_reasoning_alias(job_id: str):
+    return _handle_report_response(job_id, Path("11_chunk_reasoning/chunk_reasoning.json"))
 
 
 @router.get("/reports/{job_id}/cluster-reasoning", summary="Get Cluster-Level Reasoning Report")
 async def get_report_cluster_reasoning(job_id: str):
-    from backend.services import get_job_dir
-    report_file = get_job_dir(job_id) / "12_cluster_reasoning" / "cluster_reasoning.json"
-    if not report_file.exists():
-        raise HTTPException(status_code=404, detail="Cluster-level reasoning report not found.")
-    try:
-        with open(report_file, "r", encoding="utf-8") as f:
-            data = json.load(f)
-        meta = get_report_meta(job_id, Path("12_cluster_reasoning/cluster_reasoning.json"))
-        return {"metadata": meta, "data": data}
-    except Exception as e:
-        raise HTTPException(status_code=500, detail=str(e))
+    return _handle_report_response(job_id, Path("12_cluster_reasoning/cluster_reasoning.json"))
+
+
+@router.get("/reports/{job_id}/cluster_reasoning", summary="Get Cluster-Level Reasoning Report (Alias)")
+async def get_report_cluster_reasoning_alias(job_id: str):
+    return _handle_report_response(job_id, Path("12_cluster_reasoning/cluster_reasoning.json"))
 
 
 @router.get("/reports/{job_id}/claude-verification", summary="Get Claude Verification Report")
 async def get_report_claude_verification(job_id: str):
-    from backend.services import get_job_dir
-    report_file = get_job_dir(job_id) / "14_claude_verification" / "claude_response.json"
-    if not report_file.exists():
-        raise HTTPException(status_code=404, detail="Claude verification report not found.")
-    try:
-        with open(report_file, "r", encoding="utf-8") as f:
-            data = json.load(f)
-        meta = get_report_meta(job_id, Path("14_claude_verification/claude_response.json"))
-        return {"metadata": meta, "data": data}
-    except Exception as e:
-        raise HTTPException(status_code=500, detail=str(e))
+    return _handle_report_response(job_id, Path("14_claude_verification/claude_response.json"))
+
+
+@router.get("/reports/{job_id}/claude_verification", summary="Get Claude Verification Report (Alias)")
+async def get_report_claude_verification_alias(job_id: str):
+    return _handle_report_response(job_id, Path("14_claude_verification/claude_response.json"))
 
 
 @router.get("/reports/{job_id}/final-report", summary="Get Final Business Compliance Report")
 async def get_report_final_report(job_id: str):
-    from backend.services import get_job_dir
-    report_file = get_job_dir(job_id) / "15_final_report" / "final_report.json"
-    if not report_file.exists():
-        raise HTTPException(status_code=404, detail="Final business compliance report not found.")
-    try:
-        with open(report_file, "r", encoding="utf-8") as f:
-            data = json.load(f)
-        meta = get_report_meta(job_id, Path("15_final_report/final_report.json"))
-        return {"metadata": meta, "data": data}
-    except Exception as e:
-        raise HTTPException(status_code=500, detail=str(e))
+    return _handle_report_response(job_id, Path("15_final_report/final_report.json"))
+
+
+@router.get("/reports/{job_id}/final_report", summary="Get Final Business Compliance Report (Alias)")
+async def get_report_final_report_alias(job_id: str):
+    return _handle_report_response(job_id, Path("15_final_report/final_report.json"))
+
+
+@router.get("/reports/{job_id}/{report_type}", summary="Get dynamic report by type")
+async def get_report_by_type(job_id: str, report_type: str):
+    if report_type.lower() in REPORT_PATH_MAP:
+        return _handle_report_response(job_id, REPORT_PATH_MAP[report_type.lower()])
+
+    from backend.services import get_job_dir, get_job
+    job = get_job(job_id)
+    if not job:
+        raise HTTPException(status_code=404, detail=f"Job '{job_id}' not found.")
+
+    job_dir = get_job_dir(job_id)
+    possible_files = list(job_dir.glob(f"**/{report_type}.json")) + list(job_dir.glob(f"**/{report_type}"))
+    if possible_files:
+        rel_path = possible_files[0].relative_to(job_dir)
+        return _handle_report_response(job_id, rel_path)
+
+    if job.get("status") in ("processing", "pending", "running") or job.get("context_analysis_status") in ("running", "pending"):
+        return {"metadata": {"job_id": job_id, "status": "generating", "message": "Generating Executive Report..."}, "data": None}
+
+    raise HTTPException(status_code=404, detail=f"Report '{report_type}' not found for job '{job_id}'.")
+
+
+@router.get("/reports/{job_id}/{report_type}/pdf", summary="Download report in PDF format")
+async def download_report_pdf(job_id: str, report_type: str):
+    from backend.services import get_job_dir, get_job
+    job = get_job(job_id)
+    if not job:
+        raise HTTPException(status_code=404, detail=f"Job '{job_id}' not found.")
+
+    job_dir = get_job_dir(job_id)
+
+    report_html_map = {
+        "final-report": job_dir / "15_final_report" / "final_report.html",
+        "final_report": job_dir / "15_final_report" / "final_report.html",
+        "executive": job_dir / "15_final_report" / "final_report.html",
+        "claude-verification": job_dir / "14_claude_verification" / "verification_inspector.html",
+        "verification": job_dir / "14_claude_verification" / "verification_inspector.html",
+        "cluster-reasoning": job_dir / "12_cluster_reasoning" / "cluster_reasoning_inspector.html",
+        "chunk-reasoning": job_dir / "11_chunk_reasoning" / "chunk_reasoning_inspector.html",
+        "claim-extraction": job_dir / "10_claim_extraction" / "claim_inspector.html",
+        "semantic-clusters": job_dir / "09_semantic_clusters" / "cluster_inspector.html",
+        "annotated-original": job_dir / "10_final" / "annotated_original.html",
+        "corrected-document": job_dir / "10_final" / "corrected_document.html",
+    }
+
+    html_file = report_html_map.get(report_type.lower())
+    if not html_file or not html_file.exists():
+        alt_html = job_dir / "15_final_report" / "final_report.html"
+        if alt_html.exists():
+            html_file = alt_html
+        else:
+            raise HTTPException(status_code=404, detail=f"HTML source for report '{report_type}' not found.")
+
+    pdf_output_path = job_dir / f"{report_type}_report.pdf"
+
+    # Always compile or update PDF if HTML is newer or PDF is missing
+    if not pdf_output_path.exists() or pdf_output_path.stat().st_size == 0 or (html_file.stat().st_mtime > pdf_output_path.stat().st_mtime):
+        try:
+            import fitz
+            html_text = html_file.read_text(encoding="utf-8")
+            story = fitz.Story(html=html_text)
+            writer = fitz.DocumentWriter(str(pdf_output_path))
+            more = True
+            while more:
+                page = writer.begin_page(fitz.PaperSize("A4"))
+                more, _ = story.place(fitz.Rect(36, 36, page.rect.width - 36, page.rect.height - 36))
+                story.draw(page)
+                writer.end_page()
+            writer.close()
+        except Exception as e:
+            backend_logger.error(f"Failed to compile PDF via PyMuPDF: {e}")
+            return FileResponse(
+                path=html_file,
+                media_type="text/html",
+                filename=f"{report_type}_{job_id}.html"
+            )
+
+    return FileResponse(
+        path=pdf_output_path,
+        media_type="application/pdf",
+        filename=f"{report_type}_{job_id}.pdf"
+    )
+
+
+@router.get("/jobs/{job_id}/progress/stream", summary="Stream live pipeline progress via Server-Sent Events (SSE)")
+async def stream_job_progress(job_id: str):
+    import asyncio
+    from fastapi.responses import StreamingResponse
+
+    async def event_generator():
+        last_stage = None
+        last_pct = -1.0
+        while True:
+            job = get_job(job_id)
+            if not job:
+                yield f"data: {json.dumps({'error': 'Job not found'})}\n\n"
+                break
+            
+            stage = job.get("current_stage")
+            pct = job.get("progress_percentage", 0.0)
+            status_val = job.get("status")
+            ca_status = job.get("context_analysis_status")
+            ca_stage = job.get("context_analysis_stage")
+            ca_pct = job.get("context_analysis_progress", 0.0)
+            
+            payload = {
+                "job_id": job_id,
+                "status": status_val,
+                "current_stage": stage,
+                "progress_percentage": pct,
+                "context_analysis_status": ca_status,
+                "context_analysis_stage": ca_stage,
+                "context_analysis_progress": ca_pct,
+            }
+            
+            if stage != last_stage or pct != last_pct:
+                yield f"data: {json.dumps(payload)}\n\n"
+                last_stage = stage
+                last_pct = pct
+                
+            if status_val in ("completed", "failed") and ca_status in ("completed", "failed"):
+                yield f"data: {json.dumps(payload)}\n\n"
+                break
+                
+            await asyncio.sleep(0.5)
+
+    return StreamingResponse(event_generator(), media_type="text/event-stream")
+
+
+@router.get("/cache/{job_id}/metadata", summary="Get cache metadata and completed stages for a document")
+async def get_cache_metadata_endpoint(job_id: str):
+    from src.rag.cache_manager import DocumentCacheManager, compute_file_hash
+    job = get_job(job_id)
+    if not job:
+        raise HTTPException(status_code=404, detail="Job not found")
+    
+    doc_hash = job.get("doc_hash")
+    if not doc_hash:
+        file_path = Path(job.get("file_path", ""))
+        if file_path.exists():
+            doc_hash = compute_file_hash(file_path)
+    
+    if not doc_hash:
+        raise HTTPException(status_code=404, detail="Cache hash not available for job")
+        
+    cache_mgr = DocumentCacheManager(doc_hash, job.get("filename", "unknown"))
+    return cache_mgr.get_metadata()
+
+
+@router.post("/jobs/{job_id}/regenerate", summary="Regenerate specified pipeline stage or full document")
+async def regenerate_job_stage(job_id: str, stage: str = "all"):
+    from src.rag.cache_manager import DocumentCacheManager
+    job = get_job(job_id)
+    if not job:
+        raise HTTPException(status_code=404, detail="Job not found")
+        
+    doc_hash = job.get("doc_hash")
+    if doc_hash:
+        cache_mgr = DocumentCacheManager(doc_hash, job.get("filename", "unknown"))
+        if stage and stage != "all":
+            cache_mgr.invalidate_stage(stage)
+        else:
+            meta = cache_mgr.get_metadata()
+            meta["completed_stages"] = []
+            cache_mgr._write_json(cache_mgr.metadata_path, meta)
+
+    queue_job(job_id)
+    return {"status": "queued", "job_id": job_id, "regenerating_stage": stage}
+
 
 
 

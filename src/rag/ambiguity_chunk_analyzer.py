@@ -1,6 +1,7 @@
 import re
 import json
 import logging
+import os
 from pathlib import Path
 from typing import List, Dict, Any, Optional
 
@@ -21,7 +22,7 @@ class AmbiguityChunkAnalyzer:
 
     def __init__(self, config: Optional[RagConfig] = None):
         self.config = config or RagConfig()
-        self.model_name = getattr(self.config, "ollama_model", "qwen2.5-coder:32b")
+        self.model_name = getattr(self.config, "ollama_model", os.environ.get("OLLAMA_MODEL", "qwen2.5-coder:32b"))
         
         # Resolve host from config
         ollama_host = "http://192.168.19.21:11434"
@@ -177,6 +178,12 @@ class AmbiguityChunkAnalyzer:
     def run_analysis(self, job_dir: Path, doc_id: str) -> None:
         logger.info(f"Starting Phase 2B Chunk Analysis for job: {doc_id}")
         
+        # Cache hit check
+        cache_reasoning_path = job_dir / "11_chunk_reasoning" / "chunk_reasoning.json"
+        if cache_reasoning_path.exists() and cache_reasoning_path.stat().st_size > 0:
+            logger.info(f"[CACHE HIT] Chunk reasoning analysis already exists for job {doc_id}. Skipping re-analysis.")
+            return
+
         # 1. Load extracted claims from Phase 2A
         claims_json_path = job_dir / "10_claim_extraction" / "chunk_claims.json"
         if not claims_json_path.exists():
@@ -424,7 +431,9 @@ Requested JSON Schema:
         # rewrite_suggestions.md
         md_rewrites = ["# Side-by-Side Rewrite Suggestions\n\n| ID | Type | Original Text / Quote | Suggested Rewrite |\n|:---|:-----|:----------------------|:------------------|\n"]
         for rw in rewrites_list:
-            md_rewrites.append(f"| `{rw['id']}` | {rw['type']} | *\"{rw['original_text'].strip()}\"* | **{rw['suggested_text'].strip()}** |\n")
+            orig_text = (rw.get("original_text") or "").strip()
+            sugg_text = (rw.get("suggested_text") or "").strip()
+            md_rewrites.append(f"| `{rw['id']}` | {rw['type']} | *\"{orig_text}\"* | **{sugg_text}** |\n")
         with open(reason_dir / "rewrite_suggestions.md", "w", encoding="utf-8") as f:
             f.write("".join(md_rewrites))
 

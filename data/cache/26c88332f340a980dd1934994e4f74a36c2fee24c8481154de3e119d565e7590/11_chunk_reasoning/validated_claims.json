@@ -1,0 +1,139 @@
+{
+  "validated_claims": [
+    {
+      "claim_id": "64296935b11e46a1941a9867e3fec6eb_chunk_0000_claim_000",
+      "chunk_id": "64296935b11e46a1941a9867e3fec6eb_chunk_0000",
+      "original_text": "The company has decided to implement the new security policy from next month.",
+      "status": "partial",
+      "reason": "The claim does not fully support the original text as it omits the possibility of immediate effectiveness.",
+      "improved_claim": "The company has decided to implement the new security policy from next month, but it may also become effective immediately depending on the circumstances.",
+      "confidence": 0.95
+    },
+    {
+      "claim_id": "64296935b11e46a1941a9867e3fec6eb_chunk_0000_claim_001",
+      "chunk_id": "64296935b11e46a1941a9867e3fec6eb_chunk_0000",
+      "original_text": "Every manager must approve the travel request before the employee leaves.",
+      "status": "partial",
+      "reason": "The claim does not fully support the original text as it omits the possibility of obtaining approval after the trip.",
+      "improved_claim": "Every manager must approve the travel request before the employee leaves, although in some departments, approval can be obtained after the trip if necessary.",
+      "confidence": 0.95
+    },
+    {
+      "claim_id": "64296935b11e46a1941a9867e3fec6eb_chunk_0000_claim_002",
+      "chunk_id": "64296935b11e46a1941a9867e3fec6eb_chunk_0000",
+      "original_text": "The finance team reported that the revenue increased by 18 percent during the first quarter.",
+      "status": "partial",
+      "reason": "The claim does not fully support the original text as it omits the conflicting revenue growth figures.",
+      "improved_claim": "The finance team reported that the revenue increased by 18 percent during the first quarter; later, it was stated to be 12 percent for the same period. Both values are considered correct according to previous discussion.",
+      "confidence": 0.95
+    },
+    {
+      "claim_id": "64296935b11e46a1941a9867e3fec6eb_chunk_0000_claim_003",
+      "chunk_id": "64296935b11e46a1941a9867e3fec6eb_chunk_0000",
+      "original_text": "The engineering department have completed the migration to the new servers.",
+      "status": "partial",
+      "reason": "The claim does not fully support the original text as it omits that some critical tasks are still pending.",
+      "improved_claim": "The engineering department have completed the migration to the new servers, although several critical tasks are still pending.",
+      "confidence": 0.95
+    },
+    {
+      "claim_id": "64296935b11e46a1941a9867e3fec6eb_chunk_0000_claim_004",
+      "chunk_id": "64296935b11e46a1941a9867e3fec6eb_chunk_0000",
+      "original_text": "The customer should submit the application with the required documents.",
+      "status": "valid",
+      "reason": "The claim fully supports the original text.",
+      "improved_claim": "The customer should submit the application with the required documents.",
+      "confidence": 0.95
+    },
+    {
+      "claim_id": "64296935b11e46a1941a9867e3fec6eb_chunk_0000_claim_005",
+      "chunk_id": "64296935b11e46a1941a9867e3fec6eb_chunk_0000",
+      "original_text": "Alex informed Jordan that he would present the proposal during the meeting.",
+      "status": "partial",
+      "reason": "The claim does not fully support the original text as it omits that Alex later said the presentation needed additional revisions.",
+      "improved_claim": "Alex informed Jordan that he would present the proposal during the meeting. Afterwards, he said the presentation needed additional revisions before he could approve it.",
+      "confidence": 0.95
+    },
+    {
+      "claim_id": "64296935b11e46a1941a9867e3fec6eb_chunk_0000_claim_006",
+      "chunk_id": "64296935b11e46a1941a9867e3fec6eb_chunk_0000",
+      "original_text": "The system shall automatically archive inactive accounts after thirty days.",
+      "status": "partial",
+      "reason": "The claim does not fully support the original text as it omits the possibility of archiving after sixty days.",
+      "improved_claim": "The system shall automatically archive inactive accounts after thirty days, unless otherwise specified.",
+      "confidence": 0.95
+    },
+    {
+      "claim_id": "64296935b11e46a1941a9867e3fec6eb_chunk_0000_claim_007",
+      "chunk_id": "64296935b11e46a1941a9867e3fec6eb_chunk_0000",
+      "original_text": "Every employee must wear their identification badge inside the building.",
+      "status": "valid",
+      "reason": "The claim fully supports the original text.",
+      "improved_claim": "Every employee must wear their identification badge inside the building.",
+      "confidence": 0.95
+    },
+    {
+      "claim_id": "64296935b11e46a1941a9867e3fec6eb_chunk_0000_claim_008",
+      "chunk_id": "64296935b11e46a1941a9867e3fec6eb_chunk_0000",
+      "original_text": "The software installation takes approximately fifteen minutes on most computers.",
+      "status": "partial",
+      "reason": "The claim does not fully support the original text as it omits the wide range of installation times.",
+      "improved_claim": "The software installation takes approximately fifteen minutes on most computers. Some systems may require significantly less time, while others usually need around one hour. This is considered the standard installation duration.",
+      "confidence": 0.95
+    },
+    {
+      "claim_id": "64296935b11e46a1941a9867e3fec6eb_chunk_0000_claim_009",
+      "chunk_id": "64296935b11e46a1941a9867e3fec6eb_chunk_0000",
+      "original_text": "When the package arrives, place it near the main entrance unless it should be delivered somewhere else.",
+      "status": "valid",
+      "reason": "The claim fully supports the original text.",
+      "improved_claim": "When the package arrives, place it near the main entrance unless it should be delivered somewhere else. If it is unavailable, notify the appropriate person immediately.",
+      "confidence": 0.95
+    },
+    {
+      "claim_id": "64296935b11e46a1941a9867e3fec6eb_chunk_0000_claim_010",
+      "chunk_id": "64296935b11e46a1941a9867e3fec6eb_chunk_0000",
+      "original_text": "The project deadline is on 30 September 2026.",
+      "status": "partial",
+      "reason": "The claim does not fully support the original text as it omits the official delivery date in Appendix A.",
+      "improved_claim": "The project deadline is on 30 September 2026. The final submission should be completed before the last working day of September. The official delivery date is listed as 28 September 2026 in Appendix A.",
+      "confidence": 0.95
+    },
+    {
+      "claim_id": "64296935b11e46a1941a9867e3fec6eb_chunk_0000_claim_011",
+      "chunk_id": "64296935b11e46a1941a9867e3fec6eb_chunk_0000",
+      "original_text": "The training session will be conducted every Monday except when it is not required.",
+      "status": "valid",
+      "reason": "The claim fully supports the original text.",
+      "improved_claim": "The training session will be conducted every Monday except when it is not required. Attendance is mandatory unless employees receive prior approval, although everyone is expected to attend.",
+      "confidence": 0.95
+    },
+    {
+      "claim_id": "64296935b11e46a1941a9867e3fec6eb_chunk_0000_claim_012",
+      "chunk_id": "64296935b11e46a1941a9867e3fec6eb_chunk_0000",
+      "original_text": "Several users has reported that the application crash frequently after the recent update.",
+      "status": "valid",
+      "reason": "The claim fully supports the original text.",
+      "improved_claim": "Several users has reported that the application crash frequently after the recent update. The development team are investigating the issue and expect to fix it soon.",
+      "confidence": 0.95
+    },
+    {
+      "claim_id": "64296935b11e46a1941a9867e3fec6eb_chunk_0001_claim_000",
+      "chunk_id": "64296935b11e46a1941a9867e3fec6eb_chunk_0001",
+      "original_text": "the application crash frequently after the recent update",
+      "status": "partial",
+      "reason": "The original text does not specify what 'the recent update' refers to or the time frame for frequent crashes.",
+      "improved_claim": "Several users have reported that the application crashes frequently after a specific recent update.",
+      "confidence": 0.95
+    },
+    {
+      "claim_id": "64296935b11e46a1941a9867e3fec6eb_chunk_0001_claim_001",
+      "chunk_id": "64296935b11e46a1941a9867e3fec6eb_chunk_0001",
+      "original_text": "the development team are investigating the issue and expect to fix it soon",
+      "status": "valid",
+      "reason": "The original text clearly states that the development team is investigating the issue and expects to fix it soon.",
+      "improved_claim": "the development team are investigating the issue and expect to fix it soon",
+      "confidence": 0.95
+    }
+  ]
+}

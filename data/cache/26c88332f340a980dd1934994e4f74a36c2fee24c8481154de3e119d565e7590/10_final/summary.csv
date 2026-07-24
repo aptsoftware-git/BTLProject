@@ -1,0 +1,31 @@
+page,paragraph,sentence,issue_type,original,replacement,confidence,agreement_count,source_agents,reason,protected_reason
+1,4,4,punctuation,references,References,0.75,1,languagetool,This sentence does not start with an uppercase letter.,None
+1,7,8,grammar,the circumstances.,The circumstances.,0.80,1,languagetool|llm,Subject pronoun 'The' should be capitalized at the beginning of a sentence.,None
+1,8,10,spelling,recieved,received,0.95,2,languagetool|llm,Incorrect spelling of the word.,None
+1,10,12,punctuation,leaves,Leaves,0.75,1,languagetool,This sentence does not start with an uppercase letter.,None
+1,13,17,grammar,during the first quarter.,During the first quarter.,0.80,1,languagetool|llm,Sentence should start with a capital letter.,None
+1,14,19,punctuation,growth,Growth,0.75,1,languagetool,This sentence does not start with an uppercase letter.,None
+1,15,21,punctuation,correct,Correct,0.75,1,languagetool,This sentence does not start with an uppercase letter.,None
+1,17,23,punctuation,servers,Servers,0.75,1,languagetool,This sentence does not start with an uppercase letter.,None
+1,17,24,grammar,was,were,0.80,1,llm,Subject-verb agreement error,None
+1,18,25,grammar,although,Although,0.95,2,languagetool|llm,Sentence should start with a capital letter.,None
+1,21,28,punctuation,verified,Verified,0.75,1,languagetool,This sentence does not start with an uppercase letter.,None
+1,23,31,punctuation,meeting,Meeting,0.75,1,languagetool,This sentence does not start with an uppercase letter.,None
+1,24,33,punctuation,revisions,Revisions,0.75,1,languagetool,This sentence does not start with an uppercase letter.,None
+1,27,37,punctuation,otherwise,Otherwise,0.75,1,languagetool,This sentence does not start with an uppercase letter.,None
+1,30,40,grammar,although,Although,0.95,2,languagetool|llm,Sentence should start with a capital letter.,None
+1,31,41,punctuation,identification,Identification,0.75,1,languagetool,This sentence does not start with an uppercase letter.,None
+1,33,43,grammar,computers.,Computers.,0.80,1,languagetool|llm,Sentence should start with a capital letter.,None
+1,34,45,punctuation,others,Others,0.75,1,languagetool,This sentence does not start with an uppercase letter.,None
+1,35,47,punctuation,installation,Installation,0.75,1,languagetool,This sentence does not start with an uppercase letter.,None
+1,37,49,punctuation,should,Should,0.75,1,languagetool,This sentence does not start with an uppercase letter.,None
+1,38,51,punctuation,appropriate,Appropriate,0.75,1,languagetool,This sentence does not start with an uppercase letter.,None
+1,40,54,punctuation,should,Should,0.75,1,languagetool,This sentence does not start with an uppercase letter.,None
+1,41,56,punctuation,official,Official,0.75,1,languagetool,This sentence does not start with an uppercase letter.,None
+1,43,58,punctuation,not,Not,0.75,1,languagetool,This sentence does not start with an uppercase letter.,None
+1,44,60,punctuation,approval,Approval,0.75,1,languagetool,This sentence does not start with an uppercase letter.,None
+1,45,61,grammar,has,have,0.95,2,languagetool|llm,Subject-verb agreement error,None
+1,45,61,tense,crash,crashes,0.80,1,llm,Verb agreement with singular subject,None
+1,46,62,punctuation,the,The,0.75,1,languagetool,This sentence does not start with an uppercase letter.,None
+1,47,64,punctuation,expect,Expect,0.75,1,languagetool,This sentence does not start with an uppercase letter.,None
+1,51,69,punctuation,for,For,0.75,1,languagetool,This sentence does not start with an uppercase letter.,None

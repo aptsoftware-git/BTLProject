@@ -1,0 +1,806 @@
+{
+  "document_job_id": "64296935b11e46a1941a9867e3fec6eb",
+  "dashboard_kpis": {
+    "document_status": "Completed",
+    "publication_readiness": "Requires Minor Revision",
+    "publication_guidance": "Resolve minor phrasing, terminology, or clarity items prior to publishing.",
+    "verified_findings_count": 14,
+    "high_priority_findings_count": 0,
+    "last_generated": "Jul 23, 2026 at 13:27"
+  },
+  "publication_status": {
+    "label": "Requires Minor Revision",
+    "badge_class": "status-minor",
+    "action": "Resolve minor phrasing, terminology, or clarity items prior to publishing."
+  },
+  "validation_summary": {
+    "local_findings": 14,
+    "verified_findings": 14,
+    "false_positives": 0,
+    "overfitting_rate": 0.0
+  },
+  "executive_summary": {
+    "summary_text": "The Local AI Review Engine first analyzed the document and identified 14 potential findings. Claude performed an expert validation of those findings, confirming 14 valid findings while unsupported findings (0) were rejected as false positives. Consequently, only the 14 validated findings appear in this final report. Overall document publication readiness is evaluated as: Requires Minor Revision.",
+    "overall_risk_level": "Medium",
+    "category_breakdown": {
+      "Pronoun Ambiguity": 4,
+      "Numerical Inconsistency": 2,
+      "Writing Clarity": 8
+    },
+    "severity_breakdown": {
+      "Medium": 6,
+      "Low": 8
+    }
+  },
+  "findings": [
+    {
+      "finding_id": "64296935b11e46a1941a9867e3fec6eb_chunk_0000_finding_000",
+      "title": "Pronoun Ambiguity in Page 1 · Section: Document Section",
+      "severity": "Medium",
+      "category": "Pronoun Ambiguity",
+      "page_number": 1,
+      "section_heading": "Document Section",
+      "chunk_id": "64296935b11e46a1941a9867e3fec6eb_chunk_0000",
+      "location_display": "Page 1 · Section: Document Section",
+      "original_chunk": "Every manager must approve the travel request before the employee leaves. In some departments, approval can be obtained after the trip if necessary.",
+      "highlighted_ambiguity": "Every manager must approve the travel request before the employee leaves. In some departments, approval can be obtained after the trip if necessary.",
+      "claude_explanation": "The pronoun 'the' in 'the employee' is ambiguous as it could refer to either the manager or another unspecified employee.",
+      "business_impact": "Ambiguity in operational instructions may cause execution deviations across teams.",
+      "recommended_resolution": "Every manager must approve the employee's travel request before they leave. In some departments, approval can be obtained after the trip if necessary.",
+      "evidence": [
+        {
+          "location": "Page 1 · Section: Root",
+          "quote": "Every manager must approve the travel request before the employee leaves. In some departments, approval can be obtained after the trip if necessary.",
+          "chunk_id": "64296935b11e46a1941a9867e3fec6eb_chunk_0000"
+        }
+      ],
+      "internal_reference": "64296935b11e46a1941a9867e3fec6eb_chunk_0000",
+      "occurrence_count": 1,
+      "verification_status": "✓ Expert Validation Complete",
+      "ambiguity_category": "Pronoun Ambiguity",
+      "why_claude_flagged_it": "The pronoun 'the' in 'the employee' is ambiguous as it could refer to either the manager or another unspecified employee."
+    },
+    {
+      "finding_id": "64296935b11e46a1941a9867e3fec6eb_chunk_0000_finding_001",
+      "title": "Numerical Inconsistency in Page 1 · Section: Document Section",
+      "severity": "Low",
+      "category": "Numerical Inconsistency",
+      "page_number": 1,
+      "section_heading": "Document Section",
+      "chunk_id": "64296935b11e46a1941a9867e3fec6eb_chunk_0000",
+      "location_display": "Page 1 · Section: Document Section",
+      "original_chunk": "The finance team reported that the revenue increased by 18 percent during the first quarter. Later in the report it states that the revenue growth for the same quarter was 12 percent.",
+      "highlighted_ambiguity": "The finance team reported that the revenue increased by 18 percent during the first quarter. Later in the report it states that the revenue growth for the same quarter was 12 percent.",
+      "claude_explanation": "There is a discrepancy in the reported revenue growth percentages, which could lead to confusion about the actual revenue increase.",
+      "business_impact": "Ambiguity in operational instructions may cause execution deviations across teams.",
+      "recommended_resolution": "The finance team reported that the revenue increased by 18 percent during the first quarter; later, it was stated to be 12 percent for the same period. Both values are considered correct according to previous discussion.",
+      "evidence": [
+        {
+          "location": "Page 1 · Section: Root",
+          "quote": "The finance team reported that the revenue increased by 18 percent during the first quarter. Later in the report it states that the revenue growth for the same quarter was 12 percent.",
+          "chunk_id": "64296935b11e46a1941a9867e3fec6eb_chunk_0000"
+        }
+      ],
+      "internal_reference": "64296935b11e46a1941a9867e3fec6eb_chunk_0000",
+      "occurrence_count": 1,
+      "verification_status": "✓ Expert Validation Complete",
+      "ambiguity_category": "Numerical Inconsistency",
+      "why_claude_flagged_it": "There is a discrepancy in the reported revenue growth percentages, which could lead to confusion about the actual revenue increase."
+    },
+    {
+      "finding_id": "64296935b11e46a1941a9867e3fec6eb_chunk_0000_finding_002",
+      "title": "Pronoun Ambiguity in Page 1 · Section: Document Section",
+      "severity": "Medium",
+      "category": "Pronoun Ambiguity",
+      "page_number": 1,
+      "section_heading": "Document Section",
+      "chunk_id": "64296935b11e46a1941a9867e3fec6eb_chunk_0000",
+      "location_display": "Page 1 · Section: Document Section",
+      "original_chunk": "The engineering department have completed the migration to the new servers. They was able to finish everything earlier than expected, although several critical tasks are still pending.",
+      "highlighted_ambiguity": "The engineering department have completed the migration to the new servers. They was able to finish everything earlier than expected, although several critical tasks are still pending.",
+      "claude_explanation": "The pronoun 'They' does not clearly refer back to the engineering department or any specific group mentioned previously.",
+      "business_impact": "Ambiguity in operational instructions may cause execution deviations across teams.",
+      "recommended_resolution": "The engineering department has completed the migration to the new servers. They were able to finish everything earlier than expected, although several critical tasks are still pending.",
+      "evidence": [
+        {
+          "location": "Page 1 · Section: Root",
+          "quote": "The engineering department have completed the migration to the new servers. They was able to finish everything earlier than expected, although several critical tasks are still pending.",
+          "chunk_id": "64296935b11e46a1941a9867e3fec6eb_chunk_0000"
+        }
+      ],
+      "internal_reference": "64296935b11e46a1941a9867e3fec6eb_chunk_0000",
+      "occurrence_count": 1,
+      "verification_status": "✓ Expert Validation Complete",
+      "ambiguity_category": "Pronoun Ambiguity",
+      "why_claude_flagged_it": "The pronoun 'They' does not clearly refer back to the engineering department or any specific group mentioned previously."
+    },
+    {
+      "finding_id": "64296935b11e46a1941a9867e3fec6eb_chunk_0000_finding_003",
+      "title": "Writing Clarity in Page 1 · Section: Document Section",
+      "severity": "Low",
+      "category": "Writing Clarity",
+      "page_number": 1,
+      "section_heading": "Document Section",
+      "chunk_id": "64296935b11e46a1941a9867e3fec6eb_chunk_0000",
+      "location_display": "Page 1 · Section: Document Section",
+      "original_chunk": "If they are missing, it should still be accepted until everything is verified. This may not apply in certain situations.",
+      "highlighted_ambiguity": "If they are missing, it should still be accepted until everything is verified. This may not apply in certain situations.",
+      "claude_explanation": "The phrase 'everything is verified' is vague and does not specify what exactly needs to be verified or by whom.",
+      "business_impact": "Ambiguity in operational instructions may cause execution deviations across teams.",
+      "recommended_resolution": "If any documents are missing, the application should still be accepted until all required documents are verified. This may not apply in certain situations.",
+      "evidence": [
+        {
+          "location": "Page 1 · Section: Root",
+          "quote": "If they are missing, it should still be accepted until everything is verified. This may not apply in certain situations.",
+          "chunk_id": "64296935b11e46a1941a9867e3fec6eb_chunk_0000"
+        }
+      ],
+      "internal_reference": "64296935b11e46a1941a9867e3fec6eb_chunk_0000",
+      "occurrence_count": 1,
+      "verification_status": "✓ Expert Validation Complete",
+      "ambiguity_category": "Writing Clarity",
+      "why_claude_flagged_it": "The phrase 'everything is verified' is vague and does not specify what exactly needs to be verified or by whom."
+    },
+    {
+      "finding_id": "64296935b11e46a1941a9867e3fec6eb_chunk_0000_finding_004",
+      "title": "Pronoun Ambiguity in Page 1 · Section: Document Section",
+      "severity": "Medium",
+      "category": "Pronoun Ambiguity",
+      "page_number": 1,
+      "section_heading": "Document Section",
+      "chunk_id": "64296935b11e46a1941a9867e3fec6eb_chunk_0000",
+      "location_display": "Page 1 · Section: Document Section",
+      "original_chunk": "Alex informed Jordan that he would present the proposal during the meeting. Afterwards, he said the presentation needed additional revisions before he could approve it.",
+      "highlighted_ambiguity": "Alex informed Jordan that he would present the proposal during the meeting. Afterwards, he said the presentation needed additional revisions before he could approve it.",
+      "claude_explanation": "The pronouns 'he' and 'it' do not clearly refer back to Alex or the proposal without additional context.",
+      "business_impact": "Ambiguity in operational instructions may cause execution deviations across teams.",
+      "recommended_resolution": "Alex informed Jordan that he would present the proposal during the meeting. Afterwards, Alex said the proposal needed additional revisions before it could be approved.",
+      "evidence": [
+        {
+          "location": "Page 1 · Section: Root",
+          "quote": "Alex informed Jordan that he would present the proposal during the meeting. Afterwards, he said the presentation needed additional revisions before he could approve it.",
+          "chunk_id": "64296935b11e46a1941a9867e3fec6eb_chunk_0000"
+        }
+      ],
+      "internal_reference": "64296935b11e46a1941a9867e3fec6eb_chunk_0000",
+      "occurrence_count": 1,
+      "verification_status": "✓ Expert Validation Complete",
+      "ambiguity_category": "Pronoun Ambiguity",
+      "why_claude_flagged_it": "The pronouns 'he' and 'it' do not clearly refer back to Alex or the proposal without additional context."
+    },
+    {
+      "finding_id": "64296935b11e46a1941a9867e3fec6eb_chunk_0000_finding_005",
+      "title": "Numerical Inconsistency in Page 1 · Section: Document Section",
+      "severity": "Low",
+      "category": "Numerical Inconsistency",
+      "page_number": 1,
+      "section_heading": "Document Section",
+      "chunk_id": "64296935b11e46a1941a9867e3fec6eb_chunk_0000",
+      "location_display": "Page 1 · Section: Document Section",
+      "original_chunk": "The system shall automatically archive inactive accounts after thirty days. In another section, accounts are archived after sixty days unless otherwise specified.",
+      "highlighted_ambiguity": "The system shall automatically archive inactive accounts after thirty days. In another section, accounts are archived after sixty days unless otherwise specified.",
+      "claude_explanation": "There is a discrepancy in the stated archiving durations, which could lead to confusion about when accounts should be archived.",
+      "business_impact": "Ambiguity in operational instructions may cause execution deviations across teams.",
+      "recommended_resolution": "The system shall automatically archive inactive accounts after thirty days, unless otherwise specified. In another section, accounts are archived after sixty days unless otherwise specified.",
+      "evidence": [
+        {
+          "location": "Page 1 · Section: Root",
+          "quote": "The system shall automatically archive inactive accounts after thirty days. In another section, accounts are archived after sixty days unless otherwise specified.",
+          "chunk_id": "64296935b11e46a1941a9867e3fec6eb_chunk_0000"
+        }
+      ],
+      "internal_reference": "64296935b11e46a1941a9867e3fec6eb_chunk_0000",
+      "occurrence_count": 1,
+      "verification_status": "✓ Expert Validation Complete",
+      "ambiguity_category": "Numerical Inconsistency",
+      "why_claude_flagged_it": "There is a discrepancy in the stated archiving durations, which could lead to confusion about when accounts should be archived."
+    },
+    {
+      "finding_id": "64296935b11e46a1941a9867e3fec6eb_chunk_0000_finding_006",
+      "title": "Writing Clarity in Page 1 · Section: Document Section",
+      "severity": "Low",
+      "category": "Writing Clarity",
+      "page_number": 1,
+      "section_heading": "Document Section",
+      "chunk_id": "64296935b11e46a1941a9867e3fec6eb_chunk_0000",
+      "location_display": "Page 1 · Section: Document Section",
+      "original_chunk": "The software installation takes approximately fifteen minutes on most computers. Some systems may require significantly less time, while others usually need around one hour. This is considered the standard installation duration.",
+      "highlighted_ambiguity": "The software installation takes approximately fifteen minutes on most computers. Some systems may require significantly less time, while others usually need around one hour. This is considered the standard installation duration.",
+      "claude_explanation": "The phrase 'standard installation duration' is vague as it does not specify what constitutes a 'standard' range of times.",
+      "business_impact": "Ambiguity in operational instructions may cause execution deviations across teams.",
+      "recommended_resolution": "The software installation typically takes approximately fifteen minutes on most computers. Some systems may require significantly less time, while others usually need around one hour. These times are considered the typical installation duration.",
+      "evidence": [
+        {
+          "location": "Page 1 · Section: Root",
+          "quote": "The software installation takes approximately fifteen minutes on most computers. Some systems may require significantly less time, while others usually need around one hour. This is considered the standard installation duration.",
+          "chunk_id": "64296935b11e46a1941a9867e3fec6eb_chunk_0000"
+        }
+      ],
+      "internal_reference": "64296935b11e46a1941a9867e3fec6eb_chunk_0000",
+      "occurrence_count": 1,
+      "verification_status": "✓ Expert Validation Complete",
+      "ambiguity_category": "Writing Clarity",
+      "why_claude_flagged_it": "The phrase 'standard installation duration' is vague as it does not specify what constitutes a 'standard' range of times."
+    },
+    {
+      "finding_id": "64296935b11e46a1941a9867e3fec6eb_chunk_0000_finding_007",
+      "title": "Writing Clarity in Page 1 · Section: Document Section",
+      "severity": "Low",
+      "category": "Writing Clarity",
+      "page_number": 1,
+      "section_heading": "Document Section",
+      "chunk_id": "64296935b11e46a1941a9867e3fec6eb_chunk_0000",
+      "location_display": "Page 1 · Section: Document Section",
+      "original_chunk": "The project deadline is on 30 September 2026. The final submission should be completed before the last working day of September. The official delivery date is listed as 28 September 2026 in Appendix A.",
+      "highlighted_ambiguity": "The project deadline is on 30 September 2026. The final submission should be completed before the last working day of September. The official delivery date is listed as 28 September 2026 in Appendix A.",
+      "claude_explanation": "There is a discrepancy between the project deadline and the official delivery date, which could lead to confusion about when work must be completed.",
+      "business_impact": "Ambiguity in operational instructions may cause execution deviations across teams.",
+      "recommended_resolution": "The project deadline is on 30 September 2026. The final submission should be completed before the last working day of September (28 September 2026, as listed in Appendix A).",
+      "evidence": [
+        {
+          "location": "Page 1 · Section: Root",
+          "quote": "The project deadline is on 30 September 2026. The final submission should be completed before the last working day of September. The official delivery date is listed as 28 September 2026 in Appendix A.",
+          "chunk_id": "64296935b11e46a1941a9867e3fec6eb_chunk_0000"
+        }
+      ],
+      "internal_reference": "64296935b11e46a1941a9867e3fec6eb_chunk_0000",
+      "occurrence_count": 1,
+      "verification_status": "✓ Expert Validation Complete",
+      "ambiguity_category": "Writing Clarity",
+      "why_claude_flagged_it": "There is a discrepancy between the project deadline and the official delivery date, which could lead to confusion about when work must be completed."
+    },
+    {
+      "finding_id": "64296935b11e46a1941a9867e3fec6eb_chunk_0000_finding_008",
+      "title": "Pronoun Ambiguity in Page 1 · Section: Document Section",
+      "severity": "Medium",
+      "category": "Pronoun Ambiguity",
+      "page_number": 1,
+      "section_heading": "Document Section",
+      "chunk_id": "64296935b11e46a1941a9867e3fec6eb_chunk_0000",
+      "location_display": "Page 1 · Section: Document Section",
+      "original_chunk": "Several users has reported that the application crash frequently after the recent update. The development team are investigating the issue and expect to fix it soon.",
+      "highlighted_ambiguity": "Several users has reported that the application crash frequently after the recent update. The development team are investigating the issue and expect to fix it soon.",
+      "claude_explanation": "The pronouns 'has' and 'are' do not agree with their antecedents ('users' and 'development team'), which can cause confusion in understanding who performed the actions.",
+      "business_impact": "Ambiguity in operational instructions may cause execution deviations across teams.",
+      "recommended_resolution": "Several users have reported that the application crashes frequently after the recent update. The development team is investigating the issue and expect to fix it soon.",
+      "evidence": [
+        {
+          "location": "Page 1 · Section: Root",
+          "quote": "Several users has reported that the application crash frequently after the recent update. The development team are investigating the issue and expect to fix it soon.",
+          "chunk_id": "64296935b11e46a1941a9867e3fec6eb_chunk_0000"
+        }
+      ],
+      "internal_reference": "64296935b11e46a1941a9867e3fec6eb_chunk_0000",
+      "occurrence_count": 1,
+      "verification_status": "✓ Expert Validation Complete",
+      "ambiguity_category": "Pronoun Ambiguity",
+      "why_claude_flagged_it": "The pronouns 'has' and 'are' do not agree with their antecedents ('users' and 'development team'), which can cause confusion in understanding who performed the actions."
+    },
+    {
+      "finding_id": "64296935b11e46a1941a9867e3fec6eb_chunk_0001_finding_000",
+      "title": "Writing Clarity in Page 1 · Section: Document Section",
+      "severity": "Medium",
+      "category": "Writing Clarity",
+      "page_number": 1,
+      "section_heading": "Document Section",
+      "chunk_id": "64296935b11e46a1941a9867e3fec6eb_chunk_0001",
+      "location_display": "Page 1 · Section: Document Section",
+      "original_chunk": "the recent update",
+      "highlighted_ambiguity": "the recent update",
+      "claude_explanation": "It is unclear which specific update is being referred to.",
+      "business_impact": "Ambiguity in operational instructions may cause execution deviations across teams.",
+      "recommended_resolution": "after a specific recent update",
+      "evidence": [
+        {
+          "location": "Page 1 · Section: Root",
+          "quote": "the recent update",
+          "chunk_id": "64296935b11e46a1941a9867e3fec6eb_chunk_0001"
+        }
+      ],
+      "internal_reference": "64296935b11e46a1941a9867e3fec6eb_chunk_0001",
+      "occurrence_count": 1,
+      "verification_status": "✓ Expert Validation Complete",
+      "ambiguity_category": "Writing Clarity",
+      "why_claude_flagged_it": "It is unclear which specific update is being referred to."
+    },
+    {
+      "finding_id": "64296935b11e46a1941a9867e3fec6eb_chunk_0001_finding_001",
+      "title": "Writing Clarity in Page 1 · Section: Document Section",
+      "severity": "Medium",
+      "category": "Writing Clarity",
+      "page_number": 1,
+      "section_heading": "Document Section",
+      "chunk_id": "64296935b11e46a1941a9867e3fec6eb_chunk_0001",
+      "location_display": "Page 1 · Section: Document Section",
+      "original_chunk": "frequently",
+      "highlighted_ambiguity": "frequently",
+      "claude_explanation": "The term 'frequently' is subjective and not defined in the text.",
+      "business_impact": "Ambiguity in operational instructions may cause execution deviations across teams.",
+      "recommended_resolution": "crashes at a high rate or on multiple occasions",
+      "evidence": [
+        {
+          "location": "Page 1 · Section: Root",
+          "quote": "frequently",
+          "chunk_id": "64296935b11e46a1941a9867e3fec6eb_chunk_0001"
+        }
+      ],
+      "internal_reference": "64296935b11e46a1941a9867e3fec6eb_chunk_0001",
+      "occurrence_count": 1,
+      "verification_status": "✓ Expert Validation Complete",
+      "ambiguity_category": "Writing Clarity",
+      "why_claude_flagged_it": "The term 'frequently' is subjective and not defined in the text."
+    },
+    {
+      "finding_id": "64296935b11e46a1941a9867e3fec6eb_chunk_0001_finding_002",
+      "title": "Writing Clarity in Page 1 · Section: Document Section",
+      "severity": "Low",
+      "category": "Writing Clarity",
+      "page_number": 1,
+      "section_heading": "Document Section",
+      "chunk_id": "64296935b11e46a1941a9867e3fec6eb_chunk_0001",
+      "location_display": "Page 1 · Section: Document Section",
+      "original_chunk": "soon",
+      "highlighted_ambiguity": "soon",
+      "claude_explanation": "The term 'soon' is subjective and not defined in the text.",
+      "business_impact": "Ambiguity in operational instructions may cause execution deviations across teams.",
+      "recommended_resolution": "at an unspecified time in the near future",
+      "evidence": [
+        {
+          "location": "Page 1 · Section: Root",
+          "quote": "soon",
+          "chunk_id": "64296935b11e46a1941a9867e3fec6eb_chunk_0001"
+        }
+      ],
+      "internal_reference": "64296935b11e46a1941a9867e3fec6eb_chunk_0001",
+      "occurrence_count": 1,
+      "verification_status": "✓ Expert Validation Complete",
+      "ambiguity_category": "Writing Clarity",
+      "why_claude_flagged_it": "The term 'soon' is subjective and not defined in the text."
+    },
+    {
+      "finding_id": "64296935b11e46a1941a9867e3fec6eb_chunk_0001_finding_003",
+      "title": "Writing Clarity in Page 1 · Section: Document Section",
+      "severity": "Low",
+      "category": "Writing Clarity",
+      "page_number": 1,
+      "section_heading": "Document Section",
+      "chunk_id": "64296935b11e46a1941a9867e3fec6eb_chunk_0001",
+      "location_display": "Page 1 · Section: Document Section",
+      "original_chunk": "Several users has reported",
+      "highlighted_ambiguity": "Several users has reported",
+      "claude_explanation": "Subject-verb agreement error.",
+      "business_impact": "Ambiguity in operational instructions may cause execution deviations across teams.",
+      "recommended_resolution": "Several users have reported",
+      "evidence": [
+        {
+          "location": "Page 1 · Section: Root",
+          "quote": "Several users has reported",
+          "chunk_id": "64296935b11e46a1941a9867e3fec6eb_chunk_0001"
+        }
+      ],
+      "internal_reference": "64296935b11e46a1941a9867e3fec6eb_chunk_0001",
+      "occurrence_count": 1,
+      "verification_status": "✓ Expert Validation Complete",
+      "ambiguity_category": "Writing Clarity",
+      "why_claude_flagged_it": "Subject-verb agreement error."
+    },
+    {
+      "finding_id": "64296935b11e46a1941a9867e3fec6eb_chunk_0001_finding_004",
+      "title": "Writing Clarity in Page 1 · Section: Document Section",
+      "severity": "Low",
+      "category": "Writing Clarity",
+      "page_number": 1,
+      "section_heading": "Document Section",
+      "chunk_id": "64296935b11e46a1941a9867e3fec6eb_chunk_0001",
+      "location_display": "Page 1 · Section: Document Section",
+      "original_chunk": "application crash frequently",
+      "highlighted_ambiguity": "application crash frequently",
+      "claude_explanation": "Missing verb 'does' for proper sentence structure.",
+      "business_impact": "Ambiguity in operational instructions may cause execution deviations across teams.",
+      "recommended_resolution": "application crashes frequently",
+      "evidence": [
+        {
+          "location": "Page 1 · Section: Root",
+          "quote": "application crash frequently",
+          "chunk_id": "64296935b11e46a1941a9867e3fec6eb_chunk_0001"
+        }
+      ],
+      "internal_reference": "64296935b11e46a1941a9867e3fec6eb_chunk_0001",
+      "occurrence_count": 1,
+      "verification_status": "✓ Expert Validation Complete",
+      "ambiguity_category": "Writing Clarity",
+      "why_claude_flagged_it": "Missing verb 'does' for proper sentence structure."
+    }
+  ],
+  "rejected_findings": [],
+  "action_plan": {
+    "phase_1_immediate": [],
+    "phase_2_operational": [
+      {
+        "finding_id": "64296935b11e46a1941a9867e3fec6eb_chunk_0000_finding_000",
+        "title": "Pronoun Ambiguity in Page 1 · Section: Document Section",
+        "severity": "Medium",
+        "category": "Pronoun Ambiguity",
+        "page_number": 1,
+        "section_heading": "Document Section",
+        "chunk_id": "64296935b11e46a1941a9867e3fec6eb_chunk_0000",
+        "location_display": "Page 1 · Section: Document Section",
+        "original_chunk": "Every manager must approve the travel request before the employee leaves. In some departments, approval can be obtained after the trip if necessary.",
+        "highlighted_ambiguity": "Every manager must approve the travel request before the employee leaves. In some departments, approval can be obtained after the trip if necessary.",
+        "claude_explanation": "The pronoun 'the' in 'the employee' is ambiguous as it could refer to either the manager or another unspecified employee.",
+        "business_impact": "Ambiguity in operational instructions may cause execution deviations across teams.",
+        "recommended_resolution": "Every manager must approve the employee's travel request before they leave. In some departments, approval can be obtained after the trip if necessary.",
+        "evidence": [
+          {
+            "location": "Page 1 · Section: Root",
+            "quote": "Every manager must approve the travel request before the employee leaves. In some departments, approval can be obtained after the trip if necessary.",
+            "chunk_id": "64296935b11e46a1941a9867e3fec6eb_chunk_0000"
+          }
+        ],
+        "internal_reference": "64296935b11e46a1941a9867e3fec6eb_chunk_0000",
+        "occurrence_count": 1,
+        "verification_status": "✓ Expert Validation Complete",
+        "ambiguity_category": "Pronoun Ambiguity",
+        "why_claude_flagged_it": "The pronoun 'the' in 'the employee' is ambiguous as it could refer to either the manager or another unspecified employee."
+      },
+      {
+        "finding_id": "64296935b11e46a1941a9867e3fec6eb_chunk_0000_finding_002",
+        "title": "Pronoun Ambiguity in Page 1 · Section: Document Section",
+        "severity": "Medium",
+        "category": "Pronoun Ambiguity",
+        "page_number": 1,
+        "section_heading": "Document Section",
+        "chunk_id": "64296935b11e46a1941a9867e3fec6eb_chunk_0000",
+        "location_display": "Page 1 · Section: Document Section",
+        "original_chunk": "The engineering department have completed the migration to the new servers. They was able to finish everything earlier than expected, although several critical tasks are still pending.",
+        "highlighted_ambiguity": "The engineering department have completed the migration to the new servers. They was able to finish everything earlier than expected, although several critical tasks are still pending.",
+        "claude_explanation": "The pronoun 'They' does not clearly refer back to the engineering department or any specific group mentioned previously.",
+        "business_impact": "Ambiguity in operational instructions may cause execution deviations across teams.",
+        "recommended_resolution": "The engineering department has completed the migration to the new servers. They were able to finish everything earlier than expected, although several critical tasks are still pending.",
+        "evidence": [
+          {
+            "location": "Page 1 · Section: Root",
+            "quote": "The engineering department have completed the migration to the new servers. They was able to finish everything earlier than expected, although several critical tasks are still pending.",
+            "chunk_id": "64296935b11e46a1941a9867e3fec6eb_chunk_0000"
+          }
+        ],
+        "internal_reference": "64296935b11e46a1941a9867e3fec6eb_chunk_0000",
+        "occurrence_count": 1,
+        "verification_status": "✓ Expert Validation Complete",
+        "ambiguity_category": "Pronoun Ambiguity",
+        "why_claude_flagged_it": "The pronoun 'They' does not clearly refer back to the engineering department or any specific group mentioned previously."
+      },
+      {
+        "finding_id": "64296935b11e46a1941a9867e3fec6eb_chunk_0000_finding_004",
+        "title": "Pronoun Ambiguity in Page 1 · Section: Document Section",
+        "severity": "Medium",
+        "category": "Pronoun Ambiguity",
+        "page_number": 1,
+        "section_heading": "Document Section",
+        "chunk_id": "64296935b11e46a1941a9867e3fec6eb_chunk_0000",
+        "location_display": "Page 1 · Section: Document Section",
+        "original_chunk": "Alex informed Jordan that he would present the proposal during the meeting. Afterwards, he said the presentation needed additional revisions before he could approve it.",
+        "highlighted_ambiguity": "Alex informed Jordan that he would present the proposal during the meeting. Afterwards, he said the presentation needed additional revisions before he could approve it.",
+        "claude_explanation": "The pronouns 'he' and 'it' do not clearly refer back to Alex or the proposal without additional context.",
+        "business_impact": "Ambiguity in operational instructions may cause execution deviations across teams.",
+        "recommended_resolution": "Alex informed Jordan that he would present the proposal during the meeting. Afterwards, Alex said the proposal needed additional revisions before it could be approved.",
+        "evidence": [
+          {
+            "location": "Page 1 · Section: Root",
+            "quote": "Alex informed Jordan that he would present the proposal during the meeting. Afterwards, he said the presentation needed additional revisions before he could approve it.",
+            "chunk_id": "64296935b11e46a1941a9867e3fec6eb_chunk_0000"
+          }
+        ],
+        "internal_reference": "64296935b11e46a1941a9867e3fec6eb_chunk_0000",
+        "occurrence_count": 1,
+        "verification_status": "✓ Expert Validation Complete",
+        "ambiguity_category": "Pronoun Ambiguity",
+        "why_claude_flagged_it": "The pronouns 'he' and 'it' do not clearly refer back to Alex or the proposal without additional context."
+      },
+      {
+        "finding_id": "64296935b11e46a1941a9867e3fec6eb_chunk_0000_finding_008",
+        "title": "Pronoun Ambiguity in Page 1 · Section: Document Section",
+        "severity": "Medium",
+        "category": "Pronoun Ambiguity",
+        "page_number": 1,
+        "section_heading": "Document Section",
+        "chunk_id": "64296935b11e46a1941a9867e3fec6eb_chunk_0000",
+        "location_display": "Page 1 · Section: Document Section",
+        "original_chunk": "Several users has reported that the application crash frequently after the recent update. The development team are investigating the issue and expect to fix it soon.",
+        "highlighted_ambiguity": "Several users has reported that the application crash frequently after the recent update. The development team are investigating the issue and expect to fix it soon.",
+        "claude_explanation": "The pronouns 'has' and 'are' do not agree with their antecedents ('users' and 'development team'), which can cause confusion in understanding who performed the actions.",
+        "business_impact": "Ambiguity in operational instructions may cause execution deviations across teams.",
+        "recommended_resolution": "Several users have reported that the application crashes frequently after the recent update. The development team is investigating the issue and expect to fix it soon.",
+        "evidence": [
+          {
+            "location": "Page 1 · Section: Root",
+            "quote": "Several users has reported that the application crash frequently after the recent update. The development team are investigating the issue and expect to fix it soon.",
+            "chunk_id": "64296935b11e46a1941a9867e3fec6eb_chunk_0000"
+          }
+        ],
+        "internal_reference": "64296935b11e46a1941a9867e3fec6eb_chunk_0000",
+        "occurrence_count": 1,
+        "verification_status": "✓ Expert Validation Complete",
+        "ambiguity_category": "Pronoun Ambiguity",
+        "why_claude_flagged_it": "The pronouns 'has' and 'are' do not agree with their antecedents ('users' and 'development team'), which can cause confusion in understanding who performed the actions."
+      },
+      {
+        "finding_id": "64296935b11e46a1941a9867e3fec6eb_chunk_0001_finding_000",
+        "title": "Writing Clarity in Page 1 · Section: Document Section",
+        "severity": "Medium",
+        "category": "Writing Clarity",
+        "page_number": 1,
+        "section_heading": "Document Section",
+        "chunk_id": "64296935b11e46a1941a9867e3fec6eb_chunk_0001",
+        "location_display": "Page 1 · Section: Document Section",
+        "original_chunk": "the recent update",
+        "highlighted_ambiguity": "the recent update",
+        "claude_explanation": "It is unclear which specific update is being referred to.",
+        "business_impact": "Ambiguity in operational instructions may cause execution deviations across teams.",
+        "recommended_resolution": "after a specific recent update",
+        "evidence": [
+          {
+            "location": "Page 1 · Section: Root",
+            "quote": "the recent update",
+            "chunk_id": "64296935b11e46a1941a9867e3fec6eb_chunk_0001"
+          }
+        ],
+        "internal_reference": "64296935b11e46a1941a9867e3fec6eb_chunk_0001",
+        "occurrence_count": 1,
+        "verification_status": "✓ Expert Validation Complete",
+        "ambiguity_category": "Writing Clarity",
+        "why_claude_flagged_it": "It is unclear which specific update is being referred to."
+      },
+      {
+        "finding_id": "64296935b11e46a1941a9867e3fec6eb_chunk_0001_finding_001",
+        "title": "Writing Clarity in Page 1 · Section: Document Section",
+        "severity": "Medium",
+        "category": "Writing Clarity",
+        "page_number": 1,
+        "section_heading": "Document Section",
+        "chunk_id": "64296935b11e46a1941a9867e3fec6eb_chunk_0001",
+        "location_display": "Page 1 · Section: Document Section",
+        "original_chunk": "frequently",
+        "highlighted_ambiguity": "frequently",
+        "claude_explanation": "The term 'frequently' is subjective and not defined in the text.",
+        "business_impact": "Ambiguity in operational instructions may cause execution deviations across teams.",
+        "recommended_resolution": "crashes at a high rate or on multiple occasions",
+        "evidence": [
+          {
+            "location": "Page 1 · Section: Root",
+            "quote": "frequently",
+            "chunk_id": "64296935b11e46a1941a9867e3fec6eb_chunk_0001"
+          }
+        ],
+        "internal_reference": "64296935b11e46a1941a9867e3fec6eb_chunk_0001",
+        "occurrence_count": 1,
+        "verification_status": "✓ Expert Validation Complete",
+        "ambiguity_category": "Writing Clarity",
+        "why_claude_flagged_it": "The term 'frequently' is subjective and not defined in the text."
+      }
+    ],
+    "phase_3_polish": [
+      {
+        "finding_id": "64296935b11e46a1941a9867e3fec6eb_chunk_0000_finding_001",
+        "title": "Numerical Inconsistency in Page 1 · Section: Document Section",
+        "severity": "Low",
+        "category": "Numerical Inconsistency",
+        "page_number": 1,
+        "section_heading": "Document Section",
+        "chunk_id": "64296935b11e46a1941a9867e3fec6eb_chunk_0000",
+        "location_display": "Page 1 · Section: Document Section",
+        "original_chunk": "The finance team reported that the revenue increased by 18 percent during the first quarter. Later in the report it states that the revenue growth for the same quarter was 12 percent.",
+        "highlighted_ambiguity": "The finance team reported that the revenue increased by 18 percent during the first quarter. Later in the report it states that the revenue growth for the same quarter was 12 percent.",
+        "claude_explanation": "There is a discrepancy in the reported revenue growth percentages, which could lead to confusion about the actual revenue increase.",
+        "business_impact": "Ambiguity in operational instructions may cause execution deviations across teams.",
+        "recommended_resolution": "The finance team reported that the revenue increased by 18 percent during the first quarter; later, it was stated to be 12 percent for the same period. Both values are considered correct according to previous discussion.",
+        "evidence": [
+          {
+            "location": "Page 1 · Section: Root",
+            "quote": "The finance team reported that the revenue increased by 18 percent during the first quarter. Later in the report it states that the revenue growth for the same quarter was 12 percent.",
+            "chunk_id": "64296935b11e46a1941a9867e3fec6eb_chunk_0000"
+          }
+        ],
+        "internal_reference": "64296935b11e46a1941a9867e3fec6eb_chunk_0000",
+        "occurrence_count": 1,
+        "verification_status": "✓ Expert Validation Complete",
+        "ambiguity_category": "Numerical Inconsistency",
+        "why_claude_flagged_it": "There is a discrepancy in the reported revenue growth percentages, which could lead to confusion about the actual revenue increase."
+      },
+      {
+        "finding_id": "64296935b11e46a1941a9867e3fec6eb_chunk_0000_finding_003",
+        "title": "Writing Clarity in Page 1 · Section: Document Section",
+        "severity": "Low",
+        "category": "Writing Clarity",
+        "page_number": 1,
+        "section_heading": "Document Section",
+        "chunk_id": "64296935b11e46a1941a9867e3fec6eb_chunk_0000",
+        "location_display": "Page 1 · Section: Document Section",
+        "original_chunk": "If they are missing, it should still be accepted until everything is verified. This may not apply in certain situations.",
+        "highlighted_ambiguity": "If they are missing, it should still be accepted until everything is verified. This may not apply in certain situations.",
+        "claude_explanation": "The phrase 'everything is verified' is vague and does not specify what exactly needs to be verified or by whom.",
+        "business_impact": "Ambiguity in operational instructions may cause execution deviations across teams.",
+        "recommended_resolution": "If any documents are missing, the application should still be accepted until all required documents are verified. This may not apply in certain situations.",
+        "evidence": [
+          {
+            "location": "Page 1 · Section: Root",
+            "quote": "If they are missing, it should still be accepted until everything is verified. This may not apply in certain situations.",
+            "chunk_id": "64296935b11e46a1941a9867e3fec6eb_chunk_0000"
+          }
+        ],
+        "internal_reference": "64296935b11e46a1941a9867e3fec6eb_chunk_0000",
+        "occurrence_count": 1,
+        "verification_status": "✓ Expert Validation Complete",
+        "ambiguity_category": "Writing Clarity",
+        "why_claude_flagged_it": "The phrase 'everything is verified' is vague and does not specify what exactly needs to be verified or by whom."
+      },
+      {
+        "finding_id": "64296935b11e46a1941a9867e3fec6eb_chunk_0000_finding_005",
+        "title": "Numerical Inconsistency in Page 1 · Section: Document Section",
+        "severity": "Low",
+        "category": "Numerical Inconsistency",
+        "page_number": 1,
+        "section_heading": "Document Section",
+        "chunk_id": "64296935b11e46a1941a9867e3fec6eb_chunk_0000",
+        "location_display": "Page 1 · Section: Document Section",
+        "original_chunk": "The system shall automatically archive inactive accounts after thirty days. In another section, accounts are archived after sixty days unless otherwise specified.",
+        "highlighted_ambiguity": "The system shall automatically archive inactive accounts after thirty days. In another section, accounts are archived after sixty days unless otherwise specified.",
+        "claude_explanation": "There is a discrepancy in the stated archiving durations, which could lead to confusion about when accounts should be archived.",
+        "business_impact": "Ambiguity in operational instructions may cause execution deviations across teams.",
+        "recommended_resolution": "The system shall automatically archive inactive accounts after thirty days, unless otherwise specified. In another section, accounts are archived after sixty days unless otherwise specified.",
+        "evidence": [
+          {
+            "location": "Page 1 · Section: Root",
+            "quote": "The system shall automatically archive inactive accounts after thirty days. In another section, accounts are archived after sixty days unless otherwise specified.",
+            "chunk_id": "64296935b11e46a1941a9867e3fec6eb_chunk_0000"
+          }
+        ],
+        "internal_reference": "64296935b11e46a1941a9867e3fec6eb_chunk_0000",
+        "occurrence_count": 1,
+        "verification_status": "✓ Expert Validation Complete",
+        "ambiguity_category": "Numerical Inconsistency",
+        "why_claude_flagged_it": "There is a discrepancy in the stated archiving durations, which could lead to confusion about when accounts should be archived."
+      },
+      {
+        "finding_id": "64296935b11e46a1941a9867e3fec6eb_chunk_0000_finding_006",
+        "title": "Writing Clarity in Page 1 · Section: Document Section",
+        "severity": "Low",
+        "category": "Writing Clarity",
+        "page_number": 1,
+        "section_heading": "Document Section",
+        "chunk_id": "64296935b11e46a1941a9867e3fec6eb_chunk_0000",
+        "location_display": "Page 1 · Section: Document Section",
+        "original_chunk": "The software installation takes approximately fifteen minutes on most computers. Some systems may require significantly less time, while others usually need around one hour. This is considered the standard installation duration.",
+        "highlighted_ambiguity": "The software installation takes approximately fifteen minutes on most computers. Some systems may require significantly less time, while others usually need around one hour. This is considered the standard installation duration.",
+        "claude_explanation": "The phrase 'standard installation duration' is vague as it does not specify what constitutes a 'standard' range of times.",
+        "business_impact": "Ambiguity in operational instructions may cause execution deviations across teams.",
+        "recommended_resolution": "The software installation typically takes approximately fifteen minutes on most computers. Some systems may require significantly less time, while others usually need around one hour. These times are considered the typical installation duration.",
+        "evidence": [
+          {
+            "location": "Page 1 · Section: Root",
+            "quote": "The software installation takes approximately fifteen minutes on most computers. Some systems may require significantly less time, while others usually need around one hour. This is considered the standard installation duration.",
+            "chunk_id": "64296935b11e46a1941a9867e3fec6eb_chunk_0000"
+          }
+        ],
+        "internal_reference": "64296935b11e46a1941a9867e3fec6eb_chunk_0000",
+        "occurrence_count": 1,
+        "verification_status": "✓ Expert Validation Complete",
+        "ambiguity_category": "Writing Clarity",
+        "why_claude_flagged_it": "The phrase 'standard installation duration' is vague as it does not specify what constitutes a 'standard' range of times."
+      },
+      {
+        "finding_id": "64296935b11e46a1941a9867e3fec6eb_chunk_0000_finding_007",
+        "title": "Writing Clarity in Page 1 · Section: Document Section",
+        "severity": "Low",
+        "category": "Writing Clarity",
+        "page_number": 1,
+        "section_heading": "Document Section",
+        "chunk_id": "64296935b11e46a1941a9867e3fec6eb_chunk_0000",
+        "location_display": "Page 1 · Section: Document Section",
+        "original_chunk": "The project deadline is on 30 September 2026. The final submission should be completed before the last working day of September. The official delivery date is listed as 28 September 2026 in Appendix A.",
+        "highlighted_ambiguity": "The project deadline is on 30 September 2026. The final submission should be completed before the last working day of September. The official delivery date is listed as 28 September 2026 in Appendix A.",
+        "claude_explanation": "There is a discrepancy between the project deadline and the official delivery date, which could lead to confusion about when work must be completed.",
+        "business_impact": "Ambiguity in operational instructions may cause execution deviations across teams.",
+        "recommended_resolution": "The project deadline is on 30 September 2026. The final submission should be completed before the last working day of September (28 September 2026, as listed in Appendix A).",
+        "evidence": [
+          {
+            "location": "Page 1 · Section: Root",
+            "quote": "The project deadline is on 30 September 2026. The final submission should be completed before the last working day of September. The official delivery date is listed as 28 September 2026 in Appendix A.",
+            "chunk_id": "64296935b11e46a1941a9867e3fec6eb_chunk_0000"
+          }
+        ],
+        "internal_reference": "64296935b11e46a1941a9867e3fec6eb_chunk_0000",
+        "occurrence_count": 1,
+        "verification_status": "✓ Expert Validation Complete",
+        "ambiguity_category": "Writing Clarity",
+        "why_claude_flagged_it": "There is a discrepancy between the project deadline and the official delivery date, which could lead to confusion about when work must be completed."
+      },
+      {
+        "finding_id": "64296935b11e46a1941a9867e3fec6eb_chunk_0001_finding_002",
+        "title": "Writing Clarity in Page 1 · Section: Document Section",
+        "severity": "Low",
+        "category": "Writing Clarity",
+        "page_number": 1,
+        "section_heading": "Document Section",
+        "chunk_id": "64296935b11e46a1941a9867e3fec6eb_chunk_0001",
+        "location_display": "Page 1 · Section: Document Section",
+        "original_chunk": "soon",
+        "highlighted_ambiguity": "soon",
+        "claude_explanation": "The term 'soon' is subjective and not defined in the text.",
+        "business_impact": "Ambiguity in operational instructions may cause execution deviations across teams.",
+        "recommended_resolution": "at an unspecified time in the near future",
+        "evidence": [
+          {
+            "location": "Page 1 · Section: Root",
+            "quote": "soon",
+            "chunk_id": "64296935b11e46a1941a9867e3fec6eb_chunk_0001"
+          }
+        ],
+        "internal_reference": "64296935b11e46a1941a9867e3fec6eb_chunk_0001",
+        "occurrence_count": 1,
+        "verification_status": "✓ Expert Validation Complete",
+        "ambiguity_category": "Writing Clarity",
+        "why_claude_flagged_it": "The term 'soon' is subjective and not defined in the text."
+      },
+      {
+        "finding_id": "64296935b11e46a1941a9867e3fec6eb_chunk_0001_finding_003",
+        "title": "Writing Clarity in Page 1 · Section: Document Section",
+        "severity": "Low",
+        "category": "Writing Clarity",
+        "page_number": 1,
+        "section_heading": "Document Section",
+        "chunk_id": "64296935b11e46a1941a9867e3fec6eb_chunk_0001",
+        "location_display": "Page 1 · Section: Document Section",
+        "original_chunk": "Several users has reported",
+        "highlighted_ambiguity": "Several users has reported",
+        "claude_explanation": "Subject-verb agreement error.",
+        "business_impact": "Ambiguity in operational instructions may cause execution deviations across teams.",
+        "recommended_resolution": "Several users have reported",
+        "evidence": [
+          {
+            "location": "Page 1 · Section: Root",
+            "quote": "Several users has reported",
+            "chunk_id": "64296935b11e46a1941a9867e3fec6eb_chunk_0001"
+          }
+        ],
+        "internal_reference": "64296935b11e46a1941a9867e3fec6eb_chunk_0001",
+        "occurrence_count": 1,
+        "verification_status": "✓ Expert Validation Complete",
+        "ambiguity_category": "Writing Clarity",
+        "why_claude_flagged_it": "Subject-verb agreement error."
+      },
+      {
+        "finding_id": "64296935b11e46a1941a9867e3fec6eb_chunk_0001_finding_004",
+        "title": "Writing Clarity in Page 1 · Section: Document Section",
+        "severity": "Low",
+        "category": "Writing Clarity",
+        "page_number": 1,
+        "section_heading": "Document Section",
+        "chunk_id": "64296935b11e46a1941a9867e3fec6eb_chunk_0001",
+        "location_display": "Page 1 · Section: Document Section",
+        "original_chunk": "application crash frequently",
+        "highlighted_ambiguity": "application crash frequently",
+        "claude_explanation": "Missing verb 'does' for proper sentence structure.",
+        "business_impact": "Ambiguity in operational instructions may cause execution deviations across teams.",
+        "recommended_resolution": "application crashes frequently",
+        "evidence": [
+          {
+            "location": "Page 1 · Section: Root",
+            "quote": "application crash frequently",
+            "chunk_id": "64296935b11e46a1941a9867e3fec6eb_chunk_0001"
+          }
+        ],
+        "internal_reference": "64296935b11e46a1941a9867e3fec6eb_chunk_0001",
+        "occurrence_count": 1,
+        "verification_status": "✓ Expert Validation Complete",
+        "ambiguity_category": "Writing Clarity",
+        "why_claude_flagged_it": "Missing verb 'does' for proper sentence structure."
+      }
+    ]
+  },
+  "strategic_recommendations": [
+    "Reconcile cross-section policy directives to establish a unified operational protocol.",
+    "Ensure all technical acronyms and proprietary terms have explicit definitions in the appendix.",
+    "Clarify pronoun references across all multi-clause statements."
+  ]
+}

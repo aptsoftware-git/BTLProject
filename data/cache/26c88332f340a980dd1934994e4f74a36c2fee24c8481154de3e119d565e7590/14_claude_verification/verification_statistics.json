@@ -1,0 +1,17 @@
+{
+  "total_findings_audited": 14,
+  "total_findings_confirmed": 14,
+  "total_findings_rejected": 0,
+  "overall_document_risk": "Medium",
+  "severity_breakdown": {
+    "Critical": 0,
+    "High": 0,
+    "Medium": 6,
+    "Low": 8
+  },
+  "category_breakdown": {
+    "Pronoun Ambiguity": 4,
+    "Numerical Inconsistency": 2,
+    "Writing Clarity": 8
+  }
+}

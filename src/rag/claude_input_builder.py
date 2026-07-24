@@ -21,6 +21,12 @@ class ClaudeInputBuilder:
     def run_packaging(self, job_dir: Path, doc_id: str) -> None:
         logger.info(f"Starting Phase 13 Claude Input Packaging for job: {doc_id}")
         
+        # Cache hit check
+        cache_claude_input = job_dir / "13_claude_input" / "claude_input.json"
+        if cache_claude_input.exists() and cache_claude_input.stat().st_size > 0:
+            logger.info(f"[CACHE HIT] Claude input package already exists for job {doc_id}. Skipping re-packaging.")
+            return
+
         # Paths setup
         parsing_path = job_dir / "05_parsed"
         chunk_path = job_dir / "06_chunks"

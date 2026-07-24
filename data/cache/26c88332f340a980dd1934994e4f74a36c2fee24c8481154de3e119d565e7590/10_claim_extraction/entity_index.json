@@ -1,0 +1,60 @@
+{
+  "entities": [
+    {
+      "entity_id": "64296935b11e46a1941a9867e3fec6eb_chunk_0000_ent_003",
+      "text": "Alex",
+      "type": "Person",
+      "chunk_id": "64296935b11e46a1941a9867e3fec6eb_chunk_0000",
+      "claim_id": "64296935b11e46a1941a9867e3fec6eb_chunk_0000_claim_005"
+    },
+    {
+      "entity_id": "64296935b11e46a1941a9867e3fec6eb_chunk_0000_ent_004",
+      "text": "Jordan",
+      "type": "Person",
+      "chunk_id": "64296935b11e46a1941a9867e3fec6eb_chunk_0000",
+      "claim_id": "64296935b11e46a1941a9867e3fec6eb_chunk_0000_claim_005"
+    },
+    {
+      "entity_id": "64296935b11e46a1941a9867e3fec6eb_chunk_0001_ent_000",
+      "text": "application",
+      "type": "Product",
+      "chunk_id": "64296935b11e46a1941a9867e3fec6eb_chunk_0001",
+      "claim_id": "64296935b11e46a1941a9867e3fec6eb_chunk_0001_claim_000"
+    },
+    {
+      "entity_id": "64296935b11e46a1941a9867e3fec6eb_chunk_0000_ent_000",
+      "text": "company",
+      "type": "Organization",
+      "chunk_id": "64296935b11e46a1941a9867e3fec6eb_chunk_0000",
+      "claim_id": "64296935b11e46a1941a9867e3fec6eb_chunk_0000_claim_000"
+    },
+    {
+      "entity_id": "64296935b11e46a1941a9867e3fec6eb_chunk_0000_ent_005",
+      "text": "development team",
+      "type": "Team",
+      "chunk_id": "64296935b11e46a1941a9867e3fec6eb_chunk_0000",
+      "claim_id": "64296935b11e46a1941a9867e3fec6eb_chunk_0000_claim_000"
+    },
+    {
+      "entity_id": "64296935b11e46a1941a9867e3fec6eb_chunk_0001_ent_001",
+      "text": "development team",
+      "type": "Team",
+      "chunk_id": "64296935b11e46a1941a9867e3fec6eb_chunk_0001",
+      "claim_id": "64296935b11e46a1941a9867e3fec6eb_chunk_0001_claim_001"
+    },
+    {
+      "entity_id": "64296935b11e46a1941a9867e3fec6eb_chunk_0000_ent_002",
+      "text": "engineering department",
+      "type": "Department",
+      "chunk_id": "64296935b11e46a1941a9867e3fec6eb_chunk_0000",
+      "claim_id": "64296935b11e46a1941a9867e3fec6eb_chunk_0000_claim_003"
+    },
+    {
+      "entity_id": "64296935b11e46a1941a9867e3fec6eb_chunk_0000_ent_001",
+      "text": "finance team",
+      "type": "Team",
+      "chunk_id": "64296935b11e46a1941a9867e3fec6eb_chunk_0000",
+      "claim_id": "64296935b11e46a1941a9867e3fec6eb_chunk_0000_claim_002"
+    }
+  ]
+}

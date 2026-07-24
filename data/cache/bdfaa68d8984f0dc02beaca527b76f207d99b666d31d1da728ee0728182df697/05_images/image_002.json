@@ -1,0 +1,35 @@
+{
+  "image_id": "#/pictures/1",
+  "page": 4,
+  "caption": null,
+  "ocr_text": null,
+  "bounding_box": {
+    "l": 173.01467895507812,
+    "t": 697.9975280761719,
+    "r": 239.46841430664062,
+    "b": 572.7838897705078,
+    "coord_origin": "BOTTOMLEFT"
+  },
+  "image_path": "05_images/image_002.png",
+  "image_type": "Diagram",
+  "objects": [
+    "Mask out",
+    "MatMul",
+    "Matrix",
+    "Scale",
+    "SoftMax"
+  ],
+  "keywords": [
+    "data processing",
+    "mask",
+    "matrix",
+    "multiplication",
+    "neural network",
+    "scale",
+    "softmax"
+  ],
+  "semantic_description": "This diagram illustrates a sequence of operations in a machine learning or data processing pipeline, specifically related to a softmax function and its application in a neural network or similar computational model. The diagram shows the flow of data through various stages",
+  "detected_entities": [
+    "None"
+  ]
+}

@@ -1,6 +1,7 @@
 import re
 import json
 import logging
+import os
 from pathlib import Path
 from typing import List, Dict, Any, Optional
 
@@ -19,7 +20,7 @@ class AmbiguityExtractor:
 
     def __init__(self, config: Optional[RagConfig] = None):
         self.config = config or RagConfig()
-        self.model_name = getattr(self.config, "ollama_model", "qwen2.5-coder:32b")
+        self.model_name = getattr(self.config, "ollama_model", os.environ.get("OLLAMA_MODEL", "qwen2.5-coder:32b"))
         
         # Instantiate OllamaClient using host from configuration
         ollama_host = "http://192.168.19.21:11434"
@@ -160,6 +161,12 @@ class AmbiguityExtractor:
     def run_extraction(self, job_dir: Path, doc_id: str) -> None:
         logger.info(f"Starting Phase 2A Claim Extraction for job: {doc_id}")
         
+        # Cache hit check
+        cache_claims_path = job_dir / "10_claim_extraction" / "chunk_claims.json"
+        if cache_claims_path.exists() and cache_claims_path.stat().st_size > 0:
+            logger.info(f"[CACHE HIT] Claim extractions already exist for job {doc_id}. Skipping re-extraction.")
+            return
+
         # 1. Load document chunks (Master list containing all chunks)
         chunks_json_path = job_dir / "06_chunks" / "document_chunks.json"
         if not chunks_json_path.exists():

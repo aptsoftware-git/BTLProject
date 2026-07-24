@@ -1,0 +1,38 @@
+{
+  "image_id": "#/pictures/5",
+  "page": 15,
+  "caption": null,
+  "ocr_text": null,
+  "bounding_box": {
+    "l": 120.3704605102539,
+    "t": 607.4371490478516,
+    "r": 498.24505615234375,
+    "b": 202.76763916015625,
+    "coord_origin": "BOTTOMLEFT"
+  },
+  "image_path": "05_images/image_006.png",
+  "image_type": "Graph",
+  "objects": [
+    "Words",
+    "and the text \"The Law will never be perfect\" and \"The missing out on his opinion's ECS-ve but its application should be just this is what we are missing in my opinion\".",
+    "lines (edges)",
+    "nodes (representing words)"
+  ],
+  "keywords": [
+    "Neural network",
+    "green lines",
+    "input sentence",
+    "machine translation",
+    "natural language processing",
+    "output sentence",
+    "probability",
+    "red lines",
+    "sequence-to-sequence model",
+    "text generation",
+    "word mapping."
+  ],
+  "semantic_description": "The image is a visualization of a neural network or a machine learning model's output, specifically a sequence-to-sequence model, likely used for natural language processing tasks such as machine translation or text generation. The graph shows the probability of each word in the input sentence \"The Law will never be perfect\" being mapped to the corresponding word in the output sentence \"The missing out on his opinion's ECS-ve but its application should be just this is what we are missing in my opinion\". The green lines represent the highest probability paths, while the red lines represent alternative paths with lower probabilities.",
+  "detected_entities": [
+    "None"
+  ]
+}

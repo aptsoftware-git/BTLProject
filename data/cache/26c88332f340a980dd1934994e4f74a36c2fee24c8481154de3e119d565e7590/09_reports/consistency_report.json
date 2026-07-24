@@ -1,0 +1,33 @@
+{
+  "document_id": "64296935b11e46a1941a9867e3fec6eb",
+  "source_file": "64296935b11e46a1941a9867e3fec6eb_sample_ambiguity_test_document.txt",
+  "created_time": "2026-07-23T07:55:12Z",
+  "summary": {
+    "document_name": "64296935b11e46a1941a9867e3fec6eb_sample_ambiguity_test_document.txt",
+    "document_type": "TXT Document",
+    "pages_analysed": 1,
+    "total_segments": 51,
+    "processing_time": "N/A",
+    "analysis_completed_on": "2026-07-23 13:25:12",
+    "total_issues": 0,
+    "high_severity": 0,
+    "medium_severity": 0,
+    "low_severity": 0,
+    "overall_health": "Excellent",
+    "health_description": "No contextual inconsistencies or contradictions detected in this document.",
+    "categories_distribution": {
+      "Numeric Inconsistencies": 0,
+      "Reference Conflicts": 0,
+      "Terminology Conflicts": 0,
+      "Policy Conflicts": 0,
+      "Entity Inconsistencies": 0,
+      "Date Conflicts": 0,
+      "Cross-section Contradictions": 0,
+      "Missing References": 0,
+      "Broken References": 0,
+      "Duplicate Information": 0
+    },
+    "status": "Completed Successfully"
+  },
+  "issues": []
+}

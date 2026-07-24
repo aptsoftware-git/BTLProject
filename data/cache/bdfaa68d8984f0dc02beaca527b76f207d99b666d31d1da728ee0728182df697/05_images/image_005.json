@@ -1,0 +1,37 @@
+{
+  "image_id": "#/pictures/4",
+  "page": 14,
+  "caption": null,
+  "ocr_text": null,
+  "bounding_box": {
+    "l": 121.0322265625,
+    "t": 621.1409301757812,
+    "r": 501.9855651855469,
+    "b": 186.8482666015625,
+    "coord_origin": "BOTTOMLEFT"
+  },
+  "image_path": "05_images/image_005.png",
+  "image_type": "Diagram",
+  "objects": [
+    "Brown boxes (output sequence)",
+    "Gray boxes (input sequence)",
+    "Purple lines (alignment)",
+    "Text labels (words and tokens)"
+  ],
+  "keywords": [
+    "Alignment",
+    "Alignment Lines",
+    "End-of-Sentence Markers",
+    "Input",
+    "Natural Language Processing",
+    "Neural Network",
+    "Output",
+    "Padding Tokens",
+    "Sequence-to-Sequence",
+    "Tokens"
+  ],
+  "semantic_description": "The image appears to be a visualization of a neural network or a machine learning model's output, specifically a sequence-to-sequence model, possibly used for natural language processing (NLP). It shows the alignment of words from two different sentences, indicating how the model matches words from the input sentence to the output sentence. The purple lines represent the alignment of words, and the gray and brown boxes represent the input and output sequences, respectively. The text at the bottom indicates the end-of-sentence markers and padding tokens.",
+  "detected_entities": [
+    "None"
+  ]
+}

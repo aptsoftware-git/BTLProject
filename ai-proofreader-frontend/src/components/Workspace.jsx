@@ -1,8 +1,9 @@
 import React, { useState, useEffect, useRef, useMemo } from "react";
-import { useParams, useNavigate } from "react-router-dom";
+import { useParams, useNavigate, useLocation } from "react-router-dom";
 import { fetchDocument, fetchPreferences } from "../api";
 import Assistant from "./Assistant";
 import ContextAnalysis from "./ContextAnalysis";
+import Reports from "./Reports";
 
 
 const buildDecidedText = (rawText, issues, decisions) => {
@@ -56,9 +57,53 @@ const getCategory = (reason) => {
   return "Technical Terms";
 };
 
+const getTimelineStages = (doc) => {
+  if (!doc) return [];
+  const percent = doc.progress_percentage || 0;
+  const isCompleted = doc.status === "completed";
+  const stageStr = (doc.current_stage || "").toLowerCase();
+
+  const stages = [
+    { id: 1, label: "Stage 1: Extraction", minPct: 0 },
+    { id: 2, label: "Stage 2: Chunking", minPct: 15 },
+    { id: 3, label: "Stage 3: Embeddings", minPct: 30 },
+    { id: 4, label: "Stage 4: Proofreading", minPct: 45 },
+    { id: 5, label: "Stage 5: RAG", minPct: 60 },
+    { id: 6, label: "Stage 6: Local LLM Ambiguity Detection", minPct: 70 },
+    { id: 7, label: "Stage 7: Claude Verification", minPct: 82 },
+    { id: 8, label: "Stage 8: Executive Report Generation", minPct: 92 }
+  ];
+
+  return stages.map((stage) => {
+    let state = "pending";
+    
+    if (isCompleted) {
+      state = "completed";
+    } else if (doc.status === "failed") {
+      state = "pending";
+    } else {
+      if (percent >= stage.minPct) {
+        const isLast = stage.id === stages.length;
+        const nextStage = isLast ? null : stages[stage.id];
+        if (isLast || percent < nextStage.minPct) {
+          state = "active";
+        } else {
+          state = "completed";
+        }
+      }
+    }
+
+    return {
+      ...stage,
+      state
+    };
+  });
+};
+
 export default function Workspace() {
   const { id } = useParams();
   const navigate = useNavigate();
+  const location = useLocation();
 
   const [doc, setDoc] = useState(null);
   const [loading, setLoading] = useState(true);
@@ -68,7 +113,29 @@ export default function Workspace() {
   const [preferences, setPreferences] = useState({ confidence_threshold: 40 });
 
   // Workspace active states
-  const [activeTab, setActiveTab] = useState("annotated"); // annotated | corrected
+  const [activeTab, setActiveTab] = useState("overview"); 
+  const [isDownloadModalOpen, setIsDownloadModalOpen] = useState(false);
+  const [isActionsDropdownOpen, setIsActionsDropdownOpen] = useState(false);
+  const [statusDetailsExpanded, setStatusDetailsExpanded] = useState(false);
+  const [proofSubTab, setProofSubTab] = useState("annotated");
+  const actionsRef = useRef(null);
+
+  useEffect(() => {
+    function handleClickOutside(event) {
+      if (actionsRef.current && !actionsRef.current.contains(event.target)) {
+        setIsActionsDropdownOpen(false);
+      }
+    }
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, []);
+
+  useEffect(() => {
+    const handleOpenModal = () => setIsDownloadModalOpen(true);
+    window.addEventListener("openDownloadModal", handleOpenModal);
+    return () => window.removeEventListener("openDownloadModal", handleOpenModal);
+  }, []);
+
   const [activeIssueIdx, setActiveIssueIdx] = useState(null);
   const [issueDecisions, setIssueDecisions] = useState({});
   
@@ -77,11 +144,45 @@ export default function Workspace() {
 
   // Toolbar states
   const [search, setSearch] = useState("");
-  const [typeFilter, setTypeFilter] = useState("all");
+  const [typeFilter, setTypeFilter] = useState("all"); // 'all', 'grammar', 'spelling'
   const [sortBy, setSortBy] = useState("index");
 
   const [protectedOpen, setProtectedOpen] = useState(false);
   const textContainerRef = useRef(null);
+
+  // Helper functions to categorize issues
+  const isSpellingIssue = (issue) => issue && (issue.issue_type === "spelling" || issue.issue_type === "punctuation");
+  const isGrammarIssue = (issue) => issue && (issue.issue_type !== "spelling" && issue.issue_type !== "punctuation");
+
+  // Synchronize document DOM highlights (fallback mode when annotatedHtml is rendered)
+  useEffect(() => {
+    if (!textContainerRef.current || doc?.raw_text) return;
+
+    const marks = textContainerRef.current.querySelectorAll("mark[data-issue-idx]");
+    marks.forEach((mark) => {
+      const idxAttr = mark.getAttribute("data-issue-idx");
+      if (idxAttr === null) return;
+      const idx = parseInt(idxAttr, 10);
+      const issue = doc?.issues?.[idx];
+      if (!issue) return;
+
+      const isSpelling = isSpellingIssue(issue);
+      const isGrammar = isGrammarIssue(issue);
+
+      let hide = false;
+      if (typeFilter === "grammar" && !isGrammar) {
+        hide = true;
+      } else if (typeFilter === "spelling" && !isSpelling) {
+        hide = true;
+      }
+
+      if (hide) {
+        mark.classList.add("filter-hidden-mark");
+      } else {
+        mark.classList.remove("filter-hidden-mark");
+      }
+    });
+  }, [typeFilter, annotatedHtml, doc]);
 
   const handleShowInDocument = (page, text, objectId) => {
     setActiveTab("annotated");
@@ -150,6 +251,15 @@ export default function Workspace() {
         if (!active) return;
         setPreferences(prefs || { confidence_threshold: 40 });
         setDoc(data);
+        if (data) {
+          localStorage.setItem("currentlyOpenDocId", data.id);
+          localStorage.setItem("currentlyOpenDocName", data.filename);
+          localStorage.setItem("currentlyOpenDocPages", data.total_pages || data.pages || 1);
+          localStorage.setItem("currentlyOpenDocStatus", data.status || "pending");
+          localStorage.setItem("currentlyOpenDocIssuesCount", (data.issues || []).length);
+          localStorage.setItem("currentlyOpenDocConsistencyIssues", data.context_analysis_issues_count || 0);
+          window.dispatchEvent(new Event("activeDocChanged"));
+        }
 
         // Process HTML/State only once when loaded
         if (data && data.status === "completed") {
@@ -229,6 +339,31 @@ export default function Workspace() {
     }
   };
 
+  // Handle initial page query parameter from standalone AI Assistant citations
+  useEffect(() => {
+    if (doc && doc.issues) {
+      const params = new URLSearchParams(location.search);
+      const pageParam = params.get("page");
+      if (pageParam) {
+        const pageNum = parseInt(pageParam);
+        const firstIssueIdx = (doc.issues || []).findIndex(i => i && i.page_number === pageNum);
+        if (firstIssueIdx !== -1) {
+          handleSelectIssue(firstIssueIdx);
+        }
+      }
+    }
+  }, [doc, location.search]);
+
+  const handleTabChange = (tabName) => {
+    navigate(`/documents/${id}?tab=${tabName}`);
+  };
+
+  useEffect(() => {
+    const params = new URLSearchParams(location.search);
+    const tabVal = params.get("tab") || "overview";
+    setActiveTab(tabVal);
+  }, [location.search]);
+
   // Helper to extract paragraph body from HTML
   const getParagraphBody = (htmlStr) => {
     if (!htmlStr) return "";
@@ -297,21 +432,36 @@ export default function Workspace() {
       } else if (decision === "rejected") {
         elements.push(doc.raw_text.slice(issue.char_start, issue.char_end));
       } else {
-        const severity = issue.severity || "medium";
-        const accentClass = `sev-${severity}`;
-        const isSelected = activeIssueIdx === idx;
+        const isSpelling = isSpellingIssue(issue);
+        const isGrammar = isGrammarIssue(issue);
 
-        elements.push(
-          <mark
-            key={`mark-${idx}`}
-            data-issue-idx={idx}
-            className={`${accentClass} pending-highlight ${isSelected ? "active-highlight active-glow" : ""}`}
-            style={{ cursor: "pointer" }}
-            onClick={() => handleSelectIssue(idx)}
-          >
-            {doc.raw_text.slice(issue.char_start, issue.char_end)}
-          </mark>
-        );
+        let shouldHighlight = true;
+        if (typeFilter === "grammar" && !isGrammar) {
+          shouldHighlight = false;
+        } else if (typeFilter === "spelling" && !isSpelling) {
+          shouldHighlight = false;
+        }
+
+        if (shouldHighlight) {
+          const severity = issue.severity || "medium";
+          const accentClass = isSpelling ? "spelling" : "grammar";
+          const isSelected = activeIssueIdx === idx;
+
+          elements.push(
+            <mark
+              key={`mark-${idx}`}
+              data-issue-idx={idx}
+              className={`${accentClass} pending-highlight ${isSelected ? "active-highlight active-glow" : ""}`}
+              style={{ cursor: "pointer" }}
+              onClick={() => handleSelectIssue(idx)}
+            >
+              {doc.raw_text.slice(issue.char_start, issue.char_end)}
+            </mark>
+          );
+        } else {
+          // Render plain text without highlight when filtered out
+          elements.push(doc.raw_text.slice(issue.char_start, issue.char_end));
+        }
       }
 
       cursor = issue.char_end;
@@ -333,6 +483,22 @@ export default function Workspace() {
     return conf <= threshold;
   };
 
+  // Unresolved issues count memoizers for filter pills
+  const allUnresolvedCount = useMemo(() => {
+    if (!doc || !doc.issues) return 0;
+    return (doc.issues || []).filter((i, idx) => i && issueDecisions[idx] === undefined && !isFiltered(i)).length;
+  }, [doc, issueDecisions, preferences]);
+
+  const grammarUnresolvedCount = useMemo(() => {
+    if (!doc || !doc.issues) return 0;
+    return (doc.issues || []).filter((i, idx) => i && issueDecisions[idx] === undefined && !isFiltered(i) && isGrammarIssue(i)).length;
+  }, [doc, issueDecisions, preferences]);
+
+  const spellingUnresolvedCount = useMemo(() => {
+    if (!doc || !doc.issues) return 0;
+    return (doc.issues || []).filter((i, idx) => i && issueDecisions[idx] === undefined && !isFiltered(i) && isSpellingIssue(i)).length;
+  }, [doc, issueDecisions, preferences]);
+
   // 1. Get filtered issues list based on search/filters
   const visibleIssues = useMemo(() => {
     if (!doc || !doc.issues) return [];
@@ -342,8 +508,8 @@ export default function Workspace() {
       .filter((issue) => {
         if (!issue) return false;
         
-        // Exclude filtered (confidence <= threshold)
-        if (isFiltered(issue)) return false;
+        // Exclude filtered (confidence <= threshold) unless it is accepted or rejected where we want to show history
+        if (isFiltered(issue) && typeFilter !== "accepted" && typeFilter !== "rejected") return false;
 
         // Apply Search with safety fallbacks
         const origText = issue.original_text || "";
@@ -356,18 +522,26 @@ export default function Workspace() {
           sugText.toLowerCase().includes(query.toLowerCase()) ||
           reasonText.toLowerCase().includes(query.toLowerCase());
 
-        // Apply Type Filter
-        let matchType = true;
-        if (typeFilter !== "all") {
-          const type = issue.issue_type || "";
-          if (typeFilter === "spelling") {
-            matchType = type === "spelling" || type === "punctuation";
-          } else {
-            matchType = type === typeFilter;
-          }
+        // Apply Filter (All Issues, Grammar, Spelling, Protected Terms, Accepted, Rejected)
+        let matchFilter = true;
+        const decision = issueDecisions[issue.originalIndex];
+
+        if (typeFilter === "all" || typeFilter === "unresolved") {
+          matchFilter = decision === undefined;
+        } else if (typeFilter === "grammar") {
+          matchFilter = decision === undefined && isGrammarIssue(issue);
+        } else if (typeFilter === "spelling") {
+          matchFilter = decision === undefined && isSpellingIssue(issue);
+        } else if (typeFilter === "protected") {
+          const isProt = doc.protected_terms && doc.protected_terms.some(t => origText.toLowerCase().includes(t.toLowerCase()));
+          matchFilter = isProt;
+        } else if (typeFilter === "accepted") {
+          matchFilter = decision === "accepted";
+        } else if (typeFilter === "rejected") {
+          matchFilter = decision === "rejected";
         }
 
-        return matchSearch && matchType;
+        return matchSearch && matchFilter;
       })
       .sort((a, b) => {
         // Apply Sort
@@ -389,7 +563,7 @@ export default function Workspace() {
         // Default: original index
         return (a.originalIndex ?? 0) - (b.originalIndex ?? 0);
       });
-  }, [doc, search, typeFilter, sortBy, preferences?.confidence_threshold]);
+  }, [doc, search, typeFilter, sortBy, issueDecisions, preferences]);
 
   const groupedTerms = useMemo(() => {
     const groups = {
@@ -705,60 +879,91 @@ export default function Workspace() {
 
   // Processing stages
   if (doc.status === "processing" || doc.status === "pending" || doc.status === "uploaded") {
-    const isProcessing = doc.status === "processing";
     const percent = doc.progress_percentage || 0;
     const curPage = doc.current_page || 0;
     const totPages = doc.total_pages || 0;
-    const curBatch = doc.current_batch || 0;
-    const totBatches = doc.total_batches || 0;
     const estTime = doc.estimated_remaining_time || "Estimating...";
-    const safeMode = doc.memory_safe_mode || false;
-    const curStage = doc.current_stage || "Starting";
+    const timeline = getTimelineStages(doc);
+    const completedCount = timeline.filter(s => s.state === "completed").length;
 
     return (
       <div style={styles.centerContainer}>
-        <div style={styles.spinner} />
-        <div style={{ marginTop: 20, textAlign: "center", maxWidth: 450, width: "100%", padding: "0 20px" }}>
-          <h3 style={{ fontSize: 16, fontWeight: 700, color: "var(--text-primary)", margin: "0 0 8px 0" }}>
-            {isProcessing ? "Processing Document Analysis" : "Job Queued"}
-          </h3>
-          
-          {/* Progress bar */}
-          <div style={{ width: "100%", height: 6, background: "var(--border)", borderRadius: 3, overflow: "hidden", marginBottom: 16 }}>
-            <div style={{ width: `${percent}%`, height: "100%", background: "var(--brand)", transition: "width 0.3s ease" }} />
+        <div style={styles.processingGrid}>
+          {/* Left Column: Animated Scanning Icon */}
+          <div style={styles.processingLeft}>
+            <div className="pulse-animation" style={styles.processingIconCircle}>
+              <svg width="44" height="44" viewBox="0 0 24 24" fill="none" stroke="var(--brand)" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+                <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" />
+                <polyline points="14 2 14 8 20 8" />
+                <line x1="16" y1="13" x2="8" y2="13" />
+                <line x1="16" y1="17" x2="8" y2="17" />
+                <line x1="10" y1="9" x2="8" y2="9" />
+              </svg>
+            </div>
+            <p style={{ margin: "16px 0 0", fontSize: 13.5, fontWeight: 700, color: "var(--brand)" }}>AI Scanning Active</p>
+            <p style={{ margin: "6px 0 0", fontSize: 11.5, color: "var(--text-muted)", maxWidth: 150, textAlign: "center", lineHeight: 1.4 }}>
+              Extracting structural layout and cross-referencing policy statements.
+            </p>
           </div>
-
-          <div style={{ display: "flex", flexDirection: "column", gap: 10, textAlign: "left", background: "var(--bg-hover)", padding: 16, borderRadius: 8, border: "1px solid var(--border)" }}>
-            <div style={{ display: "flex", justifyContent: "space-between", fontSize: 12.5 }}>
-              <span style={{ fontWeight: 600, color: "var(--text-secondary)" }}>Current Stage</span>
-              <span style={{ fontWeight: 700, color: "var(--brand)" }}>{curStage}</span>
-            </div>
-            
-            {totPages > 0 && (
-              <div style={{ display: "flex", justifyContent: "space-between", fontSize: 12.5 }}>
-                <span style={{ fontWeight: 600, color: "var(--text-secondary)" }}>Page Progress</span>
-                <span style={{ fontWeight: 700, color: "var(--text-primary)" }}>Page {curPage} of {totPages}</span>
-              </div>
-            )}
-
-            {totBatches > 0 && (
-              <div style={{ display: "flex", justifyContent: "space-between", fontSize: 12.5 }}>
-                <span style={{ fontWeight: 600, color: "var(--text-secondary)" }}>Current Batch</span>
-                <span style={{ fontWeight: 700, color: "var(--text-primary)" }}>Batch {curBatch} of {totBatches}</span>
-              </div>
-            )}
-
-            <div style={{ display: "flex", justifyContent: "space-between", fontSize: 12.5 }}>
-              <span style={{ fontWeight: 600, color: "var(--text-secondary)" }}>Est. Time Remaining</span>
-              <span style={{ fontWeight: 700, color: "var(--brand)" }}>{estTime}</span>
+          
+          {/* Right Column: Processing Details & Collapsed Timeline */}
+          <div style={styles.processingRight}>
+            <div style={{ marginBottom: 16 }}>
+              <h3 style={{ fontSize: 15.5, fontWeight: 700, color: "var(--text-primary)", margin: 0 }}>
+                Analyzing Document Intelligence...
+              </h3>
+              <p style={{ margin: "2px 0 0", fontSize: 12.5, color: "var(--text-secondary)" }}>
+                We are reviewing consistency, grammar, and statements. This may take a few minutes.
+              </p>
             </div>
 
-            {safeMode && (
-              <div style={{ display: "flex", alignItems: "center", justifyContent: "center", gap: 6, marginTop: 8, padding: "4px 8px", background: "rgba(22, 163, 74, 0.1)", border: "1px solid rgba(22, 163, 74, 0.2)", borderRadius: 6, fontSize: 11, color: "var(--green)", fontWeight: 700, textTransform: "uppercase", letterSpacing: 0.5 }}>
-                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" style={{ marginRight: 2 }}><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
-                Memory Safe Mode: Active
-              </div>
-            )}
+            {/* Progress bar */}
+            <div style={{ width: "100%", height: 6, background: "var(--border)", borderRadius: 3, overflow: "hidden", marginBottom: 16 }}>
+              <div style={{ width: `${percent}%`, height: "100%", background: "var(--brand)", transition: "width 0.3s ease" }} />
+            </div>
+
+            {/* Timeline Checklist */}
+            <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
+              {/* Collapsed completed stages */}
+              {completedCount > 0 && (
+                <div style={{ display: "flex", alignItems: "center", gap: 8, color: "var(--green)" }}>
+                  <span style={{ display: "inline-flex", alignItems: "center", justifyContent: "center", width: 18, height: 18, borderRadius: "50%", background: "var(--green-light)" }}>
+                    <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round">
+                      <polyline points="20 6 9 17 4 12" />
+                    </svg>
+                  </span>
+                  <span style={{ fontSize: 12.5, fontWeight: 650 }}>
+                    {completedCount} stages completed
+                  </span>
+                </div>
+              )}
+
+              {/* Active and pending stages */}
+              {timeline.filter(s => s.state !== "completed").map((s) => {
+                const isActive = s.state === "active";
+                return (
+                  <div key={s.id} style={{ display: "flex", alignItems: "center", gap: 8, opacity: s.state === "pending" ? 0.45 : 1 }}>
+                    {isActive ? (
+                      <span className="pulse-animation" style={{ display: "inline-flex", alignItems: "center", justifyContent: "center", width: 18, height: 18, borderRadius: "50%", background: "var(--brand-light)", color: "var(--brand)" }}>
+                        <span style={{ width: 6, height: 6, borderRadius: "50%", background: "var(--brand)" }} />
+                      </span>
+                    ) : (
+                      <span style={{ display: "inline-flex", alignItems: "center", justifyContent: "center", width: 18, height: 18, borderRadius: "50%", border: "1.5px solid var(--text-muted)", color: "var(--text-muted)", fontSize: 9, fontWeight: 700 }}>
+                        {s.id}
+                      </span>
+                    )}
+                    <span style={{ fontSize: 12.5, fontWeight: isActive ? 700 : 550, color: isActive ? "var(--brand)" : "var(--text-primary)" }}>
+                      {s.label}
+                    </span>
+                  </div>
+                );
+              })}
+            </div>
+
+            <div style={{ marginTop: 20, paddingTop: 12, borderTop: "1px solid var(--border)", display: "flex", justifyContent: "space-between", fontSize: 11.5, color: "var(--text-secondary)" }}>
+              <span>Page Scope: Page {curPage} of {totPages || 1}</span>
+              <span>Est. Remaining: {estTime}</span>
+            </div>
           </div>
         </div>
       </div>
@@ -782,12 +987,11 @@ export default function Workspace() {
   const activeUnresolvedCount = visibleIssues.filter((issue) => issue && issueDecisions[issue.originalIndex] === undefined).length;
   const spellingCount = issues.filter((i, idx) => i && issueDecisions[idx] === undefined && !isFiltered(i) && (i.issue_type === "spelling" || i.issue_type === "punctuation")).length;
   const grammarCount = issues.filter((i, idx) => i && issueDecisions[idx] === undefined && !isFiltered(i) && (i.issue_type !== "spelling" && i.issue_type !== "punctuation")).length;
-  
   const acceptedCount = Object.values(issueDecisions).filter(v => v === "accepted").length;
   const rejectedCount = Object.values(issueDecisions).filter(v => v === "rejected").length;
   const totalChecked = acceptedCount + rejectedCount;
-  
-  const score = Math.max(45, 100 - (issues.length - acceptedCount));
+
+  const publicationStatus = (issues.length - acceptedCount) === 0 ? "Ready for Publication" : (issues.length - acceptedCount) <= 3 ? "Requires Minor Revision" : "Requires Major Revision";
 
   const totalProtectedCount = doc?.protected_terms?.length || 0;
 
@@ -799,6 +1003,11 @@ export default function Workspace() {
     } catch (e) {
       console.error("Error fetching latest protected terms: ", e);
     }
+  };
+
+  const handleDownloadFormat = (packageName, format) => {
+    alert(`Preparing ${packageName} report in ${format.toUpperCase()} format...`);
+    handleDownloadCorrected();
   };
 
   // Copy Corrected Document text directly to clipboard
@@ -820,6 +1029,149 @@ export default function Workspace() {
     });
   };
 
+  const renderResultsOverview = () => {
+    const totalIssues = doc?.issues?.length || 0;
+    const consistencyIssues = doc?.context_analysis_issues_count || 0;
+    
+    return (
+      <div style={styles.overviewContainer}>
+        <div style={styles.overviewHeader}>
+          <h2 style={styles.overviewTitle}>Executive Overview</h2>
+          <p style={styles.overviewSubtitle}>Formal assessment indicators generated from structural checking algorithms.</p>
+        </div>
+        
+        <div style={styles.overviewGrid}>
+          {/* Card 1: Overall Assessment */}
+          <div style={styles.overviewCard}>
+            <div style={styles.overviewCardTop}>
+              <span style={{
+                ...styles.cardBadge,
+                backgroundColor: totalIssues === 0 ? "var(--green-light)" : totalIssues <= 10 ? "var(--amber-light)" : "var(--red-light)",
+                color: totalIssues === 0 ? "var(--green)" : totalIssues <= 10 ? "var(--amber)" : "var(--red)"
+              }}>
+                {totalIssues === 0 ? "Ready for Publication" : totalIssues <= 10 ? "Needs Attention" : "Revisions Recommended"}
+              </span>
+              <h3 style={styles.overviewCardTitle}>Overall Assessment</h3>
+            </div>
+            <p style={styles.overviewCardDesc}>
+              This document has been reviewed across spelling, structural grammar, and semantic contradiction layers.
+            </p>
+            <button style={styles.overviewCardBtn} onClick={() => handleTabChange("proofreading")}>
+              View Proofreading &rarr;
+            </button>
+          </div>
+
+          {/* Card 2: Writing Quality */}
+          <div style={styles.overviewCard}>
+            <div style={styles.overviewCardTop}>
+              <span style={{
+                ...styles.cardBadge,
+                backgroundColor: totalIssues === 0 ? "var(--green-light)" : "var(--amber-light)",
+                color: totalIssues === 0 ? "var(--green)" : "var(--amber)"
+              }}>
+                {totalIssues} Issues Found
+              </span>
+              <h3 style={styles.overviewCardTitle}>Writing Quality</h3>
+            </div>
+            <p style={styles.overviewCardDesc}>
+              Spelling and structural grammar verification flags typographical bugs and formatting errors.
+            </p>
+            <button style={styles.overviewCardBtn} onClick={() => handleTabChange("proofreading")}>
+              View Proofreading &rarr;
+            </button>
+          </div>
+
+          {/* Card 3: Consistency Review */}
+          <div style={styles.overviewCard}>
+            <div style={styles.overviewCardTop}>
+              <span style={{
+                ...styles.cardBadge,
+                backgroundColor: consistencyIssues === 0 ? "var(--green-light)" : "var(--amber-light)",
+                color: consistencyIssues === 0 ? "var(--green)" : "var(--amber)"
+              }}>
+                {consistencyIssues} Conflicts Mapped
+              </span>
+              <h3 style={styles.overviewCardTitle}>Consistency Review</h3>
+            </div>
+            <p style={styles.overviewCardDesc}>
+              Audits conflicting sections to check that clauses do not contradict.
+            </p>
+            <button style={styles.overviewCardBtn} onClick={() => handleTabChange("analysis")}>
+              View Context Analysis &rarr;
+            </button>
+          </div>
+
+          {/* Card 4: AI Verification */}
+          <div style={styles.overviewCard}>
+            <div style={styles.overviewCardTop}>
+              <span style={{
+                ...styles.cardBadge,
+                backgroundColor: consistencyIssues === 0 ? "var(--green-light)" : "var(--amber-light)",
+                color: consistencyIssues === 0 ? "var(--green)" : "var(--amber)"
+              }}>
+                Validation Run
+              </span>
+              <h3 style={styles.overviewCardTitle}>AI Verification</h3>
+            </div>
+            <p style={styles.overviewCardDesc}>
+              Advanced cross-sectional logic checks verifying statements are factual and consistent.
+            </p>
+            <button style={styles.overviewCardBtn} onClick={() => handleTabChange("analysis")}>
+              View Context Analysis &rarr;
+            </button>
+          </div>
+
+          {/* Card 5: Reports Page */}
+          <div style={styles.overviewCard}>
+            <div style={styles.overviewCardTop}>
+              <span style={{
+                ...styles.cardBadge,
+                backgroundColor: "var(--brand-light)",
+                color: "var(--brand)"
+              }}>
+                Ready to Export
+              </span>
+              <h3 style={styles.overviewCardTitle}>Reports Archive</h3>
+            </div>
+            <p style={styles.overviewCardDesc}>
+              Access intermediate logical analysis, cross references, and formal executive summaries.
+            </p>
+            <button style={styles.overviewCardBtn} onClick={() => handleTabChange("reports")}>
+              View Reports &rarr;
+            </button>
+          </div>
+        </div>
+      </div>
+    );
+  };
+
+  const totalIssuesCount = doc?.issues?.length || 0;
+  const totalConsistencyCount = doc?.context_analysis_issues_count || 0;
+
+  let primaryStatusText = "Currently Processing";
+  let badgeColor = "var(--amber)";
+  let badgeBg = "var(--amber-light)";
+  
+  if (doc.status === "completed") {
+    if (totalIssuesCount === 0 && totalConsistencyCount === 0) {
+      primaryStatusText = "Ready for Publishing";
+      badgeColor = "var(--green)";
+      badgeBg = "var(--green-light)";
+    } else if (totalIssuesCount <= 5 && totalConsistencyCount === 0) {
+      primaryStatusText = "Needs Minor Revision";
+      badgeColor = "var(--green)";
+      badgeBg = "var(--green-light)";
+    } else if (totalIssuesCount <= 15) {
+      primaryStatusText = "Needs Review";
+      badgeColor = "var(--amber)";
+      badgeBg = "var(--amber-light)";
+    } else {
+      primaryStatusText = "Requires Major Revision";
+      badgeColor = "var(--red)";
+      badgeBg = "var(--red-light)";
+    }
+  }
+
   return (
     <div style={styles.workspace}>
       
@@ -827,314 +1179,454 @@ export default function Workspace() {
       <div style={styles.header}>
         <div style={styles.titleCol}>
           <div style={styles.iconBox}>
-            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z" /><path d="M14 2v6h6" /></svg>
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z" /><path d="M14 2v6h6" /></svg>
           </div>
           <div>
             <h2 style={styles.filename}>{doc.filename}</h2>
-            <p style={styles.subtext}>Job ID: {doc.id?.substring(0, 8)}... · {doc.size}</p>
+            <div style={{ display: "flex", gap: 12, fontSize: 12.5, color: "var(--text-secondary)", marginTop: 2, alignItems: "center" }}>
+              <span>{doc.total_pages || doc.pages || 1} pages</span>
+              <span>•</span>
+              <span>Uploaded {doc.uploadedLabel || "Recently"}</span>
+              <span>•</span>
+              <span style={{ fontWeight: 650, color: doc.status === "completed" ? "var(--green)" : "var(--amber)" }}>
+                {doc.status === "completed" ? "✓ Scan Complete" : "⚠ Under Review"}
+              </span>
+            </div>
+            
+            {/* Persistent Document Context Header - Clean primary status */}
+            <div style={{ display: "flex", alignItems: "center", gap: 10, marginTop: 8, flexWrap: "wrap", position: "relative" }}>
+              <div 
+                style={{
+                  display: "inline-flex", alignItems: "center", gap: 6, cursor: "pointer",
+                  padding: "4px 10px", borderRadius: 6, background: badgeBg, color: badgeColor,
+                  fontSize: 12, fontWeight: 700, userSelect: "none"
+                }}
+                onClick={() => setStatusDetailsExpanded(!statusDetailsExpanded)}
+                title="Click to view detailed metrics breakdown"
+              >
+                <span>{primaryStatusText}</span>
+                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" style={{ transform: statusDetailsExpanded ? "rotate(180deg)" : "none", transition: "transform 0.15s" }}>
+                  <polyline points="6 9 12 15 18 9"/>
+                </svg>
+              </div>
+
+              {statusDetailsExpanded && (
+                <div style={{
+                  position: "absolute", top: 32, left: 0, zIndex: 10,
+                  background: "var(--bg-card)", border: "1px solid var(--border)",
+                  borderRadius: 8, padding: "12px 16px", minWidth: 240,
+                  boxShadow: "0 4px 12px rgba(0, 0, 0, 0.08)", display: "flex", flexDirection: "column", gap: 6
+                }}>
+                  <div style={{ fontSize: 11, fontWeight: 700, textTransform: "uppercase", color: "var(--text-muted)", borderBottom: "1px solid var(--border)", paddingBottom: 4 }}>
+                    Detailed Metrics Audit
+                  </div>
+                  <div style={{ display: "flex", justifyContent: "space-between", fontSize: 12 }}>
+                    <span>Writing Flags:</span>
+                    <strong>{totalIssuesCount}</strong>
+                  </div>
+                  <div style={{ display: "flex", justifyContent: "space-between", fontSize: 12 }}>
+                    <span>Consistency Issues:</span>
+                    <strong>{totalConsistencyCount}</strong>
+                  </div>
+                  <div style={{ display: "flex", justifyContent: "space-between", fontSize: 12 }}>
+                    <span>Protected Terms Checked:</span>
+                    <strong>{doc.protected_terms?.length || 0}</strong>
+                  </div>
+                </div>
+              )}
+            </div>
           </div>
         </div>
 
         <div style={styles.actionCol}>
-          <div style={styles.scorePill}>
-            Score: <strong>{score}</strong>
-          </div>
-          <button style={styles.exportBtn} onClick={() => navigate(`/assistant/${doc.id}`)}>
-            Open AI Assistant
-          </button>
-          <button style={styles.exportBtn} onClick={handleGenerateReport}>
-            Generate Report
-          </button>
-          {activeTab === "corrected" && (
-            <button style={styles.copyBtn} onClick={copyCorrectedText}>
-              Copy Text
+          {/* Actions Dropdown */}
+          <div ref={actionsRef} style={{ position: "relative" }}>
+            <button className="btn-premium-solid" onClick={() => setIsActionsDropdownOpen(!isActionsDropdownOpen)}>
+              Actions
+              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" style={{ marginLeft: 6 }}><polyline points="6 9 12 15 18 9"/></svg>
             </button>
-          )}
-          <button style={styles.downloadBtn} onClick={handleDownloadCorrected}>
-            Download Clean Document
-          </button>
+            {isActionsDropdownOpen && (
+              <div style={styles.actionsDropdownMenu}>
+                <button style={styles.dropdownMenuItem} onClick={() => { setIsActionsDropdownOpen(false); handleTabChange("assistant"); }}>
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" style={{ marginRight: 8 }}><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+                  Open AI Assistant
+                </button>
+                <button style={styles.dropdownMenuItem} onClick={() => { setIsActionsDropdownOpen(false); handleTabChange("reports"); }}>
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" style={{ marginRight: 8 }}><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+                  Open Executive Report
+                </button>
+                <button style={styles.dropdownMenuItem} onClick={() => { setIsActionsDropdownOpen(false); setIsDownloadModalOpen(true); }}>
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" style={{ marginRight: 8 }}><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+                  Download Reports
+                </button>
+                <button style={styles.dropdownMenuItem} onClick={() => { setIsActionsDropdownOpen(false); handleDownloadCorrected(); }}>
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" style={{ marginRight: 8 }}><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/><polyline points="17 21 17 13 7 13 7 21"/><polyline points="7 3 7 8 15 8"/></svg>
+                  Download Clean Document
+                </button>
+              </div>
+            )}
+          </div>
         </div>
       </div>
 
-      {/* 2. Tabs view selector */}
-      <div style={styles.tabsRow}>
-        <button
-          style={{ ...styles.tab, ...(activeTab === "annotated" ? styles.tabActive : {}) }}
-          onClick={() => setActiveTab("annotated")}
-        >
-          Interactive Workspace
-        </button>
-        <button
-          style={{ ...styles.tab, ...(activeTab === "corrected" ? styles.tabActive : {}) }}
-          onClick={() => setActiveTab("corrected")}
-        >
-          Clean Preview
-        </button>
-        <button
-          style={{ ...styles.tab, ...(activeTab === "assistant" ? styles.tabActive : {}) }}
-          onClick={() => setActiveTab("assistant")}
-        >
-          AI Assistant
-        </button>
-        <button
-          style={{ ...styles.tab, ...(activeTab === "context" ? styles.tabActive : {}) }}
-          onClick={() => setActiveTab("context")}
-        >
-          Context Analysis
-        </button>
-      </div>
-
-
-      {/* 3. Main editor split pane */}
-      {activeTab === "annotated" ? (
-        <div style={styles.splitGrid}>
-          
-          {/* Left panel: Document text with inline highlights */}
-          <div style={styles.editorPanel}>
-            {doc.raw_text ? (
-              <div 
-                ref={textContainerRef}
-                style={{ ...styles.textView, whiteSpace: "pre-wrap" }}
+        {/* 3. Main editor split pane */}
+        {activeTab === "overview" ? (
+          renderResultsOverview()
+        ) : activeTab === "proofreading" || activeTab === "annotated" || activeTab === "corrected" ? (
+          <div style={{ display: "flex", flexDirection: "column", gap: 16 }}>
+            {/* Sub-selector toggle */}
+            <div style={{ display: "flex", gap: 8, margin: "4px 0" }}>
+              <button
+                style={{
+                  background: proofSubTab === "annotated" ? "var(--brand-light)" : "var(--bg-card)",
+                  border: "1px solid var(--border)",
+                  borderRadius: 6, padding: "5px 12px", fontSize: 12, fontWeight: 700,
+                  color: proofSubTab === "annotated" ? "var(--brand)" : "var(--text-secondary)",
+                  cursor: "pointer", transition: "all 0.15s"
+                }}
+                onClick={() => setProofSubTab("annotated")}
               >
-                {renderDocumentMarkup()}
+                Interactive Editor
+              </button>
+              <button
+                style={{
+                  background: proofSubTab === "corrected" ? "var(--brand-light)" : "var(--bg-card)",
+                  border: "1px solid var(--border)",
+                  borderRadius: 6, padding: "5px 12px", fontSize: 12, fontWeight: 700,
+                  color: proofSubTab === "corrected" ? "var(--brand)" : "var(--text-secondary)",
+                  cursor: "pointer", transition: "all 0.15s"
+                }}
+                onClick={() => setProofSubTab("corrected")}
+              >
+                Clean Preview
+              </button>
+            </div>
+
+            {proofSubTab === "corrected" ? (
+              /* Corrected View (Clean Preview) */
+              <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
+                <div style={{ ...styles.editorPanel, minHeight: 400 }}>
+                  {doc.raw_text ? (
+                    <div style={styles.textView}>
+                      {buildDecidedText(doc.raw_text, doc.issues, issueDecisions)}
+                    </div>
+                  ) : (
+                    <div 
+                      style={{ ...styles.textView, ...styles.correctedText }}
+                      className="clean-corrected-view"
+                      dangerouslySetInnerHTML={{ __html: getParagraphBody(annotatedHtml) }}
+                    />
+                  )}
+                </div>
               </div>
             ) : (
-              <div 
-                ref={textContainerRef}
-                style={styles.textView}
-                dangerouslySetInnerHTML={{ __html: getParagraphBody(annotatedHtml) }}
-              />
-            )}
-          </div>
-
-          {/* Right panel: Suggestions rail */}
-          <div style={styles.sidebarPanel}>
-            
-            {/* Toolbar - Search, Sort, Filter */}
-            <div style={styles.sidebarToolbar}>
-              <input
-                type="text"
-                style={styles.sidebarSearch}
-                placeholder="Search suggestions..."
-                value={search}
-                onChange={(e) => setSearch(e.target.value)}
-              />
-              <div style={styles.sidebarFilterRow}>
-                <select
-                  style={styles.sidebarSelect}
-                  value={typeFilter}
-                  onChange={(e) => setTypeFilter(e.target.value)}
-                >
-                  <option value="all">All Types</option>
-                  <option value="spelling">Spelling</option>
-                  <option value="grammar">Grammar</option>
-                  <option value="tense">Tense</option>
-                </select>
-                <select
-                  style={styles.sidebarSelect}
-                  value={sortBy}
-                  onChange={(e) => setSortBy(e.target.value)}
-                >
-                  <option value="index">Default</option>
-                  <option value="confidence">Confidence Desc</option>
-                  <option value="confidence-asc">Confidence Asc</option>
-                  <option value="alphabetical">A-Z</option>
-                </select>
-              </div>
-            </div>
-
-            <div style={styles.sidebarActionHeader}>
-              <p style={styles.sidebarTitle}>Unresolved ({activeUnresolvedCount})</p>
-              {activeUnresolvedCount > 0 && (
-                <div style={styles.bulkRow}>
-                  <button style={styles.bulkAccept} onClick={handleAcceptAll}>Accept All</button>
-                  <button style={styles.bulkReject} onClick={handleRejectAll}>Reject All</button>
-                </div>
-              )}
-            </div>
-
-            <div style={styles.cardList}>
-              {activeUnresolvedCount === 0 ? (
-                <div style={styles.emptyCard}>
-                  <p style={{ margin: "0 0 4px", fontWeight: 700, color: "var(--green)" }}>No active issues!</p>
-                  <p style={{ margin: 0, fontSize: 11.5 }}>All spelling/grammar mistakes resolved or filtered.</p>
-                </div>
-              ) : (
-                visibleIssues.map((issue) => {
-                  const idx = issue.originalIndex;
-                  const SEVERITY_COLORS = { low: "#eab308", medium: "#f97316", high: "#ef4444", critical: "#b91c1c" };
-                  const severity = issue.severity || "medium";
-                  const accentColor = SEVERITY_COLORS[severity] || SEVERITY_COLORS.medium;
-                  const isSelected = activeIssueIdx === idx;
-
-                  return (
-                    <div
-                      key={idx}
-                      id={`suggestion-${idx}`}
-                      onClick={() => handleSelectIssue(idx)}
-                      style={{
-                        ...styles.suggestionCard,
-                        borderLeftColor: accentColor,
-                        ...(isSelected ? styles.suggestionSelected : {}),
-                      }}
+              /* Annotated split editor */
+              <div style={styles.splitGrid}>
+                {/* Left panel: Document text with inline highlights */}
+                <div style={styles.editorPanel}>
+                  {doc.raw_text ? (
+                    <div 
+                      ref={textContainerRef}
+                      style={{ ...styles.textView, whiteSpace: "pre-wrap" }}
+                      className="annotated-text-view"
                     >
-                      <div style={styles.cardTop}>
-                        <div style={{ display: "flex", gap: 6, alignItems: "center" }}>
-                          <span style={{ ...styles.cardLabel, color: accentColor }}>{issue.issue_type}</span>
+                      {renderDocumentMarkup()}
+                    </div>
+                  ) : (
+                    <div 
+                      ref={textContainerRef}
+                      style={styles.textView}
+                      className="annotated-text-view"
+                      dangerouslySetInnerHTML={{ __html: getParagraphBody(annotatedHtml) }}
+                    />
+                  )}
+                </div>
+
+                {/* Right panel: Suggestions rail */}
+                <div style={styles.sidebarPanel}>
+                  {/* Sticky Segmented Filter Bar */}
+                  <div
+                    className="segmented-filter-bar"
+                    role="tablist"
+                    aria-label="Correction issue category filters"
+                    style={{
+                      position: "sticky",
+                      top: 0,
+                      zIndex: 10,
+                      background: "var(--bg-card)",
+                      padding: "4px 0",
+                      borderBottom: "1px solid var(--border)",
+                      marginBottom: "4px"
+                    }}
+                  >
+                    <div style={{
+                      display: "flex",
+                      background: "var(--bg-page)",
+                      padding: "3px",
+                      borderRadius: "10px",
+                      border: "1px solid var(--border)",
+                      gap: "3px"
+                    }}>
+                      {[
+                        { id: "all", label: "All Issues", count: allUnresolvedCount },
+                        { id: "grammar", label: "Grammar", count: grammarUnresolvedCount },
+                        { id: "spelling", label: "Spelling", count: spellingUnresolvedCount }
+                      ].map((tab) => {
+                        const isSelected = typeFilter === tab.id;
+                        return (
+                          <button
+                            key={tab.id}
+                            role="tab"
+                            id={`filter-tab-${tab.id}`}
+                            aria-selected={isSelected}
+                            aria-controls="corrections-card-list"
+                            tabIndex={0}
+                            className={`filter-pill-btn ${isSelected ? "active" : ""}`}
+                            onClick={() => setTypeFilter(tab.id)}
+                            onKeyDown={(e) => {
+                              if (e.key === "Enter" || e.key === " ") {
+                                e.preventDefault();
+                                setTypeFilter(tab.id);
+                              }
+                            }}
+                            style={{
+                              flex: 1,
+                              display: "flex",
+                              alignItems: "center",
+                              justifyContent: "center",
+                              gap: "4px",
+                              padding: "7px 6px",
+                              fontSize: "12px",
+                              fontWeight: isSelected ? 700 : 600,
+                              borderRadius: "7px",
+                              border: "none",
+                              cursor: "pointer",
+                              background: isSelected ? "var(--brand)" : "transparent",
+                              color: isSelected ? "#ffffff" : "var(--text-secondary)",
+                              boxShadow: isSelected ? "0 1px 3px rgba(0, 0, 0, 0.12)" : "none",
+                              transition: "all 0.15s ease",
+                              outline: "none"
+                            }}
+                          >
+                            <span>{tab.label}</span>
+                            <span style={{
+                              fontSize: "10px",
+                              fontWeight: 700,
+                              padding: "1px 5px",
+                              borderRadius: "999px",
+                              background: isSelected ? "rgba(255, 255, 255, 0.25)" : "var(--border)",
+                              color: isSelected ? "#ffffff" : "var(--text-muted)"
+                            }}>
+                              {tab.count}
+                            </span>
+                          </button>
+                        );
+                      })}
+                    </div>
+                  </div>
+
+                  {/* Toolbar - Search input */}
+                  <div style={styles.sidebarToolbar}>
+                    <input
+                      type="text"
+                      placeholder="Search issues..."
+                      style={{ ...styles.sidebarSearch, padding: "8px 12px", border: "1px solid var(--border)", borderRadius: 8, width: "100%", outline: "none", fontSize: 12.5 }}
+                      value={search}
+                      onChange={(e) => setSearch(e.target.value)}
+                    />
+                  </div>
+
+                  <div style={styles.sidebarActionHeader}>
+                    <p style={styles.sidebarTitle}>
+                      {typeFilter === "all" ? "All Unresolved" : typeFilter === "grammar" ? "Grammar Issues" : "Spelling Issues"} ({visibleIssues.length})
+                    </p>
+                    {visibleIssues.length > 0 && (
+                      <div style={styles.bulkRow}>
+                        <button style={styles.bulkAccept} onClick={handleAcceptAll}>Accept All</button>
+                        <button style={styles.bulkReject} onClick={handleRejectAll}>Reject All</button>
+                      </div>
+                    )}
+                  </div>
+
+                  <div id="corrections-card-list" role="tabpanel" style={styles.cardList}>
+                    {visibleIssues.length === 0 ? (
+                      <div style={{ ...styles.emptyCard, padding: "24px 16px" }}>
+                        <div style={{ display: "flex", justifyContent: "center", marginBottom: 8 }}>
                           <span style={{
-                            fontSize: 9,
-                            fontWeight: 700,
-                            textTransform: "uppercase",
-                            padding: "1px 4px",
-                            borderRadius: 4,
-                            backgroundColor: `${accentColor}15`,
-                            color: accentColor,
-                            border: `1px solid ${accentColor}30`
+                            display: "inline-flex", alignItems: "center", justifyContent: "center",
+                            width: 36, height: 36, borderRadius: "50%",
+                            background: "var(--green-light)", color: "var(--green)"
                           }}>
-                            {severity}
+                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                              <polyline points="20 6 9 17 4 12" />
+                            </svg>
                           </span>
                         </div>
-                        <span style={styles.cardMeta}>Score: {Math.round((issue.final_confidence || issue.confidence || 0) * 100)}%</span>
+                        <p style={{ margin: "0 0 4px", fontWeight: 700, color: "var(--text-primary)", fontSize: 13.5 }}>
+                          {typeFilter === "grammar"
+                            ? "No grammar issues found."
+                            : typeFilter === "spelling"
+                            ? "No spelling issues found."
+                            : "No active issues found."}
+                        </p>
+                        <p style={{ margin: 0, fontSize: 11.5, color: "var(--text-muted)", lineHeight: 1.4 }}>
+                          {typeFilter === "grammar"
+                            ? "Your document has no detected grammar or structural issues."
+                            : typeFilter === "spelling"
+                            ? "No spelling or punctuation errors were detected."
+                            : "All spelling and grammar mistakes have been resolved or filtered."}
+                        </p>
                       </div>
-                      <p style={styles.cardReason}>{issue.reason}</p>
-                      <div style={styles.cardDiff}>
-                        <span style={styles.diffOriginal}>{issue.original_text}</span>
-                        <span style={{ margin: "0 6px", color: "var(--text-muted)" }}>➔</span>
-                        <span style={styles.diffSuggested}>{issue.suggested_text}</span>
-                      </div>
-
-                      {issueDecisions[idx] === undefined ? (
-                        <div style={styles.cardActions}>
-                          <button
-                            style={styles.cardRejectBtn}
-                            onClick={(e) => {
-                              e.stopPropagation();
-                              rejectIssue(idx);
-                            }}
-                          >
-                            Reject
-                          </button>
-                          <button
-                            style={styles.cardAcceptBtn}
-                            onClick={(e) => {
-                              e.stopPropagation();
-                              acceptIssue(idx);
-                            }}
-                          >
-                            Accept
-                          </button>
-                        </div>
-                      ) : (
-                        <div style={styles.cardStatusLine}>
-                          {issueDecisions[idx] === "accepted" ? (
-                            <span style={styles.cardStatusApplied}>✓ Applied</span>
-                          ) : (
-                            <span style={styles.cardStatusDismissed}>✕ Dismissed</span>
-                          )}
-                          <button
-                            style={styles.cardUndoBtn}
-                            onClick={(e) => {
-                              e.stopPropagation();
-                              undoDecision(idx);
-                            }}
-                          >
-                            Undo
-                          </button>
-                        </div>
-                      )}
-                    </div>
-                  );
-                })
-              )}
-            </div>
-
-            {/* Suggestion Panel (Selected details) */}
-            {activeIssue && (
-              <div style={styles.detailPanel}>
-                <h3 style={styles.detailTitle}>Selected Suggestion</h3>
-                <p style={styles.detailReason}>{activeIssue.reason}</p>
-                
-                <div style={styles.detailDiffCard}>
-                  <div>
-                    <span style={styles.detailDiffLabel}>Original:</span>
-                    <span style={{ ...styles.diffOriginal, marginLeft: 8 }}>{activeIssue.original_text}</span>
-                  </div>
-                  <div style={{ marginTop: 6 }}>
-                    <span style={styles.detailDiffLabel}>Suggested:</span>
-                    <span style={{ ...styles.diffSuggested, marginLeft: 8 }}>{activeIssue.suggested_text}</span>
-                  </div>
-                </div>
-
-                {issueDecisions[activeIssue.originalIndex] === undefined ? (
-                  <div style={styles.detailBtns}>
-                    <button style={styles.rejectBtn} onClick={() => rejectIssue(activeIssue.originalIndex)}>
-                      Reject
-                    </button>
-                    <button style={styles.acceptBtn} onClick={() => acceptIssue(activeIssue.originalIndex)}>
-                      Accept
-                    </button>
-                  </div>
-                ) : (
-                  <div style={styles.cardStatusLine}>
-                    {issueDecisions[activeIssue.originalIndex] === "accepted" ? (
-                      <span style={styles.cardStatusApplied}>✓ Applied</span>
                     ) : (
-                      <span style={styles.cardStatusDismissed}>✕ Dismissed</span>
-                    )}
-                    <button
-                      style={styles.cardUndoBtn}
-                      onClick={() => undoDecision(activeIssue.originalIndex)}
-                    >
-                      Undo
-                    </button>
-                  </div>
-                )}
+                      visibleIssues.map((issue) => {
+                        const idx = issue.originalIndex;
+                        const SEVERITY_COLORS = { low: "#eab308", medium: "#f97316", high: "#ef4444", critical: "#b91c1c" };
+                        const severity = issue.severity || "medium";
+                        const accentColor = SEVERITY_COLORS[severity] || SEVERITY_COLORS.medium;
+                        const isSelected = activeIssueIdx === idx;
+                        return (
+                          <div
+                            key={idx}
+                            id={`suggestion-${idx}`}
+                            onClick={() => handleSelectIssue(idx)}
+                            style={{
+                              ...styles.suggestionCard,
+                              borderLeft: isSelected ? `3px solid var(--brand)` : "3px solid var(--border)",
+                              boxShadow: isSelected ? "var(--shadow-card)" : "none",
+                              backgroundColor: isSelected ? "var(--brand-light)" : "var(--bg-card)",
+                              padding: "14px",
+                              marginBottom: "10px",
+                              borderRadius: "8px",
+                              cursor: "pointer",
+                              transition: "all 0.2s ease",
+                              textAlign: "left",
+                              border: "1px solid var(--border)"
+                            }}
+                          >
+                            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 6 }}>
+                              <span style={{ fontSize: 11, fontWeight: 750, color: accentColor, textTransform: "uppercase", letterSpacing: 0.5 }}>
+                                {issue.issue_type}
+                              </span>
+                              <span style={{ fontSize: 10.5, color: "var(--text-muted)", fontWeight: 500 }}>
+                                Page {issue.page_number || 1}
+                              </span>
+                            </div>
 
-                <div style={styles.navRow}>
-                  <button style={styles.navBtn} onClick={handlePrevIssue}>
-                    &larr; Prev
-                  </button>
-                  <span style={styles.navText}>
-                    {visibleIssues.findIndex(i => i.originalIndex === activeIssueIdx) + 1} of {visibleIssues.length}
-                  </span>
-                  <button style={styles.navBtn} onClick={handleNextIssue}>
-                    Next &rarr;
-                  </button>
+                            <p style={{ margin: "4px 0", fontSize: 13, fontWeight: 600, color: "var(--text-primary)", lineHeight: 1.4 }}>
+                              {issue.reason}
+                            </p>
+
+                            {isSelected ? (
+                              <div style={{ marginTop: 10, display: "flex", flexDirection: "column", gap: 8 }}>
+                                <div style={{ fontSize: 11.5, color: "var(--text-secondary)", lineHeight: 1.35 }}>
+                                  <strong>Why it matters:</strong> Review spelling, phrasing, or dictionary compliance guidelines.
+                                </div>
+
+                                <div style={{ 
+                                  display: "flex", alignItems: "center", gap: 6, 
+                                  background: "var(--bg-page)", border: "1px solid var(--border)",
+                                  padding: "6px 10px", borderRadius: 6, fontSize: 12
+                                }}>
+                                  <span style={{ textDecoration: "line-through", color: "var(--red)" }}>{issue.original_text}</span>
+                                  <span style={{ color: "var(--text-muted)" }}>➔</span>
+                                  <span style={{ color: "var(--green)", fontWeight: 700 }}>{issue.suggested_text}</span>
+                                </div>
+
+                                {issueDecisions[idx] === undefined ? (
+                                  <div style={{ display: "flex", gap: 8, marginTop: 2 }}>
+                                    <button
+                                      style={{
+                                        flex: 1, padding: "5px 10px", borderRadius: 6,
+                                        border: "1px solid var(--border)", background: "var(--bg-card)",
+                                        color: "var(--text-secondary)", fontSize: 11.5, fontWeight: 600,
+                                        cursor: "pointer"
+                                      }}
+                                      onClick={(e) => {
+                                        e.stopPropagation();
+                                        rejectIssue(idx);
+                                      }}
+                                    >
+                                      Reject
+                                    </button>
+                                    <button
+                                      style={{
+                                        flex: 1, padding: "5px 10px", borderRadius: 6,
+                                        border: "none", background: "var(--brand)",
+                                        color: "white", fontSize: 11.5, fontWeight: 650,
+                                        cursor: "pointer"
+                                      }}
+                                      onClick={(e) => {
+                                        e.stopPropagation();
+                                        acceptIssue(idx);
+                                      }}
+                                    >
+                                      Accept
+                                    </button>
+                                  </div>
+                                ) : (
+                                  <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginTop: 2 }}>
+                                    <span style={{
+                                      fontSize: 11.5, fontWeight: 700,
+                                      color: issueDecisions[idx] === "accepted" ? "var(--green)" : "var(--text-muted)"
+                                    }}>
+                                      {issueDecisions[idx] === "accepted" ? "✓ Accepted" : "✕ Rejected"}
+                                    </span>
+                                    <button
+                                      style={{
+                                        padding: "3px 8px", borderRadius: 6, border: "1px solid var(--border)",
+                                        background: "var(--bg-card)", color: "var(--text-secondary)",
+                                        fontSize: 11, fontWeight: 600, cursor: "pointer"
+                                      }}
+                                      onClick={(e) => {
+                                        e.stopPropagation();
+                                        undoDecision(idx);
+                                      }}
+                                    >
+                                      Undo
+                                    </button>
+                                  </div>
+                                )}
+                              </div>
+                            ) : (
+                              <div style={{ fontSize: 11.5, color: "var(--text-secondary)", marginTop: 4, borderTop: "1px solid var(--border)", paddingTop: 4, display: "flex", gap: 6, alignItems: "center" }}>
+                                <span style={{ textDecoration: "line-through", color: "var(--text-muted)" }}>{issue.original_text}</span>
+                                <span>➔</span>
+                                <span style={{ color: "var(--green)", fontWeight: 650 }}>{issue.suggested_text}</span>
+                              </div>
+                            )}
+                          </div>
+                        );
+                      })
+                    )}
+                  </div>
                 </div>
               </div>
             )}
-
           </div>
-
-        </div>
-      ) : activeTab === "corrected" ? (
-        /* Corrected View (Clean Preview) */
-        <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
-          <div style={{ ...styles.editorPanel, minHeight: 400 }}>
-            {doc.raw_text ? (
-              <div style={styles.textView}>
-                {buildDecidedText(doc.raw_text, doc.issues, issueDecisions)}
-              </div>
-            ) : (
-              <div 
-                style={{ ...styles.textView, ...styles.correctedText }}
-                className="clean-corrected-view"
-                dangerouslySetInnerHTML={{ __html: getParagraphBody(annotatedHtml) }}
-              />
-            )}
+        ) : activeTab === "assistant" ? (
+          /* Embedded AI Assistant Chat Panel */
+          <div style={{ background: "var(--bg-card)", border: "1px solid var(--border)", borderRadius: 12, padding: 16, minHeight: 500 }}>
+            <Assistant onSelectPage={(page) => {
+              setActiveTab("proofreading");
+              if (doc && doc.issues) {
+                const firstIssueIdx = (doc.issues || []).filter(Boolean).findIndex(i => i.page_number === page);
+                if (firstIssueIdx !== -1) {
+                  handleSelectIssue(firstIssueIdx);
+                }
+              }
+            }} />
           </div>
-        </div>
-      ) : activeTab === "assistant" ? (
-        /* Embedded AI Assistant Chat Panel */
-        <div style={{ background: "var(--bg-card)", border: "1px solid var(--border)", borderRadius: 12, padding: 16, minHeight: 500 }}>
-          <Assistant />
-        </div>
-      ) : (
-        /* Context Analysis Report Dashboard */
-        <div style={{ background: "var(--bg-card)", border: "1px solid var(--border)", borderRadius: 12, padding: 20, minHeight: 500 }}>
-          <ContextAnalysis id={id} onShowInDocument={handleShowInDocument} />
-        </div>
-      )}
+        ) : activeTab === "analysis" || activeTab === "context" ? (
+          /* Context Analysis Report Dashboard */
+          <div style={{ background: "var(--bg-card)", border: "1px solid var(--border)", borderRadius: 12, padding: 20, minHeight: 500 }}>
+            <ContextAnalysis id={id} onShowInDocument={handleShowInDocument} />
+          </div>
+        ) : (
+          /* Executive Reports Page */
+          <div style={{ background: "var(--bg-card)", border: "1px solid var(--border)", borderRadius: 12, padding: 20, minHeight: 500 }}>
+            <Reports activeDocId={id} />
+          </div>
+        )}
 
 
       {/* 4. Footer legend bar */}
@@ -1231,6 +1723,105 @@ export default function Workspace() {
           </div>
         </div>
       )}
+      {/* Download Experience Modal */}
+      {isDownloadModalOpen && (
+        <div style={styles.modalOverlay} onClick={() => setIsDownloadModalOpen(false)}>
+          <div style={styles.modalCard} onClick={(e) => e.stopPropagation()}>
+            <div style={styles.modalHeader}>
+              <h3 style={styles.modalTitle}>Download Export Packages</h3>
+              <button style={styles.modalCloseBtn} onClick={() => setIsDownloadModalOpen(false)}>
+                &times;
+              </button>
+            </div>
+            <div style={styles.modalBody}>
+              {/* Row 1 */}
+              <div style={styles.downloadItemRow}>
+                <div style={styles.downloadItemIcon}>
+                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="var(--brand)" strokeWidth="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+                </div>
+                <div style={styles.downloadItemMeta}>
+                  <h4 style={styles.downloadItemName}>Executive Report</h4>
+                  <p style={styles.downloadItemDesc}>Executive summary, high level KPIs, overall readiness assessment.</p>
+                </div>
+                <div style={styles.downloadItemActions}>
+                  <button style={styles.downloadFormatBtn} onClick={() => handleDownloadFormat("executive", "pdf")}>PDF</button>
+                  <button style={styles.downloadFormatBtn} onClick={() => handleDownloadFormat("executive", "html")}>HTML</button>
+                  <button style={styles.downloadFormatBtn} onClick={() => handleDownloadFormat("executive", "zip")}>ZIP</button>
+                </div>
+              </div>
+              
+              {/* Row 2 */}
+              <div style={styles.downloadItemRow}>
+                <div style={styles.downloadItemIcon}>
+                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="var(--brand)" strokeWidth="2"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
+                </div>
+                <div style={styles.downloadItemMeta}>
+                  <h4 style={styles.downloadItemName}>Detailed Analysis</h4>
+                  <p style={styles.downloadItemDesc}>Expanded page-by-page writing issue breakdown & semantic highlights.</p>
+                </div>
+                <div style={styles.downloadItemActions}>
+                  <button style={styles.downloadFormatBtn} onClick={() => handleDownloadFormat("detailed", "pdf")}>PDF</button>
+                  <button style={styles.downloadFormatBtn} onClick={() => handleDownloadFormat("detailed", "html")}>HTML</button>
+                  <button style={styles.downloadFormatBtn} onClick={() => handleDownloadFormat("detailed", "zip")}>ZIP</button>
+                </div>
+              </div>
+
+              {/* Row 3 */}
+              <div style={styles.downloadItemRow}>
+                <div style={styles.downloadItemIcon}>
+                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="var(--brand)" strokeWidth="2"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 1 1 3 3L12 15l-4 1 1-4z"/></svg>
+                </div>
+                <div style={styles.downloadItemMeta}>
+                  <h4 style={styles.downloadItemName}>Writing Review</h4>
+                  <p style={styles.downloadItemDesc}>Isolated proofreading flags, spelling mistakes, grammar edits.</p>
+                </div>
+                <div style={styles.downloadItemActions}>
+                  <button style={styles.downloadFormatBtn} onClick={() => handleDownloadFormat("writing", "pdf")}>PDF</button>
+                  <button style={styles.downloadFormatBtn} onClick={() => handleDownloadFormat("writing", "html")}>HTML</button>
+                  <button style={styles.downloadFormatBtn} onClick={() => handleDownloadFormat("writing", "zip")}>ZIP</button>
+                </div>
+              </div>
+
+              {/* Row 4 */}
+              <div style={styles.downloadItemRow}>
+                <div style={styles.downloadItemIcon}>
+                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="var(--brand)" strokeWidth="2"><polygon points="12 2 2 7 12 12 22 7 12 2"/><polyline points="2 17 12 22 22 17"/><polyline points="2 12 12 17 22 12"/></svg>
+                </div>
+                <div style={styles.downloadItemMeta}>
+                  <h4 style={styles.downloadItemName}>AI Verification</h4>
+                  <p style={styles.downloadItemDesc}>Detailed factual claims checklist, logical verification results.</p>
+                </div>
+                <div style={styles.downloadItemActions}>
+                  <button style={styles.downloadFormatBtn} onClick={() => handleDownloadFormat("ai_verification", "pdf")}>PDF</button>
+                  <button style={styles.downloadFormatBtn} onClick={() => handleDownloadFormat("ai_verification", "html")}>HTML</button>
+                  <button style={styles.downloadFormatBtn} onClick={() => handleDownloadFormat("ai_verification", "zip")}>ZIP</button>
+                </div>
+              </div>
+
+              {/* Row 5 */}
+              <div style={styles.downloadItemRow}>
+                <div style={styles.downloadItemIcon}>
+                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="var(--brand)" strokeWidth="2"><rect x="2" y="2" width="20" height="20" rx="2.18" ry="2.18"/><line x1="7" y1="2" x2="7" y2="22"/><line x1="17" y1="2" x2="17" y2="22"/><line x1="2" y1="12" x2="22" y2="12"/><line x1="2" y1="7" x2="7" y2="7"/><line x1="2" y1="17" x2="7" y2="17"/><line x1="17" y1="17" x2="22" y2="17"/><line x1="17" y1="7" x2="22" y2="7"/></svg>
+                </div>
+                <div style={styles.downloadItemMeta}>
+                  <h4 style={styles.downloadItemName}>Technical Package</h4>
+                  <p style={styles.downloadItemDesc}>Raw JSON outputs, document embeddings log, schema bindings.</p>
+                </div>
+                <div style={styles.downloadItemActions}>
+                  <button style={styles.downloadFormatBtn} onClick={() => handleDownloadFormat("technical", "pdf")}>PDF</button>
+                  <button style={styles.downloadFormatBtn} onClick={() => handleDownloadFormat("technical", "html")}>HTML</button>
+                  <button style={styles.downloadFormatBtn} onClick={() => handleDownloadFormat("technical", "zip")}>ZIP</button>
+                </div>
+              </div>
+            </div>
+            <div style={styles.modalFooter}>
+              <button style={styles.modalCloseFooterBtn} onClick={() => setIsDownloadModalOpen(false)}>
+                Close
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
 
     </div>
   );
@@ -1238,6 +1829,35 @@ export default function Workspace() {
 
 const styles = {
   workspace: { display: "flex", flexDirection: "column", gap: 16, maxWidth: 1040, margin: "0 auto", padding: "0 4px" },
+  topSummaryRow: {
+    display: "flex",
+    gap: 12,
+    marginBottom: 4,
+    width: "100%",
+  },
+  summaryMetric: {
+    flex: 1,
+    background: "var(--bg-card)",
+    border: "1px solid var(--border)",
+    borderRadius: 8,
+    padding: "12px 16px",
+    display: "flex",
+    flexDirection: "column",
+    gap: 4,
+    textAlign: "left",
+  },
+  metricLabel: {
+    fontSize: 10,
+    fontWeight: 700,
+    color: "var(--text-secondary)",
+    textTransform: "uppercase",
+    letterSpacing: 0.5,
+  },
+  metricValue: {
+    fontSize: 18,
+    fontWeight: 700,
+    color: "var(--text-primary)",
+  },
   centerContainer: { display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", minHeight: 300, padding: 40 },
   spinner: {
     width: 28, height: 28, borderRadius: "50%",
@@ -1312,20 +1932,19 @@ const styles = {
   bulkRow: { display: "flex", gap: 4 },
   bulkAccept: { background: "var(--green-light)", color: "var(--green)", border: "none", borderRadius: 4, padding: "2px 6px", fontSize: 10, fontWeight: 700, cursor: "pointer" },
   bulkReject: { background: "var(--red-light)", color: "var(--red)", border: "none", borderRadius: 4, padding: "2px 6px", fontSize: 10, fontWeight: 700, cursor: "pointer" },
-  cardList: { display: "flex", flexDirection: "column", gap: 8, overflowY: "auto", flex: 1, maxHeight: 220, paddingRight: 4 },
+  cardList: { display: "flex", flexDirection: "column", gap: 6, overflowY: "auto", flex: 1, maxHeight: "calc(100vh - 280px)", paddingRight: 4 },
   emptyCard: {
     padding: 16, background: "var(--bg-card)", border: "1px dashed var(--border)",
     borderRadius: 8, fontSize: 12.5, color: "var(--text-muted)", textAlign: "center",
   },
   suggestionCard: {
-    padding: 10, background: "var(--bg-card)", border: "1px solid var(--border)",
-    borderLeftWidth: 4, borderRadius: 6, cursor: "pointer", transition: "all 0.2s",
-    textAlign: "left",
+    padding: "12px 14px", background: "transparent", borderBottom: "1px solid var(--border)",
+    cursor: "pointer", transition: "all 0.15s", textAlign: "left",
   },
   suggestionSelected: {
-    borderColor: "var(--brand) !important",
-    boxShadow: "0 2px 8px rgba(108, 92, 231, 0.08)",
-    background: "var(--brand-light)",
+    background: "var(--bg-page)",
+    borderRadius: 8,
+    borderBottomColor: "transparent",
   },
   cardTop: { display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 2 },
   cardLabel: { fontSize: 9.5, fontWeight: 700, textTransform: "uppercase", letterSpacing: 0.5 },
@@ -1534,4 +2153,75 @@ const styles = {
     background: "none", border: "none", color: "var(--brand)", fontSize: 11, fontWeight: 700,
     cursor: "pointer", padding: 0, textDecoration: "underline",
   },
+  actionsDropdownMenu: {
+    position: "absolute", top: 40, right: 0, width: 220,
+    background: "var(--bg-card)", border: "1px solid var(--border)",
+    borderRadius: 8, boxShadow: "var(--shadow-card)", zIndex: 1000,
+    display: "flex", flexDirection: "column", padding: "6px 0",
+  },
+  dropdownMenuItem: {
+    background: "none", border: "none", display: "flex", alignItems: "center",
+    padding: "10px 14px", fontSize: 13, color: "var(--text-primary)",
+    cursor: "pointer", width: "100%", textAlign: "left",
+  },
+
+  downloadItemRow: {
+    display: "flex", alignItems: "center", gap: 12, padding: "14px 20px",
+    borderBottom: "1px solid var(--border)",
+  },
+  downloadItemIcon: {
+    width: 36, height: 36, borderRadius: 8, background: "var(--brand-light)",
+    display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0,
+  },
+  downloadItemMeta: { flex: 1, minWidth: 0 },
+  downloadItemName: { margin: 0, fontSize: 13.5, fontWeight: 700, color: "var(--text-primary)" },
+  downloadItemDesc: { margin: "2px 0 0", fontSize: 11.5, color: "var(--text-muted)", lineHeight: 1.4 },
+  downloadItemActions: { display: "flex", gap: 8, alignItems: "center" },
+  downloadFormatBtn: {
+    background: "none", border: "1px solid var(--border)", borderRadius: 6,
+    padding: "6px 12px", fontSize: 12, fontWeight: 600, color: "var(--text-secondary)",
+    cursor: "pointer",
+  },
+  tabIcon: {
+    display: "flex", alignItems: "center", justifyContent: "center",
+    width: 28, height: 28, borderRadius: 6,
+    background: "var(--bg-page)", color: "var(--text-secondary)",
+  },
+  tabTitle: { fontSize: 12.5, fontWeight: 700, color: "var(--text-primary)" },
+  tabSubtitle: { fontSize: 10, color: "var(--text-muted)", marginTop: 1 },
+  processingGrid: {
+    display: "grid", gridTemplateColumns: "180px 1fr", gap: 24,
+    maxWidth: 680, width: "100%", padding: 24,
+    background: "var(--bg-card)", border: "1px solid var(--border)",
+    borderRadius: 12, boxShadow: "var(--shadow-card)",
+  },
+  processingLeft: {
+    display: "flex", flexDirection: "column", alignItems: "center",
+    justifyContent: "center", borderRight: "1px solid var(--border)",
+    paddingRight: 24,
+  },
+  processingIconCircle: {
+    width: 80, height: 80, borderRadius: "50%",
+    background: "var(--brand-light)", display: "flex",
+    alignItems: "center", justifyContent: "center",
+  },
+  processingRight: { textAlign: "left" },
+  overviewContainer: { display: "flex", flexDirection: "column", gap: 16 },
+  overviewHeader: { textAlign: "left" },
+  overviewTitle: { margin: 0, fontSize: 20, fontWeight: 700, color: "var(--text-primary)" },
+  overviewSubtitle: { margin: "4px 0 0", fontSize: 13, color: "var(--text-secondary)" },
+  overviewGrid: { display: "grid", gridTemplateColumns: "1fr 1fr", gap: 16 },
+  overviewCard: {
+    background: "var(--bg-card)", border: "1px solid var(--border)",
+    borderRadius: 8, padding: 16, display: "flex", flexDirection: "column",
+    textAlign: "left", minHeight: 140,
+  },
+  overviewCardTop: { display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 10 },
+  overviewCardTitle: { margin: 0, fontSize: 14, fontWeight: 700, color: "var(--text-secondary)" },
+  overviewCardDesc: { margin: 0, fontSize: 12.5, color: "var(--text-muted)", flex: 1, lineHeight: 1.5, marginTop: 4 },
+  overviewCardBtn: {
+    background: "none", border: "none", color: "var(--brand)", fontSize: 12, fontWeight: 700,
+    cursor: "pointer", padding: 0, alignSelf: "flex-start", marginTop: 12, display: "flex", alignItems: "center",
+  },
+  cardBadge: { fontSize: 10, fontWeight: 700, padding: "2px 8px", borderRadius: 999 },
 };

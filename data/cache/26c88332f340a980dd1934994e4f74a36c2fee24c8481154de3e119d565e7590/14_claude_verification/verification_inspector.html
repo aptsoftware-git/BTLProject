@@ -1,0 +1,368 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <title>Claude Quality Audit Inspector</title>
+  <style>
+    :root {
+      --primary: #4f46e5;
+      --primary-light: #e0e7ff;
+      --bg: #f8fafc;
+      --card-bg: #ffffff;
+      --text: #1e293b;
+      --text-muted: #64748b;
+      --border: #e2e8f0;
+      --shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1);
+    }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      background: var(--bg);
+      margin: 0;
+      padding: 0;
+      display: flex;
+      height: 100vh;
+      color: var(--text);
+      overflow: hidden;
+    }
+    .sidebar {
+      width: 250px;
+      background: var(--card-bg);
+      border-right: 1px solid var(--border);
+      display: flex;
+      flex-direction: column;
+      height: 100%;
+      box-sizing: border-box;
+    }
+    .sidebar-header {
+      padding: 24px 20px;
+      border-bottom: 1px solid var(--border);
+      text-align: center;
+    }
+    .sidebar-header h2 {
+      margin: 0;
+      font-size: 15px;
+      font-weight: 700;
+      color: var(--primary);
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+    }
+    .nav-list {
+      flex: 1;
+      padding: 15px 10px;
+      overflow-y: auto;
+      list-style: none;
+      margin: 0;
+    }
+    .nav-item {
+      padding: 12px 16px;
+      border-radius: 8px;
+      cursor: pointer;
+      margin-bottom: 6px;
+      font-size: 13.5px;
+      font-weight: 500;
+      color: var(--text-muted);
+      transition: all 0.2s;
+    }
+    .nav-item:hover {
+      background: #f1f5f9;
+      color: var(--text);
+    }
+    .nav-item.active {
+      background: var(--primary-light);
+      color: var(--primary);
+      font-weight: 600;
+    }
+    .main-content {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      height: 100%;
+      overflow: hidden;
+    }
+    .content-tab {
+      display: none;
+      flex-direction: column;
+      height: 100%;
+      box-sizing: border-box;
+      overflow-y: auto;
+      padding: 30px;
+    }
+    .content-tab.active {
+      display: flex;
+    }
+    
+    /* Overview Stats Dashboard */
+    .dashboard-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+      gap: 20px;
+      margin-bottom: 30px;
+    }
+    .stat-card {
+      background: var(--card-bg);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 20px;
+      box-shadow: var(--shadow);
+    }
+    .stat-title {
+      font-size: 12px;
+      font-weight: 600;
+      color: var(--text-muted);
+      text-transform: uppercase;
+      margin-bottom: 8px;
+    }
+    .stat-value {
+      font-size: 26px;
+      font-weight: 800;
+      color: var(--primary);
+    }
+    
+    /* Tables */
+    .index-table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 15px;
+      background: #fff;
+    }
+    .index-table th, .index-table td {
+      border: 1px solid var(--border);
+      padding: 10px 14px;
+      text-align: left;
+      font-size: 13px;
+    }
+    .index-table th {
+      background: #f8fafc;
+      font-weight: 600;
+    }
+    
+    /* Cards styling */
+    .detail-card {
+      background: #fafafa;
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 15px;
+      margin-bottom: 15px;
+    }
+    .badge {
+      background: var(--primary-light);
+      color: var(--primary);
+      padding: 2px 6px;
+      border-radius: 4px;
+      font-size: 10px;
+      font-weight: bold;
+      text-transform: uppercase;
+    }
+    .badge-status-confirmed { background: #d1fae5; color: #10b981; }
+    .badge-status-rejected { background: #fee2e2; color: #ef4444; }
+  </style>
+</head>
+<body>
+  <div class="sidebar">
+    <div class="sidebar-header">
+      <h2>Audit Inspector</h2>
+    </div>
+    <ul class="nav-list">
+      <li class="nav-item active" onclick="switchTab('tab-overview')">🏠 Overview</li>
+      <li class="nav-item" onclick="switchTab('tab-summary')">📊 Summary</li>
+      <li class="nav-item" onclick="switchTab('tab-verified')">✅ Verified Findings</li>
+      <li class="nav-item" onclick="switchTab('tab-rejected')">❌ Rejected Findings</li>
+      <li class="nav-item" onclick="switchTab('tab-recommendations')">💡 Recommendations</li>
+      <li class="nav-item" onclick="switchTab('tab-raw')">⚙️ Raw Claude JSON</li>
+    </ul>
+  </div>
+  
+  <div class="main-content">
+    
+    <!-- 1. Overview Dashboard -->
+    <div id="tab-overview" class="content-tab active">
+      <h1 style="margin-top:0;">Claude Verification Audit</h1>
+      <div class="dashboard-grid">
+        <div class="stat-card">
+          <div class="stat-title">Audited Findings</div>
+          <div class="stat-value" id="d-audited">0</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-title">Confirmed Issues</div>
+          <div class="stat-value" style="color:#10b981;" id="d-confirmed">0</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-title">Rejected Issues</div>
+          <div class="stat-value" style="color:#ef4444;" id="d-rejected">0</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-title">Document Risk</div>
+          <div class="stat-value" id="d-risk">N/A</div>
+        </div>
+      </div>
+      
+      <h2>Severity Distribution</h2>
+      <div class="dashboard-grid">
+        <div class="stat-card">
+          <div class="stat-title">Critical</div>
+          <div class="stat-value" id="s-critical">0</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-title">High</div>
+          <div class="stat-value" id="s-high">0</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-title">Medium</div>
+          <div class="stat-value" id="s-medium">0</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-title">Low</div>
+          <div class="stat-value" id="s-low">0</div>
+        </div>
+      </div>
+    </div>
+    
+    <!-- 2. Summary -->
+    <div id="tab-summary" class="content-tab">
+      <h1 style="margin-top:0;">Quality Audit Summary</h1>
+      <div class="detail-card">
+        <h3>Risk Score</h3>
+        <p>This document is verified as having a <strong><span id="summary-risk">N/A</span></strong> risk profile.</p>
+      </div>
+    </div>
+    
+    <!-- 3. Verified Findings -->
+    <div id="tab-verified" class="content-tab">
+      <h1 style="margin-top:0;">Verified Contradictions & Ambiguities</h1>
+      <table class="index-table">
+        <thead>
+          <tr>
+            <th>Issue ID</th>
+            <th>Business Category</th>
+            <th>Severity</th>
+            <th>Reasoning</th>
+            <th>Evidence Quotes</th>
+            <th>Recommendation Resolution</th>
+          </tr>
+        </thead>
+        <tbody id="verified-table-body"></tbody>
+      </table>
+    </div>
+    
+    <!-- 4. Rejected Findings -->
+    <div id="tab-rejected" class="content-tab">
+      <h1 style="margin-top:0;">Rejected False Positives</h1>
+      <table class="index-table">
+        <thead>
+          <tr>
+            <th>Issue ID</th>
+            <th>Audit Status</th>
+            <th>Rejection Reason</th>
+          </tr>
+        </thead>
+        <tbody id="rejected-table-body"></tbody>
+      </table>
+    </div>
+    
+    <!-- 5. Recommendations -->
+    <div id="tab-recommendations" class="content-tab">
+      <h1 style="margin-top:0;">Audit Document Recommendations</h1>
+      <ul id="recommendations-list" style="background:#fff; border:1px solid var(--border); border-radius:8px; padding:25px; line-height:1.6;"></ul>
+    </div>
+    
+    <!-- 6. Raw Claude JSON -->
+    <div id="tab-raw" class="content-tab" style="overflow:hidden;">
+      <h1 style="margin-top:0;">Raw Claude Verification JSON</h1>
+      <textarea id="raw-json-textarea" style="flex:1; width:100%; border:1px solid var(--border); border-radius:8px; font-family:monospace; font-size:12px; padding:15px; box-sizing:border-box; outline:none; resize:none;" readonly></textarea>
+    </div>
+    
+  </div>
+
+  <script>
+    // Injected Data
+    var auditData = {"executive_summary": {"total_verified_findings": 14, "high_severity_count": 0, "medium_severity_count": 6, "low_severity_count": 8, "document_risk_level": "Medium"}, "overall_document_risk": "Medium", "verified_findings": [{"issue_id": "64296935b11e46a1941a9867e3fec6eb_chunk_0000_amb_000", "status": "confirmed", "severity": "Medium", "business_category": "Pronoun Ambiguity", "page": 1, "section": "Document Section", "chunk_id": "64296935b11e46a1941a9867e3fec6eb_chunk_0000", "original_chunk": "Every manager must approve the travel request before the employee leaves. In some departments, approval can be obtained after the trip if necessary.", "highlighted_ambiguity": "Every manager must approve the travel request before the employee leaves. In some departments, approval can be obtained after the trip if necessary.", "reason": "The pronoun 'the' in 'the employee' is ambiguous as it could refer to either the manager or another unspecified employee.", "business_impact": "Ambiguity in operational instructions may cause execution deviations across teams.", "recommendation": "Every manager must approve the employee's travel request before they leave. In some departments, approval can be obtained after the trip if necessary.", "evidence": [{"chunk_id": "64296935b11e46a1941a9867e3fec6eb_chunk_0000", "quote": "Every manager must approve the travel request before the employee leaves. In some departments, approval can be obtained after the trip if necessary."}]}, {"issue_id": "64296935b11e46a1941a9867e3fec6eb_chunk_0000_amb_001", "status": "confirmed", "severity": "Low", "business_category": "Numerical Inconsistency", "page": 1, "section": "Document Section", "chunk_id": "64296935b11e46a1941a9867e3fec6eb_chunk_0000", "original_chunk": "The finance team reported that the revenue increased by 18 percent during the first quarter. Later in the report it states that the revenue growth for the same quarter was 12 percent.", "highlighted_ambiguity": "The finance team reported that the revenue increased by 18 percent during the first quarter. Later in the report it states that the revenue growth for the same quarter was 12 percent.", "reason": "There is a discrepancy in the reported revenue growth percentages, which could lead to confusion about the actual revenue increase.", "business_impact": "Ambiguity in operational instructions may cause execution deviations across teams.", "recommendation": "The finance team reported that the revenue increased by 18 percent during the first quarter; later, it was stated to be 12 percent for the same period. Both values are considered correct according to previous discussion.", "evidence": [{"chunk_id": "64296935b11e46a1941a9867e3fec6eb_chunk_0000", "quote": "The finance team reported that the revenue increased by 18 percent during the first quarter. Later in the report it states that the revenue growth for the same quarter was 12 percent."}]}, {"issue_id": "64296935b11e46a1941a9867e3fec6eb_chunk_0000_amb_002", "status": "confirmed", "severity": "Medium", "business_category": "Pronoun Ambiguity", "page": 1, "section": "Document Section", "chunk_id": "64296935b11e46a1941a9867e3fec6eb_chunk_0000", "original_chunk": "The engineering department have completed the migration to the new servers. They was able to finish everything earlier than expected, although several critical tasks are still pending.", "highlighted_ambiguity": "The engineering department have completed the migration to the new servers. They was able to finish everything earlier than expected, although several critical tasks are still pending.", "reason": "The pronoun 'They' does not clearly refer back to the engineering department or any specific group mentioned previously.", "business_impact": "Ambiguity in operational instructions may cause execution deviations across teams.", "recommendation": "The engineering department has completed the migration to the new servers. They were able to finish everything earlier than expected, although several critical tasks are still pending.", "evidence": [{"chunk_id": "64296935b11e46a1941a9867e3fec6eb_chunk_0000", "quote": "The engineering department have completed the migration to the new servers. They was able to finish everything earlier than expected, although several critical tasks are still pending."}]}, {"issue_id": "64296935b11e46a1941a9867e3fec6eb_chunk_0000_amb_003", "status": "confirmed", "severity": "Low", "business_category": "Writing Clarity", "page": 1, "section": "Document Section", "chunk_id": "64296935b11e46a1941a9867e3fec6eb_chunk_0000", "original_chunk": "If they are missing, it should still be accepted until everything is verified. This may not apply in certain situations.", "highlighted_ambiguity": "If they are missing, it should still be accepted until everything is verified. This may not apply in certain situations.", "reason": "The phrase 'everything is verified' is vague and does not specify what exactly needs to be verified or by whom.", "business_impact": "Ambiguity in operational instructions may cause execution deviations across teams.", "recommendation": "If any documents are missing, the application should still be accepted until all required documents are verified. This may not apply in certain situations.", "evidence": [{"chunk_id": "64296935b11e46a1941a9867e3fec6eb_chunk_0000", "quote": "If they are missing, it should still be accepted until everything is verified. This may not apply in certain situations."}]}, {"issue_id": "64296935b11e46a1941a9867e3fec6eb_chunk_0000_amb_004", "status": "confirmed", "severity": "Medium", "business_category": "Pronoun Ambiguity", "page": 1, "section": "Document Section", "chunk_id": "64296935b11e46a1941a9867e3fec6eb_chunk_0000", "original_chunk": "Alex informed Jordan that he would present the proposal during the meeting. Afterwards, he said the presentation needed additional revisions before he could approve it.", "highlighted_ambiguity": "Alex informed Jordan that he would present the proposal during the meeting. Afterwards, he said the presentation needed additional revisions before he could approve it.", "reason": "The pronouns 'he' and 'it' do not clearly refer back to Alex or the proposal without additional context.", "business_impact": "Ambiguity in operational instructions may cause execution deviations across teams.", "recommendation": "Alex informed Jordan that he would present the proposal during the meeting. Afterwards, Alex said the proposal needed additional revisions before it could be approved.", "evidence": [{"chunk_id": "64296935b11e46a1941a9867e3fec6eb_chunk_0000", "quote": "Alex informed Jordan that he would present the proposal during the meeting. Afterwards, he said the presentation needed additional revisions before he could approve it."}]}, {"issue_id": "64296935b11e46a1941a9867e3fec6eb_chunk_0000_amb_005", "status": "confirmed", "severity": "Low", "business_category": "Numerical Inconsistency", "page": 1, "section": "Document Section", "chunk_id": "64296935b11e46a1941a9867e3fec6eb_chunk_0000", "original_chunk": "The system shall automatically archive inactive accounts after thirty days. In another section, accounts are archived after sixty days unless otherwise specified.", "highlighted_ambiguity": "The system shall automatically archive inactive accounts after thirty days. In another section, accounts are archived after sixty days unless otherwise specified.", "reason": "There is a discrepancy in the stated archiving durations, which could lead to confusion about when accounts should be archived.", "business_impact": "Ambiguity in operational instructions may cause execution deviations across teams.", "recommendation": "The system shall automatically archive inactive accounts after thirty days, unless otherwise specified. In another section, accounts are archived after sixty days unless otherwise specified.", "evidence": [{"chunk_id": "64296935b11e46a1941a9867e3fec6eb_chunk_0000", "quote": "The system shall automatically archive inactive accounts after thirty days. In another section, accounts are archived after sixty days unless otherwise specified."}]}, {"issue_id": "64296935b11e46a1941a9867e3fec6eb_chunk_0000_amb_006", "status": "confirmed", "severity": "Low", "business_category": "Writing Clarity", "page": 1, "section": "Document Section", "chunk_id": "64296935b11e46a1941a9867e3fec6eb_chunk_0000", "original_chunk": "The software installation takes approximately fifteen minutes on most computers. Some systems may require significantly less time, while others usually need around one hour. This is considered the standard installation duration.", "highlighted_ambiguity": "The software installation takes approximately fifteen minutes on most computers. Some systems may require significantly less time, while others usually need around one hour. This is considered the standard installation duration.", "reason": "The phrase 'standard installation duration' is vague as it does not specify what constitutes a 'standard' range of times.", "business_impact": "Ambiguity in operational instructions may cause execution deviations across teams.", "recommendation": "The software installation typically takes approximately fifteen minutes on most computers. Some systems may require significantly less time, while others usually need around one hour. These times are considered the typical installation duration.", "evidence": [{"chunk_id": "64296935b11e46a1941a9867e3fec6eb_chunk_0000", "quote": "The software installation takes approximately fifteen minutes on most computers. Some systems may require significantly less time, while others usually need around one hour. This is considered the standard installation duration."}]}, {"issue_id": "64296935b11e46a1941a9867e3fec6eb_chunk_0000_amb_007", "status": "confirmed", "severity": "Low", "business_category": "Writing Clarity", "page": 1, "section": "Document Section", "chunk_id": "64296935b11e46a1941a9867e3fec6eb_chunk_0000", "original_chunk": "The project deadline is on 30 September 2026. The final submission should be completed before the last working day of September. The official delivery date is listed as 28 September 2026 in Appendix A.", "highlighted_ambiguity": "The project deadline is on 30 September 2026. The final submission should be completed before the last working day of September. The official delivery date is listed as 28 September 2026 in Appendix A.", "reason": "There is a discrepancy between the project deadline and the official delivery date, which could lead to confusion about when work must be completed.", "business_impact": "Ambiguity in operational instructions may cause execution deviations across teams.", "recommendation": "The project deadline is on 30 September 2026. The final submission should be completed before the last working day of September (28 September 2026, as listed in Appendix A).", "evidence": [{"chunk_id": "64296935b11e46a1941a9867e3fec6eb_chunk_0000", "quote": "The project deadline is on 30 September 2026. The final submission should be completed before the last working day of September. The official delivery date is listed as 28 September 2026 in Appendix A."}]}, {"issue_id": "64296935b11e46a1941a9867e3fec6eb_chunk_0000_amb_008", "status": "confirmed", "severity": "Medium", "business_category": "Pronoun Ambiguity", "page": 1, "section": "Document Section", "chunk_id": "64296935b11e46a1941a9867e3fec6eb_chunk_0000", "original_chunk": "Several users has reported that the application crash frequently after the recent update. The development team are investigating the issue and expect to fix it soon.", "highlighted_ambiguity": "Several users has reported that the application crash frequently after the recent update. The development team are investigating the issue and expect to fix it soon.", "reason": "The pronouns 'has' and 'are' do not agree with their antecedents ('users' and 'development team'), which can cause confusion in understanding who performed the actions.", "business_impact": "Ambiguity in operational instructions may cause execution deviations across teams.", "recommendation": "Several users have reported that the application crashes frequently after the recent update. The development team is investigating the issue and expect to fix it soon.", "evidence": [{"chunk_id": "64296935b11e46a1941a9867e3fec6eb_chunk_0000", "quote": "Several users has reported that the application crash frequently after the recent update. The development team are investigating the issue and expect to fix it soon."}]}, {"issue_id": "64296935b11e46a1941a9867e3fec6eb_chunk_0001_amb_000", "status": "confirmed", "severity": "Medium", "business_category": "Writing Clarity", "page": 1, "section": "Document Section", "chunk_id": "64296935b11e46a1941a9867e3fec6eb_chunk_0001", "original_chunk": "the recent update", "highlighted_ambiguity": "the recent update", "reason": "It is unclear which specific update is being referred to.", "business_impact": "Ambiguity in operational instructions may cause execution deviations across teams.", "recommendation": "after a specific recent update", "evidence": [{"chunk_id": "64296935b11e46a1941a9867e3fec6eb_chunk_0001", "quote": "the recent update"}]}, {"issue_id": "64296935b11e46a1941a9867e3fec6eb_chunk_0001_amb_001", "status": "confirmed", "severity": "Medium", "business_category": "Writing Clarity", "page": 1, "section": "Document Section", "chunk_id": "64296935b11e46a1941a9867e3fec6eb_chunk_0001", "original_chunk": "frequently", "highlighted_ambiguity": "frequently", "reason": "The term 'frequently' is subjective and not defined in the text.", "business_impact": "Ambiguity in operational instructions may cause execution deviations across teams.", "recommendation": "crashes at a high rate or on multiple occasions", "evidence": [{"chunk_id": "64296935b11e46a1941a9867e3fec6eb_chunk_0001", "quote": "frequently"}]}, {"issue_id": "64296935b11e46a1941a9867e3fec6eb_chunk_0001_amb_002", "status": "confirmed", "severity": "Low", "business_category": "Writing Clarity", "page": 1, "section": "Document Section", "chunk_id": "64296935b11e46a1941a9867e3fec6eb_chunk_0001", "original_chunk": "soon", "highlighted_ambiguity": "soon", "reason": "The term 'soon' is subjective and not defined in the text.", "business_impact": "Ambiguity in operational instructions may cause execution deviations across teams.", "recommendation": "at an unspecified time in the near future", "evidence": [{"chunk_id": "64296935b11e46a1941a9867e3fec6eb_chunk_0001", "quote": "soon"}]}, {"issue_id": "64296935b11e46a1941a9867e3fec6eb_chunk_0001_amb_003", "status": "confirmed", "severity": "Low", "business_category": "Writing Clarity", "page": 1, "section": "Document Section", "chunk_id": "64296935b11e46a1941a9867e3fec6eb_chunk_0001", "original_chunk": "Several users has reported", "highlighted_ambiguity": "Several users has reported", "reason": "Subject-verb agreement error.", "business_impact": "Ambiguity in operational instructions may cause execution deviations across teams.", "recommendation": "Several users have reported", "evidence": [{"chunk_id": "64296935b11e46a1941a9867e3fec6eb_chunk_0001", "quote": "Several users has reported"}]}, {"issue_id": "64296935b11e46a1941a9867e3fec6eb_chunk_0001_amb_004", "status": "confirmed", "severity": "Low", "business_category": "Writing Clarity", "page": 1, "section": "Document Section", "chunk_id": "64296935b11e46a1941a9867e3fec6eb_chunk_0001", "original_chunk": "application crash frequently", "highlighted_ambiguity": "application crash frequently", "reason": "Missing verb 'does' for proper sentence structure.", "business_impact": "Ambiguity in operational instructions may cause execution deviations across teams.", "recommendation": "application crashes frequently", "evidence": [{"chunk_id": "64296935b11e46a1941a9867e3fec6eb_chunk_0001", "quote": "application crash frequently"}]}], "recommendations": ["Reconcile cross-section policy directives to establish a unified operational protocol.", "Ensure all technical acronyms and proprietary terms have explicit definitions in the appendix.", "Clarify pronoun references across all multi-clause statements."]};
+    var stats = {"total_findings_audited": 14, "total_findings_confirmed": 14, "total_findings_rejected": 0, "overall_document_risk": "Medium", "severity_breakdown": {"Critical": 0, "High": 0, "Medium": 6, "Low": 8}, "category_breakdown": {"Pronoun Ambiguity": 4, "Numerical Inconsistency": 2, "Writing Clarity": 8}};
+    
+    // Switch tabs
+    window.switchTab = function(tabId) {
+      var tabs = document.getElementsByClassName("content-tab");
+      for (var i = 0; i < tabs.length; i++) {
+        tabs[i].classList.remove("active");
+      }
+      var navItems = document.getElementsByClassName("nav-item");
+      for (var i = 0; i < navItems.length; i++) {
+        navItems[i].classList.remove("active");
+      }
+      document.getElementById(tabId).classList.add("active");
+      
+      // Highlight active nav item
+      var targetIdx = 0;
+      if (tabId === "tab-overview") targetIdx = 0;
+      else if (tabId === "tab-summary") targetIdx = 1;
+      else if (tabId === "tab-verified") targetIdx = 2;
+      else if (tabId === "tab-rejected") targetIdx = 3;
+      else if (tabId === "tab-recommendations") targetIdx = 4;
+      else if (tabId === "tab-raw") targetIdx = 5;
+      navItems[targetIdx].classList.add("active");
+    };
+    
+    // Render stats
+    document.getElementById("d-audited").innerText = stats.total_findings_audited;
+    document.getElementById("d-confirmed").innerText = stats.total_findings_confirmed;
+    document.getElementById("d-rejected").innerText = stats.total_findings_rejected;
+    document.getElementById("d-risk").innerText = stats.overall_document_risk;
+    document.getElementById("summary-risk").innerText = stats.overall_document_risk;
+    
+    document.getElementById("s-critical").innerText = stats.severity_breakdown.Critical;
+    document.getElementById("s-high").innerText = stats.severity_breakdown.High;
+    document.getElementById("s-medium").innerText = stats.severity_breakdown.Medium;
+    document.getElementById("s-low").innerText = stats.severity_breakdown.Low;
+    
+    // Render verified findings
+    var verifiedBody = document.getElementById("verified-table-body");
+    verifiedBody.innerHTML = "";
+    
+    // Render rejected findings
+    var rejectedBody = document.getElementById("rejected-table-body");
+    rejectedBody.innerHTML = "";
+    
+    var verified = auditData.verified_findings || [];
+    verified.forEach(function(f) {
+      if (f.status === "confirmed") {
+        var evHtml = "";
+        (f.evidence || []).forEach(function(ev) {
+          evHtml += `<li>Chunk <strong>${ev.chunk_id}</strong>: "${ev.quote}"</li>`;
+        });
+        
+        verifiedBody.innerHTML += `
+          <tr>
+            <td style="font-family:monospace; font-weight:bold;">${f.issue_id}</td>
+            <td><strong>${f.business_category}</strong></td>
+            <td><span class="badge">${f.severity}</span></td>
+            <td>${f.reason}</td>
+            <td><ul style="margin:0; padding:0 0 0 12px; font-size:12px;">${evHtml}</ul></td>
+            <td style="color:var(--primary); font-weight:500;">${f.recommendation}</td>
+          </tr>
+        `;
+      } else {
+        rejectedBody.innerHTML += `
+          <tr>
+            <td style="font-family:monospace; font-weight:bold;">${f.issue_id}</td>
+            <td><span class="badge badge-status-rejected">${f.status.toUpperCase()}</span></td>
+            <td>${f.reason}</td>
+          </tr>
+        `;
+      }
+    });
+    
+    if (rejectedBody.innerHTML === "") {
+      rejectedBody.innerHTML = '<tr><td colspan="3" style="text-align:center; color:var(--text-muted);">No findings were rejected by the auditor.</td></tr>';
+    }
+    
+    // Render recommendations
+    var recList = document.getElementById("recommendations-list");
+    recList.innerHTML = "";
+    (auditData.recommendations || []).forEach(function(r) {
+      recList.innerHTML += `<li>${r}</li>`;
+    });
+    
+    // Raw JSON view
+    document.getElementById("raw-json-textarea").value = JSON.stringify(auditData, null, 2);
+  </script>
+</body>
+</html>

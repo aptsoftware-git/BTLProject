@@ -383,7 +383,7 @@ class ReportGenerator:
 
     @staticmethod
     def _build_business_html(data: dict) -> str:
-        """EY/Deloitte-style Consulting Enterprise Audit Report."""
+        """Consulting Enterprise Audit Report."""
         sum_data = data["summary"]
         issues = data["issues"]
         

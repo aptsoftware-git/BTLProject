@@ -29,13 +29,21 @@ class VectorStore:
 
     def _get_collection_name(self, document_id: str) -> str:
         """
-        Formulates a valid collection name based on the document_id and prefix.
-        ChromaDB collections have strict naming rules: 3-63 chars, alphanumeric, starts/ends with alphanumeric.
+        Formulates a valid collection name based on doc_hash or document_id.
+        Reuses ChromaDB collections across jobs matching the same SHA-256 document fingerprint.
         """
-        # Clean the document ID to make it alphanumeric + hyphens/underscores
-        clean_id = "".join(c if c.isalnum() or c in ("-", "_") else "_" for c in document_id)
+        doc_hash = None
+        try:
+            from backend.services import get_job
+            job = get_job(document_id)
+            if job and "doc_hash" in job:
+                doc_hash = job["doc_hash"]
+        except Exception:
+            pass
+
+        target_id = doc_hash[:16] if doc_hash else document_id
+        clean_id = "".join(c if c.isalnum() or c in ("-", "_") else "_" for c in target_id)
         name = f"{self.collection_prefix}{clean_id}"
-        # Ensure it satisfies length constraints
         if len(name) < 3:
             name = name.ljust(3, "0")
         elif len(name) > 63:
@@ -55,7 +63,6 @@ class VectorStore:
                 collection = self.client.get_collection(name=collection_name)
                 self._collections[collection_name] = collection
             except Exception:
-                # Collection does not exist yet
                 return set()
         try:
             results = collection.get()
@@ -71,8 +78,17 @@ class VectorStore:
     ) -> None:
         """
         Stores chunks and their pre-computed embeddings in a dedicated collection for the document.
+        Skips indexing if Chroma collection already contains all vectors.
         """
         if not chunks or not embeddings:
+            return
+
+        collection_name = self._get_collection_name(document_id)
+        existing_ids = self.get_existing_chunk_ids(document_id)
+        
+        chunk_ids = {c.metadata.chunk_id for c in chunks}
+        if chunk_ids and chunk_ids.issubset(existing_ids):
+            logger.info(f"[CACHE HIT] ChromaDB collection '{collection_name}' already contains all {len(chunks)} vectors. Skipping indexing.")
             return
 
         assert len(chunks) == len(embeddings), "Number of chunks must match number of embeddings."

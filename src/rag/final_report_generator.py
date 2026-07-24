@@ -1,513 +1,1268 @@
 import json
 import logging
+import re
 from pathlib import Path
 from typing import List, Dict, Any, Optional
 from collections import Counter
+from datetime import datetime
 
 from src.rag.config import RagConfig
 
 logger = logging.getLogger("pipeline")
 
+
+def _format_human_location(source_sections: List[str], chunk_map: Dict[str, Any], f_item: Dict[str, Any]) -> str:
+    """
+    Translates developer chunk IDs into business-friendly document locations
+    (e.g., Page 3 · Section: Operational Controls).
+    """
+    explicit_page = f_item.get("page_number") or f_item.get("page")
+    explicit_heading = f_item.get("section_heading") or f_item.get("heading") or f_item.get("section")
+
+    locations = []
+    for cid in source_sections:
+        c_meta = chunk_map.get(cid, {})
+        page = explicit_page or c_meta.get("page_number")
+        heading = explicit_heading or c_meta.get("heading") or c_meta.get("section")
+
+        parts = []
+        if page and str(page) != "0":
+            parts.append(f"Page {page}")
+        if heading:
+            clean_heading = str(heading).strip().lstrip("#").strip()
+            if len(clean_heading) > 40:
+                clean_heading = clean_heading[:37] + "..."
+            parts.append(f"Section: {clean_heading}")
+
+        if parts:
+            locations.append(" · ".join(parts))
+
+    if locations:
+        unique_locs = list(dict.fromkeys(locations))
+        if len(unique_locs) == 1:
+            return unique_locs[0]
+        elif len(unique_locs) > 1:
+            return " & ".join(unique_locs[:2]) + (f" (+{len(unique_locs)-2} more)" if len(unique_locs) > 2 else "")
+
+    if explicit_page:
+        return f"Page {explicit_page}"
+    if explicit_heading:
+        return f"Section: {explicit_heading}"
+
+    return "Document Section"
+
+
+def _group_and_consolidate_findings(confirmed_findings: List[Dict[str, Any]], chunk_map: Dict[str, Any], category_mappings: Dict[str, str]) -> List[Dict[str, Any]]:
+    """
+    Groups similar/repetitive findings sharing the same category and core recommendation
+    into consolidated executive finding cards.
+    """
+    grouped_map = {}
+    for idx, f in enumerate(confirmed_findings, start=1):
+        raw_cat = f.get("business_category", "Writing Clarity")
+        category = category_mappings.get(raw_cat, raw_cat)
+        reason = (f.get("reason") or f.get("explanation") or "").strip()
+        recommendation = (f.get("recommendation") or f.get("suggested_resolution") or "").strip()
+        severity = f.get("severity", "Medium")
+
+        rec_key = recommendation[:50].lower() if recommendation else reason[:50].lower()
+        group_key = (category, rec_key)
+
+        evidence = f.get("evidence", [])
+        source_sections = [ev.get("chunk_id") for ev in evidence if ev.get("chunk_id")]
+        if not source_sections and f.get("chunk_id"):
+            source_sections = [f.get("chunk_id")]
+
+        if group_key not in grouped_map:
+            grouped_map[group_key] = {
+                "base_finding": f,
+                "category": category,
+                "severity": severity,
+                "reasons": [reason] if reason else [],
+                "recommendations": [recommendation] if recommendation else [],
+                "source_sections": list(source_sections),
+                "evidence_list": list(evidence),
+                "suspected_texts": []
+            }
+            sus_t = f.get("highlighted_ambiguity") or f.get("suspected_text") or f.get("original_text") or f.get("quote")
+            if sus_t:
+                grouped_map[group_key]["suspected_texts"].append(sus_t)
+        else:
+            g = grouped_map[group_key]
+            sev_rank = {"Critical": 4, "High": 3, "Medium": 2, "Low": 1}
+            if sev_rank.get(severity, 1) > sev_rank.get(g["severity"], 1):
+                g["severity"] = severity
+            if reason and reason not in g["reasons"]:
+                g["reasons"].append(reason)
+            if recommendation and recommendation not in g["recommendations"]:
+                g["recommendations"].append(recommendation)
+            for ss in source_sections:
+                if ss not in g["source_sections"]:
+                    g["source_sections"].append(ss)
+            for ev in evidence:
+                if ev not in g["evidence_list"]:
+                    g["evidence_list"].append(ev)
+            sus_t = f.get("highlighted_ambiguity") or f.get("suspected_text") or f.get("original_text") or f.get("quote")
+            if sus_t and sus_t not in g["suspected_texts"]:
+                g["suspected_texts"].append(sus_t)
+
+    consolidated = []
+    for g_idx, (g_key, g) in enumerate(grouped_map.items(), start=1):
+        f = g["base_finding"]
+        category = g["category"]
+        severity = g["severity"]
+
+        location_display = _format_human_location(g["source_sections"], chunk_map, f)
+        primary_cid = g["source_sections"][0] if g["source_sections"] else f.get("chunk_id", "N/A")
+        c_meta = chunk_map.get(primary_cid, {})
+
+        page_number = f.get("page_number") or f.get("page") or c_meta.get("page_number") or 1
+        section_heading = f.get("section_heading") or f.get("section") or c_meta.get("heading") or "General Section"
+
+        highlighted_ambiguity = g["suspected_texts"][0] if g["suspected_texts"] else ""
+        if not highlighted_ambiguity and g["evidence_list"]:
+            for ev in g["evidence_list"]:
+                if ev.get("quote"):
+                    highlighted_ambiguity = ev.get("quote")
+                    break
+        if not highlighted_ambiguity:
+            highlighted_ambiguity = f.get("quote") or "Passage evaluated during assurance review."
+
+        original_chunk = f.get("original_chunk") or c_meta.get("text") or highlighted_ambiguity
+
+        raw_title = f.get("title", "")
+        if not raw_title or "chunk_" in raw_title or len(raw_title) > 90:
+            if len(g["source_sections"]) > 1:
+                title = f"{category} across Multiple Document Sections"
+            else:
+                title = f"{category} in {location_display}"
+        else:
+            title = raw_title
+
+        impact = f.get("business_impact") or f.get("impact")
+        if not impact or "OPERATIONAL IMPACT: Minor syntax" in impact:
+            if severity == "Critical":
+                impact = "Critical Compliance Risk: Introduces immediate legal exposure, risk of regulatory audit failure, or project certification halt."
+            elif severity == "High":
+                impact = "High Strategic Risk: Conflicting directives cause operational execution errors, vendor disputes, or implementation bottlenecks."
+            elif severity == "Medium":
+                impact = "Medium Operational Risk: Ambiguous qualifiers or missing prerequisites create execution deviations across teams."
+            else:
+                impact = "Clarity Impact: Minor syntax or phrasing issues increase review cycle time and reduce document polish."
+
+        resolution = g["recommendations"][0] if g["recommendations"] else (f.get("recommendation") or f.get("suggested_resolution") or "Review source document to reconcile conflicting statements.")
+        explanation = " ".join(dict.fromkeys(g["reasons"])) if g["reasons"] else "Identified during document consistency and quality assurance audit."
+
+        formatted_evidence = []
+        for ev in g["evidence_list"]:
+            ev_cid = ev.get("chunk_id", "")
+            ev_loc = _format_human_location([ev_cid], chunk_map, {}) if ev_cid else location_display
+            formatted_evidence.append({
+                "location": ev_loc,
+                "quote": ev.get("quote", ""),
+                "chunk_id": ev_cid
+            })
+
+        issue_id = f.get("issue_id", f"finding_{g_idx:03d}")
+
+        consolidated.append({
+            "finding_id": issue_id.replace("_amb_", "_finding_").replace("_issue_", "_finding_"),
+            "title": title,
+            "severity": severity,
+            "category": category,
+            "page_number": page_number,
+            "section_heading": section_heading,
+            "chunk_id": primary_cid,
+            "location_display": location_display,
+            "original_chunk": original_chunk,
+            "highlighted_ambiguity": highlighted_ambiguity,
+            "claude_explanation": explanation,
+            "business_impact": impact,
+            "recommended_resolution": resolution,
+            "evidence": formatted_evidence,
+            "internal_reference": ", ".join(g["source_sections"]) if g["source_sections"] else primary_cid,
+            "occurrence_count": len(g["source_sections"]) or 1,
+            "verification_status": "✓ Expert Validation Complete"
+        })
+
+    return consolidated
+
+
+def _get_publication_status(severity_counts: Counter, confirmed_count: int) -> Dict[str, str]:
+    critical = severity_counts.get("Critical", 0)
+    high = severity_counts.get("High", 0)
+
+    if critical == 0 and high == 0 and confirmed_count <= 2:
+        return {
+            "label": "Ready for Publication",
+            "badge_class": "status-ready",
+            "action": "Document satisfies enterprise compliance and structural standards."
+        }
+    elif critical == 0 and high == 0:
+        return {
+            "label": "Requires Minor Revision",
+            "badge_class": "status-minor",
+            "action": "Resolve minor phrasing, terminology, or clarity items prior to publishing."
+        }
+    elif critical == 0 and high <= 3:
+        return {
+            "label": "Compliance Review Recommended",
+            "badge_class": "status-review",
+            "action": "Operational policy or cross-section discrepancies require review before release."
+        }
+    elif critical > 0 or high > 3:
+        return {
+            "label": "Requires Major Revision",
+            "badge_class": "status-major",
+            "action": "Critical policy conflicts or contract ambiguities must be reconciled prior to publication."
+        }
+    else:
+        return {
+            "label": "Editorial Review Required",
+            "badge_class": "status-editorial",
+            "action": "Editorial review required to align terminology and narrative polish."
+        }
+
+
 class FinalReportGenerator:
     """
-    Phase 15: Final Business Report Generator.
-    Consumes the verified Claude responses and generates customer-facing
-    business reports in JSON, Markdown, and print-friendly HTML formats.
-    Uses professional consulting terminology (e.g. Finding ID, Document Location, Related Sections).
+    Phase 15: Enterprise Business Compliance & Document Quality Audit Report Generator.
+    Produces Deloitte/EY/PwC senior consulting-grade reports in JSON, Markdown, and interactive HTML format.
     Writes outputs to 15_final_report/.
     """
 
     def __init__(self, config: Optional[RagConfig] = None):
         self.config = config or RagConfig()
 
-    def run_generation(self, job_dir: Path, doc_id: str) -> None:
-        logger.info(f"Starting Phase 15 Final Business Report Generation for job: {doc_id}")
-        
-        # Load claude_response.json
+    def run_generation(self, job_dir: Path, doc_id: str, force_regenerate: bool = False) -> None:
+        logger.info(f"Starting Phase 15 Enterprise Report Generation for job: {doc_id}")
+
+        final_report_json = job_dir / "15_final_report" / "final_report.json"
+        final_report_html = job_dir / "15_final_report" / "final_report.html"
+        if not force_regenerate and final_report_json.exists() and final_report_html.exists() and final_report_json.stat().st_size > 0:
+            logger.info(f"[CACHE HIT] Final business report already exists for job {doc_id}. Skipping re-generation.")
+            return
+
         claude_json_path = job_dir / "14_claude_verification" / "claude_response.json"
         if not claude_json_path.exists():
             logger.error(f"claude_response.json not found in {job_dir}/14_claude_verification/")
             return
-            
+
         with open(claude_json_path, "r", encoding="utf-8") as f:
             claude_data = json.load(f)
-            
+
         verified_findings = claude_data.get("verified_findings", [])
         confirmed_findings = [f for f in verified_findings if f.get("status") == "confirmed"]
         rejected_findings = [f for f in verified_findings if f.get("status") == "rejected"]
-        
+
         overall_risk = claude_data.get("overall_document_risk", "Low")
-        
-        # Terminology translation mappings
+
+        # Load chunk metadata & original chunk text
+        chunk_map = {}
+        for chunk_file in [job_dir / "06_chunks" / "document_chunks.json", job_dir / "document_chunks.json"]:
+            if chunk_file.exists():
+                try:
+                    with open(chunk_file, "r", encoding="utf-8") as f:
+                        cd_data = json.load(f)
+                        chunks_list = cd_data.get("chunks", [])
+                        for chunk in chunks_list:
+                            meta = chunk.get("metadata", {})
+                            cid = meta.get("chunk_id") or chunk.get("chunk_id")
+                            if cid:
+                                chunk_map[cid] = {
+                                    "page_number": meta.get("page_number"),
+                                    "heading": meta.get("heading"),
+                                    "section": meta.get("section"),
+                                    "chunk_type": meta.get("chunk_type"),
+                                    "text": chunk.get("text") or chunk.get("content") or ""
+                                }
+                except Exception as e:
+                    logger.warning(f"Could not load chunk metadata map: {e}")
+                break
+
         category_mappings = {
-            "Lexical Ambiguity": "Writing Quality Issue",
-            "Grammar Errors": "Writing Quality Issue",
-            "Spelling Errors": "Writing Quality Issue",
-            "Writing Style Issues": "Writing Quality Issue",
-            "Terminology Inconsistency": "Terminology Inconsistency",
-            "Policy Conflict": "Policy Alignment Conflict",
-            "Numerical Conflict": "Numerical Conflict",
-            "Temporal Conflict": "Temporal Conflict",
-            "Broken Reference": "Broken Reference",
-            "Duplicate Guidance": "Duplicate Guidance"
+            "Lexical Ambiguity": "Writing Clarity",
+            "Referential Ambiguity": "Pronoun Ambiguity",
+            "Ambiguous Reference": "Pronoun Ambiguity",
+            "Grammar Errors": "Grammar Issue",
+            "Grammar Error": "Grammar Issue",
+            "Grammar Issue": "Grammar Issue",
+            "Spelling Errors": "Spelling Issue",
+            "Spelling Error": "Spelling Issue",
+            "Spelling Issue": "Spelling Issue",
+            "Writing Style Issues": "Writing Clarity",
+            "Writing Quality": "Writing Clarity",
+            "Ambiguities": "Writing Clarity",
+            "Terminology Inconsistency": "Terminology Issue",
+            "Undefined Term": "Undefined Term",
+            "Inconsistent Terminology": "Terminology Issue",
+            "Terminology Issue": "Terminology Issue",
+            "Policy Conflict": "Policy Conflict",
+            "Policy Conflicts": "Policy Conflict",
+            "Numerical Conflict": "Numerical Inconsistency",
+            "Numerical Inconsistency": "Numerical Inconsistency",
+            "Temporal Conflict": "Contradictory Statement",
+            "Contradictory Statement": "Contradictory Statement",
+            "Contradictions": "Contradictory Statement",
+            "Broken Reference": "Cross-reference Issue",
+            "Cross-reference Issue": "Cross-reference Issue",
+            "Duplicate Guidance": "Contradictory Statement",
+            "Missing Information": "Writing Clarity"
         }
-        
-        # Re-compile stats
-        severity_counts = Counter(f.get("severity", "Low") for f in confirmed_findings)
-        category_counts = Counter(
-            category_mappings.get(f.get("business_category"), f.get("business_category", "Writing Quality Issue")) 
-            for f in confirmed_findings
-        )
-        
-        # Map findings to professional business structure
-        business_findings = []
-        for idx, f in enumerate(confirmed_findings, start=1):
-            issue_id = f.get("issue_id", f"finding_{idx:03d}")
-            raw_cat = f.get("business_category", "Writing Quality Issue")
-            category = category_mappings.get(raw_cat, raw_cat)
-            severity = f.get("severity", "Medium")
-            evidence = f.get("evidence", [])
-            source_sections = list(set(ev.get("chunk_id") for ev in evidence))
-            
-            # Formulate business title
-            title = f"{category} in Document Locations {', '.join(source_sections)}"
-            if len(source_sections) > 2:
-                title = f"{category} Conflict (Multi-Section)"
-                
-            # Consulting-grade Business Impact statements
-            impact = "OPERATIONAL IMPACT: Minor syntax or clarity issues increase document review cycle times and introduce slight comprehension variances."
-            if severity == "Critical":
-                impact = "CRITICAL COMPLIANCE RISK: Structural contradictions in regulatory mandates introduce immediate legal exposure, risk audits failures, or halt project certifications."
-            elif severity == "High":
-                impact = "HIGH STRATEGIC RISK: Terminology divergences or policy discrepancies will cause engineering execution errors, vendor contract disputes, or developer speed bottlenecks."
-            elif severity == "Medium":
-                impact = "MEDIUM OPERATIONAL RISK: Vague qualifiers or missing prerequisites create execution deviations, increasing task rework rates across operations teams."
-                
-            business_findings.append({
-                "finding_id": issue_id.replace("_amb_", "_finding_").replace("_issue_", "_finding_"),
-                "title": title,
-                "severity": severity,
-                "category": category,
-                "explanation": f.get("reason", "No reason provided."),
-                "business_impact": impact,
-                "evidence": evidence,
-                "document_locations": source_sections,
-                "suggested_resolution": f.get("recommendation", "Review source requirements documents for reconciliation."),
-                "verification_status": "verified"
-            })
-            
-        # Structure final JSON
+
+        # Consolidate and group findings into clean executive cards
+        business_findings = _group_and_consolidate_findings(confirmed_findings, chunk_map, category_mappings)
+        for f_item in business_findings:
+            f_item["ambiguity_category"] = f_item["category"]
+            f_item["why_claude_flagged_it"] = f_item["claude_explanation"]
+
+        severity_counts = Counter(f["severity"] for f in business_findings)
+        category_counts = Counter(f["category"] for f in business_findings)
+
+        pub_status = _get_publication_status(severity_counts, len(business_findings))
+
+        # Claude Verification Summary Funnel Metrics (Requirement 3)
+        # Local Model Validation Summary
+        total_local_findings = len(verified_findings)
+        verified_by_claude = len(confirmed_findings)
+        false_positives = len(rejected_findings)
+        overfitting_rate = (
+          round((false_positives / total_local_findings) * 100, 1)
+          if total_local_findings
+          else 0
+          )
+        validation_summary = {
+  "local_findings": total_local_findings,
+  "verified_findings": verified_by_claude,
+  "false_positives": false_positives,
+  "overfitting_rate": overfitting_rate
+  }
+
+        # Decluttered Dashboard KPIs (Requirement 4: Document Status, Publication Readiness, Verified Findings, High Priority Findings, Last Generated)
+        critical_high_count = severity_counts.get("Critical", 0) + severity_counts.get("High", 0)
+        now_timestamp = datetime.now().strftime("%b %d, %Y at %H:%M")
+
+        dashboard_kpis = {
+            "document_status": "Completed",
+            "publication_readiness": pub_status["label"],
+            "publication_guidance": pub_status["action"],
+            "verified_findings_count": len(business_findings),
+            "high_priority_findings_count": critical_high_count,
+            "last_generated": now_timestamp
+        }
+
+        # Action Plan grouped by priority (Requirement 4 under Priority Actions)
+        critical_high_items = [f for f in business_findings if f["severity"] in ["Critical", "High"]]
+        medium_items = [f for f in business_findings if f["severity"] == "Medium"]
+        low_items = [f for f in business_findings if f["severity"] == "Low"]
+
+        action_plan = {
+            "phase_1_immediate": critical_high_items,
+            "phase_2_operational": medium_items,
+            "phase_3_polish": low_items
+        }
+
+        # Structure clean final JSON schema (Requirement 10)
         final_report_data = {
             "document_job_id": doc_id,
-            "overall_document_health": "Poor" if overall_risk == "High" else ("Fair" if overall_risk == "Medium" else "Good"),
-            "overall_risk_score": overall_risk,
-            "consistency_score": round(100 - (len(confirmed_findings) * 3), 1),
-            "quality_score": round(100 - (len(confirmed_findings) * 2), 1),
-            "readability_score": "High" if len(confirmed_findings) < 10 else ("Medium" if len(confirmed_findings) < 25 else "Low"),
+            "dashboard_kpis": dashboard_kpis,
+            "publication_status": pub_status,
+            "validation_summary": validation_summary,
             "executive_summary": {
-                "summary_text": f"This Business Quality Audit Report evaluates the consistency, structural alignment, and compliance profile of document {doc_id}. The analysis verified {len(confirmed_findings)} findings across related sections. The document demonstrates a {overall_risk.upper()} risk exposure and holds a consistency index of {100 - (len(confirmed_findings) * 3)}%.",
-                "total_findings_confirmed": len(confirmed_findings),
-                "total_findings_rejected": len(rejected_findings),
-                "severity_breakdown": dict(severity_counts),
-                "category_breakdown": dict(category_counts)
+                "summary_text": f"The Local AI Review Engine first analyzed the document and identified {total_local_findings} potential findings. Claude performed an expert validation of those findings, confirming {verified_by_claude} valid findings while unsupported findings ({false_positives}) were rejected as false positives. Consequently, only the {len(business_findings)} validated findings appear in this final report. Overall document publication readiness is evaluated as: {pub_status['label']}.",
+                "overall_risk_level": overall_risk,
+                "category_breakdown": dict(category_counts),
+                "severity_breakdown": dict(severity_counts)
             },
             "findings": business_findings,
-            "recommendations": claude_data.get("recommendations", [])
+            "rejected_findings": rejected_findings,
+            "action_plan": action_plan,
+            "strategic_recommendations": claude_data.get("recommendations", [])
         }
-        
-        # Ensure output folder exists
+
         report_dir = job_dir / "15_final_report"
         report_dir.mkdir(parents=True, exist_ok=True)
-        
-        # Output 1: final_report.json
+
+        # 1. Output: final_report.json
         with open(report_dir / "final_report.json", "w", encoding="utf-8") as f:
             json.dump(final_report_data, f, indent=2, ensure_ascii=False)
 
-        # Output 2: executive_summary.md
+        # 2. Output: executive_summary.md (Clean C-Suite Summary)
         exec_md = f"""# Executive Compliance Audit Summary
-**Document Job ID**: `{doc_id}`  
-**Overall Document Health**: **{final_report_data['overall_document_health'].upper()}**  
-**Overall Risk Profile**: **{final_report_data['overall_risk_score'].upper()}**  
-**Consistency Score**: **{final_report_data['consistency_score']}%**  
-**Quality Score**: **{final_report_data['quality_score']}%**  
-**Readability Rating**: **{final_report_data['readability_score']}**  
+**Document Job Reference**: `{doc_id}`  
+**Publication Status**: **{pub_status['label'].upper()}**  
+**Last Generated**: {now_timestamp}  
 
 ---
 
-## Audit Dashboard Metrics
-- **Confirmed Ambiguities / Contradictions**: {final_report_data['executive_summary']['total_findings_confirmed']}
-- **Filtered False Positives (Rejected)**: {final_report_data['executive_summary']['total_findings_rejected']}
+## 1. Executive Dashboard KPIs
+- **Document Status**: Completed
+- **Publication Readiness**: {pub_status['label']} ({pub_status['action']})
+- **Verified Findings Presented**: {len(business_findings)} consolidated cards ({verified_by_claude} raw confirmed)
+- **High Priority Items**: {critical_high_count} critical/high priority blockers
 
-### Mapped Severities
-- Critical issues: {severity_counts.get('Critical', 0)}
-- High Severity: {severity_counts.get('High', 0)}
-- Medium Severity: {severity_counts.get('Medium', 0)}
-- Low Severity: {severity_counts.get('Low', 0)}
+## 2. Validation Summary
+- **Local AI Review Findings**: {total_local_findings}
+- **Expert Validated Findings**: {verified_by_claude}
+- **Rejected Findings**: {false_positives}
+- **Final Findings Presented**: {len(business_findings)}
 
-### Core Recommendation Resolution
-{chr(10).join(f"- {r}" for r in final_report_data['recommendations'])}
+## 3. Strategic Action Items
+{chr(10).join(f"- {r}" for r in final_report_data['strategic_recommendations'])}
 """
         with open(report_dir / "executive_summary.md", "w", encoding="utf-8") as f:
             f.write(exec_md)
 
-        # Output 3: final_report.md
+        # 3. Output: final_report.md (Organized strictly into the 6 sections)
         md_lines = [
-            f"# Business Compliance Audit Report\n",
-            f"**Job ID**: `{doc_id}`  \n",
-            f"**Document Health**: **{final_report_data['overall_document_health'].upper()}**  \n",
-            f"**Risk Level**: **{final_report_data['overall_risk_score'].upper()}**  \n\n",
-            f"---",
-            f"\n## 1. Executive Summary\n",
-            final_report_data['executive_summary']['summary_text'],
-            f"\n## 2. Overall Document Health & Metrics\n",
-            f"- **Consistency Score**: {final_report_data['consistency_score']}%",
-            f"- **Quality Score**: {final_report_data['quality_score']}%",
-            f"- **Readability Rating**: {final_report_data['readability_score']}",
-            f"\n## 3. Risk Overview\n",
+            f"# Enterprise Document Quality & Compliance Audit Report\n",
+            f"**Document Reference**: `{doc_id}` | **Status**: **{pub_status['label']}** | **Generated**: {now_timestamp}\n\n",
+            f"---\n",
+            f"## SECTION 1: EXECUTIVE SUMMARY\n",
+            f"{final_report_data['executive_summary']['summary_text']}\n\n",
+            f"## SECTION 2: REVIEW OVERVIEW\n",
+            f"- **Publication Readiness**: **{pub_status['label']}** - {pub_status['action']}",
+            f"- **Total Consolidated Findings**: {len(business_findings)} cards",
+            f"- **High Priority Action Items**: {critical_high_count} items\n",
+            f"### Severity Breakdown",
             f"- **Critical**: {severity_counts.get('Critical', 0)}",
             f"- **High**: {severity_counts.get('High', 0)}",
             f"- **Medium**: {severity_counts.get('Medium', 0)}",
-            f"- **Low**: {severity_counts.get('Low', 0)}"
+            f"- **Low**: {severity_counts.get('Low', 0)}\n",
+            f"## SECTION 3: VALIDATION SUMMARY\n",
+            f"- **Local AI Review Findings**: {total_local_findings}\n",
+            f"- **Expert Validated Findings**: {verified_by_claude}\n",
+            f"- **Rejected Findings**: {false_positives}\n",
+            f"- **Final Findings Presented**: {len(business_findings)}\n\n",
+            f"## SECTION 4: PRIORITY ACTIONS\n",
+            f"### Phase 1: Immediate Remediation (High & Critical Priority)\n"
         ]
-        
-        # Findings by priority
-        for priority in ["Critical", "High", "Medium", "Low"]:
-            md_lines.append(f"\n## {priority} Priority Findings\n")
-            p_findings = [bf for bf in business_findings if bf["severity"] == priority]
-            for bf in p_findings:
+
+        if critical_high_items:
+            for item in critical_high_items:
+                md_lines.append(f"1. **[{item['severity']}] {item['title']}** ({item['location_display']})\n   - **Recommendation:** {item['recommended_resolution']}\n")
+        else:
+            md_lines.append("*No critical or high priority blockers identified.*\n")
+
+        md_lines.append(f"### Phase 2: Operational & Policy Alignment (Medium Priority)\n")
+        if medium_items:
+            for item in medium_items:
+                md_lines.append(f"1. **{item['title']}** ({item['location_display']})\n   - **Recommendation:** {item['recommended_resolution']}\n")
+        else:
+            md_lines.append("*No medium priority items identified.*\n")
+
+        md_lines.append(f"### Phase 3: Language & Formatting Polish (Low Priority)\n")
+        if low_items:
+            for item in low_items:
+                md_lines.append(f"1. **{item['title']}** ({item['location_display']})\n   - **Recommendation:** {item['recommended_resolution']}\n")
+        else:
+            md_lines.append("*No low priority items identified.*\n")
+
+        md_lines.append(f"\n## SECTION 5: FINDINGS BY CATEGORY\n")
+        for cat in sorted(category_counts.keys()):
+            cat_findings = [f for f in business_findings if f["category"] == cat]
+            md_lines.append(f"### Category: {cat} ({len(cat_findings)})\n")
+            for bf in cat_findings:
                 md_lines.append(
-                    f"### {bf['title']}\n"
-                    f"- **Finding ID**: `{bf['finding_id']}`\n"
-                    f"- **Category**: {bf['category']}\n"
-                    f"- **Explanation**: {bf['explanation']}\n"
-                    f"- **Business Impact**: {bf['business_impact']}\n"
-                    f"- **Resolution**: {bf['suggested_resolution']}\n"
+                    f"#### {bf['title']}\n"
+                    f"- **Location**: {bf['location_display']}\n"
+                    f"- **Category**: `{bf['category']}` | **Severity**: `{bf['severity']}` | **Status**: {bf['verification_status']}\n\n"
+                    f"**Original Document Passage:**\n"
+                    f"> \"{bf['original_chunk']}\"\n\n"
+                    f"**Highlighted Ambiguity:** *\"{bf['highlighted_ambiguity']}\"*\n\n"
+                    f"- **Validation Rationale:** {bf['claude_explanation']}\n"
+                    f"- **Business Impact:** {bf['business_impact']}\n"
+                    f"- **Recommended Resolution:** {bf['recommended_resolution']}\n\n"
                 )
-                md_lines.append("- **Supporting Evidence Quotes**:\n")
-                for ev in bf["evidence"]:
-                    md_lines.append(f"  - Document Location `{ev.get('chunk_id')}`: \"{ev.get('quote')}\"\n")
-            if not p_findings:
-                md_lines.append(f"*No {priority.lower()} findings identified.*\n")
-                
-        md_lines.append(f"\n## 8. Business Categories Breakdown\n")
-        for cat, count in category_counts.items():
-            md_lines.append(f"- **{cat}**: {count} instances")
-            
-        md_lines.append(f"\n## 9. Recommendations\n")
-        for r in final_report_data['recommendations']:
-            md_lines.append(f"- {r}")
-            
-        md_lines.append(f"\n## 10. Appendix\n")
-        md_lines.append(f"- Mapped verification source arrays stored in `final_report.json`.")
-        
+
+        md_lines.append(f"\n## SECTION 6: APPENDIX (DOCUMENT TRACEABILITY)\n")
+        md_lines.append(f"Internal Document Job ID: `{doc_id}`\n")
+        md_lines.append(f"Total Raw Findings Evaluated: {total_local_findings}\n")
+        md_lines.append(f"Verification Output Location: `14_claude_verification/claude_response.json`\n")
+
         with open(report_dir / "final_report.md", "w", encoding="utf-8") as f:
             f.write("\n".join(md_lines))
 
-        # Output 4: final_report.html (Interactive Debugger Report)
+        # 4. Output: final_report.html (Enterprise Standalone Audit Dashboard with PDF Print Support)
         html_template = """<!DOCTYPE html>
 <html lang="en">
 <head>
   <meta charset="utf-8">
-  <title>Business Compliance Audit Report</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Enterprise Document Quality & Compliance Audit Report</title>
   <style>
     :root {
-      --primary: #1e3a8a;
-      --primary-light: #eff6ff;
-      --bg: #f8fafc;
-      --card-bg: #ffffff;
-      --text: #0f172a;
-      --text-muted: #475569;
-      --border: #cbd5e1;
-      --shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1);
+      --primary-navy: #0f172a;
+      --brand-blue: #1e40af;
+      --brand-light: #eff6ff;
+      --bg-page: #f8fafc;
+      --bg-card: #ffffff;
+      --text-main: #0f172a;
+      --text-muted: #64748b;
+      --border-color: #e2e8f0;
+      
+      --sev-critical: #dc2626;
+      --sev-high: #ea580c;
+      --sev-medium: #d97706;
+      --sev-low: #059669;
     }
+    
+    * { box-sizing: border-box; }
+    
     body {
-      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
-      background: var(--bg);
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+      background: var(--bg-page);
       margin: 0;
       padding: 0;
-      color: var(--text);
-      display: flex;
-      flex-direction: column;
-      min-height: 100vh;
+      color: var(--text-main);
+      line-height: 1.5;
     }
+    
     header {
-      background: var(--primary);
-      color: #fff;
-      padding: 30px 40px;
+      background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
+      color: #ffffff;
+      padding: 32px 40px;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+    }
+    
+    .header-content {
+      max-width: 1200px;
+      margin: 0 auto;
       display: flex;
       justify-content: space-between;
       align-items: center;
+      flex-wrap: wrap;
+      gap: 16px;
     }
-    header h1 {
+    
+    .header-title h1 {
       margin: 0;
       font-size: 24px;
       font-weight: 800;
       letter-spacing: -0.02em;
     }
-    .badge {
-      background: var(--primary-light);
-      color: var(--primary);
-      padding: 4px 10px;
-      border-radius: 6px;
-      font-size: 11px;
-      font-weight: bold;
-      text-transform: uppercase;
-      display: inline-block;
-    }
-    .badge-health {
-      font-size: 14px;
-      padding: 6px 14px;
-    }
-    .badge-health-good { background: #d1fae5; color: #065f46; }
-    .badge-health-fair { background: #fef3c7; color: #92400e; }
-    .badge-health-poor { background: #fee2e2; color: #991b1b; }
     
-    .badge-severity-critical { background: #fca5a5; color: #b91c1c; }
-    .badge-severity-high { background: #fee2e2; color: #ef4444; }
-    .badge-severity-medium { background: #fef3c7; color: #d97706; }
-    .badge-severity-low { background: #d1fae5; color: #10b981; }
-
-    .main-container {
-      max-width: 1200px;
-      width: 100%;
-      margin: 30px auto;
-      padding: 0 20px;
-      box-sizing: border-box;
+    .header-subtitle {
+      font-size: 13px;
+      color: #94a3b8;
+      margin-top: 4px;
     }
-    .dashboard-grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
-      gap: 20px;
-      margin-bottom: 40px;
-    }
-    .stat-card {
-      background: var(--card-bg);
-      border: 1px solid var(--border);
-      border-radius: 12px;
-      padding: 24px;
-      box-shadow: var(--shadow);
-    }
-    .stat-title {
+    
+    .status-badge {
+      padding: 6px 14px;
+      border-radius: 999px;
       font-size: 12px;
       font-weight: 700;
-      color: var(--text-muted);
       text-transform: uppercase;
-      margin-bottom: 8px;
-    }
-    .stat-value {
-      font-size: 28px;
-      font-weight: 800;
-      color: var(--primary);
+      letter-spacing: 0.03em;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
     }
     
-    .findings-section {
-      margin-top: 40px;
+    .status-ready { background: #d1fae5; color: #065f46; border: 1px solid #6ee7b7; }
+    .status-minor { background: #fef3c7; color: #92400e; border: 1px solid #fde047; }
+    .status-review { background: #dbeafe; color: #1e40af; border: 1px solid #93c5fd; }
+    .status-major { background: #fee2e2; color: #991b1b; border: 1px solid #fca5a5; }
+    .status-editorial { background: #f1f5f9; color: #334155; border: 1px solid #cbd5e1; }
+
+    .badge-sev-critical { background: #fef2f2; color: #dc2626; border: 1px solid #fecaca; }
+    .badge-sev-high { background: #fff7ed; color: #ea580c; border: 1px solid #ffedd5; }
+    .badge-sev-medium { background: #fffbeb; color: #d97706; border: 1px solid #fef3c7; }
+    .badge-sev-low { background: #f0fdf4; color: #059669; border: 1px solid #bbf7d0; }
+    
+    .badge-cat { background: var(--brand-light); color: var(--brand-blue); border: 1px solid #bfdbfe; font-size: 11px; font-weight: 700; padding: 3px 8px; border-radius: 4px; }
+    .badge-loc { background: #f1f5f9; color: #334155; border: 1px solid #cbd5e1; font-weight: 650; font-size: 11px; padding: 3px 8px; border-radius: 4px; }
+    
+    .main-container {
+      max-width: 1200px;
+      margin: 32px auto;
+      padding: 0 24px;
     }
-    .findings-section h2 {
-      border-bottom: 2px solid var(--primary);
-      padding-bottom: 10px;
-      margin-bottom: 20px;
-      color: var(--primary);
+
+    .section-title {
+      font-size: 18px;
+      font-weight: 800;
+      color: var(--primary-navy);
+      margin: 36px 0 16px;
+      padding-bottom: 8px;
+      border-bottom: 2px solid var(--border-color);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
     }
-    .finding-card {
-      background: var(--card-bg);
-      border: 1px solid var(--border);
-      border-radius: 8px;
-      margin-bottom: 20px;
-      box-shadow: var(--shadow);
-      overflow: hidden;
+    
+    /* Decluttered Dashboard Grid (Requirement 4) */
+    .dashboard-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(210px, 1fr));
+      gap: 16px;
+      margin-bottom: 24px;
     }
-    .finding-header {
-      padding: 20px;
+    
+    .kpi-card {
+      background: var(--bg-card);
+      border: 1px solid var(--border-color);
+      border-radius: 12px;
+      padding: 18px 20px;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.02);
+    }
+    
+    .kpi-label {
+      font-size: 11px;
+      font-weight: 800;
+      color: var(--text-muted);
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+    }
+    
+    .kpi-value {
+      font-size: 20px;
+      font-weight: 800;
+      color: var(--primary-navy);
+      margin-top: 4px;
+    }
+    
+    .kpi-desc {
+      font-size: 12px;
+      color: #475569;
+      margin-top: 4px;
+      line-height: 1.4;
+    }
+
+    /* Funnel Summary Box (Requirement 3) */
+    .funnel-card {
+      background: #ffffff;
+      border: 1px solid var(--border-color);
+      border-radius: 12px;
+      padding: 24px;
+      margin-bottom: 28px;
+    }
+    .funnel-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      flex-wrap: wrap;
+      gap: 12px;
+      margin-top: 16px;
+    }
+    .funnel-step {
+      flex: 1;
+      min-width: 160px;
       background: #f8fafc;
-      cursor: pointer;
+      border: 1px solid #e2e8f0;
+      border-radius: 8px;
+      padding: 14px 16px;
+      text-align: center;
+    }
+    .funnel-step-val {
+      font-size: 22px;
+      font-weight: 800;
+      color: var(--primary-navy);
+    }
+    .funnel-step-lbl {
+      font-size: 11.5px;
+      font-weight: 700;
+      color: var(--text-muted);
+      margin-top: 2px;
+    }
+    .funnel-arrow {
+      font-size: 18px;
+      color: var(--brand-blue);
+      font-weight: 800;
+    }
+    
+    /* Toolbar */
+    .toolbar {
       display: flex;
       justify-content: space-between;
       align-items: center;
-      border-bottom: 1px solid var(--border);
+      flex-wrap: wrap;
+      gap: 12px;
+      background: #ffffff;
+      padding: 16px 20px;
+      border-radius: 12px;
+      border: 1px solid var(--border-color);
+      margin-bottom: 24px;
     }
-    .finding-header h4 {
-      margin: 0;
+    
+    .search-input {
+      flex: 1;
+      min-width: 220px;
+      padding: 8px 12px;
+      border-radius: 6px;
+      border: 1px solid var(--border-color);
+      font-size: 13px;
+      outline: none;
+    }
+    
+    .select-dropdown {
+      padding: 8px 12px;
+      border-radius: 6px;
+      border: 1px solid var(--border-color);
+      font-size: 12.5px;
+      font-weight: 600;
+      background: #ffffff;
+      color: #334155;
+    }
+    
+    .filter-btn {
+      background: #f1f5f9;
+      border: 1px solid #cbd5e1;
+      padding: 6px 12px;
+      border-radius: 6px;
+      font-size: 12px;
+      font-weight: 600;
+      color: #475569;
+      cursor: pointer;
+    }
+    .filter-btn.active {
+      background: var(--primary-navy);
+      color: #ffffff;
+      border-color: var(--primary-navy);
+    }
+    
+    .action-btn {
+      background: #ffffff;
+      border: 1px solid var(--border-color);
+      padding: 6px 12px;
+      border-radius: 6px;
+      font-size: 12px;
+      font-weight: 600;
+      color: #334155;
+      cursor: pointer;
+    }
+    
+    /* Category Section Headers */
+    .category-group-header {
       font-size: 16px;
-      font-weight: 700;
+      font-weight: 800;
+      color: var(--primary-navy);
+      margin: 28px 0 12px;
+      padding-bottom: 6px;
+      border-bottom: 2px solid var(--border-color);
+      display: flex;
+      align-items: center;
+      gap: 10px;
     }
-    .finding-body {
-      padding: 25px;
+    
+    /* Finding Cards (Requirement 5) */
+    .finding-card {
+      background: var(--bg-card);
+      border: 1px solid var(--border-color);
+      border-radius: 12px;
+      margin-bottom: 16px;
+      box-shadow: 0 2px 6px rgba(15, 23, 42, 0.03);
+      overflow: hidden;
+    }
+    
+    .finding-card.sev-Critical { border-left: 6px solid var(--sev-critical); }
+    .finding-card.sev-High { border-left: 6px solid var(--sev-high); }
+    .finding-card.sev-Medium { border-left: 6px solid var(--sev-medium); }
+    .finding-card.sev-Low { border-left: 6px solid var(--sev-low); }
+    
+    .finding-header-bar {
+      padding: 18px 22px;
+      background: #ffffff;
+      cursor: pointer;
+      user-select: none;
+    }
+    
+    .finding-meta-row {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      flex-wrap: wrap;
+      margin-bottom: 8px;
+    }
+    
+    .finding-title-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 16px;
+    }
+    
+    .finding-title-text {
+      margin: 0;
+      font-size: 15.5px;
+      font-weight: 700;
+      color: var(--primary-navy);
+    }
+    
+    .toggle-icon {
+      font-size: 12px;
+      font-weight: 700;
+      color: var(--brand-blue);
+      background: var(--brand-light);
+      padding: 4px 10px;
+      border-radius: 6px;
+      white-space: nowrap;
+    }
+    
+    .finding-card-body {
+      padding: 0 22px 22px;
+      display: block;
+      border-top: 1px solid #f1f5f9;
+      background: #ffffff;
+    }
+
+    .finding-card-body.collapsed {
       display: none;
     }
-    .finding-body.active {
-      display: block;
+    
+    .block-title {
+      font-size: 11px;
+      font-weight: 800;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      color: var(--text-muted);
+      margin: 16px 0 6px;
     }
     
-    .evidence-box {
-      font-family: monospace;
-      font-size: 12px;
-      background: #f1f5f9;
-      padding: 15px;
-      border-radius: 6px;
-      margin-top: 10px;
-      border-left: 4px solid var(--border);
+    .chunk-box {
+      background: #f8fafc;
+      border: 1px solid #cbd5e1;
+      border-left: 4px solid var(--brand-blue);
+      border-radius: 8px;
+      padding: 14px 18px;
+      font-size: 13.5px;
+      color: #1e293b;
+      line-height: 1.6;
     }
     
+    mark.ambiguity-highlight {
+      background-color: #fef3c7 !important;
+      color: #92400e !important;
+      padding: 2px 5px !important;
+      border-radius: 4px !important;
+      font-weight: 700 !important;
+      border-bottom: 2px solid #d97706 !important;
+    }
+
+    .reason-text {
+      font-size: 13.5px;
+      color: #334155;
+      line-height: 1.6;
+      margin: 0;
+    }
+    
+    .impact-box {
+      background: #fffbeb;
+      border: 1px solid #fde68a;
+      border-left: 4px solid #d97706;
+      border-radius: 8px;
+      padding: 12px 16px;
+      font-size: 13px;
+      color: #92400e;
+      font-weight: 550;
+    }
+    
+    .solution-box {
+      background: #f0fdf4;
+      border: 1px solid #bbf7d0;
+      border-left: 4px solid #16a34a;
+      border-radius: 8px;
+      padding: 12px 16px;
+      font-size: 13px;
+      color: #14532d;
+      font-weight: 600;
+    }
+
+    /* Priority Action Roadmap */
+    .action-plan-card {
+      background: #ffffff;
+      border: 1px solid var(--border-color);
+      border-radius: 12px;
+      padding: 24px;
+      margin-top: 24px;
+    }
+    .plan-phase { margin-bottom: 20px; }
+    .plan-phase-title { font-size: 14px; font-weight: 700; color: #334155; margin-bottom: 8px; }
+    .plan-list { margin: 0; padding-left: 20px; font-size: 13.5px; color: #475569; line-height: 1.6; }
+
     @media print {
-      body {
-        background: #fff;
-        color: #000;
-      }
-      header {
-        background: none;
-        color: #000;
-        border-bottom: 2px solid #000;
-        padding: 10px 0;
-      }
-      .stat-card {
-        border: 1px solid #000;
-        box-shadow: none;
-      }
-      .finding-card {
-        border: 1px solid #000;
-        box-shadow: none;
-        page-break-inside: avoid;
-      }
-      .finding-body {
-        display: block !important;
-      }
-      .finding-header {
-        background: none;
-        border-bottom: 1px solid #000;
-      }
-      .main-container {
-        max-width: 100%;
-        margin: 0;
-        padding: 0;
-      }
+      body { background: #ffffff; color: #000000; }
+      header { background: none; color: #000000; border-bottom: 2px solid #000; padding: 10px 0; }
+      .header-subtitle { color: #555; }
+      .finding-card-body { display: block !important; }
+      .toggle-icon, .toolbar { display: none; }
+      .finding-card { page-break-inside: avoid; border: 1px solid #ccc; box-shadow: none; }
     }
   </style>
 </head>
 <body>
+
   <header>
-    <div>
-      <h1>Compliance Business Audit Report</h1>
-      <div style="font-size:12px; margin-top:5px; color:#bfdbfe;">Job ID: <span id="header-job-id"></span></div>
+    <div class="header-content">
+      <div class="header-title">
+        <h1>Enterprise Document Quality & Compliance Audit Report</h1>
+        <div class="header-subtitle">Senior Assurance Review · Document Reference: <span id="header-job-id"></span></div>
+      </div>
+      <span class="status-badge" id="header-publication-status">Publication Readiness</span>
     </div>
-    <span class="badge badge-health" id="header-health">Good</span>
   </header>
-  
+
   <div class="main-container">
     
-    <!-- Executive Dashboard -->
+    <!-- SECTION 1: EXECUTIVE SUMMARY -->
+    <div class="section-title">
+      <span>Section 1: Executive Summary</span>
+    </div>
+    <div class="kpi-card" style="margin-bottom: 24px;">
+      <p style="margin:0; font-size:14px; color:#334155; line-height:1.6;" id="executive-summary-text"></p>
+    </div>
+
+    <!-- SECTION 2: REVIEW OVERVIEW (DECLUTTERED DASHBOARD REQUIREMENT 4) -->
+    <div class="section-title">
+      <span>Section 2: Review Overview</span>
+    </div>
     <div class="dashboard-grid">
-      <div class="stat-card">
-        <div class="stat-title">Overall Risk Score</div>
-        <div class="stat-value" id="stats-risk">LOW</div>
+      <div class="kpi-card">
+        <div class="kpi-label">Document Status</div>
+        <div class="kpi-value" id="kpi-doc-status">Completed</div>
+        <div class="kpi-desc">Engine execution complete</div>
       </div>
-      <div class="stat-card">
-        <div class="stat-title">Consistency Index</div>
-        <div class="stat-value" id="stats-consistency">100%</div>
+      
+      <div class="kpi-card">
+        <div class="kpi-label">Publication Readiness</div>
+        <div class="kpi-value" id="kpi-pub-status">Ready</div>
+        <div class="kpi-desc" id="kpi-pub-guidance">Compliance evaluation status</div>
       </div>
-      <div class="stat-card">
-        <div class="stat-title">Quality Score</div>
-        <div class="stat-value" id="stats-quality">100%</div>
+      
+      <div class="kpi-card">
+        <div class="kpi-label">Verified Findings</div>
+        <div class="kpi-value" id="kpi-verified-count">0</div>
+        <div class="kpi-desc">Consolidated finding cards</div>
       </div>
-      <div class="stat-card">
-        <div class="stat-title">Readability Rating</div>
-        <div class="stat-value" id="stats-readability">HIGH</div>
+      
+      <div class="kpi-card">
+        <div class="kpi-label">High Priority Items</div>
+        <div class="kpi-value" id="kpi-high-priority-count">0</div>
+        <div class="kpi-desc">Critical & High priority blockers</div>
+      </div>
+
+      <div class="kpi-card">
+        <div class="kpi-label">Last Generated</div>
+        <div class="kpi-value" style="font-size:15px; margin-top:8px;" id="kpi-last-generated">-</div>
+        <div class="kpi-desc">Audit report timestamp</div>
       </div>
     </div>
-    
-    <!-- Summary -->
-    <div class="detail-card" style="margin-bottom:40px;">
-      <h2>Executive Summary</h2>
-      <p id="executive-summary-text" style="font-size:15px; line-height:1.6;"></p>
+
+    <!-- SECTION 3: VALIDATION SUMMARY -->
+    <div class="section-title">
+      <span>Section 3: Validation Summary</span>
     </div>
-    
-    <!-- Findings -->
-    <div class="findings-section">
-      <h2>Audit Findings List</h2>
-      <div id="findings-list-container"></div>
+    <div class="dashboard-grid">
+      <div class="kpi-card">
+        <div class="kpi-label">Local AI Review Findings</div>
+        <div class="kpi-value" id="val-local-findings">0</div>
+        <div class="kpi-desc">Initial automated findings</div>
+      </div>
+      <div class="kpi-card">
+        <div class="kpi-label">Expert Validated Findings</div>
+        <div class="kpi-value" id="val-verified-findings" style="color:#059669;">0</div>
+        <div class="kpi-desc">Confirmed valid issues</div>
+      </div>
+      <div class="kpi-card">
+        <div class="kpi-label">Rejected Findings</div>
+        <div class="kpi-value" id="val-rejected-findings" style="color:#dc2626;">0</div>
+        <div class="kpi-desc">Filtered false positives</div>
+      </div>
+      <div class="kpi-card">
+        <div class="kpi-label">Final Findings Presented</div>
+        <div class="kpi-value" id="val-final-findings" style="color:#1e40af;">0</div>
+        <div class="kpi-desc">Consolidated business cards</div>
+      </div>
     </div>
-    
-    <!-- Recommendations -->
-    <div class="findings-section" style="margin-bottom:60px;">
-      <h2>Action Recommendations</h2>
-      <ul id="recommendations-list" style="font-size:15px; line-height:1.6; padding-left:20px;"></ul>
+
+    <!-- SECTION 4: PRIORITY ACTIONS -->
+    <div class="section-title">
+      <span>Section 4: Priority Actions</span>
     </div>
-    
+    <div class="action-plan-card" style="margin-top:0;">
+      <div class="plan-phase">
+        <div class="plan-phase-title">🔴 Phase 1: Immediate Remediation (High & Critical Blockers)</div>
+        <ol class="plan-list" id="plan-phase-1"></ol>
+      </div>
+      <div class="plan-phase">
+        <div class="plan-phase-title">🟡 Phase 2: Operational & Policy Alignment (Medium Priority)</div>
+        <ol class="plan-list" id="plan-phase-2"></ol>
+      </div>
+      <div class="plan-phase">
+        <div class="plan-phase-title">🟢 Phase 3: Language & Formatting Polish (Low Priority)</div>
+        <ol class="plan-list" id="plan-phase-3"></ol>
+      </div>
+    </div>
+
+    <!-- SECTION 5: FINDINGS BY CATEGORY (COLLAPSIBLE CATEGORIES REQUIREMENT 7) -->
+    <div class="section-title">
+      <span>Section 5: Findings by Category</span>
+      <span id="findings-count-badge" style="font-size:12.5px; font-weight:600; color:var(--text-muted);">Showing 0 findings</span>
+    </div>
+
+    <!-- Controls Toolbar -->
+    <div class="toolbar">
+      <input type="text" id="search-input" class="search-input" placeholder="Search findings by chunk text, page, category, or recommendation..." oninput="onSearchOrFilterChange()">
+      
+      <select id="category-select" class="select-dropdown" onchange="onSearchOrFilterChange()">
+        <option value="ALL">All Categories</option>
+      </select>
+
+      <div style="display:flex; gap:4px;">
+        <button class="filter-btn active" data-sev="ALL" onclick="onSeverityClick('ALL')">All</button>
+        <button class="filter-btn" data-sev="Critical" onclick="onSeverityClick('Critical')">Critical</button>
+        <button class="filter-btn" data-sev="High" onclick="onSeverityClick('High')">High</button>
+        <button class="filter-btn" data-sev="Medium" onclick="onSeverityClick('Medium')">Medium</button>
+        <button class="filter-btn" data-sev="Low" onclick="onSeverityClick('Low')">Low</button>
+      </div>
+
+      <div>
+        <button class="action-btn" onclick="toggleAllCards(true)">Expand All</button>
+        <button class="action-btn" onclick="toggleAllCards(false)">Collapse All</button>
+      </div>
+    </div>
+
+    <!-- Container for Category Groups -->
+    <div id="findings-list-container"></div>
+
+    <!-- SECTION 6: APPENDIX (DOCUMENT TRACEABILITY) -->
+    <div class="section-title">
+      <span>Section 6: Appendix (Document Traceability)</span>
+    </div>
+    <div class="kpi-card" style="margin-bottom:32px;">
+      <details>
+        <summary style="cursor:pointer; font-weight:700; color:var(--primary-navy);">Document Traceability & Data Maps</summary>
+        <div style="margin-top:12px; font-size:12.5px; color:#64748b; line-height:1.6;">
+          Internal Job Reference: <code id="app-job-id"></code><br>
+          Raw Automated Candidates Evaluated: <span id="app-raw-count">0</span><br>
+          Claude Verification Output: <code>14_claude_verification/claude_response.json</code><br>
+          Final Business Report Package: <code>15_final_report/final_report.json</code>
+        </div>
+      </details>
+    </div>
+
   </div>
 
   <script>
-    // Injected Data
     var report = /* INJECT_REPORT */;
+    var activeSeverity = "ALL";
+
+    document.getElementById("header-job-id").innerText = report.document_job_id || "N/A";
+    document.getElementById("app-job-id").innerText = report.document_job_id || "N/A";
+
+    var kpi = report.dashboard_kpis || {};
+    var pubStatus = report.publication_status || { label: "Ready for Publication", action: "Passes standards." };
     
-    // Set Header
-    document.getElementById("header-job-id").innerText = report.document_job_id;
-    var healthBadge = document.getElementById("header-health");
-    healthBadge.innerText = "Health: " + report.overall_document_health;
-    healthBadge.classList.add("badge-health-" + report.overall_document_health.toLowerCase());
-    
-    // Set Stats
-    document.getElementById("stats-risk").innerText = report.overall_risk_score.toUpperCase();
-    document.getElementById("stats-consistency").innerText = report.consistency_score + "%";
-    document.getElementById("stats-quality").innerText = report.quality_score + "%";
-    document.getElementById("stats-readability").innerText = report.readability_score.toUpperCase();
-    
-    // Set Executive Text
-    document.getElementById("executive-summary-text").innerText = report.executive_summary.summary_text;
-    
-    // Set Recommendations
-    var recList = document.getElementById("recommendations-list");
-    recList.innerHTML = "";
-    (report.recommendations || []).forEach(function(r) {
-      recList.innerHTML += `<li>${r}</li>`;
+    var hBadge = document.getElementById("header-publication-status");
+    hBadge.innerText = pubStatus.label;
+    hBadge.className = "status-badge " + (pubStatus.badge_class || "status-ready");
+
+    document.getElementById("kpi-doc-status").innerText = kpi.document_status || "Completed";
+    document.getElementById("kpi-pub-status").innerText = pubStatus.label;
+    document.getElementById("kpi-pub-guidance").innerText = pubStatus.action;
+    document.getElementById("kpi-verified-count").innerText = kpi.verified_findings_count || 0;
+    document.getElementById("kpi-high-priority-count").innerText = kpi.high_priority_findings_count || 0;
+    document.getElementById("kpi-last-generated").innerText = kpi.last_generated || "-";
+
+    var valSummary = report.validation_summary || {};
+    var localFindings = valSummary.local_findings || 0;
+    var verifiedFindings = valSummary.verified_findings || 0;
+    var falsePositives = valSummary.false_positives || 0;
+    var finalFindings = (report.findings || []).length;
+
+    document.getElementById("val-local-findings").innerText = localFindings;
+    document.getElementById("val-verified-findings").innerText = verifiedFindings;
+    document.getElementById("val-rejected-findings").innerText = falsePositives;
+    document.getElementById("val-final-findings").innerText = finalFindings;
+    document.getElementById("app-raw-count").innerText = localFindings;
+
+    document.getElementById("executive-summary-text").innerText = report.executive_summary ? report.executive_summary.summary_text : "";
+
+    var findings = report.findings || [];
+
+    // Populate Category Dropdown
+    var catCounts = {};
+    findings.forEach(function(f) { catCounts[f.category] = (catCounts[f.category] || 0) + 1; });
+    var catSelect = document.getElementById("category-select");
+    Object.keys(catCounts).forEach(function(c) {
+      var opt = document.createElement("option");
+      opt.value = c;
+      opt.innerText = `${c} (${catCounts[c]})`;
+      catSelect.appendChild(opt);
     });
-    
-    // Set Findings
-    var findingsDiv = document.getElementById("findings-list-container");
-    findingsDiv.innerHTML = "";
-    (report.findings || []).forEach(function(f, idx) {
-      var badgeClass = "badge-severity-" + f.severity.toLowerCase();
-      var evHtml = "";
-      (f.evidence || []).forEach(function(ev) {
-        evHtml += `<li>Document Location <strong>${ev.chunk_id}</strong>: "${ev.quote}"</li>`;
-      });
+
+    function escapeRegExp(string) {
+      return string.replace(/[.*+?^${}()|[\\]\\\\]/g, '\\\\$&');
+    }
+
+    function renderFindings() {
+      var container = document.getElementById("findings-list-container");
+      container.innerHTML = "";
       
-      findingsDiv.innerHTML += `
-        <div class="finding-card">
-          <div class="finding-header" onclick="toggleFinding(${idx})">
-            <h4>${f.title}</h4>
-            <div>
-              <span class="badge ${badgeClass}">${f.severity}</span>
+      var searchQ = document.getElementById("search-input").value.toLowerCase().trim();
+      var selectedCat = document.getElementById("category-select").value;
+
+      var filtered = findings.filter(function(f) {
+        var matchSev = (activeSeverity === "ALL") || ((f.severity || "").toLowerCase() === activeSeverity.toLowerCase());
+        var matchCat = (selectedCat === "ALL") || (f.category === selectedCat);
+        var matchSearch = !searchQ || 
+          (f.title || "").toLowerCase().includes(searchQ) ||
+          (f.location_display || "").toLowerCase().includes(searchQ) ||
+          (f.original_chunk || "").toLowerCase().includes(searchQ) ||
+          (f.highlighted_ambiguity || "").toLowerCase().includes(searchQ) ||
+          (f.claude_explanation || "").toLowerCase().includes(searchQ) ||
+          (f.recommended_resolution || "").toLowerCase().includes(searchQ);
+
+        return matchSev && matchCat && matchSearch;
+      });
+
+      document.getElementById("findings-count-badge").innerText = `Showing ${filtered.length} of ${findings.length} findings`;
+
+      if (filtered.length === 0) {
+        container.innerHTML = `<div class="kpi-card" style="text-align:center; color:#64748b; padding:32px;">No audit findings matched your selected criteria.</div>`;
+        return;
+      }
+
+      var grouped = {};
+      filtered.forEach(function(f) {
+        if (!grouped[f.category]) grouped[f.category] = [];
+        grouped[f.category].push(f);
+      });
+
+      var cardGlobalIdx = 0;
+      Object.keys(grouped).forEach(function(cat) {
+        var catHeader = document.createElement("div");
+        catHeader.className = "category-group-header";
+        catHeader.innerHTML = `<span>${cat}</span> <span style="font-size:12px; font-weight:600; color:var(--text-muted);">(${grouped[cat].length} finding${grouped[cat].length > 1 ? 's' : ''})</span>`;
+        container.appendChild(catHeader);
+
+        grouped[cat].forEach(function(f) {
+          cardGlobalIdx++;
+          var idx = cardGlobalIdx;
+          var sevClass = "badge-sev-" + (f.severity || "medium").toLowerCase();
+          var cardSevClass = "sev-" + (f.severity || "Medium");
+
+          // Highlight ambiguity inside chunk text (Requirement 5)
+          var chunkText = f.original_chunk || "";
+          var ambText = f.highlighted_ambiguity || "";
+          var formattedChunk = chunkText;
+          if (ambText && chunkText.toLowerCase().includes(ambText.toLowerCase())) {
+            var re = new RegExp(escapeRegExp(ambText), "gi");
+            formattedChunk = chunkText.replace(re, function(match) {
+              return `<mark class="ambiguity-highlight">${match}</mark>`;
+            });
+          }
+
+          var cardDiv = document.createElement("div");
+          cardDiv.className = `finding-card ${cardSevClass}`;
+          cardDiv.innerHTML = `
+            <div class="finding-header-bar" onclick="toggleCard(${idx})">
+              <div class="finding-meta-row">
+                <span class="badge ${sevClass}">${f.severity || 'Medium'}</span>
+                <span class="badge badge-cat">${f.category || 'Writing Clarity'}</span>
+                <span class="badge badge-loc">📍 ${f.location_display || 'Document Location'}</span>
+              </div>
+              <div class="finding-title-row">
+                <h3 class="finding-title-text">${f.title || 'Audit Finding'}</h3>
+                <span class="toggle-icon" id="toggle-label-${idx}">▼ Details</span>
+              </div>
             </div>
-          </div>
-          <div class="finding-body" id="finding-body-${idx}">
-            <p><strong>Finding ID:</strong> ${f.finding_id}</p>
-            <p><strong>Category:</strong> ${f.category}</p>
-            <p><strong>Explanation:</strong> ${f.explanation}</p>
-            <p><strong>Business Impact:</strong> ${f.business_impact}</p>
-            <p><strong>Suggested Resolution:</strong> ${f.suggested_resolution}</p>
-            <div class="evidence-box">
-              <strong>Evidence Mapped Document Sections:</strong>
-              <ul style="margin:5px 0 0 15px; padding:0;">${evHtml}</ul>
+            
+            <div class="finding-card-body" id="card-body-${idx}">
+              <div class="block-title">Original Document Passage</div>
+              <div class="chunk-box">${formattedChunk}</div>
+              
+              <div class="block-title">Validation Rationale</div>
+              <p class="reason-text">${f.claude_explanation || 'No detailed explanation provided.'}</p>
+              
+              <div class="block-title">Business Impact</div>
+              <div class="impact-box">⚠️ ${f.business_impact || 'May result in operational confusion.'}</div>
+              
+              <div class="block-title">Recommended Resolution</div>
+              <div class="solution-box">💡 ${f.recommended_resolution || 'Review source document.'}</div>
+
+              <div style="margin-top:12px; font-size:11.5px; font-weight:700; color:#059669;">
+                ${f.verification_status || '✓ Expert Validation Complete'}
+              </div>
             </div>
-          </div>
-        </div>
-      `;
-    });
-    
-    window.toggleFinding = function(idx) {
-      var body = document.getElementById("finding-body-" + idx);
-      body.classList.toggle("active");
+          `;
+          container.appendChild(cardDiv);
+        });
+      });
+    }
+
+    function renderActionPlan() {
+      var p1 = document.getElementById("plan-phase-1");
+      var p2 = document.getElementById("plan-phase-2");
+      var p3 = document.getElementById("plan-phase-3");
+      p1.innerHTML = ""; p2.innerHTML = ""; p3.innerHTML = "";
+
+      var critHigh = findings.filter(function(f) { return f.severity === 'Critical' || f.severity === 'High'; });
+      var medium = findings.filter(function(f) { return f.severity === 'Medium'; });
+      var low = findings.filter(function(f) { return f.severity === 'Low'; });
+
+      if (critHigh.length === 0) p1.innerHTML = "<li><em>No critical or high priority blockers identified.</em></li>";
+      else critHigh.forEach(function(f) { p1.innerHTML += `<li><strong>[${f.severity}] ${f.title}</strong> (${f.location_display})<br><span style="color:#16a34a; font-weight:600;">Action:</span> ${f.recommended_resolution}</li>`; });
+
+      if (medium.length === 0) p2.innerHTML = "<li><em>No medium operational items identified.</em></li>";
+      else medium.forEach(function(f) { p2.innerHTML += `<li><strong>${f.title}</strong> (${f.location_display})<br><span style="color:#16a34a; font-weight:600;">Action:</span> ${f.recommended_resolution}</li>`; });
+
+      if (low.length === 0) p3.innerHTML = "<li><em>No low priority items identified.</em></li>";
+      else low.forEach(function(f) { p3.innerHTML += `<li><strong>${f.title}</strong> (${f.location_display})<br><span style="color:#16a34a; font-weight:600;">Action:</span> ${f.recommended_resolution}</li>`; });
+    }
+
+    window.onSearchOrFilterChange = function() { renderFindings(); };
+    window.onSeverityClick = function(sev) {
+      activeSeverity = sev;
+      var btns = document.querySelectorAll(".filter-btn");
+      btns.forEach(function(b) {
+        if (b.getAttribute("data-sev") === sev) b.classList.add("active");
+        else b.classList.remove("active");
+      });
+      renderFindings();
     };
+
+    window.toggleCard = function(idx) {
+      var body = document.getElementById("card-body-" + idx);
+      var label = document.getElementById("toggle-label-" + idx);
+      if (body) {
+        var isCollapsed = body.classList.contains("collapsed");
+        if (isCollapsed) {
+          body.classList.remove("collapsed");
+          label.innerHTML = "▲ Hide";
+        } else {
+          body.classList.add("collapsed");
+          label.innerHTML = "▼ Details";
+        }
+      }
+    };
+
+    window.toggleAllCards = function(expand) {
+      var bodies = document.querySelectorAll(".finding-card-body");
+      var labels = document.querySelectorAll(".toggle-icon");
+      bodies.forEach(function(b, i) {
+        if (expand) {
+          b.classList.remove("collapsed");
+          if (labels[i]) labels[i].innerHTML = "▲ Hide";
+        } else {
+          b.classList.add("collapsed");
+          if (labels[i]) labels[i].innerHTML = "▼ Details";
+        }
+      });
+    };
+
+    renderFindings();
+    renderActionPlan();
   </script>
 </body>
 </html>
 """
-        
-        # Inject serialized variables
+
         html_content = html_template \
             .replace("/* INJECT_REPORT */", json.dumps(final_report_data, ensure_ascii=False))
-            
+
         with open(report_dir / "final_report.html", "w", encoding="utf-8") as f:
             f.write(html_content)
-            
-        logger.info(f"Phase 15 Business Report generation complete. Outputs in {report_dir}")
+
+        logger.info(f"Phase 15 Enterprise Report generation complete. Outputs written to {report_dir}")

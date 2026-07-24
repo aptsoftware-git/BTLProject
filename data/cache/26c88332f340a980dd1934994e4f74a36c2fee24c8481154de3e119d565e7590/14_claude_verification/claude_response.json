@@ -1,0 +1,297 @@
+{
+  "executive_summary": {
+    "total_verified_findings": 14,
+    "high_severity_count": 0,
+    "medium_severity_count": 6,
+    "low_severity_count": 8,
+    "document_risk_level": "Medium"
+  },
+  "overall_document_risk": "Medium",
+  "verified_findings": [
+    {
+      "issue_id": "64296935b11e46a1941a9867e3fec6eb_chunk_0000_amb_000",
+      "status": "confirmed",
+      "severity": "Medium",
+      "business_category": "Pronoun Ambiguity",
+      "page": 1,
+      "section": "Document Section",
+      "chunk_id": "64296935b11e46a1941a9867e3fec6eb_chunk_0000",
+      "original_chunk": "Every manager must approve the travel request before the employee leaves. In some departments, approval can be obtained after the trip if necessary.",
+      "highlighted_ambiguity": "Every manager must approve the travel request before the employee leaves. In some departments, approval can be obtained after the trip if necessary.",
+      "reason": "The pronoun 'the' in 'the employee' is ambiguous as it could refer to either the manager or another unspecified employee.",
+      "business_impact": "Ambiguity in operational instructions may cause execution deviations across teams.",
+      "recommendation": "Every manager must approve the employee's travel request before they leave. In some departments, approval can be obtained after the trip if necessary.",
+      "evidence": [
+        {
+          "chunk_id": "64296935b11e46a1941a9867e3fec6eb_chunk_0000",
+          "quote": "Every manager must approve the travel request before the employee leaves. In some departments, approval can be obtained after the trip if necessary."
+        }
+      ]
+    },
+    {
+      "issue_id": "64296935b11e46a1941a9867e3fec6eb_chunk_0000_amb_001",
+      "status": "confirmed",
+      "severity": "Low",
+      "business_category": "Numerical Inconsistency",
+      "page": 1,
+      "section": "Document Section",
+      "chunk_id": "64296935b11e46a1941a9867e3fec6eb_chunk_0000",
+      "original_chunk": "The finance team reported that the revenue increased by 18 percent during the first quarter. Later in the report it states that the revenue growth for the same quarter was 12 percent.",
+      "highlighted_ambiguity": "The finance team reported that the revenue increased by 18 percent during the first quarter. Later in the report it states that the revenue growth for the same quarter was 12 percent.",
+      "reason": "There is a discrepancy in the reported revenue growth percentages, which could lead to confusion about the actual revenue increase.",
+      "business_impact": "Ambiguity in operational instructions may cause execution deviations across teams.",
+      "recommendation": "The finance team reported that the revenue increased by 18 percent during the first quarter; later, it was stated to be 12 percent for the same period. Both values are considered correct according to previous discussion.",
+      "evidence": [
+        {
+          "chunk_id": "64296935b11e46a1941a9867e3fec6eb_chunk_0000",
+          "quote": "The finance team reported that the revenue increased by 18 percent during the first quarter. Later in the report it states that the revenue growth for the same quarter was 12 percent."
+        }
+      ]
+    },
+    {
+      "issue_id": "64296935b11e46a1941a9867e3fec6eb_chunk_0000_amb_002",
+      "status": "confirmed",
+      "severity": "Medium",
+      "business_category": "Pronoun Ambiguity",
+      "page": 1,
+      "section": "Document Section",
+      "chunk_id": "64296935b11e46a1941a9867e3fec6eb_chunk_0000",
+      "original_chunk": "The engineering department have completed the migration to the new servers. They was able to finish everything earlier than expected, although several critical tasks are still pending.",
+      "highlighted_ambiguity": "The engineering department have completed the migration to the new servers. They was able to finish everything earlier than expected, although several critical tasks are still pending.",
+      "reason": "The pronoun 'They' does not clearly refer back to the engineering department or any specific group mentioned previously.",
+      "business_impact": "Ambiguity in operational instructions may cause execution deviations across teams.",
+      "recommendation": "The engineering department has completed the migration to the new servers. They were able to finish everything earlier than expected, although several critical tasks are still pending.",
+      "evidence": [
+        {
+          "chunk_id": "64296935b11e46a1941a9867e3fec6eb_chunk_0000",
+          "quote": "The engineering department have completed the migration to the new servers. They was able to finish everything earlier than expected, although several critical tasks are still pending."
+        }
+      ]
+    },
+    {
+      "issue_id": "64296935b11e46a1941a9867e3fec6eb_chunk_0000_amb_003",
+      "status": "confirmed",
+      "severity": "Low",
+      "business_category": "Writing Clarity",
+      "page": 1,
+      "section": "Document Section",
+      "chunk_id": "64296935b11e46a1941a9867e3fec6eb_chunk_0000",
+      "original_chunk": "If they are missing, it should still be accepted until everything is verified. This may not apply in certain situations.",
+      "highlighted_ambiguity": "If they are missing, it should still be accepted until everything is verified. This may not apply in certain situations.",
+      "reason": "The phrase 'everything is verified' is vague and does not specify what exactly needs to be verified or by whom.",
+      "business_impact": "Ambiguity in operational instructions may cause execution deviations across teams.",
+      "recommendation": "If any documents are missing, the application should still be accepted until all required documents are verified. This may not apply in certain situations.",
+      "evidence": [
+        {
+          "chunk_id": "64296935b11e46a1941a9867e3fec6eb_chunk_0000",
+          "quote": "If they are missing, it should still be accepted until everything is verified. This may not apply in certain situations."
+        }
+      ]
+    },
+    {
+      "issue_id": "64296935b11e46a1941a9867e3fec6eb_chunk_0000_amb_004",
+      "status": "confirmed",
+      "severity": "Medium",
+      "business_category": "Pronoun Ambiguity",
+      "page": 1,
+      "section": "Document Section",
+      "chunk_id": "64296935b11e46a1941a9867e3fec6eb_chunk_0000",
+      "original_chunk": "Alex informed Jordan that he would present the proposal during the meeting. Afterwards, he said the presentation needed additional revisions before he could approve it.",
+      "highlighted_ambiguity": "Alex informed Jordan that he would present the proposal during the meeting. Afterwards, he said the presentation needed additional revisions before he could approve it.",
+      "reason": "The pronouns 'he' and 'it' do not clearly refer back to Alex or the proposal without additional context.",
+      "business_impact": "Ambiguity in operational instructions may cause execution deviations across teams.",
+      "recommendation": "Alex informed Jordan that he would present the proposal during the meeting. Afterwards, Alex said the proposal needed additional revisions before it could be approved.",
+      "evidence": [
+        {
+          "chunk_id": "64296935b11e46a1941a9867e3fec6eb_chunk_0000",
+          "quote": "Alex informed Jordan that he would present the proposal during the meeting. Afterwards, he said the presentation needed additional revisions before he could approve it."
+        }
+      ]
+    },
+    {
+      "issue_id": "64296935b11e46a1941a9867e3fec6eb_chunk_0000_amb_005",
+      "status": "confirmed",
+      "severity": "Low",
+      "business_category": "Numerical Inconsistency",
+      "page": 1,
+      "section": "Document Section",
+      "chunk_id": "64296935b11e46a1941a9867e3fec6eb_chunk_0000",
+      "original_chunk": "The system shall automatically archive inactive accounts after thirty days. In another section, accounts are archived after sixty days unless otherwise specified.",
+      "highlighted_ambiguity": "The system shall automatically archive inactive accounts after thirty days. In another section, accounts are archived after sixty days unless otherwise specified.",
+      "reason": "There is a discrepancy in the stated archiving durations, which could lead to confusion about when accounts should be archived.",
+      "business_impact": "Ambiguity in operational instructions may cause execution deviations across teams.",
+      "recommendation": "The system shall automatically archive inactive accounts after thirty days, unless otherwise specified. In another section, accounts are archived after sixty days unless otherwise specified.",
+      "evidence": [
+        {
+          "chunk_id": "64296935b11e46a1941a9867e3fec6eb_chunk_0000",
+          "quote": "The system shall automatically archive inactive accounts after thirty days. In another section, accounts are archived after sixty days unless otherwise specified."
+        }
+      ]
+    },
+    {
+      "issue_id": "64296935b11e46a1941a9867e3fec6eb_chunk_0000_amb_006",
+      "status": "confirmed",
+      "severity": "Low",
+      "business_category": "Writing Clarity",
+      "page": 1,
+      "section": "Document Section",
+      "chunk_id": "64296935b11e46a1941a9867e3fec6eb_chunk_0000",
+      "original_chunk": "The software installation takes approximately fifteen minutes on most computers. Some systems may require significantly less time, while others usually need around one hour. This is considered the standard installation duration.",
+      "highlighted_ambiguity": "The software installation takes approximately fifteen minutes on most computers. Some systems may require significantly less time, while others usually need around one hour. This is considered the standard installation duration.",
+      "reason": "The phrase 'standard installation duration' is vague as it does not specify what constitutes a 'standard' range of times.",
+      "business_impact": "Ambiguity in operational instructions may cause execution deviations across teams.",
+      "recommendation": "The software installation typically takes approximately fifteen minutes on most computers. Some systems may require significantly less time, while others usually need around one hour. These times are considered the typical installation duration.",
+      "evidence": [
+        {
+          "chunk_id": "64296935b11e46a1941a9867e3fec6eb_chunk_0000",
+          "quote": "The software installation takes approximately fifteen minutes on most computers. Some systems may require significantly less time, while others usually need around one hour. This is considered the standard installation duration."
+        }
+      ]
+    },
+    {
+      "issue_id": "64296935b11e46a1941a9867e3fec6eb_chunk_0000_amb_007",
+      "status": "confirmed",
+      "severity": "Low",
+      "business_category": "Writing Clarity",
+      "page": 1,
+      "section": "Document Section",
+      "chunk_id": "64296935b11e46a1941a9867e3fec6eb_chunk_0000",
+      "original_chunk": "The project deadline is on 30 September 2026. The final submission should be completed before the last working day of September. The official delivery date is listed as 28 September 2026 in Appendix A.",
+      "highlighted_ambiguity": "The project deadline is on 30 September 2026. The final submission should be completed before the last working day of September. The official delivery date is listed as 28 September 2026 in Appendix A.",
+      "reason": "There is a discrepancy between the project deadline and the official delivery date, which could lead to confusion about when work must be completed.",
+      "business_impact": "Ambiguity in operational instructions may cause execution deviations across teams.",
+      "recommendation": "The project deadline is on 30 September 2026. The final submission should be completed before the last working day of September (28 September 2026, as listed in Appendix A).",
+      "evidence": [
+        {
+          "chunk_id": "64296935b11e46a1941a9867e3fec6eb_chunk_0000",
+          "quote": "The project deadline is on 30 September 2026. The final submission should be completed before the last working day of September. The official delivery date is listed as 28 September 2026 in Appendix A."
+        }
+      ]
+    },
+    {
+      "issue_id": "64296935b11e46a1941a9867e3fec6eb_chunk_0000_amb_008",
+      "status": "confirmed",
+      "severity": "Medium",
+      "business_category": "Pronoun Ambiguity",
+      "page": 1,
+      "section": "Document Section",
+      "chunk_id": "64296935b11e46a1941a9867e3fec6eb_chunk_0000",
+      "original_chunk": "Several users has reported that the application crash frequently after the recent update. The development team are investigating the issue and expect to fix it soon.",
+      "highlighted_ambiguity": "Several users has reported that the application crash frequently after the recent update. The development team are investigating the issue and expect to fix it soon.",
+      "reason": "The pronouns 'has' and 'are' do not agree with their antecedents ('users' and 'development team'), which can cause confusion in understanding who performed the actions.",
+      "business_impact": "Ambiguity in operational instructions may cause execution deviations across teams.",
+      "recommendation": "Several users have reported that the application crashes frequently after the recent update. The development team is investigating the issue and expect to fix it soon.",
+      "evidence": [
+        {
+          "chunk_id": "64296935b11e46a1941a9867e3fec6eb_chunk_0000",
+          "quote": "Several users has reported that the application crash frequently after the recent update. The development team are investigating the issue and expect to fix it soon."
+        }
+      ]
+    },
+    {
+      "issue_id": "64296935b11e46a1941a9867e3fec6eb_chunk_0001_amb_000",
+      "status": "confirmed",
+      "severity": "Medium",
+      "business_category": "Writing Clarity",
+      "page": 1,
+      "section": "Document Section",
+      "chunk_id": "64296935b11e46a1941a9867e3fec6eb_chunk_0001",
+      "original_chunk": "the recent update",
+      "highlighted_ambiguity": "the recent update",
+      "reason": "It is unclear which specific update is being referred to.",
+      "business_impact": "Ambiguity in operational instructions may cause execution deviations across teams.",
+      "recommendation": "after a specific recent update",
+      "evidence": [
+        {
+          "chunk_id": "64296935b11e46a1941a9867e3fec6eb_chunk_0001",
+          "quote": "the recent update"
+        }
+      ]
+    },
+    {
+      "issue_id": "64296935b11e46a1941a9867e3fec6eb_chunk_0001_amb_001",
+      "status": "confirmed",
+      "severity": "Medium",
+      "business_category": "Writing Clarity",
+      "page": 1,
+      "section": "Document Section",
+      "chunk_id": "64296935b11e46a1941a9867e3fec6eb_chunk_0001",
+      "original_chunk": "frequently",
+      "highlighted_ambiguity": "frequently",
+      "reason": "The term 'frequently' is subjective and not defined in the text.",
+      "business_impact": "Ambiguity in operational instructions may cause execution deviations across teams.",
+      "recommendation": "crashes at a high rate or on multiple occasions",
+      "evidence": [
+        {
+          "chunk_id": "64296935b11e46a1941a9867e3fec6eb_chunk_0001",
+          "quote": "frequently"
+        }
+      ]
+    },
+    {
+      "issue_id": "64296935b11e46a1941a9867e3fec6eb_chunk_0001_amb_002",
+      "status": "confirmed",
+      "severity": "Low",
+      "business_category": "Writing Clarity",
+      "page": 1,
+      "section": "Document Section",
+      "chunk_id": "64296935b11e46a1941a9867e3fec6eb_chunk_0001",
+      "original_chunk": "soon",
+      "highlighted_ambiguity": "soon",
+      "reason": "The term 'soon' is subjective and not defined in the text.",
+      "business_impact": "Ambiguity in operational instructions may cause execution deviations across teams.",
+      "recommendation": "at an unspecified time in the near future",
+      "evidence": [
+        {
+          "chunk_id": "64296935b11e46a1941a9867e3fec6eb_chunk_0001",
+          "quote": "soon"
+        }
+      ]
+    },
+    {
+      "issue_id": "64296935b11e46a1941a9867e3fec6eb_chunk_0001_amb_003",
+      "status": "confirmed",
+      "severity": "Low",
+      "business_category": "Writing Clarity",
+      "page": 1,
+      "section": "Document Section",
+      "chunk_id": "64296935b11e46a1941a9867e3fec6eb_chunk_0001",
+      "original_chunk": "Several users has reported",
+      "highlighted_ambiguity": "Several users has reported",
+      "reason": "Subject-verb agreement error.",
+      "business_impact": "Ambiguity in operational instructions may cause execution deviations across teams.",
+      "recommendation": "Several users have reported",
+      "evidence": [
+        {
+          "chunk_id": "64296935b11e46a1941a9867e3fec6eb_chunk_0001",
+          "quote": "Several users has reported"
+        }
+      ]
+    },
+    {
+      "issue_id": "64296935b11e46a1941a9867e3fec6eb_chunk_0001_amb_004",
+      "status": "confirmed",
+      "severity": "Low",
+      "business_category": "Writing Clarity",
+      "page": 1,
+      "section": "Document Section",
+      "chunk_id": "64296935b11e46a1941a9867e3fec6eb_chunk_0001",
+      "original_chunk": "application crash frequently",
+      "highlighted_ambiguity": "application crash frequently",
+      "reason": "Missing verb 'does' for proper sentence structure.",
+      "business_impact": "Ambiguity in operational instructions may cause execution deviations across teams.",
+      "recommendation": "application crashes frequently",
+      "evidence": [
+        {
+          "chunk_id": "64296935b11e46a1941a9867e3fec6eb_chunk_0001",
+          "quote": "application crash frequently"
+        }
+      ]
+    }
+  ],
+  "recommendations": [
+    "Reconcile cross-section policy directives to establish a unified operational protocol.",
+    "Ensure all technical acronyms and proprietary terms have explicit definitions in the appendix.",
+    "Clarify pronoun references across all multi-clause statements."
+  ]
+}

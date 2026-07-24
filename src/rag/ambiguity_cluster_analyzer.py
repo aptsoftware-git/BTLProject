@@ -1,6 +1,7 @@
 import re
 import json
 import logging
+import os
 from pathlib import Path
 from typing import List, Dict, Any, Optional
 from collections import Counter
@@ -21,7 +22,7 @@ class AmbiguityClusterAnalyzer:
 
     def __init__(self, config: Optional[RagConfig] = None):
         self.config = config or RagConfig()
-        self.model_name = getattr(self.config, "ollama_model", "qwen2.5-coder:32b")
+        self.model_name = getattr(self.config, "ollama_model", os.environ.get("OLLAMA_MODEL", "qwen2.5-coder:32b"))
         
         # Resolve host from config
         ollama_host = "http://192.168.19.21:11434"
@@ -187,6 +188,12 @@ class AmbiguityClusterAnalyzer:
     def run_analysis(self, job_dir: Path, doc_id: str) -> None:
         logger.info(f"Starting Phase 3 Cluster-Level Analysis for job: {doc_id}")
         
+        # Cache hit check
+        cache_cluster_reasoning_path = job_dir / "12_cluster_reasoning" / "cluster_reasoning.json"
+        if cache_cluster_reasoning_path.exists() and cache_cluster_reasoning_path.stat().st_size > 0:
+            logger.info(f"[CACHE HIT] Cluster reasoning analysis already exists for job {doc_id}. Skipping re-analysis.")
+            return
+
         # Load necessary inputs
         clusters_path = job_dir / "09_semantic_clusters" / "semantic_clusters.json"
         if not clusters_path.exists():

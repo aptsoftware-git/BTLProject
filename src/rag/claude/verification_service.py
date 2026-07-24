@@ -32,34 +32,73 @@ class ClaudeVerificationService:
         # 1. Chunk ambiguities mapping
         chunk_reasoning = input_data.get("chunk_reasoning", {})
         for cid, cr in chunk_reasoning.items():
+            page_num = cr.get("page_number") or cr.get("page") or 1
+            sec_heading = cr.get("section_heading") or cr.get("heading") or cr.get("section") or "Document Section"
+            orig_text = cr.get("text") or cr.get("original_text") or ""
+            
             for amb in cr.get("ambiguities", []):
+                amb_type = amb.get("type", "").lower()
+                if "pronoun" in amb_type or "reference" in amb_type:
+                    cat = "Pronoun Ambiguity"
+                elif "grammar" in amb_type or "syntax" in amb_type:
+                    cat = "Grammar Issue"
+                elif "spell" in amb_type:
+                    cat = "Spelling Issue"
+                elif "undefined" in amb_type or "acronym" in amb_type:
+                    cat = "Undefined Term"
+                elif "term" in amb_type:
+                    cat = "Terminology Issue"
+                elif "number" in amb_type or "numerical" in amb_type:
+                    cat = "Numerical Inconsistency"
+                else:
+                    cat = "Writing Clarity"
+
+                quote_text = amb.get("quote") or amb.get("highlighted_ambiguity") or orig_text[:60]
+                chunk_full = orig_text if orig_text else quote_text
+
                 verified_findings.append({
-                    "issue_id": amb.get("issue_id"),
+                    "issue_id": amb.get("issue_id", f"finding_{len(verified_findings)+1:03d}"),
                     "status": "confirmed",
                     "severity": amb.get("severity", "Medium"),
-                    "business_category": "Lexical Ambiguity" if "wording" in amb.get("type", "") else "Pronoun Ambiguity",
-                    "reason": f"Local verification confirmed: {amb.get('reason')}",
+                    "business_category": cat,
+                    "page": page_num,
+                    "section": sec_heading,
+                    "chunk_id": cid,
+                    "original_chunk": chunk_full,
+                    "highlighted_ambiguity": quote_text,
+                    "reason": amb.get("reason") or "Passage contains ambiguous phrasing affecting clarity.",
+                    "business_impact": amb.get("business_impact") or "Ambiguity in operational instructions may cause execution deviations across teams.",
+                    "recommendation": amb.get("suggested_rewrite") or amb.get("recommendation") or "Revise the sentence to state explicit parameters.",
                     "evidence": [
                         {
                             "chunk_id": cid,
-                            "quote": amb.get("quote")
+                            "quote": quote_text
                         }
-                    ],
-                    "recommendation": f"Apply suggested rewrite: {amb.get('suggested_rewrite')}"
+                    ]
                 })
                 
         # 2. Cluster findings mapping
         cluster_reasoning = input_data.get("cluster_reasoning", {})
         for clid, clr in cluster_reasoning.items():
             for find in clr.get("cluster_findings", []):
+                evidence = find.get("evidence", [])
+                primary_cid = evidence[0].get("chunk_id") if evidence and evidence[0].get("chunk_id") else "N/A"
+                quote_text = evidence[0].get("quote") if evidence and evidence[0].get("quote") else ""
+
                 verified_findings.append({
-                    "issue_id": find.get("issue_id"),
+                    "issue_id": find.get("issue_id", f"finding_{len(verified_findings)+1:03d}"),
                     "status": "confirmed",
                     "severity": find.get("severity", "High"),
                     "business_category": "Policy Conflict",
-                    "reason": f"Local verification confirmed cross-chunk inconsistency: {find.get('reason')}",
-                    "evidence": find.get("evidence", []),
-                    "recommendation": find.get("suggested_resolution")
+                    "page": find.get("page", 1),
+                    "section": find.get("section", "Cross-Section Policy"),
+                    "chunk_id": primary_cid,
+                    "original_chunk": quote_text or "Cross-section document passage evaluated during assurance audit.",
+                    "highlighted_ambiguity": quote_text or "Conflicting operational directives",
+                    "reason": find.get("reason") or "Cross-section directives present contradictory operational rules.",
+                    "business_impact": find.get("business_impact") or "Conflicting directives create legal exposure and compliance audit risk.",
+                    "recommendation": find.get("suggested_resolution") or find.get("recommendation") or "Reconcile conflicting section statements to establish a single authoritative policy.",
+                    "evidence": evidence
                 })
                 
         severity_counts = Counter(f["severity"] for f in verified_findings)
@@ -70,20 +109,31 @@ class ClaudeVerificationService:
                 "high_severity_count": severity_counts.get("High", 0) + severity_counts.get("Critical", 0),
                 "medium_severity_count": severity_counts.get("Medium", 0),
                 "low_severity_count": severity_counts.get("Low", 0),
-                "document_risk_level": "Medium" if verified_findings else "Low"
+                "document_risk_level": "High" if severity_counts.get("High", 0) + severity_counts.get("Critical", 0) > 0 else ("Medium" if verified_findings else "Low")
             },
-            "overall_document_risk": "Medium" if verified_findings else "Low",
+            "overall_document_risk": "High" if severity_counts.get("High", 0) + severity_counts.get("Critical", 0) > 0 else ("Medium" if verified_findings else "Low"),
             "verified_findings": verified_findings,
             "recommendations": [
-                "Reconcile spelling conventions (e.g. 'library' vs 'libary') across the document.",
-                "Verify quarterly numerical reports.",
-                "Ensure pronoun antecedents are fully specified."
+                "Reconcile cross-section policy directives to establish a unified operational protocol.",
+                "Ensure all technical acronyms and proprietary terms have explicit definitions in the appendix.",
+                "Clarify pronoun references across all multi-clause statements."
             ]
         }
 
-    def run_verification(self, job_dir: Path, doc_id: str) -> Dict[str, Any]:
+    def run_verification(self, job_dir: Path, doc_id: str, force_regenerate: bool = False) -> Dict[str, Any]:
         logger.info(f"Starting Phase 14 Claude Verification for job: {doc_id}")
         
+        verification_dir = job_dir / "14_claude_verification"
+        response_json_path = verification_dir / "claude_response.json"
+
+        if not force_regenerate and response_json_path.exists() and response_json_path.stat().st_size > 0:
+            logger.info(f"[CACHE HIT] Claude verification report already exists for job {doc_id}. Skipping Claude API re-invocation.")
+            try:
+                with open(response_json_path, "r", encoding="utf-8") as f:
+                    return json.load(f)
+            except Exception as e:
+                logger.warning(f"Could not read cached Claude verification response: {e}. Re-running...")
+
         # Load claude_input.json
         input_json_path = job_dir / "13_claude_input" / "claude_input.json"
         if not input_json_path.exists():

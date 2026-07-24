@@ -111,6 +111,8 @@ class ProofreadingPipeline:
 
     # ------------------------------------------------------------------
     def run(self, input_path: Path, run_id: str | None = None) -> dict:
+        from src.rag.cache_manager import DocumentCacheManager, compute_file_hash
+
         run_id = run_id or f"{input_path.stem}_{timestamp()}"
         run_dir = self.config.paths.data_output_dir / run_id
         stage_dirs = {name: run_dir / name for name in self.config.stage_folders}
@@ -119,6 +121,29 @@ class ProofreadingPipeline:
 
         log_file = stage_dirs["logs"] / "pipeline.log"
         self.logger = get_logger("pipeline", log_file=log_file)
+
+        # SHA-256 Cache Check (Requirement 1 & Primary Objective)
+        doc_hash = compute_file_hash(input_path)
+        cache_mgr = DocumentCacheManager(doc_hash, input_path.name)
+        cache_mgr.sync_to_job_dir(run_dir)
+
+        proof_report_file = stage_dirs["10_final"] / "report.json"
+        if proof_report_file.exists() and proof_report_file.stat().st_size > 0:
+            self.logger.info("[CACHE HIT] Proofreading stage is already completed for document %s. Skipping re-execution.", doc_hash[:10])
+            import json
+            try:
+                with open(proof_report_file, "r", encoding="utf-8") as f:
+                    cached_report = json.load(f)
+                    return {
+                        "run_dir": str(run_dir),
+                        "total_issues": cached_report.get("total_issues", 0),
+                        "accepted": len(cached_report.get("issues", [])),
+                        "rejected_protected": 0,
+                        "rejected_semantic": 0,
+                        "rejected_confidence": 0,
+                    }
+            except Exception as e:
+                self.logger.warning("Could not read cached proofreading report: %s. Re-running...", e)
 
         # --- Stages 1-4: extract, layout, filter, preprocess -----------
         document = self.extractor.extract(input_path, output_dir=run_dir)

@@ -1,0 +1,14 @@
+{
+  "collection_name": "doc_26c88332f340a980",
+  "total_objects": 51,
+  "objects_by_type": {
+    "Paragraph": 51,
+    "text": 2
+  },
+  "vision_processed_images": 0,
+  "skipped_images": 0,
+  "ocr_count": 0,
+  "table_count": 0,
+  "average_vlm_time_seconds": 0.0,
+  "average_embedding_time_seconds": 5.766645550727844
+}

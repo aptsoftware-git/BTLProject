@@ -66,6 +66,9 @@ progress_handler.setLevel(logging.INFO)
 logger.addHandler(progress_handler)
 logger.setLevel(logging.INFO)
 
+backend_logger = logging.getLogger("backend")
+
+
 
 def get_job_dir(job_id: str) -> Path:
     """Return the output directory path for a given job ID."""
@@ -101,7 +104,8 @@ def save_job_metadata(job_id: str) -> None:
         "context_analysis_issues_count", "context_analysis_est_time",
         "knowledge_objects_generated", "embeddings_completed", "index_progress",
         "memory_usage", "cpu_usage", "current_page", "total_pages",
-        "current_batch", "total_batches", "estimated_remaining_time", "memory_safe_mode"
+        "current_batch", "total_batches", "estimated_remaining_time", "memory_safe_mode",
+        "cache_info"
     ]:
         if key in job:
             metadata[key] = job[key]
@@ -135,37 +139,90 @@ def get_job(job_id: str) -> Optional[Dict[str, Any]]:
     return load_job_metadata(job_id)
 
 
-def create_job(filename: str, original_file_path: Path) -> Dict[str, Any]:
-    """Initialize job details and write initial metadata."""
-    job_id = str(uuid.uuid4().hex)
+from src.rag.cache_manager import DocumentCacheManager, compute_file_hash
+
+
+def create_job(filename: str, original_file_path: Path, job_id: Optional[str] = None) -> Dict[str, Any]:
+    """Initialize job details and write initial metadata with persistent SHA-256 caching."""
+    if not job_id:
+        job_id = str(uuid.uuid4().hex)
+
+    job_dir = get_job_dir(job_id)
+    job_dir.mkdir(parents=True, exist_ok=True)
+
+    # Compute SHA-256 document fingerprint
+    doc_hash = compute_file_hash(original_file_path)
+    cache_mgr = DocumentCacheManager(doc_hash, filename)
+
+    cache_info = {
+        "cached": False,
+        "reused_embeddings": False,
+        "reused_chunks": False,
+        "reused_artifacts": False,
+        "estimated_time_saved_min": 0
+    }
+
     job = {
         "job_id": job_id,
+        "doc_hash": doc_hash,
         "filename": filename,
         "status": "uploaded",
-        "current_stage": "Uploaded",
+        "current_stage": "Stage 1: Extraction",
         "progress_percentage": 0.0,
         "created_at": datetime.now().isoformat(),
         "completed_at": None,
         "error": None,
         "file_path": str(original_file_path),
         "result": None,
+        "cache_info": cache_info,
     }
+
+    # Check for full cache hit (Requirement 1 & Primary Objective)
+    if cache_mgr.is_fully_processed():
+        backend_logger.info("[FULL CACHE HIT] Document fingerprint %s... is fully processed. Reusing artifacts for job %s.", doc_hash[:10], job_id)
+        cache_mgr.sync_to_job_dir(job_dir)
+        
+        proof_res = cache_mgr.load_artifact("10_final/report.json")
+        
+        job["status"] = "completed"
+        job["current_stage"] = "Completed"
+        job["progress_percentage"] = 100.0
+        job["context_analysis_status"] = "completed"
+        job["context_analysis_stage"] = "Completed"
+        job["context_analysis_progress"] = 100.0
+        job["completed_at"] = datetime.now().isoformat()
+        job["result"] = proof_res or {"total_issues": 0, "status": "completed"}
+        job["cache_info"] = {
+            "cached": True,
+            "reused_embeddings": True,
+            "reused_chunks": True,
+            "reused_artifacts": True,
+            "estimated_time_saved_min": 18
+        }
+
+        JOBS[job_id] = job
+        save_job_metadata(job_id)
+        return job
+
+    # Partial cache hit / new document: sync existing completed stages
+    cache_mgr.sync_to_job_dir(job_dir)
+
     JOBS[job_id] = job
     save_job_metadata(job_id)
     return job
 
 
 def queue_job(job_id: str) -> Dict[str, Any]:
-    """Queues a job for background processing if it is not already running."""
+    """Queues a job for background processing if it is not already running or completed."""
     job = get_job(job_id)
     if not job:
         raise ValueError("Job not found")
         
-    if job["status"] in ("pending", "processing"):
+    if job["status"] in ("completed", "pending", "processing"):
         return job
 
     job["status"] = "pending"
-    job["current_stage"] = "Queued"
+    job["current_stage"] = "Stage 1: Extraction"
     job["progress_percentage"] = 0.0
     job["error"] = None
     job["completed_at"] = None
@@ -173,6 +230,109 @@ def queue_job(job_id: str) -> Dict[str, Any]:
     
     job_queue.put(job_id)
     return job
+
+
+def run_context_analysis_inline(job_id: str, job_dir: Path) -> None:
+    """Executes Context Analysis, Ambiguity Pipeline, Claude Verification, and Final Report synchronously."""
+    job = get_job(job_id)
+    if job:
+        job["context_analysis_status"] = "running"
+        job["context_analysis_stage"] = "Stage 5: RAG"
+        job["context_analysis_progress"] = 55.0
+        job["current_stage"] = "Stage 5: RAG"
+        job["progress_percentage"] = 55.0
+        save_job_metadata(job_id)
+
+    from src.rag.contextual_analysis.pipeline import ContextAnalysisPipeline
+    from src.config import load_preferences
+
+    prefs = load_preferences()
+    model_name = prefs.get("ollama", {}).get("model", "qwen2.5-coder:32b")
+
+    consistency_pipeline = ContextAnalysisPipeline(model_name=model_name)
+    consistency_pipeline.run_analysis(job_dir, job_id)
+
+    # Stage 6: Local LLM Ambiguity Detection
+    if job:
+        job["current_stage"] = "Stage 6: Local LLM Ambiguity Detection"
+        job["progress_percentage"] = 68.0
+        save_job_metadata(job_id)
+
+    from src.rag.ambiguity_pipeline import AmbiguityPipeline
+    ambiguity_pipeline = AmbiguityPipeline()
+    ambiguity_pipeline.run_clustering(job_dir, job_id)
+    backend_logger.info("Generated ambiguity semantic clusters for job %s", job_id)
+
+    from src.rag.ambiguity_extractor import AmbiguityExtractor
+    ambiguity_extractor = AmbiguityExtractor()
+    ambiguity_extractor.run_extraction(job_dir, job_id)
+    backend_logger.info("Generated ambiguity claims extraction index for job %s", job_id)
+
+    from src.rag.ambiguity_chunk_analyzer import AmbiguityChunkAnalyzer
+    chunk_analyzer = AmbiguityChunkAnalyzer()
+    chunk_analyzer.run_analysis(job_dir, job_id)
+    backend_logger.info("Generated ambiguity chunk-level analysis for job %s", job_id)
+
+    from src.rag.ambiguity_cluster_analyzer import AmbiguityClusterAnalyzer
+    cluster_analyzer = AmbiguityClusterAnalyzer()
+    cluster_analyzer.run_analysis(job_dir, job_id)
+    backend_logger.info("Generated ambiguity cluster-level analysis for job %s", job_id)
+
+    # Stage 7: Claude Verification
+    if job:
+        job["current_stage"] = "Stage 7: Claude Verification"
+        job["progress_percentage"] = 82.0
+        save_job_metadata(job_id)
+
+    from src.rag.claude_input_builder import ClaudeInputBuilder
+    input_builder = ClaudeInputBuilder()
+    input_builder.run_packaging(job_dir, job_id)
+
+    from src.rag.claude.verification_service import ClaudeVerificationService
+    verification_service = ClaudeVerificationService()
+    verification_service.run_verification(job_dir, job_id)
+    backend_logger.info("Generated Claude verification report for job %s", job_id)
+
+    # Stage 8: Executive Report Generation
+    if job:
+        job["current_stage"] = "Stage 8: Executive Report Generation"
+        job["progress_percentage"] = 92.0
+        save_job_metadata(job_id)
+
+    from src.rag.final_report_generator import FinalReportGenerator
+    report_generator = FinalReportGenerator()
+    report_generator.run_generation(job_dir, job_id)
+    backend_logger.info("Generated final business report for job %s", job_id)
+
+    # Copy reports to 09_reports/
+    try:
+        import shutil
+        reports_dir = job_dir / "09_reports"
+        reports_dir.mkdir(parents=True, exist_ok=True)
+        if (job_dir / "report.json").exists():
+            shutil.copy2(job_dir / "report.json", reports_dir / "consistency_report.json")
+        if (job_dir / "business_report.html").exists():
+            shutil.copy2(job_dir / "business_report.html", reports_dir / "consistency_report.html")
+    except Exception as copy_err:
+        backend_logger.error("Failed to copy consistency reports to 09_reports: %s", copy_err)
+
+    # Count issues
+    issues_count = 0
+    report_file = job_dir / "report.json"
+    if report_file.exists():
+        with open(report_file, "r", encoding="utf-8") as f:
+            data = json.load(f)
+            issues_count = len(data.get("issues", []))
+
+    if job:
+        job["context_analysis_status"] = "completed"
+        job["context_analysis_stage"] = "Completed"
+        job["context_analysis_progress"] = 100.0
+        job["context_analysis_issues_count"] = issues_count
+
+    if job and "doc_hash" in job:
+        cache_mgr = DocumentCacheManager(job["doc_hash"], job["filename"])
+        cache_mgr.sync_from_job_dir(job_dir)
 
 
 def background_worker() -> None:
@@ -194,8 +354,8 @@ def background_worker() -> None:
                 
             backend_logger.info("Processing job %s (%s)", job_id, job["filename"])
             job["status"] = "processing"
-            job["current_stage"] = "Starting"
-            job["progress_percentage"] = 0.0
+            job["current_stage"] = "Stage 1: Extraction"
+            job["progress_percentage"] = 5.0
             save_job_metadata(job_id)
             
             CURRENT_JOB_ID = job_id
@@ -212,13 +372,12 @@ def background_worker() -> None:
             try:
                 with ProofreadingPipeline(config) as pipeline:
                     result = pipeline.run(input_path, run_id=job_id)
-                    job["status"] = "completed"
-                    job["current_stage"] = "Completed"
-                    job["progress_percentage"] = 100.0
                     job["result"] = result
-                    backend_logger.info("Job %s completed successfully.", job_id)
+                    job["current_stage"] = "Stage 4: Proofreading"
+                    job["progress_percentage"] = 50.0
+                    save_job_metadata(job_id)
+                    backend_logger.info("Proofreading phase finished for job %s. Proceeding to RAG & Ambiguity Pipeline...", job_id)
                     
-                    # Phase 6 Final: Copy reports to 09_reports/
                     try:
                         import shutil
                         job_dir = get_job_dir(job_id)
@@ -232,13 +391,18 @@ def background_worker() -> None:
                             shutil.copy2(final_dir / "annotated_original.html", reports_dir / "annotated.html")
                         if (final_dir / "corrected_document.html").exists():
                             shutil.copy2(final_dir / "corrected_document.html", reports_dir / "corrected.html")
-                        backend_logger.info("Copied proofreading reports to 09_reports/ for job %s", job_id)
                     except Exception as copy_err:
                         backend_logger.error("Failed to copy proofreading reports to 09_reports: %s", copy_err)
 
-                    # Trigger Context Analysis in background thread!
-                    job_dir = get_job_dir(job_id)
-                    run_context_analysis_bg(job_id, job_dir)
+                # Run RAG -> Ambiguity Detection -> Claude Verification -> Final Report Generation
+                job_dir = get_job_dir(job_id)
+                run_context_analysis_inline(job_id, job_dir)
+
+                # Mark Job Complete ONLY after all report files are successfully written
+                job["status"] = "completed"
+                job["current_stage"] = "Completed"
+                job["progress_percentage"] = 100.0
+                backend_logger.info("Job %s fully completed end-to-end successfully.", job_id)
 
             except Exception as e:
                 import traceback
@@ -285,97 +449,16 @@ def get_all_jobs() -> list[Dict[str, Any]]:
 def run_context_analysis_bg(job_id: str, job_dir: Path) -> None:
     def worker():
         try:
-            job = get_job(job_id)
-            if job:
-                job["context_analysis_status"] = "running"
-                job["context_analysis_stage"] = "Starting Context Analysis"
-                job["context_analysis_progress"] = 0.0
-                save_job_metadata(job_id)
-            
-            from src.rag.contextual_analysis.pipeline import ContextAnalysisPipeline
-            from src.config import load_preferences
-            
-            # Load preferences
-            prefs = load_preferences()
-            model_name = prefs.get("ollama", {}).get("model", "qwen2.5-coder:32b")
-            
-            consistency_pipeline = ContextAnalysisPipeline(model_name=model_name)
-            consistency_pipeline.run_analysis(job_dir, job_id)
-            
-            # Run Ambiguity Pipeline (Phase 1 Clustering & Phase 2A Claim Extraction)
-            try:
-                from src.rag.ambiguity_pipeline import AmbiguityPipeline
-                ambiguity_pipeline = AmbiguityPipeline()
-                ambiguity_pipeline.run_clustering(job_dir, job_id)
-                backend_logger.info("Generated ambiguity semantic clusters for job %s", job_id)
-                
-                from src.rag.ambiguity_extractor import AmbiguityExtractor
-                ambiguity_extractor = AmbiguityExtractor()
-                ambiguity_extractor.run_extraction(job_dir, job_id)
-                backend_logger.info("Generated ambiguity claims extraction index for job %s", job_id)
-                
-                from src.rag.ambiguity_chunk_analyzer import AmbiguityChunkAnalyzer
-                chunk_analyzer = AmbiguityChunkAnalyzer()
-                chunk_analyzer.run_analysis(job_dir, job_id)
-                backend_logger.info("Generated ambiguity chunk-level analysis for job %s", job_id)
-                
-                from src.rag.ambiguity_cluster_analyzer import AmbiguityClusterAnalyzer
-                cluster_analyzer = AmbiguityClusterAnalyzer()
-                cluster_analyzer.run_analysis(job_dir, job_id)
-                backend_logger.info("Generated ambiguity cluster-level analysis for job %s", job_id)
-                
-                from src.rag.claude_input_builder import ClaudeInputBuilder
-                input_builder = ClaudeInputBuilder()
-                input_builder.run_packaging(job_dir, job_id)
-                backend_logger.info("Generated Claude input package for job %s", job_id)
-                
-                from src.rag.claude.verification_service import ClaudeVerificationService
-                verification_service = ClaudeVerificationService()
-                verification_service.run_verification(job_dir, job_id)
-                backend_logger.info("Generated Claude verification report for job %s", job_id)
-                
-                from src.rag.final_report_generator import FinalReportGenerator
-                report_generator = FinalReportGenerator()
-                report_generator.run_generation(job_dir, job_id)
-                backend_logger.info("Generated final business report for job %s", job_id)
-            except Exception as amb_err:
-                backend_logger.error("Failed to execute ambiguity pipeline phases: %s", amb_err)
-            
-            # Set completion status
-            issues_count = 0
-            report_file = job_dir / "report.json"
-            if report_file.exists():
-                with open(report_file, "r", encoding="utf-8") as f:
-                    data = json.load(f)
-                    issues_count = len(data.get("issues", []))
-            
-            if job:
-                job["context_analysis_status"] = "completed"
-                job["context_analysis_stage"] = "Completed"
-                job["context_analysis_progress"] = 100.0
-                job["context_analysis_issues_count"] = issues_count
-                save_job_metadata(job_id)
-                
-            try:
-                import shutil
-                reports_dir = job_dir / "09_reports"
-                reports_dir.mkdir(parents=True, exist_ok=True)
-                if (job_dir / "report.json").exists():
-                    shutil.copy2(job_dir / "report.json", reports_dir / "consistency_report.json")
-                if (job_dir / "business_report.html").exists():
-                    shutil.copy2(job_dir / "business_report.html", reports_dir / "consistency_report.html")
-            except Exception as copy_err:
-                logging.getLogger("backend").error("Failed to copy consistency reports to 09_reports: %s", copy_err)
-                
+            run_context_analysis_inline(job_id, job_dir)
         except Exception as e:
             import traceback
-            logging.getLogger("backend").error("Context Analysis failed for job %s: %s\n%s", job_id, e, traceback.format_exc())
+            logging.getLogger("backend").error("Context Analysis background trigger failed for job %s: %s\n%s", job_id, e, traceback.format_exc())
             job = get_job(job_id)
             if job:
                 job["context_analysis_status"] = "failed"
                 job["context_analysis_stage"] = f"Failed: {str(e)}"
-                job["context_analysis_progress"] = 0.0
                 save_job_metadata(job_id)
             
     threading.Thread(target=worker, daemon=True).start()
+
 

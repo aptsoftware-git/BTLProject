@@ -91,9 +91,9 @@ export default function UploadZone({ onUploaded }) {
           </div>
         ) : (
           <>
-            <p style={styles.heading}>Drag and drop your file here</p>
+            <p style={styles.heading}>Upload a document for AI review</p>
             <button style={styles.browseLink} onClick={() => inputRef.current?.click()}>
-              or click to browse
+              Drag and drop your file here or click to browse
             </button>
           </>
         )}
@@ -131,7 +131,7 @@ const styles = {
     border: "2px dashed #D8D3F7",
     background: "var(--brand-light)",
     borderRadius: "var(--radius-lg)",
-    padding: "32px 20px",
+    padding: "20px 16px",
     display: "flex",
     flexDirection: "column",
     alignItems: "center",

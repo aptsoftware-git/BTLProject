@@ -244,16 +244,19 @@ class FakeRetriever:
 
 
 class FakeOllamaClient:
-    def __init__(self, response_text):
+    def __init__(self, response_text, fail_models=None):
         self.response_text = response_text
+        self.fail_models = fail_models or []
         self.last_prompt = None
         self.last_system = None
         self.last_model = None
 
-    def generate(self, model: str, prompt: str, system: Optional[str] = None, options=None):
+    def generate(self, model: str, prompt: str, system: Optional[str] = None, options=None, timeout=None, **kwargs):
         self.last_model = model
         self.last_prompt = prompt
         self.last_system = system
+        if model in self.fail_models:
+            raise OllamaTimeoutError(f"Model '{model}' timed out after 300s")
         return self.response_text
 
 
@@ -281,6 +284,30 @@ def test_chat_service_success():
     assert response.generation_time >= 0.0
     assert response.retrieval_statistics["total_retrieved"] == 1
     assert response.retrieval_statistics["used_chunks_count"] == 1
+    assert response.fallback_triggered is False
+
+
+def test_chat_service_model_fallback_on_timeout():
+    chunk_a = _create_mock_scored_chunk("chunk_1", "Python was created by Guido van Rossum.", page=1, tokens=50)
+    retriever = FakeRetriever([chunk_a])
+    # Configure qwen2.5:72b to fail/timeout, while default model qwen2.5-coder:32b succeeds
+    ollama_client = FakeOllamaClient("Guido van Rossum", fail_models=["qwen2.5:72b"])
+
+    service = ChatService(
+        retriever=retriever,
+        ollama_client=ollama_client,
+        context_builder=ContextBuilder(),
+        prompt_builder=PromptBuilder(),
+        memory=ConversationMemory()
+    )
+
+    response = service.answer_question("doc_test", "Who created Python?", model_id="qwen2.5:72b")
+
+    assert response.answer == "Guido van Rossum"
+    assert response.selected_model == DEFAULT_MODEL_ID
+    assert response.requested_model == "qwen2.5:72b"
+    assert response.fallback_triggered is True
+    assert "exceeded 5-minute timeout" in response.fallback_reason
 
 
 def test_chat_service_empty_retrieval_unsupported_question():
@@ -298,6 +325,8 @@ def test_chat_service_empty_retrieval_unsupported_question():
     )
 
     response = service.answer_question("doc_test", "What is the capital of Mars?")
+
+    assert isinstance(response, GroundedAnswerResponse)
     assert response.answer == fallback_ans
-    assert len(response.used_chunk_ids) == 0
-    assert len(response.page_references) == 0
+    assert response.used_chunk_ids == []
+    assert response.page_references == []

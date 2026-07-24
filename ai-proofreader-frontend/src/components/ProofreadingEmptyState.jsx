@@ -21,8 +21,13 @@ export default function ProofreadingEmptyState() {
   };
 
   useEffect(() => {
-    loadDocs();
-  }, []);
+    const activeId = localStorage.getItem("currentlyOpenDocId");
+    if (activeId) {
+      navigate(`/documents/${activeId}?tab=proofreading`, { replace: true });
+    } else {
+      loadDocs();
+    }
+  }, [navigate]);
 
   const completedDocs = documents.filter((d) => d.status === "completed" || d.status === "processing" || d.status === "pending");
 
@@ -50,7 +55,11 @@ export default function ProofreadingEmptyState() {
             </div>
           ) : completedDocs.length === 0 ? (
             <div style={styles.emptyBox}>
-              <p style={{ fontSize: 13.5, color: "var(--text-muted)", margin: 0 }}>No documents analyzed yet.</p>
+              <div style={{ textAlign: "center", padding: 16 }}>
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="var(--text-muted)" strokeWidth="2" style={{ marginBottom: 6 }}><circle cx="12" cy="12" r="10"/><path d="M12 16v-4"/><path d="M12 8h.01"/></svg>
+                <p style={{ fontSize: 13, fontWeight: 600, color: "var(--text-secondary)", margin: 0 }}>No Previous Analyses</p>
+                <p style={{ fontSize: 11.5, color: "var(--text-muted)", margin: "4px 0 0" }}>Upload a document in the left pane to start reviews.</p>
+              </div>
             </div>
           ) : (
             <div style={styles.list}>

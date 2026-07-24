@@ -28,7 +28,7 @@ class OllamaClient:
     def __init__(
         self,
         host: str = "http://192.168.19.21:11434",
-        timeout: int = 120,
+        timeout: int = 300,
         max_retries: int = 2
     ):
         self.host = host.rstrip('/')
@@ -63,7 +63,8 @@ class OllamaClient:
         model: str,
         prompt: str,
         system: Optional[str] = None,
-        options: Optional[Dict[str, Any]] = None
+        options: Optional[Dict[str, Any]] = None,
+        timeout: Optional[int] = None
     ) -> str:
         """
         Calls the Ollama /api/generate endpoint with retry logic and detailed error handling.
@@ -79,11 +80,13 @@ class OllamaClient:
         if options:
             payload["options"] = options
 
+        req_timeout = timeout or self.timeout
+
         last_err = None
         for attempt in range(self.max_retries + 1):
             try:
-                logger.info(f"Calling Ollama generate (Attempt {attempt + 1}/{self.max_retries + 1}) for model {model}...")
-                resp = requests.post(url, json=payload, timeout=self.timeout)
+                logger.info(f"Calling Ollama generate (Attempt {attempt + 1}/{self.max_retries + 1}) for model {model} (timeout={req_timeout}s)...")
+                resp = requests.post(url, json=payload, timeout=req_timeout)
                 
                 if resp.status_code == 404:
                     raise OllamaModelMissingError(f"Model '{model}' is not found on Ollama server at {self.host}.")

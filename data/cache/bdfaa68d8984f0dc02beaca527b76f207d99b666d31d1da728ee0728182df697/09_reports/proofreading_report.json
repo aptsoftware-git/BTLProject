@@ -1,0 +1,1973 @@
+{
+  "total_issues": 103,
+  "by_type": {
+    "grammar": 97,
+    "spelling": 3,
+    "punctuation": 3
+  },
+  "issues": [
+    {
+      "sentence_id": 14,
+      "char_start": 1810,
+      "char_end": 1826,
+      "original_text": "state of the art",
+      "suggested_text": "state-of-the-art",
+      "issue_type": "grammar",
+      "source": "llm",
+      "reason": "hyphenation required for compound adjective",
+      "confidence": 0.7,
+      "is_protected": false,
+      "protected_reason": null,
+      "agreement_count": 2,
+      "final_confidence": 0.95,
+      "contributing_sources": [
+        "llm",
+        "languagetool"
+      ],
+      "severity": "critical"
+    },
+    {
+      "sentence_id": 18,
+      "char_start": 2292,
+      "char_end": 2294,
+      "original_text": " ,",
+      "suggested_text": ",",
+      "issue_type": "grammar",
+      "source": "languagetool",
+      "reason": "Put a space after the comma, but not before the comma.",
+      "confidence": 0.75,
+      "is_protected": false,
+      "protected_reason": null,
+      "agreement_count": 1,
+      "final_confidence": 0.73,
+      "contributing_sources": [
+        "languagetool"
+      ],
+      "severity": "high"
+    },
+    {
+      "sentence_id": 18,
+      "char_start": 2373,
+      "char_end": 2375,
+      "original_text": " .",
+      "suggested_text": ".",
+      "issue_type": "grammar",
+      "source": "languagetool",
+      "reason": "Don’t put a space before the full stop.",
+      "confidence": 0.75,
+      "is_protected": false,
+      "protected_reason": null,
+      "agreement_count": 1,
+      "final_confidence": 0.73,
+      "contributing_sources": [
+        "languagetool"
+      ],
+      "severity": "high"
+    },
+    {
+      "sentence_id": 36,
+      "char_start": 4900,
+      "char_end": 4915,
+      "original_text": "sequencealigned",
+      "suggested_text": "sequence-aligned",
+      "issue_type": "grammar",
+      "source": "llm",
+      "reason": "The term should be hyphenated.",
+      "confidence": 0.7,
+      "is_protected": false,
+      "protected_reason": null,
+      "agreement_count": 1,
+      "final_confidence": 0.8,
+      "contributing_sources": [
+        "llm",
+        "languagetool"
+      ],
+      "severity": "high"
+    },
+    {
+      "sentence_id": 38,
+      "char_start": 5223,
+      "char_end": 5238,
+      "original_text": "sequencealigned",
+      "suggested_text": "sequence aligned",
+      "issue_type": "spelling",
+      "source": "languagetool",
+      "reason": "Possible spelling mistake found.",
+      "confidence": 0.75,
+      "is_protected": false,
+      "protected_reason": null,
+      "agreement_count": 1,
+      "final_confidence": 0.78,
+      "contributing_sources": [
+        "languagetool"
+      ],
+      "severity": "medium"
+    },
+    {
+      "sentence_id": 43,
+      "char_start": 5599,
+      "char_end": 5601,
+      "original_text": "( ",
+      "suggested_text": "(",
+      "issue_type": "grammar",
+      "source": "languagetool",
+      "reason": "Don’t put a space after the opening parenthesis.",
+      "confidence": 0.75,
+      "is_protected": false,
+      "protected_reason": null,
+      "agreement_count": 1,
+      "final_confidence": 0.73,
+      "contributing_sources": [
+        "languagetool"
+      ],
+      "severity": "high"
+    },
+    {
+      "sentence_id": 43,
+      "char_start": 5604,
+      "char_end": 5606,
+      "original_text": " ,",
+      "suggested_text": ",",
+      "issue_type": "grammar",
+      "source": "languagetool",
+      "reason": "Put a space after the comma, but not before the comma.",
+      "confidence": 0.75,
+      "is_protected": false,
+      "protected_reason": null,
+      "agreement_count": 1,
+      "final_confidence": 0.73,
+      "contributing_sources": [
+        "languagetool"
+      ],
+      "severity": "high"
+    },
+    {
+      "sentence_id": 43,
+      "char_start": 5615,
+      "char_end": 5617,
+      "original_text": " )",
+      "suggested_text": ")",
+      "issue_type": "grammar",
+      "source": "languagetool",
+      "reason": "Don’t put a space before the closing parenthesis.",
+      "confidence": 0.75,
+      "is_protected": false,
+      "protected_reason": null,
+      "agreement_count": 1,
+      "final_confidence": 0.73,
+      "contributing_sources": [
+        "languagetool"
+      ],
+      "severity": "high"
+    },
+    {
+      "sentence_id": 44,
+      "char_start": 5666,
+      "char_end": 5668,
+      "original_text": "( ",
+      "suggested_text": "(",
+      "issue_type": "grammar",
+      "source": "languagetool",
+      "reason": "Don’t put a space after the opening parenthesis.",
+      "confidence": 0.75,
+      "is_protected": false,
+      "protected_reason": null,
+      "agreement_count": 1,
+      "final_confidence": 0.73,
+      "contributing_sources": [
+        "languagetool"
+      ],
+      "severity": "high"
+    },
+    {
+      "sentence_id": 44,
+      "char_start": 5671,
+      "char_end": 5673,
+      "original_text": " ,",
+      "suggested_text": ",",
+      "issue_type": "grammar",
+      "source": "languagetool",
+      "reason": "Put a space after the comma, but not before the comma.",
+      "confidence": 0.75,
+      "is_protected": false,
+      "protected_reason": null,
+      "agreement_count": 1,
+      "final_confidence": 0.73,
+      "contributing_sources": [
+        "languagetool"
+      ],
+      "severity": "high"
+    },
+    {
+      "sentence_id": 44,
+      "char_start": 5682,
+      "char_end": 5684,
+      "original_text": " )",
+      "suggested_text": ")",
+      "issue_type": "grammar",
+      "source": "languagetool",
+      "reason": "Don’t put a space before the closing parenthesis.",
+      "confidence": 0.75,
+      "is_protected": false,
+      "protected_reason": null,
+      "agreement_count": 1,
+      "final_confidence": 0.73,
+      "contributing_sources": [
+        "languagetool"
+      ],
+      "severity": "high"
+    },
+    {
+      "sentence_id": 45,
+      "char_start": 5694,
+      "char_end": 5696,
+      "original_text": " ,",
+      "suggested_text": ",",
+      "issue_type": "grammar",
+      "source": "languagetool",
+      "reason": "Put a space after the comma, but not before the comma.",
+      "confidence": 0.75,
+      "is_protected": false,
+      "protected_reason": null,
+      "agreement_count": 1,
+      "final_confidence": 0.73,
+      "contributing_sources": [
+        "languagetool"
+      ],
+      "severity": "high"
+    },
+    {
+      "sentence_id": 45,
+      "char_start": 5743,
+      "char_end": 5745,
+      "original_text": "( ",
+      "suggested_text": "(",
+      "issue_type": "grammar",
+      "source": "languagetool",
+      "reason": "Don’t put a space after the opening parenthesis.",
+      "confidence": 0.75,
+      "is_protected": false,
+      "protected_reason": null,
+      "agreement_count": 1,
+      "final_confidence": 0.73,
+      "contributing_sources": [
+        "languagetool"
+      ],
+      "severity": "high"
+    },
+    {
+      "sentence_id": 45,
+      "char_start": 5748,
+      "char_end": 5750,
+      "original_text": " ,",
+      "suggested_text": ",",
+      "issue_type": "grammar",
+      "source": "languagetool",
+      "reason": "Put a space after the comma, but not before the comma.",
+      "confidence": 0.75,
+      "is_protected": false,
+      "protected_reason": null,
+      "agreement_count": 1,
+      "final_confidence": 0.73,
+      "contributing_sources": [
+        "languagetool"
+      ],
+      "severity": "high"
+    },
+    {
+      "sentence_id": 45,
+      "char_start": 5759,
+      "char_end": 5761,
+      "original_text": " )",
+      "suggested_text": ")",
+      "issue_type": "grammar",
+      "source": "languagetool",
+      "reason": "Don’t put a space before the closing parenthesis.",
+      "confidence": 0.75,
+      "is_protected": false,
+      "protected_reason": null,
+      "agreement_count": 1,
+      "final_confidence": 0.73,
+      "contributing_sources": [
+        "languagetool"
+      ],
+      "severity": "high"
+    },
+    {
+      "sentence_id": 54,
+      "char_start": 6573,
+      "char_end": 6575,
+      "original_text": "( ",
+      "suggested_text": "(",
+      "issue_type": "grammar",
+      "source": "languagetool",
+      "reason": "Don’t put a space after the opening parenthesis.",
+      "confidence": 0.75,
+      "is_protected": false,
+      "protected_reason": null,
+      "agreement_count": 1,
+      "final_confidence": 0.73,
+      "contributing_sources": [
+        "languagetool"
+      ],
+      "severity": "high"
+    },
+    {
+      "sentence_id": 54,
+      "char_start": 6586,
+      "char_end": 6588,
+      "original_text": "( ",
+      "suggested_text": "(",
+      "issue_type": "grammar",
+      "source": "languagetool",
+      "reason": "Don’t put a space after the opening parenthesis.",
+      "confidence": 0.75,
+      "is_protected": false,
+      "protected_reason": null,
+      "agreement_count": 1,
+      "final_confidence": 0.73,
+      "contributing_sources": [
+        "languagetool"
+      ],
+      "severity": "high"
+    },
+    {
+      "sentence_id": 54,
+      "char_start": 6589,
+      "char_end": 6591,
+      "original_text": " )",
+      "suggested_text": ")",
+      "issue_type": "grammar",
+      "source": "languagetool",
+      "reason": "Don’t put a space before the closing parenthesis.",
+      "confidence": 0.75,
+      "is_protected": false,
+      "protected_reason": null,
+      "agreement_count": 1,
+      "final_confidence": 0.73,
+      "contributing_sources": [
+        "languagetool"
+      ],
+      "severity": "high"
+    },
+    {
+      "sentence_id": 54,
+      "char_start": 6592,
+      "char_end": 6594,
+      "original_text": " ,",
+      "suggested_text": ",",
+      "issue_type": "grammar",
+      "source": "languagetool",
+      "reason": "Put a space after the comma, but not before the comma.",
+      "confidence": 0.75,
+      "is_protected": false,
+      "protected_reason": null,
+      "agreement_count": 1,
+      "final_confidence": 0.73,
+      "contributing_sources": [
+        "languagetool"
+      ],
+      "severity": "high"
+    },
+    {
+      "sentence_id": 54,
+      "char_start": 6609,
+      "char_end": 6611,
+      "original_text": "( ",
+      "suggested_text": "(",
+      "issue_type": "grammar",
+      "source": "languagetool",
+      "reason": "Don’t put a space after the opening parenthesis.",
+      "confidence": 0.75,
+      "is_protected": false,
+      "protected_reason": null,
+      "agreement_count": 1,
+      "final_confidence": 0.73,
+      "contributing_sources": [
+        "languagetool"
+      ],
+      "severity": "high"
+    },
+    {
+      "sentence_id": 54,
+      "char_start": 6612,
+      "char_end": 6614,
+      "original_text": " )",
+      "suggested_text": ")",
+      "issue_type": "grammar",
+      "source": "languagetool",
+      "reason": "Don’t put a space before the closing parenthesis.",
+      "confidence": 0.75,
+      "is_protected": false,
+      "protected_reason": null,
+      "agreement_count": 1,
+      "final_confidence": 0.73,
+      "contributing_sources": [
+        "languagetool"
+      ],
+      "severity": "high"
+    },
+    {
+      "sentence_id": 55,
+      "char_start": 6814,
+      "char_end": 6816,
+      "original_text": " .",
+      "suggested_text": ".",
+      "issue_type": "grammar",
+      "source": "languagetool",
+      "reason": "Don’t put a space before the full stop.",
+      "confidence": 0.75,
+      "is_protected": false,
+      "protected_reason": null,
+      "agreement_count": 1,
+      "final_confidence": 0.73,
+      "contributing_sources": [
+        "languagetool"
+      ],
+      "severity": "high"
+    },
+    {
+      "sentence_id": 60,
+      "char_start": 7337,
+      "char_end": 7341,
+      "original_text": "fact",
+      "suggested_text": "the fact",
+      "issue_type": "grammar",
+      "source": "llm",
+      "reason": "Missing article before 'fact'",
+      "confidence": 0.7,
+      "is_protected": false,
+      "protected_reason": null,
+      "agreement_count": 1,
+      "final_confidence": 0.8,
+      "contributing_sources": [
+        "llm"
+      ],
+      "severity": "high"
+    },
+    {
+      "sentence_id": 60,
+      "char_start": 7502,
+      "char_end": 7504,
+      "original_text": " .",
+      "suggested_text": ".",
+      "issue_type": "grammar",
+      "source": "languagetool",
+      "reason": "Don’t put a space before the full stop.",
+      "confidence": 0.75,
+      "is_protected": false,
+      "protected_reason": null,
+      "agreement_count": 1,
+      "final_confidence": 0.73,
+      "contributing_sources": [
+        "languagetool"
+      ],
+      "severity": "high"
+    },
+    {
+      "sentence_id": 65,
+      "char_start": 7753,
+      "char_end": 7755,
+      "original_text": "of",
+      "suggested_text": "Of",
+      "issue_type": "punctuation",
+      "source": "languagetool",
+      "reason": "This sentence does not start with an uppercase letter.",
+      "confidence": 0.75,
+      "is_protected": false,
+      "protected_reason": null,
+      "agreement_count": 1,
+      "final_confidence": 0.75,
+      "contributing_sources": [
+        "languagetool"
+      ],
+      "severity": "medium"
+    },
+    {
+      "sentence_id": 69,
+      "char_start": 8057,
+      "char_end": 8059,
+      "original_text": " ,",
+      "suggested_text": ",",
+      "issue_type": "grammar",
+      "source": "languagetool",
+      "reason": "Put a space after the comma, but not before the comma.",
+      "confidence": 0.75,
+      "is_protected": false,
+      "protected_reason": null,
+      "agreement_count": 1,
+      "final_confidence": 0.73,
+      "contributing_sources": [
+        "languagetool"
+      ],
+      "severity": "high"
+    },
+    {
+      "sentence_id": 69,
+      "char_start": 8087,
+      "char_end": 8089,
+      "original_text": " .",
+      "suggested_text": ".",
+      "issue_type": "grammar",
+      "source": "languagetool",
+      "reason": "Don’t put a space before the full stop.",
+      "confidence": 0.75,
+      "is_protected": false,
+      "protected_reason": null,
+      "agreement_count": 1,
+      "final_confidence": 0.73,
+      "contributing_sources": [
+        "languagetool"
+      ],
+      "severity": "high"
+    },
+    {
+      "sentence_id": 70,
+      "char_start": 8166,
+      "char_end": 8168,
+      "original_text": " ,",
+      "suggested_text": ",",
+      "issue_type": "grammar",
+      "source": "languagetool",
+      "reason": "Put a space after the comma, but not before the comma.",
+      "confidence": 0.75,
+      "is_protected": false,
+      "protected_reason": null,
+      "agreement_count": 1,
+      "final_confidence": 0.73,
+      "contributing_sources": [
+        "languagetool"
+      ],
+      "severity": "high"
+    },
+    {
+      "sentence_id": 71,
+      "char_start": 8350,
+      "char_end": 8352,
+      "original_text": " .",
+      "suggested_text": ".",
+      "issue_type": "grammar",
+      "source": "languagetool",
+      "reason": "Don’t put a space before the full stop.",
+      "confidence": 0.75,
+      "is_protected": false,
+      "protected_reason": null,
+      "agreement_count": 1,
+      "final_confidence": 0.73,
+      "contributing_sources": [
+        "languagetool"
+      ],
+      "severity": "high"
+    },
+    {
+      "sentence_id": 72,
+      "char_start": 8419,
+      "char_end": 8421,
+      "original_text": " .",
+      "suggested_text": ".",
+      "issue_type": "grammar",
+      "source": "languagetool",
+      "reason": "Don’t put a space before the full stop.",
+      "confidence": 0.75,
+      "is_protected": false,
+      "protected_reason": null,
+      "agreement_count": 1,
+      "final_confidence": 0.73,
+      "contributing_sources": [
+        "languagetool"
+      ],
+      "severity": "high"
+    },
+    {
+      "sentence_id": 76,
+      "char_start": 8672,
+      "char_end": 8674,
+      "original_text": " .",
+      "suggested_text": ".",
+      "issue_type": "grammar",
+      "source": "languagetool",
+      "reason": "Don’t put a space before the full stop.",
+      "confidence": 0.75,
+      "is_protected": false,
+      "protected_reason": null,
+      "agreement_count": 1,
+      "final_confidence": 0.73,
+      "contributing_sources": [
+        "languagetool"
+      ],
+      "severity": "high"
+    },
+    {
+      "sentence_id": 81,
+      "char_start": 9201,
+      "char_end": 9203,
+      "original_text": " ,",
+      "suggested_text": ",",
+      "issue_type": "grammar",
+      "source": "languagetool",
+      "reason": "Put a space after the comma, but not before the comma.",
+      "confidence": 0.75,
+      "is_protected": false,
+      "protected_reason": null,
+      "agreement_count": 1,
+      "final_confidence": 0.73,
+      "contributing_sources": [
+        "languagetool"
+      ],
+      "severity": "high"
+    },
+    {
+      "sentence_id": 81,
+      "char_start": 9301,
+      "char_end": 9316,
+      "original_text": "extremely small",
+      "suggested_text": "tiny",
+      "issue_type": "grammar",
+      "source": "languagetool",
+      "reason": "Consider using an extreme adjective for ‘small’.",
+      "confidence": 0.75,
+      "is_protected": false,
+      "protected_reason": null,
+      "agreement_count": 1,
+      "final_confidence": 0.73,
+      "contributing_sources": [
+        "languagetool"
+      ],
+      "severity": "high"
+    },
+    {
+      "sentence_id": 81,
+      "char_start": 9328,
+      "char_end": 9330,
+      "original_text": " .",
+      "suggested_text": ".",
+      "issue_type": "grammar",
+      "source": "languagetool",
+      "reason": "Don’t put a space before the full stop.",
+      "confidence": 0.75,
+      "is_protected": false,
+      "protected_reason": null,
+      "agreement_count": 1,
+      "final_confidence": 0.73,
+      "contributing_sources": [
+        "languagetool"
+      ],
+      "severity": "high"
+    },
+    {
+      "sentence_id": 82,
+      "char_start": 9394,
+      "char_end": 9396,
+      "original_text": " .",
+      "suggested_text": ".",
+      "issue_type": "grammar",
+      "source": "languagetool",
+      "reason": "Don’t put a space before the full stop.",
+      "confidence": 0.75,
+      "is_protected": false,
+      "protected_reason": null,
+      "agreement_count": 1,
+      "final_confidence": 0.73,
+      "contributing_sources": [
+        "languagetool"
+      ],
+      "severity": "high"
+    },
+    {
+      "sentence_id": 84,
+      "char_start": 9656,
+      "char_end": 9658,
+      "original_text": " ,",
+      "suggested_text": ",",
+      "issue_type": "grammar",
+      "source": "languagetool",
+      "reason": "Put a space after the comma, but not before the comma.",
+      "confidence": 0.75,
+      "is_protected": false,
+      "protected_reason": null,
+      "agreement_count": 1,
+      "final_confidence": 0.73,
+      "contributing_sources": [
+        "languagetool"
+      ],
+      "severity": "high"
+    },
+    {
+      "sentence_id": 90,
+      "char_start": 10219,
+      "char_end": 10221,
+      "original_text": " ,",
+      "suggested_text": ",",
+      "issue_type": "grammar",
+      "source": "languagetool",
+      "reason": "Put a space after the comma, but not before the comma.",
+      "confidence": 0.75,
+      "is_protected": false,
+      "protected_reason": null,
+      "agreement_count": 1,
+      "final_confidence": 0.73,
+      "contributing_sources": [
+        "languagetool"
+      ],
+      "severity": "high"
+    },
+    {
+      "sentence_id": 91,
+      "char_start": 10245,
+      "char_end": 10247,
+      "original_text": " ,",
+      "suggested_text": ",",
+      "issue_type": "grammar",
+      "source": "languagetool",
+      "reason": "Put a space after the comma, but not before the comma.",
+      "confidence": 0.75,
+      "is_protected": false,
+      "protected_reason": null,
+      "agreement_count": 1,
+      "final_confidence": 0.73,
+      "contributing_sources": [
+        "languagetool"
+      ],
+      "severity": "high"
+    },
+    {
+      "sentence_id": 91,
+      "char_start": 10284,
+      "char_end": 10286,
+      "original_text": "hd",
+      "suggested_text": "HD",
+      "issue_type": "spelling",
+      "source": "languagetool",
+      "reason": "Possible spelling mistake found.",
+      "confidence": 0.75,
+      "is_protected": false,
+      "protected_reason": null,
+      "agreement_count": 1,
+      "final_confidence": 0.78,
+      "contributing_sources": [
+        "languagetool"
+      ],
+      "severity": "medium"
+    },
+    {
+      "sentence_id": 91,
+      "char_start": 10298,
+      "char_end": 10300,
+      "original_text": " .",
+      "suggested_text": ".",
+      "issue_type": "grammar",
+      "source": "languagetool",
+      "reason": "Don’t put a space before the full stop.",
+      "confidence": 0.75,
+      "is_protected": false,
+      "protected_reason": null,
+      "agreement_count": 1,
+      "final_confidence": 0.73,
+      "contributing_sources": [
+        "languagetool"
+      ],
+      "severity": "high"
+    },
+    {
+      "sentence_id": 95,
+      "char_start": 10420,
+      "char_end": 10422,
+      "original_text": " .",
+      "suggested_text": ".",
+      "issue_type": "grammar",
+      "source": "languagetool",
+      "reason": "Don’t put a space before the full stop.",
+      "confidence": 0.75,
+      "is_protected": false,
+      "protected_reason": null,
+      "agreement_count": 1,
+      "final_confidence": 0.73,
+      "contributing_sources": [
+        "languagetool"
+      ],
+      "severity": "high"
+    },
+    {
+      "sentence_id": 103,
+      "char_start": 11114,
+      "char_end": 11124,
+      "original_text": "all of the",
+      "suggested_text": "all the",
+      "issue_type": "grammar",
+      "source": "languagetool",
+      "reason": "Consider removing “of” to be more concise",
+      "confidence": 0.75,
+      "is_protected": false,
+      "protected_reason": null,
+      "agreement_count": 1,
+      "final_confidence": 0.73,
+      "contributing_sources": [
+        "languagetool"
+      ],
+      "severity": "high"
+    },
+    {
+      "sentence_id": 107,
+      "char_start": 11683,
+      "char_end": 11685,
+      "original_text": " )",
+      "suggested_text": ")",
+      "issue_type": "grammar",
+      "source": "languagetool",
+      "reason": "Don’t put a space before the closing parenthesis.",
+      "confidence": 0.75,
+      "is_protected": false,
+      "protected_reason": null,
+      "agreement_count": 1,
+      "final_confidence": 0.73,
+      "contributing_sources": [
+        "languagetool"
+      ],
+      "severity": "high"
+    },
+    {
+      "sentence_id": 108,
+      "char_start": 11686,
+      "char_end": 11689,
+      "original_text": "all",
+      "suggested_text": "All",
+      "issue_type": "punctuation",
+      "source": "languagetool",
+      "reason": "This sentence does not start with an uppercase letter.",
+      "confidence": 0.75,
+      "is_protected": false,
+      "protected_reason": null,
+      "agreement_count": 1,
+      "final_confidence": 0.75,
+      "contributing_sources": [
+        "languagetool"
+      ],
+      "severity": "medium"
+    },
+    {
+      "sentence_id": 115,
+      "char_start": 12350,
+      "char_end": 12352,
+      "original_text": " ,",
+      "suggested_text": ",",
+      "issue_type": "grammar",
+      "source": "languagetool",
+      "reason": "Put a space after the comma, but not before the comma.",
+      "confidence": 0.75,
+      "is_protected": false,
+      "protected_reason": null,
+      "agreement_count": 1,
+      "final_confidence": 0.73,
+      "contributing_sources": [
+        "languagetool"
+      ],
+      "severity": "high"
+    },
+    {
+      "sentence_id": 116,
+      "char_start": 12403,
+      "char_end": 12405,
+      "original_text": " .",
+      "suggested_text": ".",
+      "issue_type": "grammar",
+      "source": "languagetool",
+      "reason": "Don’t put a space before the full stop.",
+      "confidence": 0.75,
+      "is_protected": false,
+      "protected_reason": null,
+      "agreement_count": 1,
+      "final_confidence": 0.73,
+      "contributing_sources": [
+        "languagetool"
+      ],
+      "severity": "high"
+    },
+    {
+      "sentence_id": 128,
+      "char_start": 13558,
+      "char_end": 13563,
+      "original_text": "where",
+      "suggested_text": "Where",
+      "issue_type": "punctuation",
+      "source": "languagetool",
+      "reason": "This sentence does not start with an uppercase letter.",
+      "confidence": 0.75,
+      "is_protected": false,
+      "protected_reason": null,
+      "agreement_count": 1,
+      "final_confidence": 0.75,
+      "contributing_sources": [
+        "languagetool"
+      ],
+      "severity": "medium"
+    },
+    {
+      "sentence_id": 130,
+      "char_start": 13754,
+      "char_end": 13756,
+      "original_text": " .",
+      "suggested_text": ".",
+      "issue_type": "grammar",
+      "source": "languagetool",
+      "reason": "Don’t put a space before the full stop.",
+      "confidence": 0.75,
+      "is_protected": false,
+      "protected_reason": null,
+      "agreement_count": 1,
+      "final_confidence": 0.73,
+      "contributing_sources": [
+        "languagetool"
+      ],
+      "severity": "high"
+    },
+    {
+      "sentence_id": 131,
+      "char_start": 13906,
+      "char_end": 13908,
+      "original_text": " ,",
+      "suggested_text": ",",
+      "issue_type": "grammar",
+      "source": "languagetool",
+      "reason": "Put a space after the comma, but not before the comma.",
+      "confidence": 0.75,
+      "is_protected": false,
+      "protected_reason": null,
+      "agreement_count": 1,
+      "final_confidence": 0.73,
+      "contributing_sources": [
+        "languagetool"
+      ],
+      "severity": "high"
+    },
+    {
+      "sentence_id": 131,
+      "char_start": 13969,
+      "char_end": 13971,
+      "original_text": " .",
+      "suggested_text": ".",
+      "issue_type": "grammar",
+      "source": "languagetool",
+      "reason": "Don’t put a space before the full stop.",
+      "confidence": 0.75,
+      "is_protected": false,
+      "protected_reason": null,
+      "agreement_count": 1,
+      "final_confidence": 0.73,
+      "contributing_sources": [
+        "languagetool"
+      ],
+      "severity": "high"
+    },
+    {
+      "sentence_id": 135,
+      "char_start": 14499,
+      "char_end": 14501,
+      "original_text": "( ",
+      "suggested_text": "(",
+      "issue_type": "grammar",
+      "source": "languagetool",
+      "reason": "Don’t put a space after the opening parenthesis.",
+      "confidence": 0.75,
+      "is_protected": false,
+      "protected_reason": null,
+      "agreement_count": 1,
+      "final_confidence": 0.73,
+      "contributing_sources": [
+        "languagetool"
+      ],
+      "severity": "high"
+    },
+    {
+      "sentence_id": 135,
+      "char_start": 14504,
+      "char_end": 14506,
+      "original_text": " ,",
+      "suggested_text": ",",
+      "issue_type": "grammar",
+      "source": "languagetool",
+      "reason": "Put a space after the comma, but not before the comma.",
+      "confidence": 0.75,
+      "is_protected": false,
+      "protected_reason": null,
+      "agreement_count": 1,
+      "final_confidence": 0.73,
+      "contributing_sources": [
+        "languagetool"
+      ],
+      "severity": "high"
+    },
+    {
+      "sentence_id": 135,
+      "char_start": 14515,
+      "char_end": 14517,
+      "original_text": " )",
+      "suggested_text": ")",
+      "issue_type": "grammar",
+      "source": "languagetool",
+      "reason": "Don’t put a space before the closing parenthesis.",
+      "confidence": 0.75,
+      "is_protected": false,
+      "protected_reason": null,
+      "agreement_count": 1,
+      "final_confidence": 0.73,
+      "contributing_sources": [
+        "languagetool"
+      ],
+      "severity": "high"
+    },
+    {
+      "sentence_id": 135,
+      "char_start": 14554,
+      "char_end": 14556,
+      "original_text": "( ",
+      "suggested_text": "(",
+      "issue_type": "grammar",
+      "source": "languagetool",
+      "reason": "Don’t put a space after the opening parenthesis.",
+      "confidence": 0.75,
+      "is_protected": false,
+      "protected_reason": null,
+      "agreement_count": 1,
+      "final_confidence": 0.73,
+      "contributing_sources": [
+        "languagetool"
+      ],
+      "severity": "high"
+    },
+    {
+      "sentence_id": 135,
+      "char_start": 14559,
+      "char_end": 14561,
+      "original_text": " ,",
+      "suggested_text": ",",
+      "issue_type": "grammar",
+      "source": "languagetool",
+      "reason": "Put a space after the comma, but not before the comma.",
+      "confidence": 0.75,
+      "is_protected": false,
+      "protected_reason": null,
+      "agreement_count": 1,
+      "final_confidence": 0.73,
+      "contributing_sources": [
+        "languagetool"
+      ],
+      "severity": "high"
+    },
+    {
+      "sentence_id": 135,
+      "char_start": 14570,
+      "char_end": 14572,
+      "original_text": " )",
+      "suggested_text": ")",
+      "issue_type": "grammar",
+      "source": "languagetool",
+      "reason": "Don’t put a space before the closing parenthesis.",
+      "confidence": 0.75,
+      "is_protected": false,
+      "protected_reason": null,
+      "agreement_count": 1,
+      "final_confidence": 0.73,
+      "contributing_sources": [
+        "languagetool"
+      ],
+      "severity": "high"
+    },
+    {
+      "sentence_id": 136,
+      "char_start": 14583,
+      "char_end": 14585,
+      "original_text": " ,",
+      "suggested_text": ",",
+      "issue_type": "grammar",
+      "source": "languagetool",
+      "reason": "Put a space after the comma, but not before the comma.",
+      "confidence": 0.75,
+      "is_protected": false,
+      "protected_reason": null,
+      "agreement_count": 1,
+      "final_confidence": 0.73,
+      "contributing_sources": [
+        "languagetool"
+      ],
+      "severity": "high"
+    },
+    {
+      "sentence_id": 136,
+      "char_start": 14595,
+      "char_end": 14597,
+      "original_text": " ,",
+      "suggested_text": ",",
+      "issue_type": "grammar",
+      "source": "languagetool",
+      "reason": "Put a space after the comma, but not before the comma.",
+      "confidence": 0.75,
+      "is_protected": false,
+      "protected_reason": null,
+      "agreement_count": 1,
+      "final_confidence": 0.73,
+      "contributing_sources": [
+        "languagetool"
+      ],
+      "severity": "high"
+    },
+    {
+      "sentence_id": 145,
+      "char_start": 15706,
+      "char_end": 15708,
+      "original_text": "( ",
+      "suggested_text": "(",
+      "issue_type": "grammar",
+      "source": "languagetool",
+      "reason": "Don’t put a space after the opening parenthesis.",
+      "confidence": 0.75,
+      "is_protected": false,
+      "protected_reason": null,
+      "agreement_count": 1,
+      "final_confidence": 0.73,
+      "contributing_sources": [
+        "languagetool"
+      ],
+      "severity": "high"
+    },
+    {
+      "sentence_id": 145,
+      "char_start": 15709,
+      "char_end": 15711,
+      "original_text": " )",
+      "suggested_text": ")",
+      "issue_type": "grammar",
+      "source": "languagetool",
+      "reason": "Don’t put a space before the closing parenthesis.",
+      "confidence": 0.75,
+      "is_protected": false,
+      "protected_reason": null,
+      "agreement_count": 1,
+      "final_confidence": 0.73,
+      "contributing_sources": [
+        "languagetool"
+      ],
+      "severity": "high"
+    },
+    {
+      "sentence_id": 146,
+      "char_start": 15906,
+      "char_end": 15908,
+      "original_text": " ,",
+      "suggested_text": ",",
+      "issue_type": "grammar",
+      "source": "languagetool",
+      "reason": "Put a space after the comma, but not before the comma.",
+      "confidence": 0.75,
+      "is_protected": false,
+      "protected_reason": null,
+      "agreement_count": 1,
+      "final_confidence": 0.73,
+      "contributing_sources": [
+        "languagetool"
+      ],
+      "severity": "high"
+    },
+    {
+      "sentence_id": 148,
+      "char_start": 16362,
+      "char_end": 16364,
+      "original_text": "( ",
+      "suggested_text": "(",
+      "issue_type": "grammar",
+      "source": "languagetool",
+      "reason": "Don’t put a space after the opening parenthesis.",
+      "confidence": 0.75,
+      "is_protected": false,
+      "protected_reason": null,
+      "agreement_count": 1,
+      "final_confidence": 0.73,
+      "contributing_sources": [
+        "languagetool"
+      ],
+      "severity": "high"
+    },
+    {
+      "sentence_id": 148,
+      "char_start": 16367,
+      "char_end": 16369,
+      "original_text": " )",
+      "suggested_text": ")",
+      "issue_type": "grammar",
+      "source": "languagetool",
+      "reason": "Don’t put a space before the closing parenthesis.",
+      "confidence": 0.75,
+      "is_protected": false,
+      "protected_reason": null,
+      "agreement_count": 1,
+      "final_confidence": 0.73,
+      "contributing_sources": [
+        "languagetool"
+      ],
+      "severity": "high"
+    },
+    {
+      "sentence_id": 151,
+      "char_start": 16576,
+      "char_end": 16578,
+      "original_text": "( ",
+      "suggested_text": "(",
+      "issue_type": "grammar",
+      "source": "languagetool",
+      "reason": "Don’t put a space after the opening parenthesis.",
+      "confidence": 0.75,
+      "is_protected": false,
+      "protected_reason": null,
+      "agreement_count": 1,
+      "final_confidence": 0.73,
+      "contributing_sources": [
+        "languagetool"
+      ],
+      "severity": "high"
+    },
+    {
+      "sentence_id": 151,
+      "char_start": 16581,
+      "char_end": 16583,
+      "original_text": " )",
+      "suggested_text": ")",
+      "issue_type": "grammar",
+      "source": "languagetool",
+      "reason": "Don’t put a space before the closing parenthesis.",
+      "confidence": 0.75,
+      "is_protected": false,
+      "protected_reason": null,
+      "agreement_count": 1,
+      "final_confidence": 0.73,
+      "contributing_sources": [
+        "languagetool"
+      ],
+      "severity": "high"
+    },
+    {
+      "sentence_id": 151,
+      "char_start": 16645,
+      "char_end": 16647,
+      "original_text": "( ",
+      "suggested_text": "(",
+      "issue_type": "grammar",
+      "source": "languagetool",
+      "reason": "Don’t put a space after the opening parenthesis.",
+      "confidence": 0.75,
+      "is_protected": false,
+      "protected_reason": null,
+      "agreement_count": 1,
+      "final_confidence": 0.73,
+      "contributing_sources": [
+        "languagetool"
+      ],
+      "severity": "high"
+    },
+    {
+      "sentence_id": 151,
+      "char_start": 16653,
+      "char_end": 16655,
+      "original_text": "( ",
+      "suggested_text": "(",
+      "issue_type": "grammar",
+      "source": "languagetool",
+      "reason": "Don’t put a space after the opening parenthesis.",
+      "confidence": 0.75,
+      "is_protected": false,
+      "protected_reason": null,
+      "agreement_count": 1,
+      "final_confidence": 0.73,
+      "contributing_sources": [
+        "languagetool"
+      ],
+      "severity": "high"
+    },
+    {
+      "sentence_id": 151,
+      "char_start": 16656,
+      "char_end": 16658,
+      "original_text": " )",
+      "suggested_text": ")",
+      "issue_type": "grammar",
+      "source": "languagetool",
+      "reason": "Don’t put a space before the closing parenthesis.",
+      "confidence": 0.75,
+      "is_protected": false,
+      "protected_reason": null,
+      "agreement_count": 1,
+      "final_confidence": 0.73,
+      "contributing_sources": [
+        "languagetool"
+      ],
+      "severity": "high"
+    },
+    {
+      "sentence_id": 153,
+      "char_start": 16876,
+      "char_end": 16878,
+      "original_text": " .",
+      "suggested_text": ".",
+      "issue_type": "grammar",
+      "source": "languagetool",
+      "reason": "Don’t put a space before the full stop.",
+      "confidence": 0.75,
+      "is_protected": false,
+      "protected_reason": null,
+      "agreement_count": 1,
+      "final_confidence": 0.73,
+      "contributing_sources": [
+        "languagetool"
+      ],
+      "severity": "high"
+    },
+    {
+      "sentence_id": 154,
+      "char_start": 16959,
+      "char_end": 16961,
+      "original_text": "( ",
+      "suggested_text": "(",
+      "issue_type": "grammar",
+      "source": "languagetool",
+      "reason": "Don’t put a space after the opening parenthesis.",
+      "confidence": 0.75,
+      "is_protected": false,
+      "protected_reason": null,
+      "agreement_count": 1,
+      "final_confidence": 0.73,
+      "contributing_sources": [
+        "languagetool"
+      ],
+      "severity": "high"
+    },
+    {
+      "sentence_id": 155,
+      "char_start": 16980,
+      "char_end": 16982,
+      "original_text": " )",
+      "suggested_text": ")",
+      "issue_type": "grammar",
+      "source": "languagetool",
+      "reason": "Don’t put a space before the closing parenthesis.",
+      "confidence": 0.75,
+      "is_protected": false,
+      "protected_reason": null,
+      "agreement_count": 1,
+      "final_confidence": 0.73,
+      "contributing_sources": [
+        "languagetool"
+      ],
+      "severity": "high"
+    },
+    {
+      "sentence_id": 156,
+      "char_start": 17000,
+      "char_end": 17002,
+      "original_text": " ,",
+      "suggested_text": ",",
+      "issue_type": "grammar",
+      "source": "languagetool",
+      "reason": "Put a space after the comma, but not before the comma.",
+      "confidence": 0.75,
+      "is_protected": false,
+      "protected_reason": null,
+      "agreement_count": 1,
+      "final_confidence": 0.73,
+      "contributing_sources": [
+        "languagetool"
+      ],
+      "severity": "high"
+    },
+    {
+      "sentence_id": 157,
+      "char_start": 17181,
+      "char_end": 17196,
+      "original_text": "As side benefit",
+      "suggested_text": "As a side benefit",
+      "issue_type": "grammar",
+      "source": "llm",
+      "reason": "Missing article 'a'",
+      "confidence": 0.7,
+      "is_protected": false,
+      "protected_reason": null,
+      "agreement_count": 1,
+      "final_confidence": 0.8,
+      "contributing_sources": [
+        "llm"
+      ],
+      "severity": "high"
+    },
+    {
+      "sentence_id": 164,
+      "char_start": 17816,
+      "char_end": 17828,
+      "original_text": "sourcetarget",
+      "suggested_text": "source-target",
+      "issue_type": "grammar",
+      "source": "llm",
+      "reason": "The compound term should be hyphenated.",
+      "confidence": 0.7,
+      "is_protected": false,
+      "protected_reason": null,
+      "agreement_count": 1,
+      "final_confidence": 0.8,
+      "contributing_sources": [
+        "llm",
+        "languagetool"
+      ],
+      "severity": "high"
+    },
+    {
+      "sentence_id": 172,
+      "char_start": 18525,
+      "char_end": 18527,
+      "original_text": ",(",
+      "suggested_text": ", (",
+      "issue_type": "grammar",
+      "source": "languagetool",
+      "reason": "Put a space after the comma.",
+      "confidence": 0.75,
+      "is_protected": false,
+      "protected_reason": null,
+      "agreement_count": 1,
+      "final_confidence": 0.73,
+      "contributing_sources": [
+        "languagetool"
+      ],
+      "severity": "high"
+    },
+    {
+      "sentence_id": 176,
+      "char_start": 18714,
+      "char_end": 18716,
+      "original_text": " .",
+      "suggested_text": ".",
+      "issue_type": "grammar",
+      "source": "languagetool",
+      "reason": "Don’t put a space before the full stop.",
+      "confidence": 0.75,
+      "is_protected": false,
+      "protected_reason": null,
+      "agreement_count": 1,
+      "final_confidence": 0.73,
+      "contributing_sources": [
+        "languagetool"
+      ],
+      "severity": "high"
+    },
+    {
+      "sentence_id": 176,
+      "char_start": 18718,
+      "char_end": 18720,
+      "original_text": " ,",
+      "suggested_text": ",",
+      "issue_type": "grammar",
+      "source": "languagetool",
+      "reason": "Put a space after the comma, but not before the comma.",
+      "confidence": 0.75,
+      "is_protected": false,
+      "protected_reason": null,
+      "agreement_count": 1,
+      "final_confidence": 0.73,
+      "contributing_sources": [
+        "languagetool"
+      ],
+      "severity": "high"
+    },
+    {
+      "sentence_id": 176,
+      "char_start": 18728,
+      "char_end": 18730,
+      "original_text": " .",
+      "suggested_text": ".",
+      "issue_type": "grammar",
+      "source": "languagetool",
+      "reason": "Don’t put a space before the full stop.",
+      "confidence": 0.75,
+      "is_protected": false,
+      "protected_reason": null,
+      "agreement_count": 1,
+      "final_confidence": 0.73,
+      "contributing_sources": [
+        "languagetool"
+      ],
+      "severity": "high"
+    },
+    {
+      "sentence_id": 177,
+      "char_start": 18747,
+      "char_end": 18749,
+      "original_text": " .",
+      "suggested_text": ".",
+      "issue_type": "grammar",
+      "source": "languagetool",
+      "reason": "Don’t put a space before the full stop.",
+      "confidence": 0.75,
+      "is_protected": false,
+      "protected_reason": null,
+      "agreement_count": 1,
+      "final_confidence": 0.73,
+      "contributing_sources": [
+        "languagetool"
+      ],
+      "severity": "high"
+    },
+    {
+      "sentence_id": 180,
+      "char_start": 19053,
+      "char_end": 19055,
+      "original_text": " .",
+      "suggested_text": ".",
+      "issue_type": "grammar",
+      "source": "languagetool",
+      "reason": "Don’t put a space before the full stop.",
+      "confidence": 0.75,
+      "is_protected": false,
+      "protected_reason": null,
+      "agreement_count": 1,
+      "final_confidence": 0.73,
+      "contributing_sources": [
+        "languagetool"
+      ],
+      "severity": "high"
+    },
+    {
+      "sentence_id": 186,
+      "char_start": 19441,
+      "char_end": 19443,
+      "original_text": " .",
+      "suggested_text": ".",
+      "issue_type": "grammar",
+      "source": "languagetool",
+      "reason": "Don’t put a space before the full stop.",
+      "confidence": 0.75,
+      "is_protected": false,
+      "protected_reason": null,
+      "agreement_count": 1,
+      "final_confidence": 0.73,
+      "contributing_sources": [
+        "languagetool"
+      ],
+      "severity": "high"
+    },
+    {
+      "sentence_id": 186,
+      "char_start": 19445,
+      "char_end": 19447,
+      "original_text": " .",
+      "suggested_text": ".",
+      "issue_type": "grammar",
+      "source": "languagetool",
+      "reason": "Don’t put a space before the full stop.",
+      "confidence": 0.75,
+      "is_protected": false,
+      "protected_reason": null,
+      "agreement_count": 1,
+      "final_confidence": 0.73,
+      "contributing_sources": [
+        "languagetool"
+      ],
+      "severity": "high"
+    },
+    {
+      "sentence_id": 187,
+      "char_start": 19519,
+      "char_end": 19523,
+      "original_text": "ε ls",
+      "suggested_text": "ε_ls",
+      "issue_type": "spelling",
+      "source": "llm",
+      "reason": "Variable names should not have spaces between characters.",
+      "confidence": 0.7,
+      "is_protected": false,
+      "protected_reason": null,
+      "agreement_count": 1,
+      "final_confidence": 0.8,
+      "contributing_sources": [
+        "llm"
+      ],
+      "severity": "medium"
+    },
+    {
+      "sentence_id": 187,
+      "char_start": 19527,
+      "char_end": 19529,
+      "original_text": " .",
+      "suggested_text": ".",
+      "issue_type": "grammar",
+      "source": "languagetool",
+      "reason": "Don’t put a space before the full stop.",
+      "confidence": 0.75,
+      "is_protected": false,
+      "protected_reason": null,
+      "agreement_count": 1,
+      "final_confidence": 0.73,
+      "contributing_sources": [
+        "languagetool"
+      ],
+      "severity": "high"
+    },
+    {
+      "sentence_id": 192,
+      "char_start": 19867,
+      "char_end": 19872,
+      "original_text": "2 . 0",
+      "suggested_text": "2.0",
+      "issue_type": "grammar",
+      "source": "llm",
+      "reason": "Extra space before decimal point",
+      "confidence": 0.7,
+      "is_protected": false,
+      "protected_reason": null,
+      "agreement_count": 1,
+      "final_confidence": 0.8,
+      "contributing_sources": [
+        "llm",
+        "languagetool"
+      ],
+      "severity": "high"
+    },
+    {
+      "sentence_id": 193,
+      "char_start": 19931,
+      "char_end": 19933,
+      "original_text": " .",
+      "suggested_text": ".",
+      "issue_type": "grammar",
+      "source": "languagetool",
+      "reason": "Don’t put a space before the full stop.",
+      "confidence": 0.75,
+      "is_protected": false,
+      "protected_reason": null,
+      "agreement_count": 1,
+      "final_confidence": 0.73,
+      "contributing_sources": [
+        "languagetool"
+      ],
+      "severity": "high"
+    },
+    {
+      "sentence_id": 194,
+      "char_start": 19935,
+      "char_end": 19937,
+      "original_text": " .",
+      "suggested_text": ".",
+      "issue_type": "grammar",
+      "source": "languagetool",
+      "reason": "Don’t put a space before the full stop.",
+      "confidence": 0.75,
+      "is_protected": false,
+      "protected_reason": null,
+      "agreement_count": 1,
+      "final_confidence": 0.73,
+      "contributing_sources": [
+        "languagetool"
+      ],
+      "severity": "high"
+    },
+    {
+      "sentence_id": 196,
+      "char_start": 20026,
+      "char_end": 20028,
+      "original_text": " .",
+      "suggested_text": ".",
+      "issue_type": "grammar",
+      "source": "languagetool",
+      "reason": "Don’t put a space before the full stop.",
+      "confidence": 0.75,
+      "is_protected": false,
+      "protected_reason": null,
+      "agreement_count": 1,
+      "final_confidence": 0.73,
+      "contributing_sources": [
+        "languagetool"
+      ],
+      "severity": "high"
+    },
+    {
+      "sentence_id": 199,
+      "char_start": 20292,
+      "char_end": 20294,
+      "original_text": " .",
+      "suggested_text": ".",
+      "issue_type": "grammar",
+      "source": "languagetool",
+      "reason": "Don’t put a space before the full stop.",
+      "confidence": 0.75,
+      "is_protected": false,
+      "protected_reason": null,
+      "agreement_count": 1,
+      "final_confidence": 0.73,
+      "contributing_sources": [
+        "languagetool"
+      ],
+      "severity": "high"
+    },
+    {
+      "sentence_id": 199,
+      "char_start": 20296,
+      "char_end": 20298,
+      "original_text": " ,",
+      "suggested_text": ",",
+      "issue_type": "grammar",
+      "source": "languagetool",
+      "reason": "Put a space after the comma, but not before the comma.",
+      "confidence": 0.75,
+      "is_protected": false,
+      "protected_reason": null,
+      "agreement_count": 1,
+      "final_confidence": 0.73,
+      "contributing_sources": [
+        "languagetool"
+      ],
+      "severity": "high"
+    },
+    {
+      "sentence_id": 199,
+      "char_start": 20313,
+      "char_end": 20323,
+      "original_text": "all of the",
+      "suggested_text": "all the",
+      "issue_type": "grammar",
+      "source": "languagetool",
+      "reason": "Consider removing “of” to be more concise",
+      "confidence": 0.75,
+      "is_protected": false,
+      "protected_reason": null,
+      "agreement_count": 1,
+      "final_confidence": 0.73,
+      "contributing_sources": [
+        "languagetool"
+      ],
+      "severity": "high"
+    },
+    {
+      "sentence_id": 200,
+      "char_start": 20523,
+      "char_end": 20525,
+      "original_text": " .",
+      "suggested_text": ".",
+      "issue_type": "grammar",
+      "source": "languagetool",
+      "reason": "Don’t put a space before the full stop.",
+      "confidence": 0.75,
+      "is_protected": false,
+      "protected_reason": null,
+      "agreement_count": 1,
+      "final_confidence": 0.73,
+      "contributing_sources": [
+        "languagetool"
+      ],
+      "severity": "high"
+    },
+    {
+      "sentence_id": 200,
+      "char_start": 20527,
+      "char_end": 20529,
+      "original_text": " ,",
+      "suggested_text": ",",
+      "issue_type": "grammar",
+      "source": "languagetool",
+      "reason": "Put a space after the comma, but not before the comma.",
+      "confidence": 0.75,
+      "is_protected": false,
+      "protected_reason": null,
+      "agreement_count": 1,
+      "final_confidence": 0.73,
+      "contributing_sources": [
+        "languagetool"
+      ],
+      "severity": "high"
+    },
+    {
+      "sentence_id": 200,
+      "char_start": 20542,
+      "char_end": 20544,
+      "original_text": " .",
+      "suggested_text": ".",
+      "issue_type": "grammar",
+      "source": "languagetool",
+      "reason": "Don’t put a space before the full stop.",
+      "confidence": 0.75,
+      "is_protected": false,
+      "protected_reason": null,
+      "agreement_count": 1,
+      "final_confidence": 0.73,
+      "contributing_sources": [
+        "languagetool"
+      ],
+      "severity": "high"
+    },
+    {
+      "sentence_id": 200,
+      "char_start": 20546,
+      "char_end": 20548,
+      "original_text": " .",
+      "suggested_text": ".",
+      "issue_type": "grammar",
+      "source": "languagetool",
+      "reason": "Don’t put a space before the full stop.",
+      "confidence": 0.75,
+      "is_protected": false,
+      "protected_reason": null,
+      "agreement_count": 1,
+      "final_confidence": 0.73,
+      "contributing_sources": [
+        "languagetool"
+      ],
+      "severity": "high"
+    },
+    {
+      "sentence_id": 203,
+      "char_start": 20801,
+      "char_end": 20810,
+      "original_text": "α = 0 . 6",
+      "suggested_text": "α = 0.6",
+      "issue_type": "grammar",
+      "source": "llm",
+      "reason": "Extra space before the decimal point",
+      "confidence": 0.7,
+      "is_protected": false,
+      "protected_reason": null,
+      "agreement_count": 1,
+      "final_confidence": 0.8,
+      "contributing_sources": [
+        "llm",
+        "languagetool"
+      ],
+      "severity": "high"
+    },
+    {
+      "sentence_id": 206,
+      "char_start": 20950,
+      "char_end": 20969,
+      "original_text": "input length + 50 ,",
+      "suggested_text": "input length + 50,",
+      "issue_type": "grammar",
+      "source": "llm",
+      "reason": "Space after the comma is unnecessary",
+      "confidence": 0.7,
+      "is_protected": false,
+      "protected_reason": null,
+      "agreement_count": 1,
+      "final_confidence": 0.8,
+      "contributing_sources": [
+        "llm",
+        "languagetool"
+      ],
+      "severity": "high"
+    },
+    {
+      "sentence_id": 228,
+      "char_start": 23070,
+      "char_end": 23087,
+      "original_text": "a small number of",
+      "suggested_text": "a few",
+      "issue_type": "grammar",
+      "source": "languagetool",
+      "reason": "Specify a number, remove phrase, use “a few”, or use “some”",
+      "confidence": 0.75,
+      "is_protected": false,
+      "protected_reason": null,
+      "agreement_count": 1,
+      "final_confidence": 0.73,
+      "contributing_sources": [
+        "languagetool"
+      ],
+      "severity": "high"
+    },
+    {
+      "sentence_id": 228,
+      "char_start": 23202,
+      "char_end": 23209,
+      "original_text": "Section",
+      "suggested_text": "section",
+      "issue_type": "grammar",
+      "source": "llm",
+      "reason": "Inconsistent capitalization",
+      "confidence": 0.7,
+      "is_protected": false,
+      "protected_reason": null,
+      "agreement_count": 1,
+      "final_confidence": 0.8,
+      "contributing_sources": [
+        "llm"
+      ],
+      "severity": "high"
+    },
+    {
+      "sentence_id": 229,
+      "char_start": 23399,
+      "char_end": 23401,
+      "original_text": " .",
+      "suggested_text": ".",
+      "issue_type": "grammar",
+      "source": "languagetool",
+      "reason": "Don’t put a space before the full stop.",
+      "confidence": 0.75,
+      "is_protected": false,
+      "protected_reason": null,
+      "agreement_count": 1,
+      "final_confidence": 0.73,
+      "contributing_sources": [
+        "languagetool"
+      ],
+      "severity": "high"
+    },
+    {
+      "sentence_id": 230,
+      "char_start": 23437,
+      "char_end": 23439,
+      "original_text": " .",
+      "suggested_text": ".",
+      "issue_type": "grammar",
+      "source": "languagetool",
+      "reason": "Don’t put a space before the full stop.",
+      "confidence": 0.75,
+      "is_protected": false,
+      "protected_reason": null,
+      "agreement_count": 1,
+      "final_confidence": 0.73,
+      "contributing_sources": [
+        "languagetool"
+      ],
+      "severity": "high"
+    },
+    {
+      "sentence_id": 231,
+      "char_start": 23666,
+      "char_end": 23687,
+      "original_text": "with the exception of",
+      "suggested_text": "except",
+      "issue_type": "grammar",
+      "source": "languagetool",
+      "reason": "Consider using “except” or “except for”",
+      "confidence": 0.75,
+      "is_protected": false,
+      "protected_reason": null,
+      "agreement_count": 1,
+      "final_confidence": 0.73,
+      "contributing_sources": [
+        "languagetool"
+      ],
+      "severity": "high"
+    },
+    {
+      "sentence_id": 243,
+      "char_start": 24986,
+      "char_end": 24988,
+      "original_text": " .",
+      "suggested_text": ".",
+      "issue_type": "grammar",
+      "source": "languagetool",
+      "reason": "Don’t put a space before the full stop.",
+      "confidence": 0.75,
+      "is_protected": false,
+      "protected_reason": null,
+      "agreement_count": 1,
+      "final_confidence": 0.73,
+      "contributing_sources": [
+        "languagetool"
+      ],
+      "severity": "high"
+    }
+  ]
+}

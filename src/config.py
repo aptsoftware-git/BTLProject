@@ -108,3 +108,30 @@ class PipelineConfig:
                     self.languagetool.language = prefs["languagetool_language"]
             except Exception:
                 pass
+
+
+def load_preferences() -> dict:
+    pref_path = ROOT_DIR / "data" / "preferences.json"
+    if pref_path.exists():
+        import json
+        try:
+            with open(pref_path, "r", encoding="utf-8") as f:
+                prefs = json.load(f)
+            result = {}
+            for k, v in prefs.items():
+                result[k] = v
+            # Inject nested form for backend/services compatibility
+            if "ollama_model" in prefs:
+                result.setdefault("ollama", {})["model"] = prefs["ollama_model"]
+            if "ollama_host" in prefs:
+                result.setdefault("ollama", {})["host"] = prefs["ollama_host"]
+            return result
+        except Exception:
+            pass
+    return {
+        "ollama": {
+            "model": "qwen2.5-coder:32b",
+            "host": "http://192.168.19.21:11434"
+        }
+    }
+

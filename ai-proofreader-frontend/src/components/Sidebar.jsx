@@ -3,27 +3,24 @@ import { NavLink } from "react-router-dom";
 
 const NAV_ITEMS = [
   { key: "dashboard", label: "Dashboard", icon: "grid" },
-  { key: "upload", label: "Upload document", icon: "upload" },
   { key: "proofreading", label: "Proofreading", icon: "check-square" },
   { key: "assistant", label: "AI Assistant", icon: "message-square" },
+  { key: "analysis", label: "Context Analysis", icon: "search" },
   { key: "reports", label: "Reports", icon: "bar-chart" },
-  { key: "history", label: "History", icon: "clock" },
   { key: "settings", label: "Settings", icon: "settings" },
 ];
 
 function Icon({ name }) {
-  const common = { width: 18, height: 18, viewBox: "0 0 24 24", fill: "none", stroke: "currentColor", strokeWidth: 2, strokeLinecap: "round", strokeLinejoin: "round" };
+  const common = { width: 15, height: 15, viewBox: "0 0 24 24", fill: "none", stroke: "currentColor", strokeWidth: 2, strokeLinecap: "round", strokeLinejoin: "round" };
   switch (name) {
     case "grid":
       return <svg {...common}><rect x="3" y="3" width="7" height="7" rx="1.5" /><rect x="14" y="3" width="7" height="7" rx="1.5" /><rect x="3" y="14" width="7" height="7" rx="1.5" /><rect x="14" y="14" width="7" height="7" rx="1.5" /></svg>;
-    case "upload":
-      return <svg {...common}><path d="M12 3v12" /><path d="M7 8l5-5 5 5" /><path d="M4 21h16" /></svg>;
     case "check-square":
       return <svg {...common}><rect x="3" y="4" width="18" height="16" rx="2" /><path d="M8 12l3 3 5-6" /></svg>;
     case "bar-chart":
       return <svg {...common}><path d="M4 20V10" /><path d="M12 20V4" /><path d="M20 20v-7" /></svg>;
-    case "clock":
-      return <svg {...common}><circle cx="12" cy="12" r="9" /><path d="M12 7v5l3 3" /></svg>;
+    case "search":
+      return <svg {...common}><circle cx="11" cy="11" r="8" /><line x1="21" y1="21" x2="16.65" y2="16.65" /></svg>;
     case "settings":
       return <svg {...common}><circle cx="12" cy="12" r="3" /><path d="M19.4 15a1.7 1.7 0 00.34 1.87l.06.06a2 2 0 11-2.83 2.83l-.06-.06a1.7 1.7 0 00-1.87-.34 1.7 1.7 0 00-1 1.55V21a2 2 0 11-4 0v-.09a1.7 1.7 0 00-1-1.55 1.7 1.7 0 00-1.87.34l-.06.06a2 2 0 11-2.83-2.83l.06-.06a1.7 1.7 0 00.34-1.87 1.7 1.7 0 00-1.55-1H3a2 2 0 110-4h.09a1.7 1.7 0 001.55-1 1.7 1.7 0 00-.34-1.87l-.06-.06a2 2 0 112.83-2.83l.06.06a1.7 1.7 0 001.87.34H9a1.7 1.7 0 001-1.55V3a2 2 0 114 0v.09a1.7 1.7 0 001 1.55 1.7 1.7 0 001.87-.34l.06-.06a2 2 0 112.83 2.83l-.06.06a1.7 1.7 0 00-.34 1.87V9a1.7 1.7 0 001.55 1H21a2 2 0 110 4h-.09a1.7 1.7 0 00-1.55 1z" /></svg>;
     case "message-square":
@@ -60,7 +57,12 @@ export default function Sidebar({ systemStatus = SYSTEM_STATUS }) {
 
         <nav style={styles.nav}>
           {NAV_ITEMS.map((item) => {
-            const dest = item.key === "dashboard" ? "/" : `/${item.key}`;
+            const storedDocId = localStorage.getItem("currentlyOpenDocId");
+            let dest = item.key === "dashboard" ? "/" : item.key === "settings" ? "/settings" : `/${item.key}`;
+            
+            if (storedDocId && ["proofreading", "assistant", "analysis", "reports"].includes(item.key)) {
+              dest = `/documents/${storedDocId}?tab=${item.key}`;
+            }
             return (
               <NavLink
                 key={item.key}
@@ -142,7 +144,7 @@ const styles = {
     fontWeight: 600,
   },
   statusCard: {
-    border: "1px solid var(--border)", borderRadius: 12, padding: 12,
+    borderTop: "1px solid var(--border)", paddingTop: 16, marginTop: 16,
   },
   statusHeader: {
     display: "flex", alignItems: "center", gap: 6,

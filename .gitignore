@@ -72,3 +72,6 @@ htmlcov/
 
 
 check_models.py
+REPORT_GENERATION_AUDIT.md
+scratch_profile.py
+test_grammar.py

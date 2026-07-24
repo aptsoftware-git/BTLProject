@@ -1,0 +1,82 @@
+{
+  "policies": [
+    {
+      "policy_id": "64296935b11e46a1941a9867e3fec6eb_chunk_0000_pol_000",
+      "text": "The company has decided to implement the new security policy from next month.",
+      "type": "policy",
+      "chunk_id": "64296935b11e46a1941a9867e3fec6eb_chunk_0000"
+    },
+    {
+      "policy_id": "64296935b11e46a1941a9867e3fec6eb_chunk_0000_ob_000",
+      "text": "Every manager must approve the travel request before the employee leaves.",
+      "type": "obligation",
+      "chunk_id": "64296935b11e46a1941a9867e3fec6eb_chunk_0000"
+    },
+    {
+      "policy_id": "64296935b11e46a1941a9867e3fec6eb_chunk_0000_ob_001",
+      "text": "Employees should follow the latest version even if they have not recieved it yet.",
+      "type": "obligation",
+      "chunk_id": "64296935b11e46a1941a9867e3fec6eb_chunk_0000"
+    },
+    {
+      "policy_id": "64296935b11e46a1941a9867e3fec6eb_chunk_0000_ob_002",
+      "text": "This process should be completed as soon as possible.",
+      "type": "obligation",
+      "chunk_id": "64296935b11e46a1941a9867e3fec6eb_chunk_0000"
+    },
+    {
+      "policy_id": "64296935b11e46a1941a9867e3fec6eb_chunk_0000_ob_003",
+      "text": "Every employee must wear their identification badge inside the building.",
+      "type": "obligation",
+      "chunk_id": "64296935b11e46a1941a9867e3fec6eb_chunk_0000"
+    },
+    {
+      "policy_id": "64296935b11e46a1941a9867e3fec6eb_chunk_0000_ob_004",
+      "text": "The system shall automatically archive inactive accounts after thirty days.",
+      "type": "obligation",
+      "chunk_id": "64296935b11e46a1941a9867e3fec6eb_chunk_0000"
+    },
+    {
+      "policy_id": "64296935b11e46a1941a9867e3fec6eb_chunk_0000_ob_005",
+      "text": "The final submission should be completed before the last working day of September.",
+      "type": "obligation",
+      "chunk_id": "64296935b11e46a1941a9867e3fec6eb_chunk_0000"
+    },
+    {
+      "policy_id": "64296935b11e46a1941a9867e3fec6eb_chunk_0000_ob_006",
+      "text": "Attendance is mandatory unless employees receive prior approval.",
+      "type": "obligation",
+      "chunk_id": "64296935b11e46a1941a9867e3fec6eb_chunk_0000"
+    },
+    {
+      "policy_id": "64296935b11e46a1941a9867e3fec6eb_chunk_0000_perm_000",
+      "text": "it may also become effective immediately depending on the circumstances.",
+      "type": "permission",
+      "chunk_id": "64296935b11e46a1941a9867e3fec6eb_chunk_0000"
+    },
+    {
+      "policy_id": "64296935b11e46a1941a9867e3fec6eb_chunk_0000_perm_001",
+      "text": "approval can be obtained after the trip if necessary.",
+      "type": "permission",
+      "chunk_id": "64296935b11e46a1941a9867e3fec6eb_chunk_0000"
+    },
+    {
+      "policy_id": "64296935b11e46a1941a9867e3fec6eb_chunk_0000_perm_002",
+      "text": "If they are missing, it should still be accepted until everything is verified.",
+      "type": "permission",
+      "chunk_id": "64296935b11e46a1941a9867e3fec6eb_chunk_0000"
+    },
+    {
+      "policy_id": "64296935b11e46a1941a9867e3fec6eb_chunk_0000_perm_003",
+      "text": "This may not apply in certain situations.",
+      "type": "permission",
+      "chunk_id": "64296935b11e46a1941a9867e3fec6eb_chunk_0000"
+    },
+    {
+      "policy_id": "64296935b11e46a1941a9867e3fec6eb_chunk_0000_perm_004",
+      "text": "accounts are archived after sixty days unless otherwise specified.",
+      "type": "permission",
+      "chunk_id": "64296935b11e46a1941a9867e3fec6eb_chunk_0000"
+    }
+  ]
+}

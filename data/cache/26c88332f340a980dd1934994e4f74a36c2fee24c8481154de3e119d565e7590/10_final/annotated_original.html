@@ -1,0 +1,351 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Annotated Original</title>
+<style>
+body { font-family: -apple-system, Segoe UI, Roboto, Arial, sans-serif;
+       max-width: 900px; margin: 40px auto; padding: 0 20px; line-height: 1.7; color: #1a1a1a; }
+h1 { font-size: 1.4rem; }
+.legend { margin-bottom: 24px; padding: 12px 16px; background: #f6f6f6; border-radius: 8px; font-size: 0.9rem; }
+.legend span { display: inline-block; padding: 2px 8px; border-radius: 4px; margin-right: 12px; }
+.legend span.sev-low { background: #fef3c7; }
+.legend span.sev-medium { background: #fed7aa; }
+.legend span.sev-high { background: #fecaca; }
+.legend span.sev-critical { background: #fca5a5; border: 1px solid #b91c1c; }
+.legend span.corrected { background: #b2f2bb; }
+.paragraph { margin-bottom: 18px; white-space: pre-wrap; }
+mark.sev-low { background: #fef3c7; padding: 1px 2px; border-radius: 3px; cursor: help; }
+mark.sev-medium { background: #fed7aa; padding: 1px 2px; border-radius: 3px; cursor: help; }
+mark.sev-high { background: #fecaca; padding: 1px 2px; border-radius: 3px; cursor: help; }
+mark.sev-critical { background: #fca5a5; outline: 2px solid #b91c1c; padding: 1px 2px; border-radius: 3px; cursor: help; }
+mark.corrected { background: #b2f2bb; padding: 1px 2px; border-radius: 3px; }
+mark.agreed { outline: 2px solid #444; }
+mark.single { outline: 1px dashed #888; }
+mark[data-tooltip] { position: relative; }
+mark[data-tooltip]:hover::after {
+  content: attr(data-tooltip);
+  position: absolute; bottom: 125%; left: 0; white-space: pre-wrap;
+  background: #222; color: #fff; padding: 8px 10px; border-radius: 6px;
+  font-size: 0.8rem; z-index: 10; width: 260px; box-shadow: 0 4px 12px rgba(0,0,0,.2);
+}
+.meta { color: #666; font-size: 0.85rem; margin-bottom: 4px; }
+</style>
+</head>
+<body>
+<h1>Annotated Original</h1>
+<div class="legend"><span class="sev-low">Low</span><span class="sev-medium">Medium</span><span class="sev-high">High</span><span class="sev-critical">Critical</span></div><div class="paragraph">64296935b11e46a1941a9867e3fec6ebsampleambiguitytestdocument
+
+Sample Document for Ambiguity Pipeline Testing
+
+This document intentionally contains spelling mistakes, grammar
+
+mistakes, ambiguous statements, inconsistent wording, and unclear
+
+<mark class="sev-medium single" data-tooltip="Issue Type: Punctuation
+Original: references
+Suggestion: References
+Reason: This sentence does not start with an uppercase letter.
+Confidence: 0.75
+Severity: Medium
+Source: languagetool
+Agreement Count: 1">references</mark> for testing an AI ambiguity detection pipeline.
+
+The company has decided to implement the new security policy from next
+
+month. However, it may also become effective immediately depending on
+
+<mark class="sev-high single" data-tooltip="Issue Type: Grammar
+Original: the circumstances.
+Suggestion: The circumstances.
+Reason: Subject pronoun &#x27;The&#x27; should be capitalized at the beginning of a sentence.
+Confidence: 0.80
+Severity: High
+Source: languagetool, llm
+Agreement Count: 1">the circumstances.</mark> Employees should follow the latest version even if
+
+they have not <mark class="sev-high agreed" data-tooltip="Issue Type: Spelling
+Original: recieved
+Suggestion: received
+Reason: Incorrect spelling of the word.
+Confidence: 0.95
+Severity: High
+Source: languagetool, llm
+Agreement Count: 2">recieved</mark> it yet.
+
+Every manager must approve the travel request before the employee
+
+<mark class="sev-medium single" data-tooltip="Issue Type: Punctuation
+Original: leaves
+Suggestion: Leaves
+Reason: This sentence does not start with an uppercase letter.
+Confidence: 0.75
+Severity: Medium
+Source: languagetool
+Agreement Count: 1">leaves</mark>. In some departments, approval can be obtained after the trip if
+
+necessary. This process should be completed as soon as possible.
+
+The finance team reported that the revenue increased by 18 percent
+
+<mark class="sev-high single" data-tooltip="Issue Type: Grammar
+Original: during the first quarter.
+Suggestion: During the first quarter.
+Reason: Sentence should start with a capital letter.
+Confidence: 0.80
+Severity: High
+Source: languagetool, llm
+Agreement Count: 1">during the first quarter.</mark> Later in the report it states that the revenue
+
+<mark class="sev-medium single" data-tooltip="Issue Type: Punctuation
+Original: growth
+Suggestion: Growth
+Reason: This sentence does not start with an uppercase letter.
+Confidence: 0.75
+Severity: Medium
+Source: languagetool
+Agreement Count: 1">growth</mark> for the same quarter was 12 percent. Both values are considered
+
+<mark class="sev-medium single" data-tooltip="Issue Type: Punctuation
+Original: correct
+Suggestion: Correct
+Reason: This sentence does not start with an uppercase letter.
+Confidence: 0.75
+Severity: Medium
+Source: languagetool
+Agreement Count: 1">correct</mark> according to the previous discussion.
+
+The engineering department have completed the migration to the new
+
+<mark class="sev-medium single" data-tooltip="Issue Type: Punctuation
+Original: servers
+Suggestion: Servers
+Reason: This sentence does not start with an uppercase letter.
+Confidence: 0.75
+Severity: Medium
+Source: languagetool
+Agreement Count: 1">servers</mark>. They <mark class="sev-high single" data-tooltip="Issue Type: Grammar
+Original: was
+Suggestion: were
+Reason: Subject-verb agreement error
+Confidence: 0.80
+Severity: High
+Source: llm
+Agreement Count: 1">was</mark> able to finish everything earlier than expected,
+
+<mark class="sev-critical agreed" data-tooltip="Issue Type: Grammar
+Original: although
+Suggestion: Although
+Reason: Sentence should start with a capital letter.
+Confidence: 0.95
+Severity: Critical
+Source: languagetool, llm
+Agreement Count: 2">although</mark> several critical tasks are still pending.
+
+The customer should submit the application with the required documents.
+
+If they are missing, it should still be accepted until everything is
+
+<mark class="sev-medium single" data-tooltip="Issue Type: Punctuation
+Original: verified
+Suggestion: Verified
+Reason: This sentence does not start with an uppercase letter.
+Confidence: 0.75
+Severity: Medium
+Source: languagetool
+Agreement Count: 1">verified</mark>. This may not apply in certain situations.
+
+Alex informed Jordan that he would present the proposal during the
+
+<mark class="sev-medium single" data-tooltip="Issue Type: Punctuation
+Original: meeting
+Suggestion: Meeting
+Reason: This sentence does not start with an uppercase letter.
+Confidence: 0.75
+Severity: Medium
+Source: languagetool
+Agreement Count: 1">meeting</mark>. Afterwards, he said the presentation needed additional
+
+<mark class="sev-medium single" data-tooltip="Issue Type: Punctuation
+Original: revisions
+Suggestion: Revisions
+Reason: This sentence does not start with an uppercase letter.
+Confidence: 0.75
+Severity: Medium
+Source: languagetool
+Agreement Count: 1">revisions</mark> before he could approve it.
+
+The system shall automatically archive inactive accounts after thirty
+
+days. In another section, accounts are archived after sixty days unless
+
+<mark class="sev-medium single" data-tooltip="Issue Type: Punctuation
+Original: otherwise
+Suggestion: Otherwise
+Reason: This sentence does not start with an uppercase letter.
+Confidence: 0.75
+Severity: Medium
+Source: languagetool
+Agreement Count: 1">otherwise</mark> specified.
+
+Every employee must wear their identification badge inside the building.
+
+Visitors are not required to display identification at any time,
+
+<mark class="sev-critical agreed" data-tooltip="Issue Type: Grammar
+Original: although
+Suggestion: Although
+Reason: Sentence should start with a capital letter.
+Confidence: 0.95
+Severity: Critical
+Source: languagetool, llm
+Agreement Count: 2">although</mark> everyone entering the building must present valid
+
+<mark class="sev-medium single" data-tooltip="Issue Type: Punctuation
+Original: identification
+Suggestion: Identification
+Reason: This sentence does not start with an uppercase letter.
+Confidence: 0.75
+Severity: Medium
+Source: languagetool
+Agreement Count: 1">identification</mark>.
+
+The software installation takes approximately fifteen minutes on most
+
+<mark class="sev-high single" data-tooltip="Issue Type: Grammar
+Original: computers.
+Suggestion: Computers.
+Reason: Sentence should start with a capital letter.
+Confidence: 0.80
+Severity: High
+Source: languagetool, llm
+Agreement Count: 1">computers.</mark> Some systems may require significantly less time, while
+
+<mark class="sev-medium single" data-tooltip="Issue Type: Punctuation
+Original: others
+Suggestion: Others
+Reason: This sentence does not start with an uppercase letter.
+Confidence: 0.75
+Severity: Medium
+Source: languagetool
+Agreement Count: 1">others</mark> usually need around one hour. This is considered the standard
+
+<mark class="sev-medium single" data-tooltip="Issue Type: Punctuation
+Original: installation
+Suggestion: Installation
+Reason: This sentence does not start with an uppercase letter.
+Confidence: 0.75
+Severity: Medium
+Source: languagetool
+Agreement Count: 1">installation</mark> duration.
+
+When the package arrives, place it near the main entrance unless it
+
+<mark class="sev-medium single" data-tooltip="Issue Type: Punctuation
+Original: should
+Suggestion: Should
+Reason: This sentence does not start with an uppercase letter.
+Confidence: 0.75
+Severity: Medium
+Source: languagetool
+Agreement Count: 1">should</mark> be delivered somewhere else. If it is unavailable, notify the
+
+<mark class="sev-medium single" data-tooltip="Issue Type: Punctuation
+Original: appropriate
+Suggestion: Appropriate
+Reason: This sentence does not start with an uppercase letter.
+Confidence: 0.75
+Severity: Medium
+Source: languagetool
+Agreement Count: 1">appropriate</mark> person immediately.
+
+The project deadline is on 30 September 2026. The final submission
+
+<mark class="sev-medium single" data-tooltip="Issue Type: Punctuation
+Original: should
+Suggestion: Should
+Reason: This sentence does not start with an uppercase letter.
+Confidence: 0.75
+Severity: Medium
+Source: languagetool
+Agreement Count: 1">should</mark> be completed before the last working day of September. The
+
+<mark class="sev-medium single" data-tooltip="Issue Type: Punctuation
+Original: official
+Suggestion: Official
+Reason: This sentence does not start with an uppercase letter.
+Confidence: 0.75
+Severity: Medium
+Source: languagetool
+Agreement Count: 1">official</mark> delivery date is listed as 28 September 2026 in Appendix A.
+
+The training session will be conducted every Monday except when it is
+
+<mark class="sev-medium single" data-tooltip="Issue Type: Punctuation
+Original: not
+Suggestion: Not
+Reason: This sentence does not start with an uppercase letter.
+Confidence: 0.75
+Severity: Medium
+Source: languagetool
+Agreement Count: 1">not</mark> required. Attendance is mandatory unless employees receive prior
+
+<mark class="sev-medium single" data-tooltip="Issue Type: Punctuation
+Original: approval
+Suggestion: Approval
+Reason: This sentence does not start with an uppercase letter.
+Confidence: 0.75
+Severity: Medium
+Source: languagetool
+Agreement Count: 1">approval</mark>, although everyone is expected to attend.
+
+Several users <mark class="sev-critical agreed" data-tooltip="Issue Type: Grammar
+Original: has
+Suggestion: have
+Reason: Subject-verb agreement error
+Confidence: 0.95
+Severity: Critical
+Source: languagetool, llm
+Agreement Count: 2">has</mark> reported that the application <mark class="sev-high single" data-tooltip="Issue Type: Tense
+Original: crash
+Suggestion: crashes
+Reason: Verb agreement with singular subject
+Confidence: 0.80
+Severity: High
+Source: llm
+Agreement Count: 1">crash</mark> frequently after
+
+<mark class="sev-medium single" data-tooltip="Issue Type: Punctuation
+Original: the
+Suggestion: The
+Reason: This sentence does not start with an uppercase letter.
+Confidence: 0.75
+Severity: Medium
+Source: languagetool
+Agreement Count: 1">the</mark> recent update. The development team are investigating the issue and
+
+<mark class="sev-medium single" data-tooltip="Issue Type: Punctuation
+Original: expect
+Suggestion: Expect
+Reason: This sentence does not start with an uppercase letter.
+Confidence: 0.75
+Severity: Medium
+Source: languagetool
+Agreement Count: 1">expect</mark> to fix it soon.
+
+This concludes the sample document. It intentionally includes spelling
+
+mistakes, grammatical mistakes, contradictory statements, undefined
+
+references, vague wording, inconsistent dates, and ambiguous pronouns
+
+<mark class="sev-medium single" data-tooltip="Issue Type: Punctuation
+Original: for
+Suggestion: For
+Reason: This sentence does not start with an uppercase letter.
+Confidence: 0.75
+Severity: Medium
+Source: languagetool
+Agreement Count: 1">for</mark> testing purposes.</div>
+</body>
+</html>
