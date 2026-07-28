@@ -1,0 +1,34 @@
+{
+  "image_id": "#/pictures/31",
+  "page": 7,
+  "caption": null,
+  "ocr_text": null,
+  "bounding_box": {
+    "l": 906.9866333007812,
+    "t": 758.1435241699219,
+    "r": 1149.1478271484375,
+    "b": 562.6677551269531,
+    "coord_origin": "BOTTOMLEFT"
+  },
+  "image_path": "05_images/image_032.png",
+  "image_type": "Photo",
+  "objects": [
+    "Agricultural machine (potato harvester)",
+    "Field (with soil and potato plants)",
+    "Mechanical components of the harvester (e.g., tines, wheels)"
+  ],
+  "keywords": [
+    "Agricultural machine",
+    "automation",
+    "farming",
+    "field",
+    "machinery",
+    "potato harvester",
+    "potato plants",
+    "soil"
+  ],
+  "semantic_description": "The image depicts a modern agricultural machine, specifically a potato harvester, in operation within a field. The machine is designed to harvest potatoes, with its mechanical components actively engaged in the soil. The surrounding environment suggests a farming setting, likely during the potato harvesting season.",
+  "detected_entities": [
+    "None"
+  ]
+}

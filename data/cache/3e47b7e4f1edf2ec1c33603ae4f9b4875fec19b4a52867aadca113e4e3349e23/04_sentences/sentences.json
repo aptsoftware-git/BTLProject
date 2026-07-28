@@ -1,0 +1,562 @@
+[
+  {
+    "sentence_id": 0,
+    "paragraph_id": 0,
+    "page": 1,
+    "text": "9b580a49750843d68ba1ae78c6a67538LTCompanyBrochure",
+    "start_offset": 0,
+    "end_offset": 49,
+    "doc_char_start": 0,
+    "doc_char_end": 49
+  },
+  {
+    "sentence_id": 1,
+    "paragraph_id": 1,
+    "page": 1,
+    "text": "COMPANY PROFILE",
+    "start_offset": 0,
+    "end_offset": 15,
+    "doc_char_start": 51,
+    "doc_char_end": 66
+  },
+  {
+    "sentence_id": 2,
+    "paragraph_id": 2,
+    "page": 1,
+    "text": "LARSEN & TOUBRO",
+    "start_offset": 0,
+    "end_offset": 15,
+    "doc_char_start": 68,
+    "doc_char_end": 83
+  },
+  {
+    "sentence_id": 3,
+    "paragraph_id": 3,
+    "page": 1,
+    "text": "Engineering the Nation's Growth Since 1938",
+    "start_offset": 0,
+    "end_offset": 42,
+    "doc_char_start": 85,
+    "doc_char_end": 127
+  },
+  {
+    "sentence_id": 4,
+    "paragraph_id": 4,
+    "page": 1,
+    "text": "Website",
+    "start_offset": 0,
+    "end_offset": 7,
+    "doc_char_start": 129,
+    "doc_char_end": 136
+  },
+  {
+    "sentence_id": 5,
+    "paragraph_id": 5,
+    "page": 1,
+    "text": "Headquarters",
+    "start_offset": 0,
+    "end_offset": 12,
+    "doc_char_start": 138,
+    "doc_char_end": 150
+  },
+  {
+    "sentence_id": 6,
+    "paragraph_id": 6,
+    "page": 1,
+    "text": "L&T House, Ballard Estate, Mumbai, Maharashtra, India",
+    "start_offset": 0,
+    "end_offset": 53,
+    "doc_char_start": 152,
+    "doc_char_end": 205
+  },
+  {
+    "sentence_id": 7,
+    "paragraph_id": 7,
+    "page": 1,
+    "text": "Industry",
+    "start_offset": 0,
+    "end_offset": 8,
+    "doc_char_start": 207,
+    "doc_char_end": 215
+  },
+  {
+    "sentence_id": 8,
+    "paragraph_id": 8,
+    "page": 1,
+    "text": "Engineering, Construction, Manufacturing, Technology & Financial Services Conglomerate",
+    "start_offset": 0,
+    "end_offset": 86,
+    "doc_char_start": 217,
+    "doc_char_end": 303
+  },
+  {
+    "sentence_id": 9,
+    "paragraph_id": 9,
+    "page": 1,
+    "text": "This brochure is an independently compiled profile based on public information and is not an official L&T publication.",
+    "start_offset": 0,
+    "end_offset": 118,
+    "doc_char_start": 305,
+    "doc_char_end": 423
+  },
+  {
+    "sentence_id": 10,
+    "paragraph_id": 10,
+    "page": 1,
+    "text": "COMPANY SNAPSHOT",
+    "start_offset": 0,
+    "end_offset": 16,
+    "doc_char_start": 425,
+    "doc_char_end": 441
+  },
+  {
+    "sentence_id": 11,
+    "paragraph_id": 11,
+    "page": 1,
+    "text": "Larsen & Toubro Limited (L&T) is an Indian multinational conglomerate headquartered in Mumbai, founded in 1938 by Danish engineers Henning Holck-Larsen and Søren Kristian Toubro and incorporated in 1946.",
+    "start_offset": 0,
+    "end_offset": 203,
+    "doc_char_start": 443,
+    "doc_char_end": 646
+  },
+  {
+    "sentence_id": 12,
+    "paragraph_id": 11,
+    "page": 1,
+    "text": "Today the group operates in more than 50 countries and is listed on the NSE and BSE (ticker: LT), with no single majority shareholder.",
+    "start_offset": 204,
+    "end_offset": 338,
+    "doc_char_start": 647,
+    "doc_char_end": 781
+  },
+  {
+    "sentence_id": 13,
+    "paragraph_id": 12,
+    "page": 1,
+    "text": "BOARD & KEY LEADERSHIP",
+    "start_offset": 0,
+    "end_offset": 22,
+    "doc_char_start": 783,
+    "doc_char_end": 805
+  },
+  {
+    "sentence_id": 14,
+    "paragraph_id": 13,
+    "page": 1,
+    "text": "Name",
+    "start_offset": 0,
+    "end_offset": 4,
+    "doc_char_start": 807,
+    "doc_char_end": 811
+  },
+  {
+    "sentence_id": 15,
+    "paragraph_id": 14,
+    "page": 1,
+    "text": "Role",
+    "start_offset": 0,
+    "end_offset": 4,
+    "doc_char_start": 813,
+    "doc_char_end": 817
+  },
+  {
+    "sentence_id": 16,
+    "paragraph_id": 15,
+    "page": 1,
+    "text": "S N Subrahmanyan",
+    "start_offset": 0,
+    "end_offset": 16,
+    "doc_char_start": 819,
+    "doc_char_end": 835
+  },
+  {
+    "sentence_id": 17,
+    "paragraph_id": 16,
+    "page": 1,
+    "text": "Chairman & Managing Director",
+    "start_offset": 0,
+    "end_offset": 28,
+    "doc_char_start": 837,
+    "doc_char_end": 865
+  },
+  {
+    "sentence_id": 18,
+    "paragraph_id": 17,
+    "page": 1,
+    "text": "R Shankar Raman",
+    "start_offset": 0,
+    "end_offset": 15,
+    "doc_char_start": 867,
+    "doc_char_end": 882
+  },
+  {
+    "sentence_id": 19,
+    "paragraph_id": 18,
+    "page": 1,
+    "text": "Whole-time Director, President & CFO",
+    "start_offset": 0,
+    "end_offset": 36,
+    "doc_char_start": 884,
+    "doc_char_end": 920
+  },
+  {
+    "sentence_id": 20,
+    "paragraph_id": 19,
+    "page": 1,
+    "text": "Subramanian Sarma",
+    "start_offset": 0,
+    "end_offset": 17,
+    "doc_char_start": 922,
+    "doc_char_end": 939
+  },
+  {
+    "sentence_id": 21,
+    "paragraph_id": 20,
+    "page": 1,
+    "text": "Deputy Managing Director & President",
+    "start_offset": 0,
+    "end_offset": 36,
+    "doc_char_start": 941,
+    "doc_char_end": 977
+  },
+  {
+    "sentence_id": 22,
+    "paragraph_id": 21,
+    "page": 1,
+    "text": "S V Desai",
+    "start_offset": 0,
+    "end_offset": 9,
+    "doc_char_start": 979,
+    "doc_char_end": 988
+  },
+  {
+    "sentence_id": 23,
+    "paragraph_id": 22,
+    "page": 1,
+    "text": "Whole-time Director",
+    "start_offset": 0,
+    "end_offset": 19,
+    "doc_char_start": 990,
+    "doc_char_end": 1009
+  },
+  {
+    "sentence_id": 24,
+    "paragraph_id": 23,
+    "page": 1,
+    "text": "T Madhava Das",
+    "start_offset": 0,
+    "end_offset": 13,
+    "doc_char_start": 1011,
+    "doc_char_end": 1024
+  },
+  {
+    "sentence_id": 25,
+    "paragraph_id": 24,
+    "page": 1,
+    "text": "Whole-time Director & Senior EVP, Utilities",
+    "start_offset": 0,
+    "end_offset": 43,
+    "doc_char_start": 1026,
+    "doc_char_end": 1069
+  },
+  {
+    "sentence_id": 26,
+    "paragraph_id": 25,
+    "page": 1,
+    "text": "MARQUEE PROJECTS",
+    "start_offset": 0,
+    "end_offset": 16,
+    "doc_char_start": 1071,
+    "doc_char_end": 1087
+  },
+  {
+    "sentence_id": 27,
+    "paragraph_id": 26,
+    "page": 1,
+    "text": "Statue of Unity, Gujarat -the world's tallest statue, including its access infrastructure",
+    "start_offset": 0,
+    "end_offset": 89,
+    "doc_char_start": 1089,
+    "doc_char_end": 1178
+  },
+  {
+    "sentence_id": 28,
+    "paragraph_id": 27,
+    "page": 1,
+    "text": "Mumbai Trans Harbour Link (MTHL) -India's longest sea bridge",
+    "start_offset": 0,
+    "end_offset": 60,
+    "doc_char_start": 1180,
+    "doc_char_end": 1240
+  },
+  {
+    "sentence_id": 29,
+    "paragraph_id": 28,
+    "page": 1,
+    "text": "Mumbai -Ahmedabad High-Speed Rail (MAHSR) -civil works including viaducts, stations and river bridges on the C4 package",
+    "start_offset": 0,
+    "end_offset": 119,
+    "doc_char_start": 1242,
+    "doc_char_end": 1361
+  },
+  {
+    "sentence_id": 30,
+    "paragraph_id": 29,
+    "page": 1,
+    "text": "Navi Mumbai International Airport (NMIA)",
+    "start_offset": 0,
+    "end_offset": 40,
+    "doc_char_start": 1363,
+    "doc_char_end": 1403
+  },
+  {
+    "sentence_id": 31,
+    "paragraph_id": 30,
+    "page": 1,
+    "text": "Dhubri -Phulbari Bridge, Assam -Meghalaya -India's longest river bridge, over the Brahmaputra",
+    "start_offset": 0,
+    "end_offset": 93,
+    "doc_char_start": 1405,
+    "doc_char_end": 1498
+  },
+  {
+    "sentence_id": 32,
+    "paragraph_id": 31,
+    "page": 1,
+    "text": "Hyderabad Metro Rail -one of the world's largest metro rail projects executed on a PPP basis",
+    "start_offset": 0,
+    "end_offset": 92,
+    "doc_char_start": 1500,
+    "doc_char_end": 1592
+  },
+  {
+    "sentence_id": 33,
+    "paragraph_id": 32,
+    "page": 1,
+    "text": "Riyadh Metro, Saudi Arabia -systems and integration works",
+    "start_offset": 0,
+    "end_offset": 57,
+    "doc_char_start": 1594,
+    "doc_char_end": 1651
+  },
+  {
+    "sentence_id": 34,
+    "paragraph_id": 33,
+    "page": 1,
+    "text": "BUSINESS SEGMENTS / SERVICE LINES",
+    "start_offset": 0,
+    "end_offset": 33,
+    "doc_char_start": 1653,
+    "doc_char_end": 1686
+  },
+  {
+    "sentence_id": 35,
+    "paragraph_id": 34,
+    "page": 1,
+    "text": "Infrastructure (EPC)",
+    "start_offset": 0,
+    "end_offset": 20,
+    "doc_char_start": 1688,
+    "doc_char_end": 1708
+  },
+  {
+    "sentence_id": 36,
+    "paragraph_id": 35,
+    "page": 1,
+    "text": "Engineering, procurement and construction of buildings & factories, transportation infrastructure, heavy civil works, power transmission & distribution, and water & renewable energy projects.",
+    "start_offset": 0,
+    "end_offset": 191,
+    "doc_char_start": 1710,
+    "doc_char_end": 1901
+  },
+  {
+    "sentence_id": 37,
+    "paragraph_id": 36,
+    "page": 1,
+    "text": "Energy -Hydrocarbon & Power",
+    "start_offset": 0,
+    "end_offset": 27,
+    "doc_char_start": 1903,
+    "doc_char_end": 1930
+  },
+  {
+    "sentence_id": 38,
+    "paragraph_id": 37,
+    "page": 1,
+    "text": "End-to-end EPC for upstream, midstream and downstream oil & gas, and power generation infrastructure.",
+    "start_offset": 0,
+    "end_offset": 101,
+    "doc_char_start": 1932,
+    "doc_char_end": 2033
+  },
+  {
+    "sentence_id": 39,
+    "paragraph_id": 38,
+    "page": 1,
+    "text": "Hi-Tech Manufacturing & Defence Engineering",
+    "start_offset": 0,
+    "end_offset": 43,
+    "doc_char_start": 2035,
+    "doc_char_end": 2078
+  },
+  {
+    "sentence_id": 40,
+    "paragraph_id": 39,
+    "page": 1,
+    "text": "Design, manufacture and supply of engineered equipment for process plants, nuclear and green-hydrogen facilities, marine and land defence platforms, aerospace systems, and precision electronics for defence, security and space.",
+    "start_offset": 0,
+    "end_offset": 226,
+    "doc_char_start": 2080,
+    "doc_char_end": 2306
+  },
+  {
+    "sentence_id": 41,
+    "paragraph_id": 40,
+    "page": 1,
+    "text": "IT & Technology Services",
+    "start_offset": 0,
+    "end_offset": 24,
+    "doc_char_start": 2308,
+    "doc_char_end": 2332
+  },
+  {
+    "sentence_id": 42,
+    "paragraph_id": 41,
+    "page": 1,
+    "text": "Global IT services, digital solutions, engineering R&D, e-commerce/digital platforms, data centres and semiconductor chip-design solutions, delivered through group entities such as LTIMindtree and L&T Technology Services.",
+    "start_offset": 0,
+    "end_offset": 221,
+    "doc_char_start": 2334,
+    "doc_char_end": 2555
+  },
+  {
+    "sentence_id": 43,
+    "paragraph_id": 42,
+    "page": 1,
+    "text": "Financial Services",
+    "start_offset": 0,
+    "end_offset": 18,
+    "doc_char_start": 2557,
+    "doc_char_end": 2575
+  },
+  {
+    "sentence_id": 44,
+    "paragraph_id": 43,
+    "page": 1,
+    "text": "Retail finance, wholesale finance and investment management, delivered through L&T Finance Holdings.",
+    "start_offset": 0,
+    "end_offset": 100,
+    "doc_char_start": 2577,
+    "doc_char_end": 2677
+  },
+  {
+    "sentence_id": 45,
+    "paragraph_id": 44,
+    "page": 1,
+    "text": "Development Projects & Realty",
+    "start_offset": 0,
+    "end_offset": 29,
+    "doc_char_start": 2679,
+    "doc_char_end": 2708
+  },
+  {
+    "sentence_id": 46,
+    "paragraph_id": 45,
+    "page": 1,
+    "text": "Roads and transmission assets, the Hyderabad Metro Rail project, power development projects, and premium residential & commercial real estate through L&T Realty.",
+    "start_offset": 0,
+    "end_offset": 161,
+    "doc_char_start": 2710,
+    "doc_char_end": 2871
+  },
+  {
+    "sentence_id": 47,
+    "paragraph_id": 46,
+    "page": 1,
+    "text": "INDUSTRY",
+    "start_offset": 0,
+    "end_offset": 8,
+    "doc_char_start": 2873,
+    "doc_char_end": 2881
+  },
+  {
+    "sentence_id": 48,
+    "paragraph_id": 47,
+    "page": 1,
+    "text": "L&T operates at the intersection of engineering, construction, heavy manufacturing, information technology, defence and financial services -commonly classified under the capital goods / infrastructure & engineering sector in India, serving customers across more than 50 countries.",
+    "start_offset": 0,
+    "end_offset": 280,
+    "doc_char_start": 2883,
+    "doc_char_end": 3163
+  },
+  {
+    "sentence_id": 49,
+    "paragraph_id": 48,
+    "page": 1,
+    "text": "CONTACT",
+    "start_offset": 0,
+    "end_offset": 7,
+    "doc_char_start": 3165,
+    "doc_char_end": 3172
+  },
+  {
+    "sentence_id": 50,
+    "paragraph_id": 49,
+    "page": 1,
+    "text": "Larsen & Toubro Limited",
+    "start_offset": 0,
+    "end_offset": 23,
+    "doc_char_start": 3174,
+    "doc_char_end": 3197
+  },
+  {
+    "sentence_id": 51,
+    "paragraph_id": 50,
+    "page": 1,
+    "text": "L&T House, N.M.",
+    "start_offset": 0,
+    "end_offset": 15,
+    "doc_char_start": 3199,
+    "doc_char_end": 3214
+  },
+  {
+    "sentence_id": 52,
+    "paragraph_id": 50,
+    "page": 1,
+    "text": "Marg, Ballard Estate, Mumbai, Maharashtra -400 001, India",
+    "start_offset": 16,
+    "end_offset": 73,
+    "doc_char_start": 3215,
+    "doc_char_end": 3272
+  },
+  {
+    "sentence_id": 53,
+    "paragraph_id": 51,
+    "page": 1,
+    "text": "Tel: +91 22 6752 5656",
+    "start_offset": 0,
+    "end_offset": 21,
+    "doc_char_start": 3274,
+    "doc_char_end": 3295
+  },
+  {
+    "sentence_id": 54,
+    "paragraph_id": 52,
+    "page": 1,
+    "text": "Email:",
+    "start_offset": 0,
+    "end_offset": 6,
+    "doc_char_start": 3297,
+    "doc_char_end": 3303
+  },
+  {
+    "sentence_id": 55,
+    "paragraph_id": 53,
+    "page": 1,
+    "text": "Website:",
+    "start_offset": 0,
+    "end_offset": 8,
+    "doc_char_start": 3305,
+    "doc_char_end": 3313
+  }
+]

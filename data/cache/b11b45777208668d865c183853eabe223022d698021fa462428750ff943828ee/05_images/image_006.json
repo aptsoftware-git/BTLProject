@@ -1,0 +1,40 @@
+{
+  "image_id": "#/pictures/5",
+  "page": 6,
+  "caption": null,
+  "ocr_text": null,
+  "bounding_box": {
+    "l": 0.0,
+    "t": 841.8900146484375,
+    "r": 595.7405395507812,
+    "b": 376.99169921875,
+    "coord_origin": "BOTTOMLEFT"
+  },
+  "image_path": "05_images/image_006.png",
+  "image_type": "Photo",
+  "objects": [
+    "Cooling towers",
+    "greenery",
+    "industrial buildings",
+    "open land",
+    "pipes",
+    "power lines."
+  ],
+  "keywords": [
+    "Ash handling plant",
+    "BHEL",
+    "Telangana",
+    "Yadadri",
+    "cooling towers",
+    "energy generation.",
+    "industrial",
+    "pipes",
+    "power plant"
+  ],
+  "semantic_description": "The image depicts an industrial setting, specifically an ash handling plant for BHEL (Bharat Heavy Electricals Limited) located in Yadadri, Telangana, India. The scene includes large cooling towers, industrial structures, and a network of pipes, indicating a power or thermal energy generation facility. The surrounding area appears to be under development or maintenance, with some greenery and open land.",
+  "detected_entities": [
+    "BHEL (Bharat Heavy Electricals Limited)",
+    "Telangana.",
+    "Yadadri"
+  ]
+}

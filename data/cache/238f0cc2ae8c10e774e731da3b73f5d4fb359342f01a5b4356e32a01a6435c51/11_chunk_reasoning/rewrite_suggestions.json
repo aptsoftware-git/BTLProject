@@ -1,0 +1,515 @@
+{
+  "rewrites": [
+    {
+      "id": "string",
+      "chunk_id": "a8619fd4ae194817a13dad90f43659f8_chunk_0000",
+      "original_text": "N/A",
+      "suggested_text": null,
+      "type": "claim"
+    },
+    {
+      "id": "a8619fd4ae194817a13dad90f43659f8_chunk_0004_claim_000",
+      "chunk_id": "a8619fd4ae194817a13dad90f43659f8_chunk_0004",
+      "original_text": "Vertexa Solutions Pvt. Ltd. was founded in 2011 by six engineers who set out to build tools that help enterprises make sense of unstructured documents.",
+      "suggested_text": "Vertexa Solutions Pvt. Ltd. was founded in 2011 by six engineers who set out to build tools that help enterprises make sense of unstructured documents, although a regulatory filing summary mentions the founding year as 2009.",
+      "type": "claim"
+    },
+    {
+      "id": "string",
+      "chunk_id": "a8619fd4ae194817a13dad90f43659f8_chunk_0007",
+      "original_text": "N/A",
+      "suggested_text": "",
+      "type": "claim"
+    },
+    {
+      "id": "string",
+      "chunk_id": "a8619fd4ae194817a13dad90f43659f8_chunk_0008",
+      "original_text": "N/A",
+      "suggested_text": "",
+      "type": "claim"
+    },
+    {
+      "id": "a8619fd4ae194817a13dad90f43659f8_chunk_0009_claim_000",
+      "chunk_id": "a8619fd4ae194817a13dad90f43659f8_chunk_0009",
+      "original_text": "Employees receive 18 annual leaves per calendar year, credited pro-rata for employees joining mid-year, plus 10 sick and 5 casual leaves.",
+      "suggested_text": "Employees receive 20 annual leaves per calendar year, credited pro-rata for employees joining mid-year, plus 10 sick and 5 casual leaves following the FY23 revision.",
+      "type": "claim"
+    },
+    {
+      "id": "a8619fd4ae194817a13dad90f43659f8_chunk_0011_claim_000",
+      "chunk_id": "a8619fd4ae194817a13dad90f43659f8_chunk_0011",
+      "original_text": "Employees may work remotely three days every week, subject to manager approval.",
+      "suggested_text": "Employees may have worked remotely three days every week, subject to manager approval, prior to the FY24 operating-model update.",
+      "type": "claim"
+    },
+    {
+      "id": "string",
+      "chunk_id": "a8619fd4ae194817a13dad90f43659f8_chunk_0012",
+      "original_text": "N/A",
+      "suggested_text": "",
+      "type": "claim"
+    },
+    {
+      "id": "a8619fd4ae194817a13dad90f43659f8_chunk_0013_claim_000",
+      "chunk_id": "a8619fd4ae194817a13dad90f43659f8_chunk_0013",
+      "original_text": "Travel should be approved whenever necessary.",
+      "suggested_text": "Travel should be approved whenever necessary, as determined by the appropriate authority within the organization.",
+      "type": "claim"
+    },
+    {
+      "id": "a8619fd4ae194817a13dad90f43659f8_chunk_0016_claim_000",
+      "chunk_id": "a8619fd4ae194817a13dad90f43659f8_chunk_0016",
+      "original_text": "Passwords are atleast 12 characters, mixed case + numeric + special, and rotated every 90 days.",
+      "suggested_text": "Passwords are at least 12 characters, mixed case + numeric + special, and rotated every 90 days.",
+      "type": "claim"
+    },
+    {
+      "id": "string",
+      "chunk_id": "a8619fd4ae194817a13dad90f43659f8_chunk_0017",
+      "original_text": "N/A",
+      "suggested_text": null,
+      "type": "claim"
+    },
+    {
+      "id": "a8619fd4ae194817a13dad90f43659f8_chunk_0036_claim_000",
+      "chunk_id": "a8619fd4ae194817a13dad90f43659f8_chunk_0036",
+      "original_text": "Purchase approval steps:",
+      "suggested_text": "Purchase approval steps: [details of steps]",
+      "type": "claim"
+    },
+    {
+      "id": "a8619fd4ae194817a13dad90f43659f8_chunk_0043_def_000",
+      "chunk_id": "a8619fd4ae194817a13dad90f43659f8_chunk_0043",
+      "original_text": "N/A",
+      "suggested_text": "'Confidential Information' is defined elsewhere in the handbook or document, but no formal definition is provided in this section.",
+      "type": "claim"
+    },
+    {
+      "id": "a8619fd4ae194817a13dad90f43659f8_chunk_0043_def_001",
+      "chunk_id": "a8619fd4ae194817a13dad90f43659f8_chunk_0043",
+      "original_text": "N/A",
+      "suggested_text": "'Business Day' is defined in the employment contract and should be referenced there for its formal definition.",
+      "type": "claim"
+    },
+    {
+      "id": "a8619fd4ae194817a13dad90f43659f8_chunk_0043_def_002",
+      "chunk_id": "a8619fd4ae194817a13dad90f43659f8_chunk_0043",
+      "original_text": "N/A",
+      "suggested_text": "'Force Majeure Event' is defined elsewhere in the handbook or document, but no formal definition is provided in this section.",
+      "type": "claim"
+    },
+    {
+      "id": "a8619fd4ae194817a13dad90f43659f8_chunk_0047_claim_000",
+      "chunk_id": "a8619fd4ae194817a13dad90f43659f8_chunk_0047",
+      "original_text": "employees receive 18 or 20 annual leaves",
+      "suggested_text": "employees receive either 18 or 20 annual leaves (unresolved)",
+      "type": "claim"
+    },
+    {
+      "id": "a8619fd4ae194817a13dad90f43659f8_chunk_0001_amb_000",
+      "chunk_id": "a8619fd4ae194817a13dad90f43659f8_chunk_0001",
+      "original_text": "there reporting manager",
+      "suggested_text": "If in doubt, check with their reporting manager before acting on any policy below.",
+      "type": "ambiguity"
+    },
+    {
+      "id": "a8619fd4ae194817a13dad90f43659f8_chunk_0002_amb_000",
+      "chunk_id": "a8619fd4ae194817a13dad90f43659f8_chunk_0002",
+      "original_text": "Company Overview",
+      "suggested_text": "A detailed overview of the company's mission, vision, structure, and key initiatives.",
+      "type": "ambiguity"
+    },
+    {
+      "id": "a8619fd4ae194817a13dad90f43659f8_chunk_0003_amb_000",
+      "chunk_id": "a8619fd4ae194817a13dad90f43659f8_chunk_0003",
+      "original_text": "1.1 History  |  1.2 Mission  |  1.3 Vision  |  1.4 Values",
+      "suggested_text": "Define each section, e.g., '1.1 History: A chronological account of the organization's origins...'",
+      "type": "ambiguity"
+    },
+    {
+      "id": "a8619fd4ae194817a13dad90f43659f8_chunk_0004_amb_000",
+      "chunk_id": "a8619fd4ae194817a13dad90f43659f8_chunk_0004",
+      "original_text": "2011",
+      "suggested_text": "Vertexa Solutions Pvt. Ltd. was officially incorporated in 2011, though a regulatory filing summary mentions the founding year as 2009.",
+      "type": "ambiguity"
+    },
+    {
+      "id": "a8619fd4ae194817a13dad90f43659f8_chunk_0005_amb_000",
+      "chunk_id": "a8619fd4ae194817a13dad90f43659f8_chunk_0005",
+      "original_text": "they",
+      "suggested_text": "-Every employee fixes what each sees is broken.",
+      "type": "ambiguity"
+    },
+    {
+      "id": "a8619fd4ae194817a13dad90f43659f8_chunk_0006_amb_000",
+      "chunk_id": "a8619fd4ae194817a13dad90f43659f8_chunk_0006",
+      "original_text": "HR maintains the values have been constant since 2012",
+      "suggested_text": "Clarify whether there has been any change to the values since 2012 or if the addition of 'Simplicity' is not officially recognized.",
+      "type": "ambiguity"
+    },
+    {
+      "id": "a8619fd4ae194817a13dad90f43659f8_chunk_0007_amb_000",
+      "chunk_id": "a8619fd4ae194817a13dad90f43659f8_chunk_0007",
+      "original_text": "2  Human Resources Policies",
+      "suggested_text": "This section outlines the company's Human Resources Policies.",
+      "type": "ambiguity"
+    },
+    {
+      "id": "a8619fd4ae194817a13dad90f43659f8_chunk_0008_amb_000",
+      "chunk_id": "a8619fd4ae194817a13dad90f43659f8_chunk_0008",
+      "original_text": "Leave Policy",
+      "suggested_text": "Define what constitutes a 'Leave Policy'.",
+      "type": "ambiguity"
+    },
+    {
+      "id": "a8619fd4ae194817a13dad90f43659f8_chunk_0008_amb_001",
+      "chunk_id": "a8619fd4ae194817a13dad90f43659f8_chunk_0008",
+      "original_text": "Attendance",
+      "suggested_text": "Define what constitutes 'Attendance'.",
+      "type": "ambiguity"
+    },
+    {
+      "id": "a8619fd4ae194817a13dad90f43659f8_chunk_0008_amb_002",
+      "chunk_id": "a8619fd4ae194817a13dad90f43659f8_chunk_0008",
+      "original_text": "Code of Conduct",
+      "suggested_text": "Define what constitutes a 'Code of Conduct'.",
+      "type": "ambiguity"
+    },
+    {
+      "id": "a8619fd4ae194817a13dad90f43659f8_chunk_0009_amb_000",
+      "chunk_id": "a8619fd4ae194817a13dad90f43659f8_chunk_0009",
+      "original_text": "Employees receive 18 annual leaves per calendar year, credited pro-rata for employees joining mid-year, plus 10 sick and 5 casual leaves.",
+      "suggested_text": "Employees receive 20 annual leaves per calendar year, credited pro-rata for employees joining mid-year, plus 10 sick and 5 casual leaves following the FY23 revision.",
+      "type": "ambiguity"
+    },
+    {
+      "id": "a8619fd4ae194817a13dad90f43659f8_chunk_0009_amb_001",
+      "chunk_id": "a8619fd4ae194817a13dad90f43659f8_chunk_0009",
+      "original_text": "Employees who's conduct violates the Code of Conduct may face disciplinary action; their are no exceptions based on seniority.",
+      "suggested_text": "Employees whose conduct violates the Code of Conduct may face disciplinary action; there are no exceptions based on seniority.",
+      "type": "ambiguity"
+    },
+    {
+      "id": "a8619fd4ae194817a13dad90f43659f8_chunk_0009_amb_002",
+      "chunk_id": "a8619fd4ae194817a13dad90f43659f8_chunk_0009",
+      "original_text": "effect an employee's rating",
+      "suggested_text": "affect an employee's rating",
+      "type": "ambiguity"
+    },
+    {
+      "id": "a8619fd4ae194817a13dad90f43659f8_chunk_0010_amb_000",
+      "chunk_id": "a8619fd4ae194817a13dad90f43659f8_chunk_0010",
+      "original_text": "Work From Home",
+      "suggested_text": "This section outlines the policy, conditions, and permissions for employees who work from home.",
+      "type": "ambiguity"
+    },
+    {
+      "id": "a8619fd4ae194817a13dad90f43659f8_chunk_0011_amb_000",
+      "chunk_id": "a8619fd4ae194817a13dad90f43659f8_chunk_0011",
+      "original_text": "effective the date communicated by department heads",
+      "suggested_text": "effective a specific date communicated by department heads",
+      "type": "ambiguity"
+    },
+    {
+      "id": "a8619fd4ae194817a13dad90f43659f8_chunk_0011_amb_001",
+      "chunk_id": "a8619fd4ae194817a13dad90f43659f8_chunk_0011",
+      "original_text": "supersedes informal remote arrangements",
+      "suggested_text": "supersedes any prior remote work agreements or practices",
+      "type": "ambiguity"
+    },
+    {
+      "id": "a8619fd4ae194817a13dad90f43659f8_chunk_0012_amb_000",
+      "chunk_id": "a8619fd4ae194817a13dad90f43659f8_chunk_0012",
+      "original_text": "Travel Policy",
+      "suggested_text": "Section 4 outlines the rules and guidelines for the Travel Policy.",
+      "type": "ambiguity"
+    },
+    {
+      "id": "a8619fd4ae194817a13dad90f43659f8_chunk_0013_amb_000",
+      "chunk_id": "a8619fd4ae194817a13dad90f43659f8_chunk_0013",
+      "original_text": "whenever necessary",
+      "suggested_text": "Travel should be approved as determined by the appropriate authority within the organization when it is deemed necessary.",
+      "type": "ambiguity"
+    },
+    {
+      "id": "a8619fd4ae194817a13dad90f43659f8_chunk_0013_amb_001",
+      "chunk_id": "a8619fd4ae194817a13dad90f43659f8_chunk_0013",
+      "original_text": "certain grade",
+      "suggested_text": "Employees below a specified grade level may need additional sign-off. The specific grade level will be defined by the organization.",
+      "type": "ambiguity"
+    },
+    {
+      "id": "a8619fd4ae194817a13dad90f43659f8_chunk_0014_amb_000",
+      "chunk_id": "a8619fd4ae194817a13dad90f43659f8_chunk_0014",
+      "original_text": "IT Security",
+      "suggested_text": "IT Security - [Specify the specific aspects or objectives, such as network security, data protection, etc.].",
+      "type": "ambiguity"
+    },
+    {
+      "id": "a8619fd4ae194817a13dad90f43659f8_chunk_0015_amb_000",
+      "chunk_id": "a8619fd4ae194817a13dad90f43659f8_chunk_0015",
+      "original_text": "Password Policy | MFA | VPN | Device Encryption | USB Policy",
+      "suggested_text": "The document covers the following policies: Password Policy, Multi-Factor Authentication (MFA), Virtual Private Network (VPN), Device Encryption, and USB Policy.",
+      "type": "ambiguity"
+    },
+    {
+      "id": "a8619fd4ae194817a13dad90f43659f8_chunk_0016_amb_000",
+      "chunk_id": "a8619fd4ae194817a13dad90f43659f8_chunk_0016",
+      "original_text": "atleast",
+      "suggested_text": "* Passwords: at least 12 characters, mixed case + numeric + special, rotated every 90 days.",
+      "type": "ambiguity"
+    },
+    {
+      "id": "a8619fd4ae194817a13dad90f43659f8_chunk_0017_amb_000",
+      "chunk_id": "a8619fd4ae194817a13dad90f43659f8_chunk_0017",
+      "original_text": "Fig 1 -Vertexa AI Platform architecture (referenced in Sections 7 & 11)",
+      "suggested_text": "Fig 1 - Vertexa AI Platform architecture (referenced in Sections 7 & 11 for detailed description of the system components and security measures).",
+      "type": "ambiguity"
+    },
+    {
+      "id": "a8619fd4ae194817a13dad90f43659f8_chunk_0018_amb_000",
+      "chunk_id": "a8619fd4ae194817a13dad90f43659f8_chunk_0018",
+      "original_text": "6  Finance",
+      "suggested_text": "This section discusses the financial aspects of the document.",
+      "type": "ambiguity"
+    },
+    {
+      "id": "a8619fd4ae194817a13dad90f43659f8_chunk_0019_amb_000",
+      "chunk_id": "a8619fd4ae194817a13dad90f43659f8_chunk_0019",
+      "original_text": "Quarterly revenue and YoY growth (FY24)",
+      "suggested_text": "Specific quarterly revenue figures and YoY growth percentages for FY24 are reported to the Board.",
+      "type": "ambiguity"
+    },
+    {
+      "id": "a8619fd4ae194817a13dad90f43659f8_chunk_0020_amb_000",
+      "chunk_id": "a8619fd4ae194817a13dad90f43659f8_chunk_0020",
+      "original_text": "FY24",
+      "suggested_text": "Quarterly revenue for Q1 of the 2024 fiscal year was 42.6 ₹ Cr with a YoY growth of 18%.",
+      "type": "ambiguity"
+    },
+    {
+      "id": "a8619fd4ae194817a13dad90f43659f8_chunk_0021_amb_000",
+      "chunk_id": "a8619fd4ae194817a13dad90f43659f8_chunk_0021",
+      "original_text": "Q4 board deck",
+      "suggested_text": "The Q4 [year] board deck",
+      "type": "ambiguity"
+    },
+    {
+      "id": "a8619fd4ae194817a13dad90f43659f8_chunk_0021_amb_001",
+      "chunk_id": "a8619fd4ae194817a13dad90f43659f8_chunk_0021",
+      "original_text": "Q1 FY24",
+      "suggested_text": "Q1 of [specific fiscal year]",
+      "type": "ambiguity"
+    },
+    {
+      "id": "a8619fd4ae194817a13dad90f43659f8_chunk_0022_amb_000",
+      "chunk_id": "a8619fd4ae194817a13dad90f43659f8_chunk_0022",
+      "original_text": "Product Documentation",
+      "suggested_text": "Detailed description of the contents included in the Product Documentation",
+      "type": "ambiguity"
+    },
+    {
+      "id": "a8619fd4ae194817a13dad90f43659f8_chunk_0023_amb_000",
+      "chunk_id": "a8619fd4ae194817a13dad90f43659f8_chunk_0023",
+      "original_text": "platform",
+      "suggested_text": "The document describes a platform (see Fig. 1), which is organized into four layers: Presentation, AI Platform/API, Processing, and Data. Core modules:",
+      "type": "ambiguity"
+    },
+    {
+      "id": "a8619fd4ae194817a13dad90f43659f8_chunk_0024_amb_000",
+      "chunk_id": "a8619fd4ae194817a13dad90f43659f8_chunk_0024",
+      "original_text": "ChromaDB",
+      "suggested_text": "Vector Store: A collection per document using a database system like ChromaDB",
+      "type": "ambiguity"
+    },
+    {
+      "id": "a8619fd4ae194817a13dad90f43659f8_chunk_0025_amb_000",
+      "chunk_id": "a8619fd4ae194817a13dad90f43659f8_chunk_0025",
+      "original_text": "Core platform modules",
+      "suggested_text": "Define what constitutes a core platform module and provide details about their roles and functionalities.",
+      "type": "ambiguity"
+    },
+    {
+      "id": "a8619fd4ae194817a13dad90f43659f8_chunk_0026_amb_000",
+      "chunk_id": "a8619fd4ae194817a13dad90f43659f8_chunk_0026",
+      "original_text": "Customer Support",
+      "suggested_text": "This section provides information on how to reach and interact with our Customer Support team.",
+      "type": "ambiguity"
+    },
+    {
+      "id": "a8619fd4ae194817a13dad90f43659f8_chunk_0027_amb_000",
+      "chunk_id": "a8619fd4ae194817a13dad90f43659f8_chunk_0027",
+      "original_text": "he would contact the customer directly to confirm the resolution timeline before the ticket is closed.",
+      "suggested_text": "Alex informed Jordan that Alex would contact the customer directly to confirm the resolution timeline before the ticket is closed.",
+      "type": "ambiguity"
+    },
+    {
+      "id": "a8619fd4ae194817a13dad90f43659f8_chunk_0028_amb_000",
+      "chunk_id": "a8619fd4ae194817a13dad90f43659f8_chunk_0028",
+      "original_text": "Compliance",
+      "suggested_text": "Compliance: Adherence to specified rules or standards.",
+      "type": "ambiguity"
+    },
+    {
+      "id": "a8619fd4ae194817a13dad90f43659f8_chunk_0029_amb_000",
+      "chunk_id": "a8619fd4ae194817a13dad90f43659f8_chunk_0029",
+      "original_text": "summarized here",
+      "suggested_text": "Vertexa's data protection obligations are summarized in this section; for the full clause list and retention schedule, see Appendix B.",
+      "type": "ambiguity"
+    },
+    {
+      "id": "a8619fd4ae194817a13dad90f43659f8_chunk_0030_amb_000",
+      "chunk_id": "a8619fd4ae194817a13dad90f43659f8_chunk_0030",
+      "original_text": "Disaster Recovery",
+      "suggested_text": "Section of the document dealing with disaster recovery procedures.",
+      "type": "ambiguity"
+    },
+    {
+      "id": "a8619fd4ae194817a13dad90f43659f8_chunk_0031_amb_000",
+      "chunk_id": "a8619fd4ae194817a13dad90f43659f8_chunk_0031",
+      "original_text": "'major' incident",
+      "suggested_text": "'major' incident - the criteria for what constitutes a major incident should be clearly defined.",
+      "type": "ambiguity"
+    },
+    {
+      "id": "a8619fd4ae194817a13dad90f43659f8_chunk_0032_amb_000",
+      "chunk_id": "a8619fd4ae194817a13dad90f43659f8_chunk_0032",
+      "original_text": "Technical Architecture",
+      "suggested_text": "A detailed description of the technical architecture should be provided to clarify what aspects are covered.",
+      "type": "ambiguity"
+    },
+    {
+      "id": "a8619fd4ae194817a13dad90f43659f8_chunk_0033_amb_000",
+      "chunk_id": "a8619fd4ae194817a13dad90f43659f8_chunk_0033",
+      "original_text": "Vertexa's AI Platform (also referred to elsewhere in this handbook as the AI Engine, the Artificial Intelligence Platform, and the AI Solution)",
+      "suggested_text": "Clarify the primary term used or maintain consistency in terminology throughout the document.",
+      "type": "ambiguity"
+    },
+    {
+      "id": "a8619fd4ae194817a13dad90f43659f8_chunk_0034_amb_000",
+      "chunk_id": "a8619fd4ae194817a13dad90f43659f8_chunk_0034",
+      "original_text": "Organization chart (Appendix A)",
+      "suggested_text": "Fig 3 - Detailed Organization Chart (Refer to Appendix A for full details)",
+      "type": "ambiguity"
+    },
+    {
+      "id": "a8619fd4ae194817a13dad90f43659f8_chunk_0035_amb_000",
+      "chunk_id": "a8619fd4ae194817a13dad90f43659f8_chunk_0035",
+      "original_text": "Procurement",
+      "suggested_text": "This section outlines the procurement processes and procedures for acquiring goods and services.",
+      "type": "ambiguity"
+    },
+    {
+      "id": "a8619fd4ae194817a13dad90f43659f8_chunk_0036_amb_000",
+      "chunk_id": "a8619fd4ae194817a13dad90f43659f8_chunk_0036",
+      "original_text": "Purchase approval steps:",
+      "suggested_text": "Purchase approval steps include: [details of steps]",
+      "type": "ambiguity"
+    },
+    {
+      "id": "a8619fd4ae194817a13dad90f43659f8_chunk_0037_amb_000",
+      "chunk_id": "a8619fd4ae194817a13dad90f43659f8_chunk_0037",
+      "original_text": "approved vendor",
+      "suggested_text": "Finance issues a purchase order to a pre-approved vendor.",
+      "type": "ambiguity"
+    },
+    {
+      "id": "a8619fd4ae194817a13dad90f43659f8_chunk_0038_amb_000",
+      "chunk_id": "a8619fd4ae194817a13dad90f43659f8_chunk_0038",
+      "original_text": "See Appendix C",
+      "suggested_text": "The preferred vendors for Laptops & IT Hardware and Software Licenses are detailed in Appendix C.",
+      "type": "ambiguity"
+    },
+    {
+      "id": "a8619fd4ae194817a13dad90f43659f8_chunk_0039_amb_000",
+      "chunk_id": "a8619fd4ae194817a13dad90f43659f8_chunk_0039",
+      "original_text": "Procurement categories and limits",
+      "suggested_text": "Specific categories and their corresponding procurement limits",
+      "type": "ambiguity"
+    },
+    {
+      "id": "a8619fd4ae194817a13dad90f43659f8_chunk_0040_amb_000",
+      "chunk_id": "a8619fd4ae194817a13dad90f43659f8_chunk_0040",
+      "original_text": "Employee Benefits",
+      "suggested_text": "Employee Benefits including health insurance, retirement plans, and paid time off.",
+      "type": "ambiguity"
+    },
+    {
+      "id": "a8619fd4ae194817a13dad90f43659f8_chunk_0041_amb_000",
+      "chunk_id": "a8619fd4ae194817a13dad90f43659f8_chunk_0041",
+      "original_text": "health insurance coverage begins after 30 days of continuous employment - the two documents have not been reconciled.",
+      "suggested_text": "It is unclear which document represents the current policy as there is a discrepancy between the Benefits Guide stating 30 days and the Total Rewards page stating 90 days for health insurance coverage. Clarification or reconciliation of these documents is necessary.",
+      "type": "ambiguity"
+    },
+    {
+      "id": "a8619fd4ae194817a13dad90f43659f8_chunk_0042_amb_000",
+      "chunk_id": "a8619fd4ae194817a13dad90f43659f8_chunk_0042",
+      "original_text": "Legal",
+      "suggested_text": "Section detailing specific legal provisions or agreements",
+      "type": "ambiguity"
+    },
+    {
+      "id": "a8619fd4ae194817a13dad90f43659f8_chunk_0043_amb_000",
+      "chunk_id": "a8619fd4ae194817a13dad90f43659f8_chunk_0043",
+      "original_text": "'Confidential Information'",
+      "suggested_text": "'Confidential Information' is defined elsewhere in the handbook or document, but no formal definition is provided in this section.",
+      "type": "ambiguity"
+    },
+    {
+      "id": "a8619fd4ae194817a13dad90f43659f8_chunk_0043_amb_001",
+      "chunk_id": "a8619fd4ae194817a13dad90f43659f8_chunk_0043",
+      "original_text": "'Force Majeure Event'",
+      "suggested_text": "'Force Majeure Event' is defined elsewhere in the handbook or document, but no formal definition is provided in this section.",
+      "type": "ambiguity"
+    },
+    {
+      "id": "a8619fd4ae194817a3dad90f43659f8_chunk_0044_amb_000",
+      "chunk_id": "a8619fd4ae194817a13dad90f43659f8_chunk_0044",
+      "original_text": "Frequently Asked Questions",
+      "suggested_text": "N/A - The text is appropriate for a section header, no rewrite needed.",
+      "type": "ambiguity"
+    },
+    {
+      "id": "a8619fd4ae194817a13dad90f43659f8_chunk_0045_amb_000",
+      "chunk_id": "a8619fd4ae194817a13dad90f43659f8_chunk_0045",
+      "original_text": "₹",
+      "suggested_text": "Budget (Indian Rupees)",
+      "type": "ambiguity"
+    },
+    {
+      "id": "a8619fd4ae194817a13dad90f43659f8_chunk_0046_amb_000",
+      "chunk_id": "a8619fd4ae194817a13dad90f43659f8_chunk_0046",
+      "original_text": "Department headcount and budget (from the FAQ appendix).",
+      "suggested_text": "Department headcount and budget (as detailed in Table 4 of the FAQ appendix).",
+      "type": "ambiguity"
+    },
+    {
+      "id": "a8619fd4ae194817a13dad90f43659f8_chunk_0047_amb_000",
+      "chunk_id": "a8619fd4ae194817a13dad90f43659f8_chunk_0047",
+      "original_text": "18 vs. 20 -unresolved",
+      "suggested_text": "employees receive either 18 or 20 annual leaves (unresolved)",
+      "type": "ambiguity"
+    },
+    {
+      "id": "a8619fd4ae194817a13dad90f43659f8_chunk_0047_amb_001",
+      "chunk_id": "a8619fd4ae194817a13dad90f43659f8_chunk_0047",
+      "original_text": "Reported as both 18% and 15%",
+      "suggested_text": "Q1 revenue growth is inconsistently reported as 18% and 15%",
+      "type": "ambiguity"
+    },
+    {
+      "id": "a8619fd4ae194817a13dad90f43659f8_chunk_0048_amb_000",
+      "chunk_id": "a8619fd4ae194817a13dad90f43659f8_chunk_0048",
+      "original_text": "Appendices",
+      "suggested_text": "This section contains the appendices with supporting documents and additional information.",
+      "type": "ambiguity"
+    },
+    {
+      "id": "a8619fd4ae194817a13dad90f43659f8_chunk_0049_amb_000",
+      "chunk_id": "a8619fd4ae194817a13dad90f43659f8_chunk_0049",
+      "original_text": "Appendix A -Organization Chart",
+      "suggested_text": "Appendix A - Organization Chart",
+      "type": "ambiguity"
+    }
+  ]
+}

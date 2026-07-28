@@ -1,0 +1,11 @@
+{
+  "total_chunks_analyzed": 94,
+  "total_claims_validated": 184,
+  "total_ambiguities_identified": 104,
+  "risk_breakdown": {
+    "Low": 53,
+    "Medium": 39,
+    "High": 2
+  },
+  "average_confidence": 0.8824
+}

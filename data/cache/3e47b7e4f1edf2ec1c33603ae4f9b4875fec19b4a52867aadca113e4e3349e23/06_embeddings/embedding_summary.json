@@ -1,0 +1,18 @@
+{
+  "collection_name": "doc_3e47b7e4f1edf2ec",
+  "embedding_model": "BAAI/bge-small-en-v1.5",
+  "total_embeddings": 32,
+  "embedding_count_by_type": {
+    "Paragraph": 31,
+    "Heading": 16,
+    "Table": 1,
+    "Bullet List": 6,
+    "List": 1,
+    "text": 14,
+    "heading": 16,
+    "table": 1,
+    "list": 1
+  },
+  "average_embedding_time_seconds": 0.4466714784502983,
+  "timestamp": "2026-07-27T08:27:54Z"
+}

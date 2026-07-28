@@ -1,0 +1,36 @@
+{
+  "image_id": "#/pictures/32",
+  "page": 7,
+  "caption": null,
+  "ocr_text": null,
+  "bounding_box": {
+    "l": 907.02783203125,
+    "t": 520.2628784179688,
+    "r": 1149.2840576171875,
+    "b": 324.49664306640625,
+    "coord_origin": "BOTTOMLEFT"
+  },
+  "image_path": "05_images/image_033.png",
+  "image_type": "Photo",
+  "objects": [
+    "Power transmission towers",
+    "insulators",
+    "natural landscape (trees",
+    "possibly a river/stream)",
+    "power lines",
+    "terrain."
+  ],
+  "keywords": [
+    "Power transmission",
+    "insulators",
+    "lines",
+    "natural landscape",
+    "remote area.",
+    "terrain",
+    "towers"
+  ],
+  "semantic_description": "The image depicts a section of a power transmission line structure, likely part of an electrical grid, situated in a mountainous or hilly terrain. The structure consists of tall metal towers supporting multiple power lines, which are suspended by insulators. The background shows a natural landscape with trees and possibly a river or stream, indicating the infrastructure is located in a remote or rural area.",
+  "detected_entities": [
+    "None"
+  ]
+}

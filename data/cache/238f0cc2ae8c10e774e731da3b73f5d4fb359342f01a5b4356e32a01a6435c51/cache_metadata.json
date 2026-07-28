@@ -1,0 +1,24 @@
+{
+  "doc_hash": "238f0cc2ae8c10e774e731da3b73f5d4fb359342f01a5b4356e32a01a6435c51",
+  "original_filename": "Vertexa_Mini_Company_Handbook.pdf",
+  "created_at": "2026-07-27T11:59:04.756366",
+  "last_updated": "2026-07-27T13:24:57.564748",
+  "pipeline_version": "2.0.0",
+  "prompt_version": "1.0.0",
+  "embedding_model_version": "all-MiniLM-L6-v2",
+  "completed_stages": [
+    "claude_verification",
+    "protected_terms",
+    "chunks",
+    "sentences",
+    "final_report",
+    "preprocessed",
+    "semantic_clusters",
+    "chunk_reasoning",
+    "proofreading",
+    "filtered",
+    "claim_extraction",
+    "cluster_reasoning",
+    "claude_input"
+  ]
+}

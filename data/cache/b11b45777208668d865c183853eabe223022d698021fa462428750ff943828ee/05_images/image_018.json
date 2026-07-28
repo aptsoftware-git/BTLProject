@@ -1,0 +1,26 @@
+{
+  "image_id": "#/pictures/17",
+  "page": 6,
+  "caption": null,
+  "ocr_text": null,
+  "bounding_box": {
+    "l": 649.4887084960938,
+    "t": 133.25445556640625,
+    "r": 724.3377075195312,
+    "b": 57.662841796875,
+    "coord_origin": "BOTTOMLEFT"
+  },
+  "image_path": "05_images/image_018.png",
+  "image_type": "Logo",
+  "objects": [
+    "The logo consists of a circular design with a blue background and white text and border."
+  ],
+  "keywords": [
+    "9001",
+    "ISO"
+  ],
+  "semantic_description": "This image is a logo representing a company that has been certified according to the ISO 9001",
+  "detected_entities": [
+    "No specific people or names are detected in this image. The logo represents a company that has been certified under ISO 9001"
+  ]
+}

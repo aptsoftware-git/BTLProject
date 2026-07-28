@@ -1,0 +1,1283 @@
+{
+  "ambiguities": [
+    {
+      "issue_id": "6a1f1c571432456e92a961e1a0f4b70c_chunk_0000_amb_000",
+      "chunk_id": "6a1f1c571432456e92a961e1a0f4b70c_chunk_0000",
+      "type": "undefined terminology",
+      "severity": "Low",
+      "quote": "LTD",
+      "reason": "The acronym 'LTD' is used without context, making it unclear whether it refers to Limited or another meaning.",
+      "supporting_evidence": "BTL EPC LIMITED | ANNUAL REPORT 2024-25",
+      "suggested_rewrite": "BTL EPC Limited (Limited) | ANNUAL REPORT 2024-25",
+      "affected_claims": []
+    },
+    {
+      "issue_id": "6a1f1c571432456e92a961e1a0f4b70c_chunk_0001_amb_000",
+      "chunk_id": "6a1f1c571432456e92a961e1a0f4b70c_chunk_0001",
+      "type": "vague wording",
+      "severity": "Medium",
+      "quote": "Contents",
+      "reason": "The term 'Contents' is vague and does not provide specific information about what the contents include.",
+      "supporting_evidence": "Document Section: Contents\nContent:\nContents",
+      "suggested_rewrite": "List of topics, sections, or chapters included in this document.",
+      "affected_claims": []
+    },
+    {
+      "issue_id": "6a1f1c571432456e92a961e1a0f4b70c_chunk_0002_amb_000",
+      "chunk_id": "6a1f1c571432456e92a961e1a0f4b70c_chunk_0002",
+      "type": "vague wording",
+      "severity": "Low",
+      "quote": "Corporate snapshot",
+      "reason": "The term 'snapshot' is vague and does not specify what kind of information or data is included in the corporate snapshot.",
+      "supporting_evidence": "Part one: What we are and What we do\nCorporate snapshot                             | 4",
+      "suggested_rewrite": "Corporate summary",
+      "affected_claims": [
+        "6a1f1c571432456e92a961e1a0f4b70c_chunk_0002_claim_000"
+      ]
+    },
+    {
+      "issue_id": "6a1f1c571432456e92a961e1a0f4b70c_chunk_0003_amb_000",
+      "chunk_id": "6a1f1c571432456e92a961e1a0f4b70c_chunk_0003",
+      "type": "vague wording",
+      "severity": "Low",
+      "quote": "Disclaimer:",
+      "reason": "The text is very brief and does not provide any specific information or content related to the disclaimer, making it vague.",
+      "supporting_evidence": "Document Section: Disclaimer:\nContent:\nDisclaimer:",
+      "suggested_rewrite": "Please include detailed information about the disclaimer in this section.",
+      "affected_claims": []
+    },
+    {
+      "issue_id": "6a1f1c571432456e92a961e1a0f4b70c_chunk_0004_amb_000",
+      "chunk_id": "6a1f1c571432456e92a961e1a0f4b70c_chunk_0004",
+      "type": "vague wording",
+      "severity": "Low",
+      "quote": "several factors could cause assumptions, actual future results and events to differ materially from those expressed in the forward-looking statements",
+      "reason": "The term 'several factors' is vague and does not specify what these factors might be.",
+      "supporting_evidence": "Readers are cautioned not to place undue reliance on forward-looking statements as several factors could cause assumptions, actual future results and events to differ materially from those expressed in the forward- looking statements.",
+      "suggested_rewrite": "Specific factors that could cause assumptions, actual future results, and events to differ materially from those expressed in the forward-looking statements include [list specific factors].",
+      "affected_claims": [
+        "6a1f1c571432456e92a961e1a0f4b70c_chunk_0004_claim_002"
+      ]
+    },
+    {
+      "issue_id": "6a1f1c571432456e92a961e1a0f4b70c_chunk_0005_amb_000",
+      "chunk_id": "6a1f1c571432456e92a961e1a0f4b70c_chunk_0005",
+      "type": "vague wording",
+      "severity": "Medium",
+      "quote": "Building for India. Banking on India.",
+      "reason": "The phrases 'Building for India' and 'Banking on India' are too vague to determine specific actions or outcomes.",
+      "supporting_evidence": "No additional context is provided in the original text.",
+      "suggested_rewrite": "Efforts are focused on constructing infrastructure in India and leveraging financial services within the country.",
+      "affected_claims": [
+        "6a1f1c571432456e92a961e1a0f4b70c_chunk_0005_claim_000"
+      ]
+    },
+    {
+      "issue_id": "6a1f1c571432456e92a961e1a0f4b70c_chunk_0006_amb_000",
+      "chunk_id": "6a1f1c571432456e92a961e1a0f4b70c_chunk_0006",
+      "type": "vague wording",
+      "severity": "Low",
+      "quote": "fastest-growing",
+      "reason": "'Fastest-growing' is a relative term and can be subjective without a specific timeframe or comparison.",
+      "supporting_evidence": "BTL EPC Limited stands among India's fastest-growing heavy engineering EPC companies, delivering integrated solutions across the core sectors of powering India's economy.",
+      "suggested_rewrite": "BTL EPC Limited is recognized as one of the rapidly growing heavy engineering EPC companies in India, delivering integrated solutions across the core sectors of powering India's economy.",
+      "affected_claims": [
+        "6a1f1c571432456e92a961e1a0f4b70c_chunk_0006_claim_000"
+      ]
+    },
+    {
+      "issue_id": "6a1f1c571432456e92a961e1a0f4b70c_chunk_0007_amb_000",
+      "chunk_id": "6a1f1c571432456e92a961e1a0f4b70c_chunk_0007",
+      "type": "vague wording",
+      "severity": "Medium",
+      "quote": "Building for India. Banking on India.",
+      "reason": "The phrase is vague and does not specify what kind of building or banking activities are being referred to.",
+      "supporting_evidence": "PART ONE\nStructured Extraction from Phase 2A:",
+      "suggested_rewrite": "Construction projects in India. Financial services targeting the Indian market.",
+      "affected_claims": []
+    },
+    {
+      "issue_id": "6a1f1c571432456e92a961e1a0f4b70c_chunk_0008_amb_000",
+      "chunk_id": "6a1f1c571432456e92a961e1a0f4b70c_chunk_0008",
+      "type": "vague wording",
+      "severity": "Low",
+      "quote": "What we are and What we do",
+      "reason": "The phrase is vague and does not provide specific information about the identity or activities.",
+      "supporting_evidence": "Document Section: What we are and What we do\nContent:\nWhat we are and What we do",
+      "suggested_rewrite": "A detailed description of our mission, values, and core activities.",
+      "affected_claims": [
+        "string"
+      ]
+    },
+    {
+      "issue_id": "6a1f1c571432456e92a961e1a0f4b70c_chunk_0009_amb_000",
+      "chunk_id": "6a1f1c571432456e92a961e1a0f4b70c_chunk_0009",
+      "type": "vague wording",
+      "severity": "Medium",
+      "quote": "Corporate Overview Corporate snapshot",
+      "reason": "The term 'Corporate Overview Corporate snapshot' is repeated and lacks specific details, making it unclear what information the snapshot includes.",
+      "supporting_evidence": "Document Section: What we are and What we do\nContent:\nCorporate Overview Corporate snapshot",
+      "suggested_rewrite": "Brief summary of the company's operations and key points",
+      "affected_claims": []
+    },
+    {
+      "issue_id": "6a1f1c571432456e92a961e1a0f4b70c_chunk_0010_amb_000",
+      "chunk_id": "6a1f1c571432456e92a961e1a0f4b70c_chunk_0010",
+      "type": "vague wording",
+      "severity": "Medium",
+      "quote": "attractive proxy",
+      "reason": "The term 'attractive proxy' is vague and does not specify the criteria or perspective from which BTL EPC LIMITED is considered attractive.",
+      "supporting_evidence": "BTL EPC  LIMITED is an attractive proxy of India's heavy engineering solutions sector.",
+      "suggested_rewrite": "BTL EPC LIMITED serves as a representative example of India's heavy engineering solutions sector, considered attractive for its [specific criteria/perspective].",
+      "affected_claims": [
+        "6a1f1c571432456e92a961e1a0f4b70c_chunk_0010_claim_000"
+      ]
+    },
+    {
+      "issue_id": "6a1f1c571432456e92a961e1a0f4b70c_chunk_0011_amb_000",
+      "chunk_id": "6a1f1c571432456e92a961e1a0f4b70c_chunk_0011",
+      "type": "vague wording",
+      "severity": "Low",
+      "quote": "empowering them to scale and address an unprecedented national opportunity.",
+      "reason": "The phrase 'unprecedented national opportunity' is somewhat vague and not clearly defined within the text.",
+      "supporting_evidence": "This statement refers to the impact of serving critical equipment needs but does not provide specific details about the opportunities.",
+      "suggested_rewrite": "empowering them to scale and address significant national infrastructure development opportunities.",
+      "affected_claims": [
+        "6a1f1c571432456e92a961e1a0f4b70c_chunk_0011_claim_002"
+      ]
+    },
+    {
+      "issue_id": "6a1f1c571432456e92a961e1a0f4b70c_chunk_0011_amb_001",
+      "chunk_id": "6a1f1c571432456e92a961e1a0f4b70c_chunk_0011",
+      "type": "vague wording",
+      "severity": "Low",
+      "quote": "By accelerating the building of national infrastructure and catalysing national progress, we are engaged in doing two things. Building for India. Banking on India.",
+      "reason": "The phrase 'Building for India' and 'Banking on India' can be interpreted in different ways depending on context.",
+      "supporting_evidence": "These phrases are used as a slogan or mission statement without further elaboration.",
+      "suggested_rewrite": "By accelerating the building of national infrastructure and catalysing national progress, we are focused on two key areas: contributing to India's growth and investing in its future.",
+      "affected_claims": [
+        "6a1f1c571432456e92a961e1a0f4b70c_chunk_0011_claim_004"
+      ]
+    },
+    {
+      "issue_id": "6a1f1c571432456e92a961e1a0f4b70c_chunk_0012_amb_000",
+      "chunk_id": "6a1f1c571432456e92a961e1a0f4b70c_chunk_0012",
+      "type": "vague wording",
+      "severity": "Low",
+      "quote": "Our leadership",
+      "reason": "The phrase 'Our leadership' is vague and does not provide specific details about the leadership team or their roles.",
+      "supporting_evidence": "The text only contains this short phrase without any additional context or information.",
+      "suggested_rewrite": "Provide more details about the leadership team, such as key members and their responsibilities.",
+      "affected_claims": []
+    },
+    {
+      "issue_id": "6a1f1c571432456e92a961e1a0f4b70c_chunk_0013_amb_000",
+      "chunk_id": "6a1f1c571432456e92a961e1a0f4b70c_chunk_0013",
+      "type": "temporal ambiguity",
+      "severity": "Low",
+      "quote": "over 31 + years of experience",
+      "reason": "The use of '+ years' is ambiguous and unclear if it indicates exactly 32 or more.",
+      "supporting_evidence": "Mr. Ravi Todi has been instrumental in shaping the Group's trajectory with over 31 + years of experience across various business domains.",
+      "suggested_rewrite": "over 31 years of experience",
+      "affected_claims": [
+        "6a1f1c571432456e92a961e1a0f4b70c_chunk_0013_claim_004"
+      ]
+    },
+    {
+      "issue_id": "6a1f1c571432456e92a961e1a0f4b70c_chunk_0014_amb_000",
+      "chunk_id": "6a1f1c571432456e92a961e1a0f4b70c_chunk_0014",
+      "type": "vague wording",
+      "severity": "Low",
+      "quote": "Our heritage",
+      "reason": "The phrase 'Our heritage' is vague and does not provide specific information about what the heritage entails.",
+      "supporting_evidence": "Document Section: Our heritage\nContent:\nOur heritage",
+      "suggested_rewrite": "Our heritage, which includes [specific aspects of heritage]",
+      "affected_claims": []
+    },
+    {
+      "issue_id": "6a1f1c571432456e92a961e1a0f4b70c_chunk_0015_amb_000",
+      "chunk_id": "6a1f1c571432456e92a961e1a0f4b70c_chunk_0015",
+      "type": "referential ambiguity",
+      "severity": "Low",
+      "quote": "Its engineering division",
+      "reason": "'Its' could refer to BTL EPC, but it's not explicitly stated.",
+      "supporting_evidence": "The sentence starts with 'Its', which requires a clear antecedent for clarity.",
+      "suggested_rewrite": "BTL EPC's engineering division",
+      "affected_claims": [
+        "6a1f1c571432456e92a961e1a0f4b70c_chunk_0015_claim_001"
+      ]
+    },
+    {
+      "issue_id": "6a1f1c571432456e92a961e1a0f4b70c_chunk_0015_amb_001",
+      "chunk_id": "6a1f1c571432456e92a961e1a0f4b70c_chunk_0015",
+      "type": "referential ambiguity",
+      "severity": "Low",
+      "quote": "the Company",
+      "reason": "'The Company' could refer to BTL EPC, but it's not explicitly stated.",
+      "supporting_evidence": "The sentence starts with 'the Company', which requires a clear antecedent for clarity.",
+      "suggested_rewrite": "BTL EPC",
+      "affected_claims": [
+        "6a1f1c571432456e92a961e1a0f4b70c_chunk_0015_claim_002",
+        "6a1f1c571432456e92a961e1a0f4b70c_chunk_0015_claim_003"
+      ]
+    },
+    {
+      "issue_id": "6a1f1c571432456e92a961e1a0f4b70c_chunk_0016_amb_000",
+      "chunk_id": "6a1f1c571432456e92a961e1a0f4b70c_chunk_0016",
+      "type": "vague wording",
+      "severity": "Medium",
+      "quote": "Our vision",
+      "reason": "The phrase 'Our vision' is vague and does not provide any specific details about the content or goals of the vision.",
+      "supporting_evidence": "Document Section: Our vision\nContent:\nOur vision",
+      "suggested_rewrite": "A more detailed description of what 'Our vision' entails would be beneficial to understand its scope and objectives clearly.",
+      "affected_claims": []
+    },
+    {
+      "issue_id": "6a1f1c571432456e92a961e1a0f4b70c_chunk_0017_amb_000",
+      "chunk_id": "6a1f1c571432456e92a961e1a0f4b70c_chunk_0017",
+      "type": "vague wording",
+      "severity": "Medium",
+      "quote": "engineering partner of choice",
+      "reason": "The phrase is subjective and lacks clear criteria for determining who qualifies as the 'partner of choice'.",
+      "supporting_evidence": "To be the engineering partner of choice in India's infrastructure journey of value through innovation, precision, and excellence in every project we undertake.",
+      "suggested_rewrite": "the preferred engineering partner for India's infrastructure development",
+      "affected_claims": [
+        "6a1f1c571432456e92a961e1a0f4b70c_chunk_0017_claim_000"
+      ]
+    },
+    {
+      "issue_id": "6a1f1c571432456e92a961e1a0f4b70c_chunk_0017_amb_001",
+      "chunk_id": "6a1f1c571432456e92a961e1a0f4b70c_chunk_0017",
+      "type": "vague wording",
+      "severity": "Medium",
+      "quote": "journey of value through innovation, precision, and excellence",
+      "reason": "While the values are clear, the phrase is vague in terms of what constitutes a 'journey of value' and how this will be achieved.",
+      "supporting_evidence": "To be the engineering partner of choice in India's infrastructure journey of value through innovation, precision, and excellence in every project we undertake.",
+      "suggested_rewrite": "through continuous innovation, precise execution, and unwavering excellence",
+      "affected_claims": [
+        "6a1f1c571432456e92a961e1a0f4b70c_chunk_0017_claim_000"
+      ]
+    },
+    {
+      "issue_id": "6a1f1c571432456e92a961e1a0f4b70c_chunk_0018_amb_000",
+      "chunk_id": "6a1f1c571432456e92a961e1a0f4b70c_chunk_0018",
+      "type": "vague wording",
+      "severity": "High",
+      "quote": "Our mission",
+      "reason": "The phrase 'Our mission' is vague and does not provide any specific details about the mission.",
+      "supporting_evidence": "There is no additional information or context provided about what the mission entails.",
+      "suggested_rewrite": "Define the specific goals and objectives of our mission.",
+      "affected_claims": []
+    },
+    {
+      "issue_id": "6a1f1c571432456e92a961e1a0f4b70c_chunk_0019_amb_000",
+      "chunk_id": "6a1f1c571432456e92a961e1a0f4b70c_chunk_0019",
+      "type": "vague wording",
+      "severity": "Low",
+      "quote": "highquality",
+      "reason": "The term 'highquality' should be separated into two words for clarity.",
+      "supporting_evidence": "To consistently deliver highquality, on-time projects that strengthen India's industrial foundation.",
+      "suggested_rewrite": "To consistently deliver high-quality, on-time projects that strengthen India's industrial foundation.",
+      "affected_claims": [
+        "6a1f1c571432456e92a961e1a0f4b70c_chunk_0019_claim_000"
+      ]
+    },
+    {
+      "issue_id": "6a1f1c571432456e92a961e1a0f4b70c_chunk_0019_amb_001",
+      "chunk_id": "6a1f1c571432456e92a961e1a0f4b70c_chunk_0019",
+      "type": "vague wording",
+      "severity": "Low",
+      "quote": "scale new heights",
+      "reason": "'Scale new heights' is a vague phrase and may not be precise enough for all readers.",
+      "supporting_evidence": "Under the dynamic leadership of Mr. Ravi Todi, we are building on this foundation to scale new heights in engineering excellence.",
+      "suggested_rewrite": "Under the dynamic leadership of Mr. Ravi Todi, we are building on this foundation to achieve greater levels of engineering excellence.",
+      "affected_claims": [
+        "6a1f1c571432456e92a961e1a0f4b70c_chunk_0019_claim_002"
+      ]
+    },
+    {
+      "issue_id": "6a1f1c571432456e92a961e1a0f4b70c_chunk_0020_amb_000",
+      "chunk_id": "6a1f1c571432456e92a961e1a0f4b70c_chunk_0020",
+      "type": "vague wording",
+      "severity": "Medium",
+      "quote": "Our infrastructure and strategic presence",
+      "reason": "The phrase is vague as it does not specify what the infrastructure includes or how the strategic presence manifests.",
+      "supporting_evidence": "No additional context is provided about the infrastructure or strategic presence in the given text.",
+      "suggested_rewrite": "Our infrastructure, including data centers and networks, and strategic presence in key locations are crucial for our operations.",
+      "affected_claims": [
+        "6a1f1c571432456e92a961e1a0f4b70c_chunk_0020_claim_000"
+      ]
+    },
+    {
+      "issue_id": "6a1f1c571432456e92a961e1a0f4b70c_chunk_0021_amb_000",
+      "chunk_id": "6a1f1c571432456e92a961e1a0f4b70c_chunk_0021",
+      "type": "vague wording",
+      "severity": "Low",
+      "quote": "strong logistical edge and enhances our execution capabilities",
+      "reason": "The terms 'logistical edge' and 'execution capabilities' are vague and not clearly defined.",
+      "supporting_evidence": "This provides us with a strong logistical edge and enhances our execution capabilities.",
+      "suggested_rewrite": "This provides us with efficient logistics and improves our project management effectiveness.",
+      "affected_claims": [
+        "6a1f1c571432456e92a961e1a0f4b70c_chunk_0021_claim_000"
+      ]
+    },
+    {
+      "issue_id": "6a1f1c571432456e92a961e1a0f4b70c_chunk_0021_amb_001",
+      "chunk_id": "6a1f1c571432456e92a961e1a0f4b70c_chunk_0021",
+      "type": "vague wording",
+      "severity": "Low",
+      "quote": "wide range of high-quality products for diverse downstream industries",
+      "reason": "The terms 'high-quality' and 'diverse downstream industries' are vague and not clearly defined.",
+      "supporting_evidence": "This robust setup empowers us to deliver a wide range of high-quality products for diverse downstream industries.",
+      "suggested_rewrite": "This robust setup enables us to produce high-standard products for various sectors.",
+      "affected_claims": [
+        "6a1f1c571432456e92a961e1a0f4b70c_chunk_0021_claim_002"
+      ]
+    },
+    {
+      "issue_id": "6a1f1c571432456e92a961e1a0f4b70c_chunk_0022_amb_000",
+      "chunk_id": "6a1f1c571432456e92a961e1a0f4b70c_chunk_0022",
+      "type": "vague wording",
+      "severity": "Medium",
+      "quote": "Our collaborations",
+      "reason": "The phrase is too broad and does not provide specific details about the collaborations, making it vague.",
+      "supporting_evidence": "There are no additional details or context provided in the original text to clarify what 'collaborations' specifically entails.",
+      "suggested_rewrite": "Our collaborations with [specific organizations or projects]",
+      "affected_claims": []
+    },
+    {
+      "issue_id": "6a1f1c571432456e92a961e1a0f4b70c_chunk_0023_amb_000",
+      "chunk_id": "6a1f1c571432456e92a961e1a0f4b70c_chunk_0023",
+      "type": "undefined terminology",
+      "severity": "Medium",
+      "quote": "The Company",
+      "reason": "\"The Company\" is used but the specific organization is not clearly defined in this context.",
+      "supporting_evidence": "While BTL EPC is mentioned, 'The Company' could potentially refer to another entity if not for the context provided in the same text.",
+      "suggested_rewrite": "BTL EPC",
+      "affected_claims": [
+        "6a1f1c571432456e92a961e1a0f4b70c_chunk_0023_claim_001"
+      ]
+    },
+    {
+      "issue_id": "6a1f1c571432456e92a961e1a0f4b70c_chunk_0024_amb_000",
+      "chunk_id": "6a1f1c571432456e92a961e1a0f4b70c_chunk_0024",
+      "type": "vague wording",
+      "severity": "Low",
+      "quote": "Our workforce",
+      "reason": "The statement is very general and does not provide specific information about the workforce, such as size, skills, or roles.",
+      "supporting_evidence": "The chunk only contains 'Our workforce' without any additional context or details.",
+      "suggested_rewrite": "Provide more detailed information about our workforce, including its size, skills, and roles.",
+      "affected_claims": []
+    },
+    {
+      "issue_id": "6a1f1c571432456e92a961e1a0f4b70c_chunk_0025_amb_000",
+      "chunk_id": "6a1f1c571432456e92a961e1a0f4b70c_chunk_0025",
+      "type": "vague wording",
+      "severity": "Low",
+      "quote": "driven by a skilled and experienced workforce",
+      "reason": "The terms 'skilled' and 'experienced' are subjective and can vary in interpretation.",
+      "supporting_evidence": "BTL EPC is driven by a skilled and experienced workforce across its manufacturing and EPC operations, making it a trusted player in the heavy engineering solutions sector.",
+      "suggested_rewrite": "BTL EPC is driven by a highly skilled and experienced workforce across its manufacturing and EPC operations, making it a trusted player in the heavy engineering solutions sector.",
+      "affected_claims": [
+        "6a1f1c571432456e92a961e1a0f4b70c_chunk_0025_claim_000"
+      ]
+    },
+    {
+      "issue_id": "6a1f1c571432456e92a961e1a0f4b70c_chunk_0026_amb_000",
+      "chunk_id": "6a1f1c571432456e92a961e1a0f4b70c_chunk_0026",
+      "type": "vague wording",
+      "severity": "Medium",
+      "quote": "Our marquee clients",
+      "reason": "The phrase is vague and does not specify who the marquee clients are.",
+      "supporting_evidence": "No additional context or details are provided about the clients.",
+      "suggested_rewrite": "Our marquee clients include [specific client names or descriptions]",
+      "affected_claims": [
+        "6a1f1c571432456e92a961e1a0f4b70c_chunk_0026_claim_000"
+      ]
+    },
+    {
+      "issue_id": "6a1f1c571432456e92a961e1a0f4b70c_chunk_0027_amb_000",
+      "chunk_id": "6a1f1c571432456e92a961e1a0f4b70c_chunk_0027",
+      "type": "vague wording",
+      "severity": "Medium",
+      "quote": "We are proud to serve India's leading public and private enterprises, powering the nation's growth across energy, infrastructure, mining, and manufacturing.",
+      "reason": "The phrase 'leading' is vague as it does not specify what criteria define a leading enterprise.",
+      "supporting_evidence": "No specific metrics or standards are provided to determine which enterprises qualify as 'leading'.",
+      "suggested_rewrite": "We are proud to serve some of India's top-performing public and private enterprises, contributing to the nation's growth across energy, infrastructure, mining, and manufacturing.",
+      "affected_claims": [
+        "6a1f1c571432456e92a961e1a0f4b70c_chunk_0027_claim_000"
+      ]
+    },
+    {
+      "issue_id": "6a1f1c571432456e92a961e1a0f4b70c_chunk_0029_amb_000",
+      "chunk_id": "6a1f1c571432456e92a961e1a0f4b70c_chunk_0029",
+      "type": "vague wording",
+      "severity": "Medium",
+      "quote": "National Thermal Power Corporation:",
+      "reason": "The text consists of a title or heading without any additional information, making the context and purpose vague.",
+      "supporting_evidence": "Document Section: National Thermal Power Corporation:\nContent:\nNational Thermal Power Corporation:",
+      "suggested_rewrite": "Information about National Thermal Power Corporation should be provided to give context and clarity.",
+      "affected_claims": []
+    },
+    {
+      "issue_id": "6a1f1c571432456e92a961e1a0f4b70c_chunk_0030_amb_000",
+      "chunk_id": "6a1f1c571432456e92a961e1a0f4b70c_chunk_0030",
+      "type": "temporal ambiguity",
+      "severity": "Low",
+      "quote": "as of mid 2025",
+      "reason": "The text mentions a specific timeframe, but it is not clear if this was written before or after mid-2025.",
+      "supporting_evidence": "As of mid 2025, its operational capacity was around 15,250-17,550 MW",
+      "suggested_rewrite": "As of the most recent data available up to mid-2025, its operational capacity was around 15,250-17,550 MW",
+      "affected_claims": [
+        "6a1f1c571432456e92a961e1a0f4b70c_chunk_0030_claim_001"
+      ]
+    },
+    {
+      "issue_id": "6a1f1c571432456e92a961e1a0f4b70c_chunk_0032_amb_000",
+      "chunk_id": "6a1f1c571432456e92a961e1a0f4b70c_chunk_0032",
+      "type": "passive wording",
+      "severity": "Low",
+      "quote": "Neelachal Ispat Nigam Limited is being revived by Tata Steel long products to enhance steel production.",
+      "reason": "The use of passive voice can make the sentence less direct and slightly harder to understand.",
+      "supporting_evidence": "Under Tata Steel long products, the Company is being revived to enhance steel production.",
+      "suggested_rewrite": "Tata Steel long products are reviving Neelachal Ispat Nigam Limited to enhance steel production.",
+      "affected_claims": [
+        "6a1f1c571432456e92a961e1a0f4b70c_chunk_0032_claim_000"
+      ]
+    },
+    {
+      "issue_id": "6a1f1c571432456e92a961e1a0f4b70c_chunk_0033_amb_000",
+      "chunk_id": "6a1f1c571432456e92a961e1a0f4b70c_chunk_0033",
+      "type": "pronoun ambiguity",
+      "severity": "Low",
+      "quote": "It deployed advanced technologies to ensure safe, efficient, and sustainable coal extraction.",
+      "reason": "The pronoun 'It' is ambiguous as it could refer to either Neelachal Ispat Nigam Limited or JMS Mining Private Limited without clear context.",
+      "supporting_evidence": "The sentence does not specify which company deployed the technologies mentioned.",
+      "suggested_rewrite": "JMS Mining deployed advanced technologies to ensure safe, efficient, and sustainable coal extraction.",
+      "affected_claims": [
+        "6a1f1c571432456e92a961e1a0f4b70c_chunk_0033_claim_003"
+      ]
+    },
+    {
+      "issue_id": "6a1f1c571432456e92a961e1a0f4b70c_chunk_0034_amb_000",
+      "chunk_id": "6a1f1c571432456e92a961e1a0f4b70c_chunk_0034",
+      "type": "pronoun ambiguity",
+      "severity": "Medium",
+      "quote": "Its operations",
+      "reason": "It's unclear which organization ('Neelachal Ispat Nigam Limited' or another) the operations are referring to.",
+      "supporting_evidence": "Its operations play a crucial role in supporting the country's energy security.",
+      "suggested_rewrite": "Neelachal Ispat Nigam Limited's operations play a crucial role in supporting the country's energy security.",
+      "affected_claims": [
+        "6a1f1c571432456e92a961e1a0f4b70c_chunk_0034_claim_000"
+      ]
+    },
+    {
+      "issue_id": "6a1f1c571432456e92a961e1a0f4b70c_chunk_0035_amb_000",
+      "chunk_id": "6a1f1c571432456e92a961e1a0f4b70c_chunk_0035",
+      "type": "vague wording",
+      "severity": "Low",
+      "quote": "Power Transmission Corporation of Uttarakhand Limited (PTCUL):",
+      "reason": "The statement is repetitive and does not provide any additional information or claim.",
+      "supporting_evidence": "The text simply repeats the organization's name with no description or context provided.",
+      "suggested_rewrite": "Power Transmission Corporation of Uttarakhand Limited (PTCUL) oversees power transmission in Uttarakhand, India.",
+      "affected_claims": []
+    },
+    {
+      "issue_id": "6a1f1c571432456e92a961e1a0f4b70c_chunk_0036_amb_000",
+      "chunk_id": "6a1f1c571432456e92a961e1a0f4b70c_chunk_0036",
+      "type": "pronoun ambiguity",
+      "severity": "Low",
+      "quote": "It ensures reliable electricity supply across the state through the development, operation, and maintenance of high-voltage transmission systems.",
+      "reason": "The pronoun 'It' can be ambiguous without context outside this sentence, though it's clear in the full chunk text.",
+      "supporting_evidence": "A State-owned entity responsible for managing and strengthening the power transmission network in Uttarakhand. It ensures reliable electricity supply across the state through the development, operation, and maintenance of high-voltage transmission systems.",
+      "suggested_rewrite": "The corporation ensures reliable electricity supply across the state through the development, operation, and maintenance of high-voltage transmission systems.",
+      "affected_claims": [
+        "6a1f1c571432456e92a961e1a0f4b70c_chunk_0036_claim_001"
+      ]
+    },
+    {
+      "issue_id": "6a1f1c571432456e92a961e1a0f4b70c_chunk_0036_amb_001",
+      "chunk_id": "6a1f1c571432456e92a961e1a0f4b70c_chunk_0036",
+      "type": "pronoun ambiguity",
+      "severity": "Low",
+      "quote": "Its focus areas include water supply, sanitation, housing, and other essential civic amenities.",
+      "reason": "The pronoun 'Its' can be ambiguous without context outside this sentence, though it's clear in the full chunk text.",
+      "supporting_evidence": "JUIDCO is a government-owned enterprise tasked with planning, developing, and implementing urban infrastructure projects in Jharkhand. Its focus areas include water supply, sanitation, housing, and other essential civic amenities.",
+      "suggested_rewrite": "JUIDCO's focus areas include water supply, sanitation, housing, and other essential civic amenities.",
+      "affected_claims": [
+        "6a1f1c571432456e92a961e1a0f4b70c_chunk_0036_claim_006"
+      ]
+    },
+    {
+      "issue_id": "6a1f1c571432456e92a961e1a0f4b70c_chunk_0036_amb_002",
+      "chunk_id": "6a1f1c571432456e92a961e1a0f4b70c_chunk_0036",
+      "type": "pronoun ambiguity",
+      "severity": "Low",
+      "quote": "Its operations cover energy, power plants, coal mining, roads, railways, and property development.",
+      "reason": "The pronoun 'Its' can be ambiguous without context outside this sentence, though it's clear in the full chunk text.",
+      "supporting_evidence": "Indu Projects Limited is a diversified infrastructure and real estate company. Its operations cover energy, power plants, coal mining, roads, railways, and property development.",
+      "suggested_rewrite": "Indu Projects Limited's operations cover energy, power plants, coal mining, roads, railways, and property development.",
+      "affected_claims": [
+        "6a1f1c571432456e92a961e1a0f4b70c_chunk_0036_claim_008"
+      ]
+    },
+    {
+      "issue_id": "6a1f1c571432456e92a961e1a0f4b70c_chunk_0036_amb_003",
+      "chunk_id": "6a1f1c571432456e92a961e1a0f4b70c_chunk_0036",
+      "type": "pronoun ambiguity",
+      "severity": "Low",
+      "quote": "The Company is known for delivering large projects across multiple sectors.",
+      "reason": "The pronoun 'The Company' can be ambiguous without context outside this sentence, though it's clear in the full chunk text.",
+      "supporting_evidence": "Indu Projects Limited (INDU): The Company is a diversified infrastructure and real estate company. Its operations cover energy, power plants, coal mining, roads, railways, and property development. The Company is known for delivering large projects across multiple sectors.",
+      "suggested_rewrite": "Indu Projects Limited is known for delivering large projects across multiple sectors.",
+      "affected_claims": [
+        "6a1f1c571432456e92a961e1a0f4b70c_chunk_0036_claim_009"
+      ]
+    },
+    {
+      "issue_id": "6a1f1c571432456e92a961e1a0f4b70c_chunk_0036_amb_004",
+      "chunk_id": "6a1f1c571432456e92a961e1a0f4b70c_chunk_0036",
+      "type": "pronoun ambiguity",
+      "severity": "Low",
+      "quote": "It operates an extensive network of plants and terminals across India and overseas.",
+      "reason": "The pronoun 'It' can be ambiguous without context outside this sentence, though it's clear in the full chunk text.",
+      "supporting_evidence": "UltraTech Cement Limited: India's largest producer of grey cement, white cement, and ready-mix concrete. It operates an extensive network of plants and terminals across India and overseas.",
+      "suggested_rewrite": "UltraTech Cement Limited operates an extensive network of plants and terminals across India and overseas.",
+      "affected_claims": [
+        "6a1f1c571432456e92a961e1a0f4b70c_chunk_0036_claim_011"
+      ]
+    },
+    {
+      "issue_id": "6a1f1c571432456e92a961e1a0f4b70c_chunk_0037_amb_000",
+      "chunk_id": "6a1f1c571432456e92a961e1a0f4b70c_chunk_0037",
+      "type": "vague wording",
+      "severity": "Medium",
+      "quote": "Our consultants",
+      "reason": "The phrase is vague as it does not provide any information about the role, skills, or responsibilities of the consultants.",
+      "supporting_evidence": "No additional context is provided in the original text about what 'Our consultants' entails.",
+      "suggested_rewrite": "Our consultants are experienced professionals who provide strategic advice and support across various industries.",
+      "affected_claims": []
+    },
+    {
+      "issue_id": "6a1f1c571432456e92a961e1a0f4b70c_chunk_0038_amb_000",
+      "chunk_id": "6a1f1c571432456e92a961e1a0f4b70c_chunk_0038",
+      "type": "vague wording",
+      "severity": "Low",
+      "quote": "leading engineering consultancy and EPC firm",
+      "reason": "The term 'leading' is subjective and can vary in interpretation.",
+      "supporting_evidence": "Engineers India Limited: A leading engineering consultancy and EPC firm under the Ministry of Petroleum and Natural Gas, specialising in refineries, petrochemicals, and infrastructure projects in India and abroad.",
+      "suggested_rewrite": "A prominent engineering consultancy and EPC firm",
+      "affected_claims": [
+        "6a1f1c571432456e92a961e1a0f4b70c_chunk_0038_claim_000"
+      ]
+    },
+    {
+      "issue_id": "6a1f1c571432456e92a961e1a0f4b70c_chunk_0040_amb_000",
+      "chunk_id": "6a1f1c571432456e92a961e1a0f4b70c_chunk_0040",
+      "type": "vague wording",
+      "severity": "Medium",
+      "quote": "Our certifications",
+      "reason": "The phrase 'Our certifications' is vague and does not specify what certifications are being referred to.",
+      "supporting_evidence": "Document Section: Our certifications\nContent:\nOur certifications",
+      "suggested_rewrite": "We hold several industry-standard certifications.",
+      "affected_claims": [
+        "6a1f1c571432456e92a961e1a0f4b70c_chunk_0040_claim_000"
+      ]
+    },
+    {
+      "issue_id": "6a1f1c571432456e92a961e1a0f4b70c_chunk_0041_amb_000",
+      "chunk_id": "6a1f1c571432456e92a961e1a0f4b70c_chunk_0041",
+      "type": "vague wording",
+      "severity": "Low",
+      "quote": "Our businesses",
+      "reason": "The phrase is vague and does not provide specific information about the businesses being referred to.",
+      "supporting_evidence": "Document Section: Our businesses\nContent:\nOur businesses",
+      "suggested_rewrite": "Our various business units include [specific names or descriptions].",
+      "affected_claims": []
+    },
+    {
+      "issue_id": "6a1f1c571432456e92a961e1a0f4b70c_chunk_0042_amb_000",
+      "chunk_id": "6a1f1c571432456e92a961e1a0f4b70c_chunk_0042",
+      "type": "undefined terminology",
+      "severity": "Medium",
+      "quote": "sectors where we are present",
+      "reason": "It is unclear which specific sectors the company operates in.",
+      "supporting_evidence": "The text does not provide any details about the sectors in question.",
+      "suggested_rewrite": "The sectors where our businesses are present represent attractive growth proxies of the world's fastest growing major economy.",
+      "affected_claims": [
+        "6a1f1c571432456e92a961e1a0f4b70c_chunk_0042_claim_000"
+      ]
+    },
+    {
+      "issue_id": "6a1f1c571432456e92a961e1a0f4b70c_chunk_0042_amb_001",
+      "chunk_id": "6a1f1c571432456e92a961e1a0f4b70c_chunk_0042",
+      "type": "undefined terminology",
+      "severity": "Medium",
+      "quote": "world's fastest growing major economy",
+      "reason": "It is unclear which specific economy is being referred to as the world's fastest growing major economy.",
+      "supporting_evidence": "The text does not specify which economy or economies are considered the fastest growing major ones.",
+      "suggested_rewrite": "The sectors where our businesses are present represent attractive growth proxies of a specified world's fastest growing major economy.",
+      "affected_claims": [
+        "6a1f1c571432456e92a961e1a0f4b70c_chunk_0042_claim_000"
+      ]
+    },
+    {
+      "issue_id": "6a1f1c571432456e92a961e1a0f4b70c_chunk_0043_amb_000",
+      "chunk_id": "6a1f1c571432456e92a961e1a0f4b70c_chunk_0043",
+      "type": "vague wording",
+      "severity": "Medium",
+      "quote": "Bulk Material Handling",
+      "reason": "The term 'Bulk Material Handling' is a broad and generic phrase that does not provide specific details about the business activities, scope, or context related to bulk material handling.",
+      "supporting_evidence": "Document Section: Our businesses\nContent:\nBulk Material Handling",
+      "suggested_rewrite": "Provides services for the efficient storage, movement, and management of large quantities of raw materials and products.",
+      "affected_claims": []
+    },
+    {
+      "issue_id": "6a1f1c571432456e92a961e1a0f4b70c_chunk_0044_amb_000",
+      "chunk_id": "6a1f1c571432456e92a961e1a0f4b70c_chunk_0044",
+      "type": "vague wording",
+      "severity": "Low",
+      "quote": "Underground Coal Mining",
+      "reason": "The phrase is specific but does not explicitly state its relation to the businesses mentioned.",
+      "supporting_evidence": "'Underground Coal Mining' is mentioned without specifying its role or inclusion in our business portfolio.",
+      "suggested_rewrite": "Our businesses include Underground Coal Mining.",
+      "affected_claims": [
+        "6a1f1c571432456e92a961e1a0f4b70c_chunk_0044_claim_000"
+      ]
+    },
+    {
+      "issue_id": "6a1f1c571432456e92a961e1a0f4b70c_chunk_0045_amb_000",
+      "chunk_id": "6a1f1c571432456e92a961e1a0f4b70c_chunk_0045",
+      "type": "vague wording",
+      "severity": "Medium",
+      "quote": "Ash Handling",
+      "reason": "The term 'Ash Handling' is mentioned but its role, scope, or operations are not specified.",
+      "supporting_evidence": "Document Section: Our businesses\nContent:\nAsh Handling",
+      "suggested_rewrite": "Ash Handling is a business activity that involves...",
+      "affected_claims": [
+        "6a1f1c571432456e92a961e1a0f4b70c_chunk_0045_claim_000"
+      ]
+    },
+    {
+      "issue_id": "6a1f1c571432456e92a961e1a0f4b70c_chunk_0046_amb_000",
+      "chunk_id": "6a1f1c571432456e92a961e1a0f4b70c_chunk_0046",
+      "type": "vague wording",
+      "severity": "Medium",
+      "quote": "Coal Chemical",
+      "reason": "The text only mentions 'Coal Chemical' without providing any context or details about its nature, application, or significance in the business.",
+      "supporting_evidence": "Document Section: Our businesses\nContent:\nCoal Chemical",
+      "suggested_rewrite": "Coal Chemical products and their role within our businesses",
+      "affected_claims": []
+    },
+    {
+      "issue_id": "6a1f1c571432456e92a961e1a0f4b70c_chunk_0047_amb_000",
+      "chunk_id": "6a1f1c571432456e92a961e1a0f4b70c_chunk_0047",
+      "type": "vague wording",
+      "severity": "Medium",
+      "quote": "Manufacturing",
+      "reason": "The term 'Manufacturing' is too broad and does not specify what products are manufactured or the scale of manufacturing operations.",
+      "supporting_evidence": "Document Section: Our businesses\nContent:\nManufacturing",
+      "suggested_rewrite": "Our businesses engage in manufacturing activities.",
+      "affected_claims": [
+        "6a1f1c571432456e92a961e1a0f4b70c_chunk_0047_claim_000"
+      ]
+    },
+    {
+      "issue_id": "6a1f1c571432456e92a961e1a0f4b70c_chunk_0048_amb_000",
+      "chunk_id": "6a1f1c571432456e92a961e1a0f4b70c_chunk_0048",
+      "type": "vague wording",
+      "severity": "Medium",
+      "quote": "Defense",
+      "reason": "The term 'Defense' is vague and does not provide specific information about the context or scope of the defense business.",
+      "supporting_evidence": "Document Section: Our businesses\nContent:\nDefense",
+      "suggested_rewrite": "Details about the defense business operations, products, or services would help clarify this statement.",
+      "affected_claims": []
+    },
+    {
+      "issue_id": "6a1f1c571432456e92a961e1a0f4b70c_chunk_0049_amb_000",
+      "chunk_id": "6a1f1c571432456e92a961e1a0f4b70c_chunk_0049",
+      "type": "vague wording",
+      "severity": "Low",
+      "quote": "Special Business",
+      "reason": "The term 'Special Business' is not defined or further explained, which could lead to different interpretations of what it entails.",
+      "supporting_evidence": "Document Section: Our businesses\nContent:\nSpecial Business",
+      "suggested_rewrite": "Define what constitutes a 'Special Business' for clarity.",
+      "affected_claims": []
+    },
+    {
+      "issue_id": "6a1f1c571432456e92a961e1a0f4b70c_chunk_0050_amb_000",
+      "chunk_id": "6a1f1c571432456e92a961e1a0f4b70c_chunk_0050",
+      "type": "vague wording",
+      "severity": "Low",
+      "quote": "Agrimech",
+      "reason": "The mention of 'Agrimech' without additional context or information is vague.",
+      "supporting_evidence": "Document Section: Our businesses\nContent:\nAgrimech",
+      "suggested_rewrite": "Details about Agrimech should be provided to avoid vagueness.",
+      "affected_claims": []
+    },
+    {
+      "issue_id": "6a1f1c571432456e92a961e1a0f4b70c_chunk_0050_amb_001",
+      "chunk_id": "6a1f1c571432456e92a961e1a0f4b70c_chunk_0050",
+      "type": "undefined terminology",
+      "severity": "Medium",
+      "quote": "Agrimech",
+      "reason": "The term 'Agrimech' is not defined within the text, leaving it unclear what this refers to.",
+      "supporting_evidence": "Document Section: Our businesses\nContent:\nAgrimech",
+      "suggested_rewrite": "Provide a definition for Agrimech or additional context explaining its role or function.",
+      "affected_claims": []
+    },
+    {
+      "issue_id": "6a1f1c571432456e92a961e1a0f4b70c_chunk_0051_amb_000",
+      "chunk_id": "6a1f1c571432456e92a961e1a0f4b70c_chunk_0051",
+      "type": "vague wording",
+      "severity": "Low",
+      "quote": "Power Transmission",
+      "reason": "The term 'Power Transmission' is a general term and does not provide specific details about the business activities or products.",
+      "supporting_evidence": "The text only mentions 'Power Transmission' under 'Our businesses', without further description or context.",
+      "suggested_rewrite": "Provide more detailed information about the Power Transmission business, such as its focus areas, services, and market reach.",
+      "affected_claims": []
+    },
+    {
+      "issue_id": "6a1f1c571432456e92a961e1a0f4b70c_chunk_0052_amb_000",
+      "chunk_id": "6a1f1c571432456e92a961e1a0f4b70c_chunk_0052",
+      "type": "vague wording",
+      "severity": "Low",
+      "quote": "Water Management",
+      "reason": "The term 'Water Management' is too broad and does not specify what activities or responsibilities are included.",
+      "supporting_evidence": "Document Section: Our businesses\nContent:\nWater Management",
+      "suggested_rewrite": "Specific aspects of Water Management such as wastewater treatment, water supply management, etc., should be detailed.",
+      "affected_claims": []
+    },
+    {
+      "issue_id": "6a1f1c571432456e92a961e1a0f4b70c_chunk_0053_amb_000",
+      "chunk_id": "6a1f1c571432456e92a961e1a0f4b70c_chunk_0053",
+      "type": "vague wording",
+      "severity": "Low",
+      "quote": "Our business: Ash Handling Division",
+      "reason": "The statement is brief and does not provide specific details about the scope, responsibilities, or nature of the Ash Handling Division.",
+      "supporting_evidence": "",
+      "suggested_rewrite": "Our business includes an Ash Handling Division responsible for [specific tasks or description].",
+      "affected_claims": [
+        "6a1f1c571432456e92a961e1a0f4b70c_chunk_0053_claim_000"
+      ]
+    },
+    {
+      "issue_id": "6a1f1c571432456e92a961e1a0f4b70c_chunk_0054_amb_000",
+      "chunk_id": "6a1f1c571432456e92a961e1a0f4b70c_chunk_0054",
+      "type": "vague wording",
+      "severity": "Low",
+      "quote": "Overview",
+      "reason": "The term 'Overview' is vague and does not provide specific information about the content of the section.",
+      "supporting_evidence": "Document Section: Overview\nContent:\nOverview",
+      "suggested_rewrite": "A brief summary or introduction to the main topics covered in this document.",
+      "affected_claims": []
+    },
+    {
+      "issue_id": "6a1f1c571432456e92a961e1a0f4b70c_chunk_0055_amb_000",
+      "chunk_id": "6a1f1c571432456e92a961e1a0f4b70c_chunk_0055",
+      "type": "vague wording",
+      "severity": "Medium",
+      "quote": "gradual improvement in margins over the coming years",
+      "reason": "The phrase 'coming years' is vague and does not specify a timeframe.",
+      "supporting_evidence": "The Company anticipates a gradual improvement in margins over the coming years as experience and operational efficiencies grow.",
+      "suggested_rewrite": "The Company anticipates a gradual improvement in margins over the next five years as experience and operational efficiencies grow.",
+      "affected_claims": [
+        "6a1f1c571432456e92a961e1a0f4b70c_chunk_0055_claim_002"
+      ]
+    },
+    {
+      "issue_id": "6a1f1c571432456e92a961e1a0f4b70c_chunk_0056_amb_000",
+      "chunk_id": "6a1f1c571432456e92a961e1a0f4b70c_chunk_0056",
+      "type": "vague wording",
+      "severity": "Medium",
+      "quote": "Strengths",
+      "reason": "The text only contains the word 'Strengths' without any specific details or context about what strengths are being referred to.",
+      "supporting_evidence": "Document Section: Strengths\nContent:\nStrengths",
+      "suggested_rewrite": "List and describe the specific strengths of the subject matter being discussed in this section.",
+      "affected_claims": []
+    },
+    {
+      "issue_id": "6a1f1c571432456e92a961e1a0f4b70c_chunk_0057_amb_000",
+      "chunk_id": "6a1f1c571432456e92a961e1a0f4b70c_chunk_0057",
+      "type": "vague wording",
+      "severity": "Low",
+      "quote": "supported by key strengths:",
+      "reason": "The term 'key strengths' is vague and does not specify what those strengths are. This requires additional context to understand the specific advantages.",
+      "supporting_evidence": "BTL EPC's presence in the ash handling segment is supported by key strengths:",
+      "suggested_rewrite": "BTL EPC's presence in the ash handling segment is supported by several key strengths, including [specific examples].",
+      "affected_claims": [
+        "6a1f1c571432456e92a961e1a0f4b70c_chunk_0057_claim_000"
+      ]
+    },
+    {
+      "issue_id": "6a1f1c571432456e92a961e1a0f4b70c_chunk_0058_amb_000",
+      "chunk_id": "6a1f1c571432456e92a961e1a0f4b70c_chunk_0058",
+      "type": "vague wording",
+      "severity": "Low",
+      "quote": "cost effectiveness and quality",
+      "reason": "The terms 'cost effectiveness' and 'quality' are subjective and not quantified.",
+      "supporting_evidence": "In-house manufacturing facilities that ensure cost effectiveness and quality.",
+      "suggested_rewrite": "In-house manufacturing facilities that ensure cost-effective production and high-quality output.",
+      "affected_claims": [
+        "6a1f1c571432456e92a961e1a0f4b70c_chunk_0058_claim_003"
+      ]
+    },
+    {
+      "issue_id": "6a1f1c571432456e92a961e1a0f4b70c_chunk_0059_amb_000",
+      "chunk_id": "6a1f1c571432456e92a961e1a0f4b70c_chunk_0059",
+      "type": "vague wording",
+      "severity": "High",
+      "quote": "Policy",
+      "reason": "The term 'Policy' is too vague and does not provide any specific details or context about the policy in question.",
+      "supporting_evidence": "Document Section: Policy\nContent:\nPolicy",
+      "suggested_rewrite": "Specific Policy Name or Description of Policy Content",
+      "affected_claims": []
+    },
+    {
+      "issue_id": "6a1f1c571432456e92a961e1a0f4b70c_chunk_0060_amb_000",
+      "chunk_id": "6a1f1c571432456e92a961e1a0f4b70c_chunk_0060",
+      "type": "vague wording",
+      "severity": "Low",
+      "quote": "in an eco-friendly manner",
+      "reason": "The term 'eco-friendly' is vague and can be interpreted in multiple ways, which may lead to different understandings of what constitutes an eco-friendly method.",
+      "supporting_evidence": "enabling utilisation. Key measures include mandating 100% fly ash utilisation over a three-year cycle...",
+      "suggested_rewrite": "in a manner that minimizes environmental impact",
+      "affected_claims": [
+        "6a1f1c571432456e92a961e1a0f4b70c_chunk_0060_claim_000"
+      ]
+    },
+    {
+      "issue_id": "6a1f1c571432456e92a961e1a0f4b70c_chunk_0060_amb_001",
+      "chunk_id": "6a1f1c571432456e92a961e1a0f4b70c_chunk_0060",
+      "type": "vague wording",
+      "severity": "Low",
+      "quote": "Challenges and mitigations them at concessional rates or via limited auctions for use in manufacturing ash-based products.",
+      "reason": "The phrase is grammatically incorrect and vague, making it unclear what the challenges are or how they will be mitigated.",
+      "supporting_evidence": "The policy supports micro and small enterprises by requiring TPPs to reserve and supply fly ash to...",
+      "suggested_rewrite": "Challenges and mitigations include supporting micro and small enterprises by requiring TPPs to reserve and supply fly ash at concessional rates or via limited auctions for use in manufacturing ash-based products.",
+      "affected_claims": [
+        "6a1f1c571432456e92a961e1a0f4b70c_chunk_0060_ob_000"
+      ]
+    },
+    {
+      "issue_id": "6a1f1c571432456e92a961e1a0f4b70c_chunk_0061_amb_000",
+      "chunk_id": "6a1f1c571432456e92a961e1a0f4b70c_chunk_0061",
+      "type": "vague wording",
+      "severity": "Medium",
+      "quote": "Growth",
+      "reason": "The term 'Growth' is too broad and vague without additional context or definition.",
+      "supporting_evidence": "Document Section: Growth\nContent:\nGrowth",
+      "suggested_rewrite": "Define what aspect of growth is being discussed (e.g., economic growth, personal development).",
+      "affected_claims": []
+    },
+    {
+      "issue_id": "6a1f1c571432456e92a961e1a0f4b70c_chunk_0062_amb_000",
+      "chunk_id": "6a1f1c571432456e92a961e1a0f4b70c_chunk_0062",
+      "type": "vague wording",
+      "severity": "Low",
+      "quote": "The ash handling division at BTL EPC Ltd. demonstrated momentum in FY 2024-25",
+      "reason": "The term 'momentum' is vague and subjective without specific metrics or data points.",
+      "supporting_evidence": "While the text suggests growth, there's no explicit measurement provided to quantify this momentum.",
+      "suggested_rewrite": "The ash handling division at BTL EPC Ltd. showed significant revenue growth in FY 2024-25",
+      "affected_claims": [
+        "6a1f1c571432456e92a961e1a0f4b70c_chunk_0062_claim_000"
+      ]
+    },
+    {
+      "issue_id": "6a1f1c571432456e92a961e1a0f4b70c_chunk_0063_amb_000",
+      "chunk_id": "6a1f1c571432456e92a961e1a0f4b70c_chunk_0063",
+      "type": "vague wording",
+      "severity": "Medium",
+      "quote": "Limited sector-specific experience:",
+      "reason": "The statement is vague as it does not specify which sectors or the extent of the limited experience.",
+      "supporting_evidence": "The text only states 'Limited sector-specific experience:' without any additional information.",
+      "suggested_rewrite": "The individual has limited experience in specific sectors, including [list of sectors] and [duration/extent].",
+      "affected_claims": [
+        "6a1f1c571432456e92a961e1a0f4b70c_chunk_0063_claim_000"
+      ]
+    },
+    {
+      "issue_id": "6a1f1c571432456e92a961e1a0f4b70c_chunk_0064_amb_000",
+      "chunk_id": "6a1f1c571432456e92a961e1a0f4b70c_chunk_0064",
+      "type": "vague wording",
+      "severity": "Low",
+      "quote": "certain tenders",
+      "reason": "The phrase 'certain tenders' is vague as it does not specify which tenders are being referred to.",
+      "supporting_evidence": "Limited prior experience in ash handling made it difficult for BTL EPC to qualify independently for certain tenders.",
+      "suggested_rewrite": "Limited prior experience in ash handling made it difficult for BTL EPC to qualify independently for specific types of tenders related to ash handling projects.",
+      "affected_claims": [
+        "6a1f1c571432456e92a961e1a0f4b70c_chunk_0064_claim_000"
+      ]
+    },
+    {
+      "issue_id": "6a1f1c571432456e92a961e1a0f4b70c_chunk_0065_amb_000",
+      "chunk_id": "6a1f1c571432456e92a961e1a0f4b70c_chunk_0065",
+      "type": "vague wording",
+      "severity": "Medium",
+      "quote": "Highlights, FY 2024-25",
+      "reason": "The text is vague as it does not specify what highlights are being referred to for the fiscal year 2024-25.",
+      "supporting_evidence": "Document Section: Highlights, FY 2024-25\nContent:\nHighlights, FY 2024-25",
+      "suggested_rewrite": "Please provide specific highlights or details related to the fiscal year 2024-25.",
+      "affected_claims": []
+    },
+    {
+      "issue_id": "6a1f1c571432456e92a961e1a0f4b70c_chunk_0066_amb_000",
+      "chunk_id": "6a1f1c571432456e92a961e1a0f4b70c_chunk_0066",
+      "type": "vague wording",
+      "severity": "Low",
+      "quote": "Data-centric predictive analysis.",
+      "reason": "The term is used without specifying what type of data or the specific methods of analysis being employed.",
+      "supporting_evidence": "This vague claim could refer to any form of predictive analytics using data, which might not be clearly defined in this context.",
+      "suggested_rewrite": "BTL EPC is implementing data-centric predictive analysis to enhance project outcomes.",
+      "affected_claims": [
+        "6a1f1c571432456e92a961e1a0f4b70c_chunk_0066_claim_002"
+      ]
+    },
+    {
+      "issue_id": "6a1f1c571432456e92a961e1a0f4b70c_chunk_0067_amb_000",
+      "chunk_id": "6a1f1c571432456e92a961e1a0f4b70c_chunk_0067",
+      "type": "vague wording",
+      "severity": "Low",
+      "quote": "There is limited availability of qualified collaborator / consortium partners.",
+      "reason": "The term 'limited' is subjective and does not specify the extent of scarcity.",
+      "supporting_evidence": "No specific numbers or percentages are provided to quantify the limitation.",
+      "suggested_rewrite": "There is a shortage of qualified collaborator / consortium partners, with only a few meeting the necessary criteria.",
+      "affected_claims": [
+        "6a1f1c571432456e92a961e1a0f4b70c_chunk_0067_claim_000"
+      ]
+    },
+    {
+      "issue_id": "6a1f1c571432456e92a961e1a0f4b70c_chunk_0067_amb_001",
+      "chunk_id": "6a1f1c571432456e92a961e1a0f4b70c_chunk_0067",
+      "type": "passive wording",
+      "severity": "Low",
+      "quote": "The Company undertook aggressive marketing to seek a relaxation in some pre-qualification criteria from clients and explore possibilities of tie-ups.",
+      "reason": "The use of passive voice makes the sentence less direct.",
+      "supporting_evidence": "The subject (the Company) is performing the action but it could be clearer by using active voice.",
+      "suggested_rewrite": "The Company aggressively marketed to seek a relaxation in some pre-qualification criteria from clients and explore possibilities of tie-ups.",
+      "affected_claims": [
+        "6a1f1c571432456e92a961e1a0f4b70c_chunk_0067_claim_001"
+      ]
+    },
+    {
+      "issue_id": "6a1f1c571432456e92a961e1a0f4b70c_chunk_0068_amb_000",
+      "chunk_id": "6a1f1c571432456e92a961e1a0f4b70c_chunk_0068",
+      "type": "vague wording",
+      "severity": "Low",
+      "quote": "Our business: Bulk Material Handling Division",
+      "reason": "The statement is vague as it does not provide specific details about the business activities or responsibilities of the Bulk Material Handling Division.",
+      "supporting_evidence": "The text only labels the division without describing its function or role within the company.",
+      "suggested_rewrite": "Our business includes a Bulk Material Handling Division, responsible for managing large volumes of materials.",
+      "affected_claims": [
+        "6a1f1c571432456e92a961e1a0f4b70c_chunk_0068_claim_000"
+      ]
+    },
+    {
+      "issue_id": "6a1f1c571432456e92a961e1a0f4b70c_chunk_0069_amb_000",
+      "chunk_id": "6a1f1c571432456e92a961e1a0f4b70c_chunk_0069",
+      "type": "vague wording",
+      "severity": "Low",
+      "quote": "Overview",
+      "reason": "The term 'Overview' is too general and does not provide any specific information or context about the content.",
+      "supporting_evidence": "Document Section: Overview\nContent:\nOverview",
+      "suggested_rewrite": "A detailed introduction to the main topics covered in this document.",
+      "affected_claims": []
+    },
+    {
+      "issue_id": "6a1f1c571432456e92a961e1a0f4b70c_chunk_0070_amb_000",
+      "chunk_id": "6a1f1c571432456e92a961e1a0f4b70c_chunk_0070",
+      "type": "vague wording",
+      "severity": "Low",
+      "quote": "Bulk Material Handling Systems",
+      "reason": "The phrase is a title or section heading and does not provide detailed information about the systems, leading to vagueness.",
+      "supporting_evidence": "No additional context or description is provided in the text.",
+      "suggested_rewrite": "A description of Bulk Material Handling Systems should be included for clarity.",
+      "affected_claims": []
+    },
+    {
+      "issue_id": "6a1f1c571432456e92a961e1a0f4b70c_chunk_0071_amb_000",
+      "chunk_id": "6a1f1c571432456e92a961e1a0f4b70c_chunk_0071",
+      "type": "vague wording",
+      "severity": "Medium",
+      "quote": "Key elements of Bulk Material Handling system",
+      "reason": "The term 'key elements' is vague and does not specify what these elements are.",
+      "supporting_evidence": "Document Section: Key elements of Bulk Material Handling system",
+      "suggested_rewrite": "Bulk Material Handling system includes essential components such as conveyors, storage bins, and loading/unloading equipment.",
+      "affected_claims": [
+        "6a1f1c571432456e92a961e1a0f4b70c_chunk_0071_claim_000"
+      ]
+    },
+    {
+      "issue_id": "6a1f1c571432456e92a961e1a0f4b70c_chunk_0072_amb_000",
+      "chunk_id": "6a1f1c571432456e92a961e1a0f4b70c_chunk_0072",
+      "type": "vague wording",
+      "severity": "Low",
+      "quote": "turnkey solutions from design to commissioning",
+      "reason": "The phrase 'turnkey solutions' is defined in the definitions section, but it could still be vague without more context on what aspects are included.",
+      "supporting_evidence": "Its offerings include conveyors, paddle feeders, hoists, and related equipment, delivering end-to-end systems for coal, iron ore, and other minerals, including conveying, crushing, and stacking for power, steel plants, fertilisers and process plant.",
+      "suggested_rewrite": "The Company provides comprehensive turnkey solutions from initial design to final commissioning, including conveying, crushing, and stacking equipment for various applications.",
+      "affected_claims": [
+        "6a1f1c571432456e92a961e1a0f4b70c_chunk_0072_claim_001"
+      ]
+    },
+    {
+      "issue_id": "6a1f1c571432456e92a961e1a0f4b70c_chunk_0073_amb_000",
+      "chunk_id": "6a1f1c571432456e92a961e1a0f4b70c_chunk_0073",
+      "type": "vague wording",
+      "severity": "Low",
+      "quote": "Projects",
+      "reason": "The text is vague as it does not provide any details about the projects.",
+      "supporting_evidence": "Document Section: Projects\nContent:\nProjects",
+      "suggested_rewrite": "Provide a detailed description of the projects included in this section.",
+      "affected_claims": []
+    },
+    {
+      "issue_id": "6a1f1c571432456e92a961e1a0f4b70c_chunk_0074_amb_000",
+      "chunk_id": "6a1f1c571432456e92a961e1a0f4b70c_chunk_0074",
+      "type": "undefined terminology",
+      "severity": "Low",
+      "quote": "BIFPCL Bangaldesh Maitree",
+      "reason": "The acronym BIFPCL and the location 'Bangaldesh' are undefined in the text.",
+      "supporting_evidence": "Coal handling plant, BIFPCL Bangaldesh Maitree",
+      "suggested_rewrite": "Coal handling plant, BIFPCL Bangladesh Maitree (assuming it's a typo for Bangladesh)",
+      "affected_claims": [
+        "6a1f1c571432456e92a961e1a0f4b70c_chunk_0074_claim_000"
+      ]
+    },
+    {
+      "issue_id": "6a1f1c571432456e92a961e1a0f4b70c_chunk_0075_amb_000",
+      "chunk_id": "6a1f1c571432456e92a961e1a0f4b70c_chunk_0075",
+      "type": "vague wording",
+      "severity": "Medium",
+      "quote": "Bulk Material Handling systems are widely used in:",
+      "reason": "The statement is incomplete and does not specify the areas or industries where these systems are used, leading to ambiguity.",
+      "supporting_evidence": "The sentence ends with a colon, indicating that more information should follow but does not provide it.",
+      "suggested_rewrite": "Bulk Material Handling systems are widely used in various industries such as manufacturing, agriculture, and construction.",
+      "affected_claims": [
+        "6a1f1c571432456e92a961e1a0f4b70c_chunk_0075_claim_000"
+      ]
+    },
+    {
+      "issue_id": "6a1f1c571432456e92a961e1a0f4b70c_chunk_0076_amb_000",
+      "chunk_id": "6a1f1c571432456e92a961e1a0f4b70c_chunk_0076",
+      "type": "vague wording",
+      "severity": "Low",
+      "quote": "Bulk Material Handling systems are widely used in:",
+      "reason": "The phrase 'widely used' is vague and does not specify the extent or frequency of use.",
+      "supporting_evidence": "Document Section: Bulk Material Handling systems are widely used in: Content: *  Mining and minerals...",
+      "suggested_rewrite": "Bulk Material Handling systems are extensively used in:",
+      "affected_claims": [
+        "6a1f1c571432456e92a961e1a0f4b70c_chunk_0076_claim_000"
+      ]
+    },
+    {
+      "issue_id": "6a1f1c571432456e92a961e1a0f4b70c_chunk_0077_amb_000",
+      "chunk_id": "6a1f1c571432456e92a961e1a0f4b70c_chunk_0077",
+      "type": "vague wording",
+      "severity": "Low",
+      "quote": "Project milestones",
+      "reason": "The phrase 'Project milestones' is vague as it does not specify what the milestones are or their significance.",
+      "supporting_evidence": "Content: Project milestones",
+      "suggested_rewrite": "Define specific project milestones and their importance for clarity.",
+      "affected_claims": []
+    },
+    {
+      "issue_id": "6a1f1c571432456e92a961e1a0f4b70c_chunk_0078_amb_000",
+      "chunk_id": "6a1f1c571432456e92a961e1a0f4b70c_chunk_0078",
+      "type": "numerical ambiguity",
+      "severity": "Medium",
+      "quote": "45+ projects completed valued around 1500 Crore+",
+      "reason": "The use of '+', 'around' and the lack of specific figures introduce some ambiguity.",
+      "supporting_evidence": "*  Total 45+ projects completed valued around 1500 Crore+",
+      "suggested_rewrite": "Total more than 45 projects completed valued approximately 1500 Crores or more",
+      "affected_claims": [
+        "6a1f1c571432456e92a961e1a0f4b70c_chunk_0078_claim_000"
+      ]
+    },
+    {
+      "issue_id": "6a1f1c571432456e92a961e1a0f4b70c_chunk_0078_amb_001",
+      "chunk_id": "6a1f1c571432456e92a961e1a0f4b70c_chunk_0078",
+      "type": "numerical ambiguity",
+      "severity": "Medium",
+      "quote": "20+ projects Ongoing valued around 4500 Crore+",
+      "reason": "The use of '+', 'around' and the lack of specific figures introduce some ambiguity.",
+      "supporting_evidence": "*  Total 20+ projects Ongoing valued around 4500 Crore+",
+      "suggested_rewrite": "Total more than 20 ongoing projects valued approximately 4500 Crores or more",
+      "affected_claims": [
+        "6a1f1c571432456e92a961e1a0f4b70c_chunk_0078_claim_001"
+      ]
+    },
+    {
+      "issue_id": "6a1f1c571432456e92a961e1a0f4b70c_chunk_0079_amb_000",
+      "chunk_id": "6a1f1c571432456e92a961e1a0f4b70c_chunk_0079",
+      "type": "vague wording",
+      "severity": "Medium",
+      "quote": "outperform",
+      "reason": "'Outperform' is vague as it does not specify what or whom we are outperforming.",
+      "supporting_evidence": "We have demonstrated a commitment to embrace challenging projects and outperform",
+      "suggested_rewrite": "We have demonstrated a commitment to embrace challenging projects and outperform industry standards.",
+      "affected_claims": [
+        "6a1f1c571432456e92a961e1a0f4b70c_chunk_0079_claim_000"
+      ]
+    },
+    {
+      "issue_id": "6a1f1c571432456e92a961e1a0f4b70c_chunk_0080_amb_000",
+      "chunk_id": "6a1f1c571432456e92a961e1a0f4b70c_chunk_0080",
+      "type": "vague wording",
+      "severity": "Low",
+      "quote": "The location of the project was marked by law-and-order issues and political sensitivities.",
+      "reason": "While this statement is clear, it uses vague terms that could be interpreted differently based on context. 'Law-and-order issues' and 'political sensitivities' are subjective and not well-defined.",
+      "supporting_evidence": "The location of the project was marked by law-and-order issues and political sensitivities. The project posed operational and logistical challenges on account of extensive civil works, structural steel fabrication, and complex mechanical, electrical, control cum instrumentation and utility systems integration.",
+      "suggested_rewrite": "The location of the project was characterized by significant security challenges and politically sensitive circumstances.",
+      "affected_claims": []
+    },
+    {
+      "issue_id": "6a1f1c571432456e92a961e1a0f4b70c_chunk_0081_amb_000",
+      "chunk_id": "6a1f1c571432456e92a961e1a0f4b70c_chunk_0081",
+      "type": "temporal ambiguity",
+      "severity": "Medium",
+      "quote": "The project was completed successfully without any delay.",
+      "reason": "The claim of 'without any delay' contradicts the mentioned challenges and delays in other parts of the text.",
+      "supporting_evidence": "Despite statutory hurdles, political unrest, as well as time and cost overruns, BTL EPC completed the project.",
+      "suggested_rewrite": "The project was completed successfully with some delays due to statutory hurdles, political unrest, and cost overruns.",
+      "affected_claims": [
+        "6a1f1c571432456e92a961e1a0f4b70c_chunk_0081_claim_003"
+      ]
+    },
+    {
+      "issue_id": "6a1f1c571432456e92a961e1a0f4b70c_chunk_0083_amb_000",
+      "chunk_id": "6a1f1c571432456e92a961e1a0f4b70c_chunk_0083",
+      "type": "vague wording",
+      "severity": "Low",
+      "quote": "both projects are progressing at full pace",
+      "reason": "The phrase 'both projects' is vague as it does not specify which projects are being referred to.",
+      "supporting_evidence": "The text mentions overcoming bottlenecks and refers to two unspecified projects without providing their names or identifiers.",
+      "suggested_rewrite": "Both specified projects are progressing at full pace.",
+      "affected_claims": [
+        "6a1f1c571432456e92a961e1a0f4b70c_chunk_0083_claim_000"
+      ]
+    },
+    {
+      "issue_id": "6a1f1c571432456e92a961e1a0f4b70c_chunk_0084_amb_000",
+      "chunk_id": "6a1f1c571432456e92a961e1a0f4b70c_chunk_0084",
+      "type": "vague wording",
+      "severity": "Low",
+      "quote": "Our business: Coal Chemical Division",
+      "reason": "The statement is vague as it does not provide specific details about the nature of the business or what services/products are provided by the Coal Chemical Division.",
+      "supporting_evidence": "Document Section: Our business: Coal Chemical Division Content: Our business: Coal Chemical Division",
+      "suggested_rewrite": "Our business includes operations in the Coal Chemical Division, which focuses on processing coal into various chemical products and intermediates.",
+      "affected_claims": [
+        "6a1f1c571432456e92a961e1a0f4b70c_chunk_0084_claim_000"
+      ]
+    },
+    {
+      "issue_id": "6a1f1c571432456e92a961e1a0f4b70c_chunk_0085_amb_000",
+      "chunk_id": "6a1f1c571432456e92a961e1a0f4b70c_chunk_0085",
+      "type": "vague wording",
+      "severity": "Medium",
+      "quote": "Overview",
+      "reason": "The text only contains the word 'Overview' without any additional information or context, making it vague and unclear what is being overviewed.",
+      "supporting_evidence": "",
+      "suggested_rewrite": "Provide a detailed overview of [specific topic/section].",
+      "affected_claims": []
+    },
+    {
+      "issue_id": "6a1f1c571432456e92a961e1a0f4b70c_chunk_0086_amb_000",
+      "chunk_id": "6a1f1c571432456e92a961e1a0f4b70c_chunk_0086",
+      "type": "vague wording",
+      "severity": "Low",
+      "quote": "turnkey coal chemical handling solutions",
+      "reason": "The term 'turnkey' can be vague and might not be universally understood to encompass all aspects of the service.",
+      "supporting_evidence": "The Company delivers turnkey coal chemical handling solutions, including coal blending, feeding, and specialised chemical plant units.",
+      "suggested_rewrite": "The Company provides comprehensive coal chemical handling solutions, including coal blending, feeding, and specialized chemical plant units, covering all aspects from design to commissioning.",
+      "affected_claims": [
+        "6a1f1c571432456e92a961e1a0f4b70c_chunk_0086_claim_000"
+      ]
+    },
+    {
+      "issue_id": "6a1f1c571432456e92a961e1a0f4b70c_chunk_0087_amb_000",
+      "chunk_id": "6a1f1c571432456e92a961e1a0f4b70c_chunk_0087",
+      "type": "vague wording",
+      "severity": "Medium",
+      "quote": "Core functions of Coal Chemical Division",
+      "reason": "The phrase is vague and does not specify what the core functions are.",
+      "supporting_evidence": "The original text only mentions 'Core functions of Coal Chemical Division' without detailing what these functions entail.",
+      "suggested_rewrite": "The primary responsibilities or activities of the Coal Chemical Division include...",
+      "affected_claims": []
+    },
+    {
+      "issue_id": "6a1f1c571432456e92a961e1a0f4b70c_chunk_0088_amb_000",
+      "chunk_id": "6a1f1c571432456e92a961e1a0f4b70c_chunk_0088",
+      "type": "undefined terminology",
+      "severity": "Low",
+      "quote": "COG",
+      "reason": "The abbreviation 'COG' is defined in the context but may not be understood by all readers without prior knowledge.",
+      "supporting_evidence": "Coke oven gas treatment: Cooling, cleaning, and purifying COG.\n\nDefinitions:\n- COG: Coke Oven Gas",
+      "suggested_rewrite": "Coke oven gas treatment: Cooling, cleaning, and purifying coke oven gas (COG).",
+      "affected_claims": [
+        "6a1f1c571432456e92a961e1a0f4b70c_chunk_0088_claim_000"
+      ]
+    },
+    {
+      "issue_id": "6a1f1c571432456e92a961e1a0f4b70c_chunk_0089_amb_000",
+      "chunk_id": "6a1f1c571432456e92a961e1a0f4b70c_chunk_0089",
+      "type": "vague wording",
+      "severity": "Medium",
+      "quote": "Projects",
+      "reason": "The term 'Projects' is vague without additional context about what specific projects are being referred to.",
+      "supporting_evidence": "Document Section: Projects\nContent:\nProjects",
+      "suggested_rewrite": "Specify the types of projects or provide details about the projects being discussed.",
+      "affected_claims": []
+    },
+    {
+      "issue_id": "6a1f1c571432456e92a961e1a0f4b70c_chunk_0091_amb_000",
+      "chunk_id": "6a1f1c571432456e92a961e1a0f4b70c_chunk_0091",
+      "type": "vague wording",
+      "severity": "Low",
+      "quote": "other chemicals",
+      "reason": "The term 'other chemicals' is vague and does not specify what other chemicals are being extracted.",
+      "supporting_evidence": "Extraction of tar, ammonia, benzol, and other chemicals.",
+      "suggested_rewrite": "Extraction of tar, ammonia, benzol, and other specified chemicals.",
+      "affected_claims": [
+        "6a1f1c571432456e92a961e1a0f4b70c_chunk_0091_claim_000"
+      ]
+    },
+    {
+      "issue_id": "6a1f1c571432456e92a961e1a0f4b70c_chunk_0092_amb_000",
+      "chunk_id": "6a1f1c571432456e92a961e1a0f4b70c_chunk_0092",
+      "type": "vague wording",
+      "severity": "Medium",
+      "quote": "Project milestones",
+      "reason": "The phrase is too broad and does not provide specific information about the milestones, their goals, or timelines.",
+      "supporting_evidence": "No additional details are provided in the given text to clarify what the project milestones entail.",
+      "suggested_rewrite": "Define key project milestones including their objectives and expected completion dates.",
+      "affected_claims": []
+    },
+    {
+      "issue_id": "6a1f1c571432456e92a961e1a0f4b70c_chunk_0093_amb_000",
+      "chunk_id": "6a1f1c571432456e92a961e1a0f4b70c_chunk_0093",
+      "type": "temporal ambiguity",
+      "severity": "Medium",
+      "quote": "Total 10+ projects completed valued around 500 Cr+",
+      "reason": "The timeframe for project completion is not specified.",
+      "supporting_evidence": "The claim mentions completed projects but does not provide a timeline.",
+      "suggested_rewrite": "Total 10+ projects completed (within a specified timeframe) valued around 500 Cr+",
+      "affected_claims": [
+        "6a1f1c571432456e92a961e1a0f4b70c_chunk_0093_claim_000"
+      ]
+    },
+    {
+      "issue_id": "6a1f1c571432456e92a961e1a0f4b70c_chunk_0093_amb_001",
+      "chunk_id": "6a1f1c571432456e92a961e1a0f4b70c_chunk_0093",
+      "type": "vague wording",
+      "severity": "Medium",
+      "quote": "Total 5+ projects Ongoing valued around 200 Cr+",
+      "reason": "The status and current progress of the ongoing projects are not clearly defined.",
+      "supporting_evidence": "The claim indicates that projects are ongoing but does not specify their current status or expected completion timeline.",
+      "suggested_rewrite": "Total 5+ projects currently ongoing and valued around 200 Cr+",
+      "affected_claims": [
+        "6a1f1c571432456e92a961e1a0f4b70c_chunk_0093_claim_001"
+      ]
+    }
+  ]
+}

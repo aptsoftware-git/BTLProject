@@ -1,0 +1,358 @@
+{
+  "references": [
+    {
+      "reference_id": "a8619fd4ae194817a13dad90f43659f8_chunk_0002_ref_000",
+      "target": "Document Section: 1",
+      "type": "section",
+      "chunk_id": "a8619fd4ae194817a13dad90f43659f8_chunk_0002"
+    },
+    {
+      "reference_id": "a8619fd4ae194817a13dad90f43659f8_chunk_0003_ref_000",
+      "target": "1.1 History",
+      "type": "section",
+      "chunk_id": "a8619fd4ae194817a13dad90f43659f8_chunk_0003"
+    },
+    {
+      "reference_id": "a8619fd4ae194817a13dad90f43659f8_chunk_0003_ref_001",
+      "target": "1.2 Mission",
+      "type": "section",
+      "chunk_id": "a8619fd4ae194817a13dad90f43659f8_chunk_0003"
+    },
+    {
+      "reference_id": "a8619fd4ae194817a13dad90f43659f8_chunk_0003_ref_002",
+      "target": "1.3 Vision",
+      "type": "section",
+      "chunk_id": "a8619fd4ae194817a13dad90f43659f8_chunk_0003"
+    },
+    {
+      "reference_id": "a8619fd4ae194817a13dad90f43659f8_chunk_0003_ref_003",
+      "target": "1.4 Values",
+      "type": "section",
+      "chunk_id": "a8619fd4ae194817a13dad90f43659f8_chunk_0003"
+    },
+    {
+      "reference_id": "a8619fd4ae194817a13dad90f43659f8_chunk_0004_ref_000",
+      "target": "Section 9 (Compliance)",
+      "type": "section",
+      "chunk_id": "a8619fd4ae194817a13dad90f43659f8_chunk_0004"
+    },
+    {
+      "reference_id": "a8619fd4ae194817a13dad90f43659f8_chunk_0005_ref_000",
+      "target": "1.1 History",
+      "type": "section",
+      "chunk_id": "a8619fd4ae194817a13dad90f43659f8_chunk_0005"
+    },
+    {
+      "reference_id": "a8619fd4ae194817a13dad90f43659f8_chunk_0005_ref_001",
+      "target": "1.2 Mission",
+      "type": "section",
+      "chunk_id": "a8619fd4ae194817a13dad90f43659f8_chunk_0005"
+    },
+    {
+      "reference_id": "a8619fd4ae194817a13dad90f43659f8_chunk_0005_ref_002",
+      "target": "1.3 Vision",
+      "type": "section",
+      "chunk_id": "a8619fd4ae194817a13dad90f43659f8_chunk_0005"
+    },
+    {
+      "reference_id": "a8619fd4ae194817a13dad90f43659f8_chunk_0005_ref_003",
+      "target": "1.4 Values",
+      "type": "section",
+      "chunk_id": "a8619fd4ae194817a13dad90f43659f8_chunk_0005"
+    },
+    {
+      "reference_id": "a8619fd4ae194817a13dad90f43659f8_chunk_0007_ref_000",
+      "target": "2",
+      "type": "section",
+      "chunk_id": "a8619fd4ae194817a13dad90f43659f8_chunk_0007"
+    },
+    {
+      "reference_id": "a8619fd4ae194817a13dad90f43659f8_chunk_0008_ref_000",
+      "target": "2.1 Leave Policy",
+      "type": "section",
+      "chunk_id": "a8619fd4ae194817a13dad90f43659f8_chunk_0008"
+    },
+    {
+      "reference_id": "a8619fd4ae194817a13dad90f43659f8_chunk_0008_ref_001",
+      "target": "2.2 Attendance",
+      "type": "section",
+      "chunk_id": "a8619fd4ae194817a13dad90f43659f8_chunk_0008"
+    },
+    {
+      "reference_id": "a8619fd4ae194817a13dad90f43659f8_chunk_0008_ref_002",
+      "target": "2.3 Code of Conduct",
+      "type": "section",
+      "chunk_id": "a8619fd4ae194817a13dad90f43659f8_chunk_0008"
+    },
+    {
+      "reference_id": "a8619fd4ae194817a13dad90f43659f8_chunk_0009_ref_000",
+      "target": "Page 4 of the original policy circular",
+      "type": "section",
+      "chunk_id": "a8619fd4ae194817a13dad90f43659f8_chunk_0009"
+    },
+    {
+      "reference_id": "a8619fd4ae194817a13dad90f43659f8_chunk_0009_ref_001",
+      "target": "Page 18 of the same circular (Annexure update)",
+      "type": "section",
+      "chunk_id": "a8619fd4ae194817a13dad90f43659f8_chunk_0009"
+    },
+    {
+      "reference_id": "a8619fd4ae194817a13dad90f43659f8_chunk_0010_ref_000",
+      "target": "Section 3",
+      "type": "section",
+      "chunk_id": "a8619fd4ae194817a13dad90f43659f8_chunk_0010"
+    },
+    {
+      "reference_id": "a8619fd4ae194817a13dad90f43659f8_chunk_0011_ref_000",
+      "target": "Page 25 (FY24 operating-model update)",
+      "type": "section",
+      "chunk_id": "a8619fd4ae194817a13dad90f43659f8_chunk_0011"
+    },
+    {
+      "reference_id": "a8619fd4ae194817a13dad90f43659f8_chunk_0012_ref_000",
+      "target": "Section 4",
+      "type": "section",
+      "chunk_id": "a8619fd4ae194817a13dad90f43659f8_chunk_0012"
+    },
+    {
+      "reference_id": "a8619fd4ae194817a13dad90f43659f8_chunk_0013_ref_000",
+      "target": "Document Section: 4 Travel Policy",
+      "type": "section",
+      "chunk_id": "a8619fd4ae194817a13dad90f43659f8_chunk_0013"
+    },
+    {
+      "reference_id": "a8619fd4ae194817a13dad90f43659f8_chunk_0014_ref_000",
+      "target": "Document Section: 5",
+      "type": "section",
+      "chunk_id": "a8619fd4ae194817a13dad90f43659f8_chunk_0014"
+    },
+    {
+      "reference_id": "a8619fd4ae194817a13dad90f43659f8_chunk_0016_ref_000",
+      "target": "Appendix B",
+      "type": "appendix",
+      "chunk_id": "a8619fd4ae194817a13dad90f43659f8_chunk_0016"
+    },
+    {
+      "reference_id": "a8619fd4ae194817a13dad90f43659f8_chunk_0017_ref_000",
+      "target": "Fig 1 -Vertexa AI Platform architecture",
+      "type": "figure",
+      "chunk_id": "a8619fd4ae194817a13dad90f43659f8_chunk_0017"
+    },
+    {
+      "reference_id": "a8619fd4ae194817a13dad90f43659f8_chunk_0018_ref_000",
+      "target": "Document Section: 6",
+      "type": "section",
+      "chunk_id": "a8619fd4ae194817a13dad90f43659f8_chunk_0018"
+    },
+    {
+      "reference_id": "a8619fd4ae194817a13dad90f43659f8_chunk_0019_ref_000",
+      "target": "Document Section: 6 Finance",
+      "type": "section",
+      "chunk_id": "a8619fd4ae194817a13dad90f43659f8_chunk_0019"
+    },
+    {
+      "reference_id": "a8619fd4ae194817a13dad90f43659f8_chunk_0020_ref_000",
+      "target": "Table 1 -Quarterly revenue, as published in the Q4 board deck.",
+      "type": "table",
+      "chunk_id": "a8619fd4ae194817a13dad90f43659f8_chunk_0020"
+    },
+    {
+      "reference_id": "a8619fd4ae194817a13dad90f43659f8_chunk_0021_ref_000",
+      "target": "Table 1",
+      "type": "table",
+      "chunk_id": "a8619fd4ae194817a13dad90f43659f8_chunk_0021"
+    },
+    {
+      "reference_id": "a8619fd4ae194817a13dad90f43659f8_chunk_0021_ref_001",
+      "target": "Q4 board deck",
+      "type": "figure",
+      "chunk_id": "a8619fd4ae194817a13dad90f43659f8_chunk_0021"
+    },
+    {
+      "reference_id": "a8619fd4ae194817a13dad90f43659f8_chunk_0022_ref_000",
+      "target": "Document Section: 7",
+      "type": "section",
+      "chunk_id": "a8619fd4ae194817a13dad90f43659f8_chunk_0022"
+    },
+    {
+      "reference_id": "a8619fd4ae194817a13dad90f43659f8_chunk_0023_ref_000",
+      "target": "Fig. 1",
+      "type": "figure",
+      "chunk_id": "a8619fd4ae194817a13dad90f43659f8_chunk_0023"
+    },
+    {
+      "reference_id": "a8619fd4ae194817a13dad90f43659f8_chunk_0024_ref_000",
+      "target": "Document Section: 7",
+      "type": "section",
+      "chunk_id": "a8619fd4ae194817a13dad90f43659f8_chunk_0024"
+    },
+    {
+      "reference_id": "a8619fd4ae194817a13dad90f43659f8_chunk_0025_ref_000",
+      "target": "Table 2 - Core platform modules.",
+      "type": "table",
+      "chunk_id": "a8619fd4ae194817a13dad90f43659f8_chunk_0025"
+    },
+    {
+      "reference_id": "a8619fd4ae194817a13dad90f43659f8_chunk_0026_ref_000",
+      "target": "Customer Support",
+      "type": "section",
+      "chunk_id": "a8619fd4ae194817a13dad90f43659f8_chunk_0026"
+    },
+    {
+      "reference_id": "a8619fd4ae194817a13dad90f43659f8_chunk_0027_ref_000",
+      "target": "Fig 2 -Support escalation workflow",
+      "type": "figure",
+      "chunk_id": "a8619fd4ae194817a13dad90f43659f8_chunk_0027"
+    },
+    {
+      "reference_id": "a8619fd4ae194817a13dad90f43659f8_chunk_0029_ref_000",
+      "target": "Appendix B",
+      "type": "appendix",
+      "chunk_id": "a8619fd4ae194817a13dad90f43659f8_chunk_0029"
+    },
+    {
+      "reference_id": "a8619fd4ae194817a13dad90f43659f8_chunk_0031_ref_000",
+      "target": "Section 10.3, Extended Scenarios",
+      "type": "section",
+      "chunk_id": "a8619fd4ae194817a13dad90f43659f8_chunk_0031"
+    },
+    {
+      "reference_id": "a8619fd4ae194817a13dad90f43659f8_chunk_0032_ref_000",
+      "target": "Document Section: 11 Technical Architecture",
+      "type": "section",
+      "chunk_id": "a8619fd4ae194817a13dad90f43659f8_chunk_0032"
+    },
+    {
+      "reference_id": "a8619fd4ae194817a13dad90f43659f8_chunk_0033_ref_000",
+      "target": "Fig. 1",
+      "type": "figure",
+      "chunk_id": "a8619fd4ae194817a13dad90f43659f8_chunk_0033"
+    },
+    {
+      "reference_id": "a8619fd4ae194817a13dad90f43659f8_chunk_0034_ref_000",
+      "target": "Organization chart (Appendix A)",
+      "type": "figure",
+      "chunk_id": "a8619fd4ae194817a13dad90f43659f8_chunk_0034"
+    },
+    {
+      "reference_id": "a8619fd4ae194817a13dad90f43659f8_chunk_0035_ref_000",
+      "target": "Procurement",
+      "type": "section",
+      "chunk_id": "a8619fd4ae194817a13dad90f43659f8_chunk_0035"
+    },
+    {
+      "reference_id": "a8619fd4ae194817a13dad90f43659f8_chunk_0036_ref_000",
+      "target": "Document Section: 12",
+      "type": "section",
+      "chunk_id": "a8619fd4ae194817a13dad90f43659f8_chunk_0036"
+    },
+    {
+      "reference_id": "a8619fd4ae194817a13dad90f43659f8_chunk_0037_ref_000",
+      "target": "Document Section: 12 Procurement",
+      "type": "section",
+      "chunk_id": "a8619fd4ae194817a13dad90f43659f8_chunk_0037"
+    },
+    {
+      "reference_id": "a8619fd4ae194817a13dad90f43659f8_chunk_0038_ref_000",
+      "target": "Appendix C",
+      "type": "appendix",
+      "chunk_id": "a8619fd4ae194817a13dad90f43659f8_chunk_0038"
+    },
+    {
+      "reference_id": "a8619fd4ae194817a13dad90f43659f8_chunk_0039_ref_000",
+      "target": "Table 3 -Procurement categories and limits.",
+      "type": "table",
+      "chunk_id": "a8619fd4ae194817a13dad90f43659f8_chunk_0039"
+    },
+    {
+      "reference_id": "a8619fd4ae194817a13dad90f43659f8_chunk_0040_ref_000",
+      "target": "Document Section: 13",
+      "type": "section",
+      "chunk_id": "a8619fd4ae194817a13dad90f43659f8_chunk_0040"
+    },
+    {
+      "reference_id": "a8619fd4ae194817a13dad90f43659f8_chunk_0041_ref_000",
+      "target": "Benefits Guide",
+      "type": "System",
+      "chunk_id": "a8619fd4ae194817a13dad90f43659f8_chunk_0041"
+    },
+    {
+      "reference_id": "a8619fd4ae194817a13dad90f43659f8_chunk_0041_ref_001",
+      "target": "Total Rewards page",
+      "type": "System",
+      "chunk_id": "a8619fd4ae194817a13dad90f43659f8_chunk_0041"
+    },
+    {
+      "reference_id": "a8619fd4ae194817a13dad90f43659f8_chunk_0042_ref_000",
+      "target": "14  Legal",
+      "type": "section",
+      "chunk_id": "a8619fd4ae194817a13dad90f43659f8_chunk_0042"
+    },
+    {
+      "reference_id": "a8619fd4ae194817a13dad90f43659f8_chunk_0044_ref_000",
+      "target": "Frequently Asked Questions",
+      "type": "section",
+      "chunk_id": "a8619fd4ae194817a13dad90f43659f8_chunk_0044"
+    },
+    {
+      "reference_id": "a8619fd4ae194817a13dad90f43659f8_chunk_0045_ref_000",
+      "target": "Table 4 -Department headcount and budget (from the FAQ appendix).",
+      "type": "table",
+      "chunk_id": "a8619fd4ae194817a13dad90f43659f8_chunk_0045"
+    },
+    {
+      "reference_id": "a8619fd4ae194817a13dad90f43659f8_chunk_0046_ref_000",
+      "target": "Table 4 -Department headcount and budget",
+      "type": "table",
+      "chunk_id": "a8619fd4ae194817a13dad90f43659f8_chunk_0046"
+    },
+    {
+      "reference_id": "a8619fd4ae194817a13dad90f43659f8_chunk_0047_ref_000",
+      "target": "Section 2.1",
+      "type": "section",
+      "chunk_id": "a8619fd4ae194817a13dad90f43659f8_chunk_0047"
+    },
+    {
+      "reference_id": "a8619fd4ae194817a13dad90f43659f8_chunk_0047_ref_001",
+      "target": "Section 5.2",
+      "type": "section",
+      "chunk_id": "a8619fd4ae194817a13dad90f43659f8_chunk_0047"
+    },
+    {
+      "reference_id": "a8619fd4ae194817a13dad90f43659f8_chunk_0047_ref_002",
+      "target": "Section 6",
+      "type": "section",
+      "chunk_id": "a8619fd4ae194817a13dad90f43659f8_chunk_0047"
+    },
+    {
+      "reference_id": "a8619fd4ae194817a13dad90f43659f8_chunk_0047_ref_003",
+      "target": "Appendix B",
+      "type": "appendix",
+      "chunk_id": "a8619fd4ae194817a13dad90f43659f8_chunk_0047"
+    },
+    {
+      "reference_id": "a8619fd4ae194817a13dad90f43659f8_chunk_0048_ref_000",
+      "target": "Appendices",
+      "type": "section",
+      "chunk_id": "a8619fd4ae194817a13dad90f43659f8_chunk_0048"
+    },
+    {
+      "reference_id": "a8619fd4ae194817a13dad90f43659f8_chunk_0049_ref_000",
+      "target": "Fig. 3, Section 11",
+      "type": "figure",
+      "chunk_id": "a8619fd4ae194817a13dad90f43659f8_chunk_0049"
+    },
+    {
+      "reference_id": "a8619fd4ae194817a13dad90f43659f8_chunk_0049_ref_001",
+      "target": "Section 12",
+      "type": "section",
+      "chunk_id": "a8619fd4ae194817a13dad90f43659f8_chunk_0049"
+    },
+    {
+      "reference_id": "a8619fd4ae194817a13dad90f43659f8_chunk_0049_ref_002",
+      "target": "Sections 5 and 9",
+      "type": "section",
+      "chunk_id": "a8619fd4ae194817a13dad90f43659f8_chunk_0049"
+    }
+  ]
+}

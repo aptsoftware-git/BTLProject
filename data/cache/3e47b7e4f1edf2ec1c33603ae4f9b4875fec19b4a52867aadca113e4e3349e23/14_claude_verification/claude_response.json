@@ -1,0 +1,849 @@
+{
+  "executive_summary": {
+    "total_verified_findings": 40,
+    "high_severity_count": 3,
+    "medium_severity_count": 20,
+    "low_severity_count": 17,
+    "document_risk_level": "High"
+  },
+  "overall_document_risk": "High",
+  "verified_findings": [
+    {
+      "issue_id": "9b580a49750843d68ba1ae78c6a67538_chunk_0000_amb_000",
+      "status": "confirmed",
+      "severity": "Low",
+      "business_category": "Undefined Term",
+      "page": 1,
+      "section": "Document Section",
+      "chunk_id": "9b580a49750843d68ba1ae78c6a67538_chunk_0000",
+      "original_chunk": "COMPANY PROFILE",
+      "highlighted_ambiguity": "COMPANY PROFILE",
+      "reason": "The text 'COMPANY PROFILE' is a label and does not provide any specific information or claims that can be validated.",
+      "business_impact": "Ambiguity in operational instructions may cause execution deviations across teams.",
+      "recommendation": "Provide more details about the company profile such as mission, vision, values, or key activities to make it informative and verifiable.",
+      "evidence": [
+        {
+          "chunk_id": "9b580a49750843d68ba1ae78c6a67538_chunk_0000",
+          "quote": "COMPANY PROFILE"
+        }
+      ]
+    },
+    {
+      "issue_id": "9b580a49750843d68ba1ae78c6a67538_chunk_0001_amb_000",
+      "status": "confirmed",
+      "severity": "Medium",
+      "business_category": "Writing Clarity",
+      "page": 1,
+      "section": "Document Section",
+      "chunk_id": "9b580a49750843d68ba1ae78c6a67538_chunk_0001",
+      "original_chunk": "LARSEN & TOUBRO",
+      "highlighted_ambiguity": "LARSEN & TOUBRO",
+      "reason": "The text only mentions the name of an organization without any specific claims or information.",
+      "business_impact": "Ambiguity in operational instructions may cause execution deviations across teams.",
+      "recommendation": "LARSEN & TOUBRO is a multinational engineering and construction company.",
+      "evidence": [
+        {
+          "chunk_id": "9b580a49750843d68ba1ae78c6a67538_chunk_0001",
+          "quote": "LARSEN & TOUBRO"
+        }
+      ]
+    },
+    {
+      "issue_id": "9b580a49750843d68ba1ae78c6a67538_chunk_0002_amb_000",
+      "status": "confirmed",
+      "severity": "Medium",
+      "business_category": "Writing Clarity",
+      "page": 1,
+      "section": "Document Section",
+      "chunk_id": "9b580a49750843d68ba1ae78c6a67538_chunk_0002",
+      "original_chunk": "Engineering the Nation's Growth Since 1938",
+      "highlighted_ambiguity": "Engineering the Nation's Growth Since 1938",
+      "reason": "The phrase is vague as it does not specify what kind of engineering projects or what aspects of national growth are being referred to.",
+      "business_impact": "Ambiguity in operational instructions may cause execution deviations across teams.",
+      "recommendation": "Larsen & Toubro has been engineering projects for the nation's growth since 1938",
+      "evidence": [
+        {
+          "chunk_id": "9b580a49750843d68ba1ae78c6a67538_chunk_0002",
+          "quote": "Engineering the Nation's Growth Since 1938"
+        }
+      ]
+    },
+    {
+      "issue_id": "9b580a49750843d68ba1ae78c6a67538_chunk_0003_amb_000",
+      "status": "confirmed",
+      "severity": "High",
+      "business_category": "Writing Clarity",
+      "page": 1,
+      "section": "Document Section",
+      "chunk_id": "9b580a49750843d68ba1ae78c6a67538_chunk_0003",
+      "original_chunk": "Headquarters",
+      "highlighted_ambiguity": "Headquarters",
+      "reason": "The text only mentions 'Headquarters' without providing any specific information about its location, size, or other details.",
+      "business_impact": "Ambiguity in operational instructions may cause execution deviations across teams.",
+      "recommendation": "The company's main headquarters is located at [address], covering an area of [size].",
+      "evidence": [
+        {
+          "chunk_id": "9b580a49750843d68ba1ae78c6a67538_chunk_0003",
+          "quote": "Headquarters"
+        }
+      ]
+    },
+    {
+      "issue_id": "9b580a49750843d68ba1ae78c6a67538_chunk_0004_amb_000",
+      "status": "confirmed",
+      "severity": "Medium",
+      "business_category": "Writing Clarity",
+      "page": 1,
+      "section": "Document Section",
+      "chunk_id": "9b580a49750843d68ba1ae78c6a67538_chunk_0004",
+      "original_chunk": "L&T House, Ballard Estate, Mumbai, Maharashtra, India",
+      "highlighted_ambiguity": "L&T House, Ballard Estate, Mumbai, Maharashtra, India",
+      "reason": "The original text does not explicitly state that this is the headquarters, only mentions a location.",
+      "business_impact": "Ambiguity in operational instructions may cause execution deviations across teams.",
+      "recommendation": "L&T House, Ballard Estate, Mumbai, Maharashtra, India is identified as the headquarters.",
+      "evidence": [
+        {
+          "chunk_id": "9b580a49750843d68ba1ae78c6a67538_chunk_0004",
+          "quote": "L&T House, Ballard Estate, Mumbai, Maharashtra, India"
+        }
+      ]
+    },
+    {
+      "issue_id": "9b580a49750843d68ba1ae78c6a67538_chunk_0005_amb_000",
+      "status": "confirmed",
+      "severity": "High",
+      "business_category": "Writing Clarity",
+      "page": 1,
+      "section": "Document Section",
+      "chunk_id": "9b580a49750843d68ba1ae78c6a67538_chunk_0005",
+      "original_chunk": "Industry",
+      "highlighted_ambiguity": "Industry",
+      "reason": "The term 'Industry' is too broad and does not provide any specific information or context.",
+      "business_impact": "Ambiguity in operational instructions may cause execution deviations across teams.",
+      "recommendation": "A more detailed description of the specific industry or relevant aspects should be provided to avoid ambiguity.",
+      "evidence": [
+        {
+          "chunk_id": "9b580a49750843d68ba1ae78c6a67538_chunk_0005",
+          "quote": "Industry"
+        }
+      ]
+    },
+    {
+      "issue_id": "9b580a49750843d68ba1ae78c6a67538_chunk_0006_amb_000",
+      "status": "confirmed",
+      "severity": "Medium",
+      "business_category": "Undefined Term",
+      "page": 1,
+      "section": "Document Section",
+      "chunk_id": "9b580a49750843d68ba1ae78c6a67538_chunk_0006",
+      "original_chunk": "Engineering, Construction, Manufacturing, Technology & Financial Services Conglomerate",
+      "highlighted_ambiguity": "Engineering, Construction, Manufacturing, Technology & Financial Services Conglomerate",
+      "reason": "The organization is described but not specifically named or defined within the text.",
+      "business_impact": "Ambiguity in operational instructions may cause execution deviations across teams.",
+      "recommendation": "L&T: Engineering, Construction, Manufacturing, Technology & Financial Services Conglomerate",
+      "evidence": [
+        {
+          "chunk_id": "9b580a49750843d68ba1ae78c6a67538_chunk_0006",
+          "quote": "Engineering, Construction, Manufacturing, Technology & Financial Services Conglomerate"
+        }
+      ]
+    },
+    {
+      "issue_id": "9b580a49750843d68ba1ae78c6a67538_chunk_0007_amb_000",
+      "status": "confirmed",
+      "severity": "Low",
+      "business_category": "Writing Clarity",
+      "page": 1,
+      "section": "Document Section",
+      "chunk_id": "9b580a49750843d68ba1ae78c6a67538_chunk_0007",
+      "original_chunk": "COMPANY SNAPSHOT",
+      "highlighted_ambiguity": "COMPANY SNAPSHOT",
+      "reason": "The text is a section header and lacks substantive content to provide meaningful information.",
+      "business_impact": "Ambiguity in operational instructions may cause execution deviations across teams.",
+      "recommendation": "Revise the sentence to state explicit parameters.",
+      "evidence": [
+        {
+          "chunk_id": "9b580a49750843d68ba1ae78c6a67538_chunk_0007",
+          "quote": "COMPANY SNAPSHOT"
+        }
+      ]
+    },
+    {
+      "issue_id": "9b580a49750843d68ba1ae78c6a67538_chunk_0008_amb_000",
+      "status": "confirmed",
+      "severity": "Low",
+      "business_category": "Numerical Inconsistency",
+      "page": 1,
+      "section": "Document Section",
+      "chunk_id": "9b580a49750843d68ba1ae78c6a67538_chunk_0008",
+      "original_chunk": "more than 50 countries",
+      "highlighted_ambiguity": "more than 50 countries",
+      "reason": "The exact number of countries is not specified.",
+      "business_impact": "Ambiguity in operational instructions may cause execution deviations across teams.",
+      "recommendation": "Today the group operates in over 50 countries and is listed on the NSE and BSE (ticker: LT), with no single majority shareholder.",
+      "evidence": [
+        {
+          "chunk_id": "9b580a49750843d68ba1ae78c6a67538_chunk_0008",
+          "quote": "more than 50 countries"
+        }
+      ]
+    },
+    {
+      "issue_id": "9b580a49750843d68ba1ae78c6a67538_chunk_0009_amb_000",
+      "status": "confirmed",
+      "severity": "Medium",
+      "business_category": "Writing Clarity",
+      "page": 1,
+      "section": "Document Section",
+      "chunk_id": "9b580a49750843d68ba1ae78c6a67538_chunk_0009",
+      "original_chunk": "BOARD & KEY LEADERSHIP",
+      "highlighted_ambiguity": "BOARD & KEY LEADERSHIP",
+      "reason": "The phrase is a title or heading and does not provide any specific information or claims about the board and key leadership.",
+      "business_impact": "Ambiguity in operational instructions may cause execution deviations across teams.",
+      "recommendation": "The document section titled 'BOARD & KEY LEADERSHIP' contains information about the board members and key leadership positions within the organization.",
+      "evidence": [
+        {
+          "chunk_id": "9b580a49750843d68ba1ae78c6a67538_chunk_0009",
+          "quote": "BOARD & KEY LEADERSHIP"
+        }
+      ]
+    },
+    {
+      "issue_id": "9b580a49750843d68ba1ae78c6a67538_chunk_0010_amb_000",
+      "status": "confirmed",
+      "severity": "Low",
+      "business_category": "Writing Clarity",
+      "page": 1,
+      "section": "Document Section",
+      "chunk_id": "9b580a49750843d68ba1ae78c6a67538_chunk_0010",
+      "original_chunk": "Chairman &amp; Managing Director",
+      "highlighted_ambiguity": "Chairman &amp; Managing Director",
+      "reason": "The use of 'Chairman' might be ambiguous in contexts where the organization may have a different title or structure.",
+      "business_impact": "Ambiguity in operational instructions may cause execution deviations across teams.",
+      "recommendation": "Chairman and Chief Executive Officer (CEO)",
+      "evidence": [
+        {
+          "chunk_id": "9b580a49750843d68ba1ae78c6a67538_chunk_0010",
+          "quote": "Chairman &amp; Managing Director"
+        }
+      ]
+    },
+    {
+      "issue_id": "9b580a49750843d68ba1ae78c6a67538_chunk_0012_amb_000",
+      "status": "confirmed",
+      "severity": "Medium",
+      "business_category": "Writing Clarity",
+      "page": 1,
+      "section": "Document Section",
+      "chunk_id": "9b580a49750843d68ba1ae78c6a67538_chunk_0012",
+      "original_chunk": "MARQUEE PROJECTS",
+      "highlighted_ambiguity": "MARQUEE PROJECTS",
+      "reason": "The text only contains a heading and no further details or context about what constitutes Marquee Projects, making the term vague without additional information.",
+      "business_impact": "Ambiguity in operational instructions may cause execution deviations across teams.",
+      "recommendation": "MARQUEE PROJECTS\nDetails: [Please provide description of marquee projects]",
+      "evidence": [
+        {
+          "chunk_id": "9b580a49750843d68ba1ae78c6a67538_chunk_0012",
+          "quote": "MARQUEE PROJECTS"
+        }
+      ]
+    },
+    {
+      "issue_id": "9b580a49750843d68ba1ae78c6a67538_chunk_0013_amb_000",
+      "status": "confirmed",
+      "severity": "Medium",
+      "business_category": "Numerical Inconsistency",
+      "page": 1,
+      "section": "Document Section",
+      "chunk_id": "9b580a49750843d68ba1ae78c6a67538_chunk_0013",
+      "original_chunk": "world's tallest statue including its access infrastructure",
+      "highlighted_ambiguity": "world's tallest statue including its access infrastructure",
+      "reason": "The claim specifies 'including its access infrastructure' which is not explicitly detailed in the original text.",
+      "business_impact": "Ambiguity in operational instructions may cause execution deviations across teams.",
+      "recommendation": "Statue of Unity, Gujarat is the world's tallest statue, with mention of access infrastructure.",
+      "evidence": [
+        {
+          "chunk_id": "9b580a49750843d68ba1ae78c6a67538_chunk_0013",
+          "quote": "world's tallest statue including its access infrastructure"
+        }
+      ]
+    },
+    {
+      "issue_id": "9b580a49750843d68ba1ae78c6a67538_chunk_0014_amb_000",
+      "status": "confirmed",
+      "severity": "Medium",
+      "business_category": "Writing Clarity",
+      "page": 1,
+      "section": "Document Section",
+      "chunk_id": "9b580a49750843d68ba1ae78c6a67538_chunk_0014",
+      "original_chunk": "BUSINESS SEGMENTS / SERVICE LINES",
+      "highlighted_ambiguity": "BUSINESS SEGMENTS / SERVICE LINES",
+      "reason": "The text only states a heading or title without providing any details about the business segments or service lines.",
+      "business_impact": "Ambiguity in operational instructions may cause execution deviations across teams.",
+      "recommendation": "This section outlines various business segments and service lines offered by the company. [Add details about each segment/service line]",
+      "evidence": [
+        {
+          "chunk_id": "9b580a49750843d68ba1ae78c6a67538_chunk_0014",
+          "quote": "BUSINESS SEGMENTS / SERVICE LINES"
+        }
+      ]
+    },
+    {
+      "issue_id": "9b580a49750843d68ba1ae78c6a67538_chunk_0015_amb_000",
+      "status": "confirmed",
+      "severity": "Medium",
+      "business_category": "Writing Clarity",
+      "page": 1,
+      "section": "Document Section",
+      "chunk_id": "9b580a49750843d68ba1ae78c6a67538_chunk_0015",
+      "original_chunk": "Infrastructure (EPC)",
+      "highlighted_ambiguity": "Infrastructure (EPC)",
+      "reason": "The phrase 'Infrastructure (EPC)' is vague and does not provide specific details about the infrastructure or EPC.",
+      "business_impact": "Ambiguity in operational instructions may cause execution deviations across teams.",
+      "recommendation": "Specific aspects of the infrastructure related to EPC should be detailed, e.g., 'EPC-related transportation infrastructure' or 'Communication infrastructure for EPC projects'.",
+      "evidence": [
+        {
+          "chunk_id": "9b580a49750843d68ba1ae78c6a67538_chunk_0015",
+          "quote": "Infrastructure (EPC)"
+        }
+      ]
+    },
+    {
+      "issue_id": "9b580a49750843d68ba1ae78c6a67538_chunk_0016_amb_000",
+      "status": "confirmed",
+      "severity": "Low",
+      "business_category": "Writing Clarity",
+      "page": 1,
+      "section": "Document Section",
+      "chunk_id": "9b580a49750843d68ba1ae78c6a67538_chunk_0016",
+      "original_chunk": "Engineering, procurement and construction",
+      "highlighted_ambiguity": "Engineering, procurement and construction",
+      "reason": "The term 'Engineering, procurement and construction' is a broad phrase that could encompass various specific activities without clear boundaries.",
+      "business_impact": "Ambiguity in operational instructions may cause execution deviations across teams.",
+      "recommendation": "Engineering, procurement, and construction services for buildings & factories, transportation infrastructure, heavy civil works, power transmission & distribution, and water & renewable energy projects.",
+      "evidence": [
+        {
+          "chunk_id": "9b580a49750843d68ba1ae78c6a67538_chunk_0016",
+          "quote": "Engineering, procurement and construction"
+        }
+      ]
+    },
+    {
+      "issue_id": "9b580a49750843d68ba1ae78c6a67538_chunk_0017_amb_000",
+      "status": "confirmed",
+      "severity": "Low",
+      "business_category": "Writing Clarity",
+      "page": 1,
+      "section": "Document Section",
+      "chunk_id": "9b580a49750843d68ba1ae78c6a67538_chunk_0017",
+      "original_chunk": "Energy -Hydrocarbon & Power",
+      "highlighted_ambiguity": "Energy -Hydrocarbon & Power",
+      "reason": "The phrase is vague as it does not provide specific information or claims about energy, hydrocarbons, or power.",
+      "business_impact": "Ambiguity in operational instructions may cause execution deviations across teams.",
+      "recommendation": "Energy - Hydrocarbon & Power department focuses on managing and optimizing the production and distribution of energy resources including hydrocarbons and power generation facilities.",
+      "evidence": [
+        {
+          "chunk_id": "9b580a49750843d68ba1ae78c6a67538_chunk_0017",
+          "quote": "Energy -Hydrocarbon & Power"
+        }
+      ]
+    },
+    {
+      "issue_id": "9b580a49750843d68ba1ae78c6a67538_chunk_0018_amb_000",
+      "status": "confirmed",
+      "severity": "Medium",
+      "business_category": "Undefined Term",
+      "page": 1,
+      "section": "Document Section",
+      "chunk_id": "9b580a49750843d68ba1ae78c6a67538_chunk_0018",
+      "original_chunk": "EPC",
+      "highlighted_ambiguity": "EPC",
+      "reason": "The acronym 'EPC' is not defined within the text, which could lead to confusion for readers unfamiliar with this term.",
+      "business_impact": "Ambiguity in operational instructions may cause execution deviations across teams.",
+      "recommendation": "End-to-end Engineering, Procurement, and Construction (EPC) services for upstream, midstream and downstream oil & gas, and power generation infrastructure.",
+      "evidence": [
+        {
+          "chunk_id": "9b580a49750843d68ba1ae78c6a67538_chunk_0018",
+          "quote": "EPC"
+        }
+      ]
+    },
+    {
+      "issue_id": "9b580a49750843d68ba1ae78c6a67538_chunk_0019_amb_000",
+      "status": "confirmed",
+      "severity": "Low",
+      "business_category": "Writing Clarity",
+      "page": 1,
+      "section": "Document Section",
+      "chunk_id": "9b580a49750843d68ba1ae78c6a67538_chunk_0019",
+      "original_chunk": "Hi-Tech Manufacturing & Defence Engineering",
+      "highlighted_ambiguity": "Hi-Tech Manufacturing & Defence Engineering",
+      "reason": "The phrase is a title or department name without any context about its functions, responsibilities, or scope.",
+      "business_impact": "Ambiguity in operational instructions may cause execution deviations across teams.",
+      "recommendation": "Hi-Tech Manufacturing & Defence Engineering: Department responsible for [specific functions/activities].",
+      "evidence": [
+        {
+          "chunk_id": "9b580a49750843d68ba1ae78c6a67538_chunk_0019",
+          "quote": "Hi-Tech Manufacturing & Defence Engineering"
+        }
+      ]
+    },
+    {
+      "issue_id": "9b580a49750843d68ba1ae78c6a67538_chunk_0020_amb_000",
+      "status": "confirmed",
+      "severity": "Medium",
+      "business_category": "Writing Clarity",
+      "page": 1,
+      "section": "Document Section",
+      "chunk_id": "9b580a49750843d68ba1ae78c6a67538_chunk_0020",
+      "original_chunk": "engineered equipment",
+      "highlighted_ambiguity": "engineered equipment",
+      "reason": "The term 'engineered equipment' is broad and could refer to a wide range of products without specific detail.",
+      "business_impact": "Ambiguity in operational instructions may cause execution deviations across teams.",
+      "recommendation": "Design, manufacture and supply of specialized equipment for process plants, nuclear and green-hydrogen facilities...",
+      "evidence": [
+        {
+          "chunk_id": "9b580a49750843d68ba1ae78c6a67538_chunk_0020",
+          "quote": "engineered equipment"
+        }
+      ]
+    },
+    {
+      "issue_id": "9b580a49750843d68ba1ae78c6a67538_chunk_0021_amb_000",
+      "status": "confirmed",
+      "severity": "Low",
+      "business_category": "Writing Clarity",
+      "page": 1,
+      "section": "Document Section",
+      "chunk_id": "9b580a49750843d68ba1ae78c6a67538_chunk_0021",
+      "original_chunk": "IT & Technology Services",
+      "highlighted_ambiguity": "IT & Technology Services",
+      "reason": "The phrase is vague as it does not provide any specific information or services offered under IT & Technology Services.",
+      "business_impact": "Ambiguity in operational instructions may cause execution deviations across teams.",
+      "recommendation": "Specify the services provided under IT & Technology Services, e.g., 'IT & Technology Services includes network management and software development.'",
+      "evidence": [
+        {
+          "chunk_id": "9b580a49750843d68ba1ae78c6a67538_chunk_0021",
+          "quote": "IT & Technology Services"
+        }
+      ]
+    },
+    {
+      "issue_id": "9b580a49750843d68ba1ae78c6a67538_chunk_0022_amb_000",
+      "status": "confirmed",
+      "severity": "Low",
+      "business_category": "Writing Clarity",
+      "page": 1,
+      "section": "Document Section",
+      "chunk_id": "9b580a49750843d68ba1ae78c6a67538_chunk_0022",
+      "original_chunk": "Global IT services, digital solutions, engineering R&D, e-commerce/digital platforms, data centres and semiconductor chip-design solutions",
+      "highlighted_ambiguity": "Global IT services, digital solutions, engineering R&D, e-commerce/digital platforms, data centres and semiconductor chip-design solutions",
+      "reason": "The terms are broad and could be interpreted in various ways without specific definitions.",
+      "business_impact": "Ambiguity in operational instructions may cause execution deviations across teams.",
+      "recommendation": "Specific global IT services, digital solutions, engineering R&D services, e-commerce/digital platforms, data centre operations and semiconductor chip-design solutions",
+      "evidence": [
+        {
+          "chunk_id": "9b580a49750843d68ba1ae78c6a67538_chunk_0022",
+          "quote": "Global IT services, digital solutions, engineering R&D, e-commerce/digital platforms, data centres and semiconductor chip-design solutions"
+        }
+      ]
+    },
+    {
+      "issue_id": "9b580a49750843d68ba1ae78c6a67538_chunk_0023_amb_000",
+      "status": "confirmed",
+      "severity": "Medium",
+      "business_category": "Writing Clarity",
+      "page": 1,
+      "section": "Document Section",
+      "chunk_id": "9b580a49750843d68ba1ae78c6a67538_chunk_0023",
+      "original_chunk": "Financial Services",
+      "highlighted_ambiguity": "Financial Services",
+      "reason": "The phrase 'Financial Services' is a broad term and does not provide specific information or claims about the services offered, financial performance, or any other related details.",
+      "business_impact": "Ambiguity in operational instructions may cause execution deviations across teams.",
+      "recommendation": "Please specify what aspects of Financial Services are being discussed, such as banking services, investment management, insurance products, etc.",
+      "evidence": [
+        {
+          "chunk_id": "9b580a49750843d68ba1ae78c6a67538_chunk_0023",
+          "quote": "Financial Services"
+        }
+      ]
+    },
+    {
+      "issue_id": "9b580a49750843d68ba1ae78c6a67538_chunk_0025_amb_000",
+      "status": "confirmed",
+      "severity": "Low",
+      "business_category": "Writing Clarity",
+      "page": 1,
+      "section": "Document Section",
+      "chunk_id": "9b580a49750843d68ba1ae78c6a67538_chunk_0025",
+      "original_chunk": "Development Projects & Realty",
+      "highlighted_ambiguity": "Development Projects & Realty",
+      "reason": "The text is a title or heading without additional context, making it vague.",
+      "business_impact": "Ambiguity in operational instructions may cause execution deviations across teams.",
+      "recommendation": "This section covers various development projects and realty-related activities within the organization.",
+      "evidence": [
+        {
+          "chunk_id": "9b580a49750843d68ba1ae78c6a67538_chunk_0025",
+          "quote": "Development Projects & Realty"
+        }
+      ]
+    },
+    {
+      "issue_id": "9b580a49750843d68ba1ae78c6a67538_chunk_0026_amb_000",
+      "status": "confirmed",
+      "severity": "Low",
+      "business_category": "Writing Clarity",
+      "page": 1,
+      "section": "Document Section",
+      "chunk_id": "9b580a49750843d68ba1ae78c6a67538_chunk_0026",
+      "original_chunk": "Roads and transmission assets, the Hyderabad Metro Rail project, power development projects, and premium residential & commercial real estate through L&T Realty.",
+      "highlighted_ambiguity": "Roads and transmission assets, the Hyderabad Metro Rail project, power development projects, and premium residential & commercial real estate through L&T Realty.",
+      "reason": "The claim is broad and does not specify what kind of roads or transmission assets are being referred to. It also does not provide details about the scale or scope of these projects or the specific areas where they are located.",
+      "business_impact": "Ambiguity in operational instructions may cause execution deviations across teams.",
+      "recommendation": "Includes a mix of road infrastructure and transmission asset development, including the Hyderabad Metro Rail project, along with power development initiatives and premium residential & commercial real estate projects managed by L&T Realty.",
+      "evidence": [
+        {
+          "chunk_id": "9b580a49750843d68ba1ae78c6a67538_chunk_0026",
+          "quote": "Roads and transmission assets, the Hyderabad Metro Rail project, power development projects, and premium residential & commercial real estate through L&T Realty."
+        }
+      ]
+    },
+    {
+      "issue_id": "9b580a49750843d68ba1ae78c6a67538_chunk_0027_amb_000",
+      "status": "confirmed",
+      "severity": "Medium",
+      "business_category": "Writing Clarity",
+      "page": 1,
+      "section": "Document Section",
+      "chunk_id": "9b580a49750843d68ba1ae78c6a67538_chunk_0027",
+      "original_chunk": "INDUSTRY",
+      "highlighted_ambiguity": "INDUSTRY",
+      "reason": "The text only consists of the word 'INDUSTRY' and does not provide any specific details, claims, or context about what is being referred to in the industry.",
+      "business_impact": "Ambiguity in operational instructions may cause execution deviations across teams.",
+      "recommendation": "Provide a detailed description or claim about the industry content.",
+      "evidence": [
+        {
+          "chunk_id": "9b580a49750843d68ba1ae78c6a67538_chunk_0027",
+          "quote": "INDUSTRY"
+        }
+      ]
+    },
+    {
+      "issue_id": "9b580a49750843d68ba1ae78c6a67538_chunk_0028_amb_000",
+      "status": "confirmed",
+      "severity": "Low",
+      "business_category": "Numerical Inconsistency",
+      "page": 1,
+      "section": "Document Section",
+      "chunk_id": "9b580a49750843d68ba1ae78c6a67538_chunk_0028",
+      "original_chunk": "more than 50",
+      "highlighted_ambiguity": "more than 50",
+      "reason": "The phrase 'more than 50' is vague as it does not specify the exact number of countries.",
+      "business_impact": "Ambiguity in operational instructions may cause execution deviations across teams.",
+      "recommendation": "L&T serves customers across over 50 countries.",
+      "evidence": [
+        {
+          "chunk_id": "9b580a49750843d68ba1ae78c6a67538_chunk_0028",
+          "quote": "more than 50"
+        }
+      ]
+    },
+    {
+      "issue_id": "9b580a49750843d68ba1ae78c6a67538_chunk_0029_amb_000",
+      "status": "confirmed",
+      "severity": "Low",
+      "business_category": "Writing Clarity",
+      "page": 1,
+      "section": "Document Section",
+      "chunk_id": "9b580a49750843d68ba1ae78c6a67538_chunk_0029",
+      "original_chunk": "CONTACT",
+      "highlighted_ambiguity": "CONTACT",
+      "reason": "The term 'CONTACT' is too vague and does not provide any specific information about what kind of contact or section it refers to.",
+      "business_impact": "Ambiguity in operational instructions may cause execution deviations across teams.",
+      "recommendation": "Please specify the type of contact information or details provided in this section, such as 'Customer Contact Information' or 'Contact Details'.",
+      "evidence": [
+        {
+          "chunk_id": "9b580a49750843d68ba1ae78c6a67538_chunk_0029",
+          "quote": "CONTACT"
+        }
+      ]
+    },
+    {
+      "issue_id": "9b580a49750843d68ba1ae78c6a67538_chunk_0030_amb_000",
+      "status": "confirmed",
+      "severity": "Low",
+      "business_category": "Writing Clarity",
+      "page": 1,
+      "section": "Document Section",
+      "chunk_id": "9b580a49750843d68ba1ae78c6a67538_chunk_0030",
+      "original_chunk": "Larsen & Toubro Limited",
+      "highlighted_ambiguity": "Larsen & Toubro Limited",
+      "reason": "The text only mentions the company name without any context or claims about its activities, status, or other details.",
+      "business_impact": "Ambiguity in operational instructions may cause execution deviations across teams.",
+      "recommendation": "Larsen & Toubro Limited [is a description of the organization, e.g., engineering and construction company]",
+      "evidence": [
+        {
+          "chunk_id": "9b580a49750843d68ba1ae78c6a67538_chunk_0030",
+          "quote": "Larsen & Toubro Limited"
+        }
+      ]
+    },
+    {
+      "issue_id": "9b580a49750843d68ba1ae78c6a67538_chunk_0031_amb_000",
+      "status": "confirmed",
+      "severity": "Low",
+      "business_category": "Writing Clarity",
+      "page": 1,
+      "section": "Document Section",
+      "chunk_id": "9b580a49750843d68ba1ae78c6a67538_chunk_0031",
+      "original_chunk": "L&T House, N.M. Marg, Ballard Estate, Mumbai, Maharashtra -400 001, India",
+      "highlighted_ambiguity": "L&T House, N.M. Marg, Ballard Estate, Mumbai, Maharashtra -400 001, India",
+      "reason": "The address does not specify if it is the headquarters or another location.",
+      "business_impact": "Ambiguity in operational instructions may cause execution deviations across teams.",
+      "recommendation": "L&T House, N.M. Marg, Ballard Estate, Mumbai, Maharashtra -400 001, India is the registered office for Larsen & Toubro Limited.",
+      "evidence": [
+        {
+          "chunk_id": "9b580a49750843d68ba1ae78c6a67538_chunk_0031",
+          "quote": "L&T House, N.M. Marg, Ballard Estate, Mumbai, Maharashtra -400 001, India"
+        }
+      ]
+    },
+    {
+      "issue_id": "cluster_001_issue_000",
+      "status": "confirmed",
+      "severity": "Medium",
+      "business_category": "Policy Conflict",
+      "page": 1,
+      "section": "Cross-Section Policy",
+      "chunk_id": "9b580a49750843d68ba1ae78c6a67538_chunk_0010",
+      "original_chunk": "Chairman & Managing Director",
+      "highlighted_ambiguity": "Chairman & Managing Director",
+      "reason": "Some chunks use 'Chairman & Managing Director', while others use 'Whole-time Director' or 'Deputy Managing Director'. This can lead to confusion about specific roles and responsibilities.",
+      "business_impact": "Conflicting directives create legal exposure and compliance audit risk.",
+      "recommendation": "Standardize the terminology used to describe leadership roles throughout the document.",
+      "evidence": [
+        {
+          "chunk_id": "9b580a49750843d68ba1ae78c6a67538_chunk_0010",
+          "quote": "Chairman & Managing Director"
+        },
+        {
+          "chunk_id": "9b580a49750843d68ba1ae78c6a67538_chunk_0011",
+          "quote": "Whole-time Director, President & CFO"
+        }
+      ]
+    },
+    {
+      "issue_id": "cluster_001_issue_001",
+      "status": "confirmed",
+      "severity": "High",
+      "business_category": "Policy Conflict",
+      "page": 1,
+      "section": "Cross-Section Policy",
+      "chunk_id": "9b580a49750843d68ba1ae78c6a67538_chunk_0003",
+      "original_chunk": "Headquarters",
+      "highlighted_ambiguity": "Headquarters",
+      "reason": "Chunk 9b580a49750843d68ba1ae78c6a67538_chunk_0003 mentions 'Headquarters' without context, while chunk 9b580a49750843d68ba1ae78c6a67538_chunk_0004 specifies a location as headquarters.",
+      "business_impact": "Conflicting directives create legal exposure and compliance audit risk.",
+      "recommendation": "Clarify and consistently refer to the main headquarters with its full address in all relevant sections.",
+      "evidence": [
+        {
+          "chunk_id": "9b580a49750843d68ba1ae78c6a67538_chunk_0003",
+          "quote": "Headquarters"
+        },
+        {
+          "chunk_id": "9b580a49750843d68ba1ae78c6a67538_chunk_0004",
+          "quote": "L&T House, Ballard Estate, Mumbai, Maharashtra, India is the headquarters."
+        }
+      ]
+    },
+    {
+      "issue_id": "cluster_001_issue_002",
+      "status": "confirmed",
+      "severity": "Low",
+      "business_category": "Policy Conflict",
+      "page": 1,
+      "section": "Cross-Section Policy",
+      "chunk_id": "9b580a49750843d68ba1ae78c6a67538_chunk_0007",
+      "original_chunk": "COMPANY SNAPSHOT",
+      "highlighted_ambiguity": "COMPANY SNAPSHOT",
+      "reason": "Multiple chunks mention sections like 'COMPANY SNAPSHOT', 'Financial Services', etc., without providing detailed content, making them difficult to validate or understand.",
+      "business_impact": "Conflicting directives create legal exposure and compliance audit risk.",
+      "recommendation": "Provide more detailed content in these sections to make them informative and verifiable.",
+      "evidence": [
+        {
+          "chunk_id": "9b580a49750843d68ba1ae78c6a67538_chunk_0007",
+          "quote": "COMPANY SNAPSHOT"
+        },
+        {
+          "chunk_id": "9b580a49750843d68ba1ae78c6a67538_chunk_0023",
+          "quote": "Financial Services"
+        }
+      ]
+    },
+    {
+      "issue_id": "cluster_001_issue_003",
+      "status": "confirmed",
+      "severity": "Medium",
+      "business_category": "Policy Conflict",
+      "page": 1,
+      "section": "Cross-Section Policy",
+      "chunk_id": "9b580a49750843d68ba1ae78c6a67538_chunk_0026",
+      "original_chunk": "Roads and transmission assets, the Hyderabad Metro Rail project, power development projects, and premium residential & commercial real estate through L&T Realty.",
+      "highlighted_ambiguity": "Roads and transmission assets, the Hyderabad Metro Rail project, power development projects, and premium residential & commercial real estate through L&T Realty.",
+      "reason": "Chunk 9b580a49750843d68ba1ae78c6a67538_chunk_0026 mentions various development projects but lacks specificity in detail.",
+      "business_impact": "Conflicting directives create legal exposure and compliance audit risk.",
+      "recommendation": "Include more specific details about the development projects, such as scale, scope, and location.",
+      "evidence": [
+        {
+          "chunk_id": "9b580a49750843d68ba1ae78c6a67538_chunk_0026",
+          "quote": "Roads and transmission assets, the Hyderabad Metro Rail project, power development projects, and premium residential & commercial real estate through L&T Realty."
+        }
+      ]
+    },
+    {
+      "issue_id": "cluster_001_issue_004",
+      "status": "confirmed",
+      "severity": "Low",
+      "business_category": "Policy Conflict",
+      "page": 1,
+      "section": "Cross-Section Policy",
+      "chunk_id": "9b580a49750843d68ba1ae78c6a67538_chunk_0008",
+      "original_chunk": "Today the group operates in more than 50 countries",
+      "highlighted_ambiguity": "Today the group operates in more than 50 countries",
+      "reason": "Chunk 9b580a49750843d68ba1ae78c6a67538_chunk_0008 states 'more than 50 countries' without specifying an exact number.",
+      "business_impact": "Conflicting directives create legal exposure and compliance audit risk.",
+      "recommendation": "Provide the exact number of countries if known, or specify a more precise range.",
+      "evidence": [
+        {
+          "chunk_id": "9b580a49750843d68ba1ae78c6a67538_chunk_0008",
+          "quote": "Today the group operates in more than 50 countries"
+        }
+      ]
+    },
+    {
+      "issue_id": "cluster_002_issue_000",
+      "status": "confirmed",
+      "severity": "Medium",
+      "business_category": "Policy Conflict",
+      "page": 1,
+      "section": "Cross-Section Policy",
+      "chunk_id": "9b580a49750843d68ba1ae78c6a67538_chunk_0027",
+      "original_chunk": "INDUSTRY",
+      "highlighted_ambiguity": "INDUSTRY",
+      "reason": "Some instances of 'Industry' are very broad and lack context, while others provide more detailed descriptions or specific fields.",
+      "business_impact": "Conflicting directives create legal exposure and compliance audit risk.",
+      "recommendation": "Consistent use of the term 'Industry' with either broad definitions or specific sectors as appropriate in each context.",
+      "evidence": [
+        {
+          "chunk_id": "9b580a49750843d68ba1ae78c6a67538_chunk_0027",
+          "quote": "INDUSTRY"
+        },
+        {
+          "chunk_id": "9b580a49750843d68ba1ae78c6a67538_chunk_0005",
+          "quote": "Industry"
+        }
+      ]
+    },
+    {
+      "issue_id": "cluster_002_issue_001",
+      "status": "confirmed",
+      "severity": "Medium",
+      "business_category": "Policy Conflict",
+      "page": 1,
+      "section": "Cross-Section Policy",
+      "chunk_id": "9b580a49750843d68ba1ae78c6a67538_chunk_0015",
+      "original_chunk": "Infrastructure (EPC)",
+      "highlighted_ambiguity": "Infrastructure (EPC)",
+      "reason": "'EPC' is mentioned multiple times but only fully expanded to 'Engineering, Procurement, and Construction' once.",
+      "business_impact": "Conflicting directives create legal exposure and compliance audit risk.",
+      "recommendation": "Define 'EPC' as 'Engineering, Procurement, and Construction' in all relevant instances to ensure clarity for the reader.",
+      "evidence": [
+        {
+          "chunk_id": "9b580a49750843d68ba1ae78c6a67538_chunk_0015",
+          "quote": "Infrastructure (EPC)"
+        },
+        {
+          "chunk_id": "9b580a49750843d68ba1ae78c6a67538_chunk_0018",
+          "quote": "End-to-end EPC for upstream, midstream and downstream oil & gas, and power generation infrastructure."
+        }
+      ]
+    },
+    {
+      "issue_id": "cluster_002_issue_002",
+      "status": "confirmed",
+      "severity": "Medium",
+      "business_category": "Policy Conflict",
+      "page": 1,
+      "section": "Cross-Section Policy",
+      "chunk_id": "9b580a49750843d68ba1ae78c6a67538_chunk_0027",
+      "original_chunk": "INDUSTRY",
+      "highlighted_ambiguity": "INDUSTRY",
+      "reason": "'Industry' is referenced in several places but lacks context or definition, making it unclear what specific industry sectors are being addressed.",
+      "business_impact": "Conflicting directives create legal exposure and compliance audit risk.",
+      "recommendation": "Provide a clear definition or context for 'Industry' in all relevant sections to avoid ambiguity.",
+      "evidence": [
+        {
+          "chunk_id": "9b580a49750843d68ba1ae78c6a67538_chunk_0027",
+          "quote": "INDUSTRY"
+        },
+        {
+          "chunk_id": "9b580a49750843d68ba1ae78c6a67538_chunk_0005",
+          "quote": "Industry"
+        }
+      ]
+    },
+    {
+      "issue_id": "cluster_003_issue_001",
+      "status": "confirmed",
+      "severity": "Medium",
+      "business_category": "Policy Conflict",
+      "page": 1,
+      "section": "Cross-Section Policy",
+      "chunk_id": "9b580a49750843d68ba1ae78c6a67538_chunk_0006",
+      "original_chunk": "Engineering, Construction, Manufacturing, Technology & Financial Services Conglomerate",
+      "highlighted_ambiguity": "Engineering, Construction, Manufacturing, Technology & Financial Services Conglomerate",
+      "reason": "Chunk 9b580a49750843d68ba1ae78c6a67538_chunk_0006 describes a broader conglomerate, while Chunk 9b580a49750843d68ba1ae78c6a67538_chunk_0028 specifies more detailed industry segments.",
+      "business_impact": "Conflicting directives create legal exposure and compliance audit risk.",
+      "recommendation": "Clarify the industry description to align both chunks by specifying L&T's operations in more detail and referencing the conglomerate.",
+      "evidence": [
+        {
+          "chunk_id": "9b580a49750843d68ba1ae78c6a67538_chunk_0006",
+          "quote": "Engineering, Construction, Manufacturing, Technology & Financial Services Conglomerate"
+        },
+        {
+          "chunk_id": "9b580a49750843d68ba1ae78c6a67538_chunk_0028",
+          "quote": "L&T operates at the intersection of engineering, construction, heavy manufacturing, information technology, defence and financial services"
+        }
+      ]
+    },
+    {
+      "issue_id": "cluster_003_issue_002",
+      "status": "confirmed",
+      "severity": "Medium",
+      "business_category": "Policy Conflict",
+      "page": 1,
+      "section": "Cross-Section Policy",
+      "chunk_id": "9b580a49750843d68ba1ae78c6a67538_chunk_0021",
+      "original_chunk": "IT & Technology Services",
+      "highlighted_ambiguity": "IT & Technology Services",
+      "reason": "Chunk 9b580a49750843d68ba1ae78c6a67538_chunk_0021 only lists the department name without any details, while Chunk 9b580a49750843d68ba1ae78c6a67538_chunk_0022 provides specific services.",
+      "business_impact": "Conflicting directives create legal exposure and compliance audit risk.",
+      "recommendation": "Ensure Chunk 9b580a49750843d68ba1ae78c6a67538_chunk_0021 provides consistent information with Chunk 9b580a49750843d68ba1ae78c6a67538_chunk_0022.",
+      "evidence": [
+        {
+          "chunk_id": "9b580a49750843d68ba1ae78c6a67538_chunk_0021",
+          "quote": "IT & Technology Services"
+        },
+        {
+          "chunk_id": "9b580a49750843d68ba1ae78c6a67538_chunk_0022",
+          "quote": "Global IT services, digital solutions, engineering R&D, e-commerce/digital platforms, data centres and semiconductor chip-design solutions"
+        }
+      ]
+    }
+  ],
+  "recommendations": [
+    "Reconcile cross-section policy directives to establish a unified operational protocol.",
+    "Ensure all technical acronyms and proprietary terms have explicit definitions in the appendix.",
+    "Clarify pronoun references across all multi-clause statements."
+  ]
+}

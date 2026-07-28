@@ -1,0 +1,17 @@
+{
+  "total_findings_audited": 131,
+  "total_findings_confirmed": 131,
+  "total_findings_rejected": 0,
+  "overall_document_risk": "Medium",
+  "severity_breakdown": {
+    "Critical": 0,
+    "High": 3,
+    "Medium": 56,
+    "Low": 72
+  },
+  "category_breakdown": {
+    "Pronoun Ambiguity": 22,
+    "Lexical Ambiguity": 82,
+    "Policy Conflict": 27
+  }
+}

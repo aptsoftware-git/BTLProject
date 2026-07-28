@@ -1,0 +1,33 @@
+{
+  "image_id": "#/pictures/7",
+  "page": 6,
+  "caption": null,
+  "ocr_text": null,
+  "bounding_box": {
+    "l": 726.3428955078125,
+    "t": 329.8980712890625,
+    "r": 782.9014892578125,
+    "b": 277.79071044921875,
+    "coord_origin": "BOTTOMLEFT"
+  },
+  "image_path": "05_images/image_008.png",
+  "image_type": "Logo",
+  "objects": [
+    "The logo itself",
+    "including the text and the graphic element."
+  ],
+  "keywords": [
+    "Rajiv 2001 Company",
+    "building",
+    "company",
+    "graphic element.",
+    "logo",
+    "name",
+    "structure",
+    "text"
+  ],
+  "semantic_description": "This image is a logo for a company named \"Rajiv 2001 Company.\" The logo features a stylized design with the company name written in a sans-serif font, accompanied by a graphic element that appears to be a stylized representation of a building or structure, possibly symbolizing the company's industry or services.",
+  "detected_entities": [
+    "Rajiv 2001 Company"
+  ]
+}

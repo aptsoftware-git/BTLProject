@@ -1,0 +1,610 @@
+{
+  "clusters": [
+    {
+      "cluster_id": "cluster_001",
+      "cluster_topic": "We have demonstrated a commitment to embrace challenging projects and outperform & Limited & India",
+      "cluster_findings": [
+        {
+          "issue_id": "cluster_001_issue_000",
+          "type": "Terminology inconsistency",
+          "severity": "Low",
+          "description": "Inconsistent use of 'Company' versus full name or acronym in different chunks.",
+          "reason": "'The Company' is used without clear context, which could refer to BTL EPC Ltd. or another entity if not for the given context.",
+          "evidence": [
+            {
+              "chunk_id": "6a1f1c571432456e92a961e1a0f4b70c_chunk_0023",
+              "quote": "The Company partnered overseas firms to access advanced engineering practices, project management capabilities, and cutting-edge technologies."
+            },
+            {
+              "chunk_id": "6a1f1c571432456e92a961e1a0f4b70c_chunk_0055",
+              "quote": "The Company anticipates a gradual improvement in margins over the coming years as experience and operational efficiencies grow."
+            }
+          ],
+          "affected_claims": [
+            "6a1f1c571432456e92a961e1a0f4b70c_chunk_0023_claim_001",
+            "6a1f1c571432456e92a961e1a0f4b70c_chunk_0055_claim_002"
+          ],
+          "suggested_resolution": "Use consistent terminology, such as 'BTL EPC Ltd.' or specify the company in the text to avoid ambiguity.",
+          "requires_claude_verification": true,
+          "confidence": 0.85
+        },
+        {
+          "issue_id": "cluster_001_issue_001",
+          "type": "Cross-chunk numerical inconsistency",
+          "severity": "Medium",
+          "description": "Different margin percentages mentioned in different contexts without clear differentiation.",
+          "reason": "Chunk 0055 mentions spares business margins of 20% to 30%, but other financial details are not compared across chunks.",
+          "evidence": [
+            {
+              "chunk_id": "6a1f1c571432456e92a961e1a0f4b70c_chunk_0055",
+              "quote": "The spares business where BTL EPC operates as an Original Equipment Manufacturer (OEM) offers higher margins of 20% to 30%."
+            }
+          ],
+          "affected_claims": [
+            "6a1f1c571432456e92a961e1a0f4b70c_chunk_0055_claim_003"
+          ],
+          "suggested_resolution": "Ensure consistency in margin percentages or provide context if different segments have varying margins.",
+          "requires_claude_verification": true,
+          "confidence": 0.85
+        },
+        {
+          "issue_id": "cluster_001_issue_002",
+          "type": "Vague wording",
+          "severity": "Low",
+          "description": "The phrase 'both projects' in chunk 0083 is vague without specifying which projects are being referred to.",
+          "reason": "No project names or identifiers provided for the projects progressing at full pace.",
+          "evidence": [
+            {
+              "chunk_id": "6a1f1c571432456e92a961e1a0f4b70c_chunk_0083",
+              "quote": "The text mentions overcoming bottlenecks and refers to two unspecified projects without providing their names or identifiers."
+            }
+          ],
+          "affected_claims": [
+            "6a1f1c571432456e92a961e1a0f4b70c_chunk_0083_claim_000"
+          ],
+          "suggested_resolution": "Specify the names or identifiers of the projects for clarity.",
+          "requires_claude_verification": true,
+          "confidence": 0.9
+        }
+      ],
+      "overall_cluster_risk": "Medium",
+      "overall_confidence": 0.85
+    },
+    {
+      "cluster_id": "cluster_002",
+      "cluster_topic": "Our businesses & Handling & Business",
+      "cluster_findings": [
+        {
+          "issue_id": "cluster_002_issue_000",
+          "type": "Terminology inconsistency",
+          "severity": "Medium",
+          "description": "Inconsistent terminology used for similar business divisions.",
+          "reason": "Different chunks use 'Coal Chemical' and 'Coal Chemical Division' interchangeably, which might cause confusion about the scope of these entities.",
+          "evidence": [
+            {
+              "chunk_id": "6a1f1c571432456e92a961e1a0f4b70c_chunk_0046",
+              "quote": "Coal Chemical"
+            },
+            {
+              "chunk_id": "6a1f1c571432456e92a961e1a0f4b70c_chunk_0084",
+              "quote": "Coal Chemical Division"
+            }
+          ],
+          "affected_claims": [],
+          "suggested_resolution": "Standardize the terminology to either 'Coal Chemical' or 'Coal Chemical Division' consistently across all relevant chunks.",
+          "requires_claude_verification": true,
+          "confidence": 0.9
+        },
+        {
+          "issue_id": "cluster_002_issue_001",
+          "type": "Vague wording",
+          "severity": "Medium",
+          "description": "General terms without specific details about the business activities.",
+          "reason": "Several chunks use general terms like 'Ash Handling' or 'Bulk Material Handling' without specifying their roles, responsibilities, or scope.",
+          "evidence": [
+            {
+              "chunk_id": "6a1f1c571432456e92a961e1a0f4b70c_chunk_0053",
+              "quote": "Our business: Ash Handling Division"
+            },
+            {
+              "chunk_id": "6a1f1c571432456e92a961e1a0f4b70c_chunk_0043",
+              "quote": "Bulk Material Handling"
+            }
+          ],
+          "affected_claims": [
+            "6a1f1c571432456e92a961e1a0f4b70c_chunk_0053_claim_000",
+            "6a1f1c571432456e92a961e1a0f4b70c_chunk_0043_ent_000"
+          ],
+          "suggested_resolution": "Provide detailed descriptions of the roles and responsibilities for each business division mentioned.",
+          "requires_claude_verification": true,
+          "confidence": 0.85
+        },
+        {
+          "issue_id": "cluster_002_issue_002",
+          "type": "Undefined terminology",
+          "severity": "Medium",
+          "description": "Undefined terms used without providing necessary definitions or context.",
+          "reason": "Terms like 'Agrimech' and 'Special Business' are mentioned but not defined, leading to unclear understanding of their nature.",
+          "evidence": [
+            {
+              "chunk_id": "6a1f1c571432456e92a961e1a0f4b70c_chunk_0050",
+              "quote": "Agrimech"
+            },
+            {
+              "chunk_id": "6a1f1c571432456e92a961e1a0f4b70c_chunk_0049",
+              "quote": "Special Business"
+            }
+          ],
+          "affected_claims": [],
+          "suggested_resolution": "Provide definitions for undefined terms to ensure clarity and consistency in the document.",
+          "requires_claude_verification": true,
+          "confidence": 0.85
+        },
+        {
+          "issue_id": "cluster_002_issue_003",
+          "type": "Duplicate guidance",
+          "severity": "Low",
+          "description": "Redundant headings or statements without additional information.",
+          "reason": "Chunks like 'Our business: Ash Handling Division' and 'Core functions of Coal Chemical Division' are mere labels without any substantive content.",
+          "evidence": [
+            {
+              "chunk_id": "6a1f1c571432456e92a961e1a0f4b70c_chunk_0053",
+              "quote": "Our business: Ash Handling Division"
+            },
+            {
+              "chunk_id": "6a1f1c571432456e92a961e1a0f4b70c_chunk_0087",
+              "quote": "Core functions of Coal Chemical Division"
+            }
+          ],
+          "affected_claims": [],
+          "suggested_resolution": "Expand these headings to include detailed descriptions or remove them if they do not add value.",
+          "requires_claude_verification": true,
+          "confidence": 0.9
+        },
+        {
+          "issue_id": "cluster_002_issue_004",
+          "type": "Broken cross-reference",
+          "severity": "Low",
+          "description": "References that do not point to additional relevant information.",
+          "reason": "Chunks referencing 'Our businesses' without providing specific details about the sectors or activities within these businesses.",
+          "evidence": [
+            {
+              "chunk_id": "6a1f1c571432456e92a961e1a0f4b70c_chunk_0041",
+              "quote": "Our businesses"
+            },
+            {
+              "chunk_id": "6a1f1c571432456e92a961e1a0f4b70c_chunk_0042",
+              "quote": "The sectors where we are present"
+            }
+          ],
+          "affected_claims": [],
+          "suggested_resolution": "Provide detailed information or link to sections that describe the specific businesses and sectors.",
+          "requires_claude_verification": true,
+          "confidence": 0.9
+        }
+      ],
+      "overall_cluster_risk": "Medium",
+      "overall_confidence": 0.88
+    },
+    {
+      "cluster_id": "cluster_003",
+      "cluster_topic": "Project milestones & Projects & Overview",
+      "cluster_findings": [
+        {
+          "issue_id": "cluster_003_issue_000",
+          "type": "Terminology inconsistency",
+          "severity": "Low",
+          "description": "Inconsistent use of vague terms without specific definitions.",
+          "reason": "Multiple chunks use vague terms such as 'Overview', 'Projects', and 'Project milestones' without providing specific details or context.",
+          "evidence": [
+            {
+              "chunk_id": "6a1f1c571432456e92a961e1a0f4b70c_chunk_0069",
+              "quote": "Overview"
+            },
+            {
+              "chunk_id": "6a1f1c571432456e92a961e1a0f4b70c_chunk_0085",
+              "quote": "Overview"
+            }
+          ],
+          "affected_claims": [],
+          "suggested_resolution": "Provide detailed definitions or descriptions for terms like 'Overview', 'Projects', and 'Project milestones' to avoid ambiguity.",
+          "requires_claude_verification": false,
+          "confidence": 0.9
+        },
+        {
+          "issue_id": "cluster_003_issue_001",
+          "type": "Terminology inconsistency",
+          "severity": "Medium",
+          "description": "Vague use of 'Building for India' and 'Banking on India'.",
+          "reason": "Chunk IDs 6a1f1c571432456e92a961e1a0f4b70c_chunk_0005 and 6a1f1c571432456e92a961e1a0f4b70c_chunk_0007 use the phrases without specifying what they entail.",
+          "evidence": [
+            {
+              "chunk_id": "6a1f1c571432456e92a961e1a0f4b70c_chunk_0005",
+              "quote": "Building for India. Banking on India."
+            },
+            {
+              "chunk_id": "6a1f1c571432456e92a961e1a0f4b70c_chunk_0007",
+              "quote": "Building for India. Banking on India."
+            }
+          ],
+          "affected_claims": [
+            "6a1f1c571432456e92a961e1a0f4b70c_chunk_0005_claim_000"
+          ],
+          "suggested_resolution": "Clarify 'Building for India' and 'Banking on India' by specifying the nature of construction projects or financial services.",
+          "requires_claude_verification": false,
+          "confidence": 0.85
+        },
+        {
+          "issue_id": "cluster_003_issue_002",
+          "type": "Cross-reference inconsistency",
+          "severity": "Low",
+          "description": "Multiple references to 'Project milestones' without specific content.",
+          "reason": "Chunk IDs 6a1f1c571432456e92a961e1a0f4b70c_chunk_0077 and 6a1f1c571432456e92a961e1a0f4b70c_chunk_0092 refer to 'Project milestones' but do not provide detailed information.",
+          "evidence": [
+            {
+              "chunk_id": "6a1f1c571432456e92a961e1a0f4b70c_chunk_0077",
+              "quote": "Project milestones"
+            },
+            {
+              "chunk_id": "6a1f1c571432456e92a961e1a0f4b70c_chunk_0092",
+              "quote": "Project milestones"
+            }
+          ],
+          "affected_claims": [],
+          "suggested_resolution": "Provide a detailed list of project milestones including their objectives and timelines to avoid confusion.",
+          "requires_claude_verification": false,
+          "confidence": 0.9
+        },
+        {
+          "issue_id": "cluster_003_issue_003",
+          "type": "Terminology inconsistency",
+          "severity": "High",
+          "description": "Generic term 'Policy' used without specific content.",
+          "reason": "Chunk ID 6a1f1c571432456e92a961e1a0f4b70c_chunk_0059 uses the term 'Policy' without providing any specific details or context about the policy in question.",
+          "evidence": [
+            {
+              "chunk_id": "6a1f1c571432456e92a961e1a0f4b70c_chunk_0059",
+              "quote": "Policy"
+            }
+          ],
+          "affected_claims": [],
+          "suggested_resolution": "Specify the policy name or provide a detailed description of its content.",
+          "requires_claude_verification": false,
+          "confidence": 0.9
+        },
+        {
+          "issue_id": "cluster_003_issue_004",
+          "type": "Terminology inconsistency",
+          "severity": "Medium",
+          "description": "Vague use of 'Limited sector-specific experience'.",
+          "reason": "Chunk ID 6a1f1c571432456e92a961e1a0f4b70c_chunk_0063 uses the phrase without specifying which sectors or the extent of the limited experience.",
+          "evidence": [
+            {
+              "chunk_id": "6a1f1c571432456e92a961e1a0f4b70c_chunk_0063",
+              "quote": "Limited sector-specific experience:"
+            }
+          ],
+          "affected_claims": [
+            "6a1f1c571432456e92a961e1a0f4b70c_chunk_0063_claim_000"
+          ],
+          "suggested_resolution": "Specify the sectors and extent of limited experience.",
+          "requires_claude_verification": false,
+          "confidence": 0.85
+        },
+        {
+          "issue_id": "cluster_003_issue_005",
+          "type": "Terminology inconsistency",
+          "severity": "Medium",
+          "description": "Vague use of 'outperform'.",
+          "reason": "Chunk ID 6a1f1c571432456e92a961e1a0f4b70c_chunk_0079 uses the term 'outperform' without specifying what or whom they are outperforming.",
+          "evidence": [
+            {
+              "chunk_id": "6a1f1c571432456e92a961e1a0f4b70c_chunk_0079",
+              "quote": "outperform"
+            }
+          ],
+          "affected_claims": [
+            "6a1f1c571432456e92a961e1a0f4b70c_chunk_0079_claim_000"
+          ],
+          "suggested_resolution": "Specify what or whom they are outperforming.",
+          "requires_claude_verification": false,
+          "confidence": 0.85
+        },
+        {
+          "issue_id": "cluster_003_issue_006",
+          "type": "Terminology inconsistency",
+          "severity": "Medium",
+          "description": "Generic term 'Growth' used without specific content.",
+          "reason": "Chunk ID 6a1f1c571432456e92a961e1a0f4b70c_chunk_0061 uses the term 'Growth' without providing any specific details or context about what aspect of growth is being discussed.",
+          "evidence": [
+            {
+              "chunk_id": "6a1f1c571432456e92a961e1a0f4b70c_chunk_0061",
+              "quote": "Growth"
+            }
+          ],
+          "affected_claims": [],
+          "suggested_resolution": "Define what aspect of growth is being discussed (e.g., economic growth, personal development).",
+          "requires_claude_verification": false,
+          "confidence": 0.9
+        },
+        {
+          "issue_id": "cluster_003_issue_007",
+          "type": "Terminology inconsistency",
+          "severity": "Medium",
+          "description": "Generic term 'Highlights' used without specific content.",
+          "reason": "Chunk ID 6a1f1c571432456e92a961e1a0f4b70c_chunk_0065 uses the term 'Highlights, FY 2024-25' without specifying what highlights are being referred to for the fiscal year 2024-25.",
+          "evidence": [
+            {
+              "chunk_id": "6a1f1c571432456e92a961e1a0f4b70c_chunk_0065",
+              "quote": "Highlights, FY 2024-25"
+            }
+          ],
+          "affected_claims": [],
+          "suggested_resolution": "Specify the highlights or details related to the fiscal year 2024-25.",
+          "requires_claude_verification": false,
+          "confidence": 0.85
+        },
+        {
+          "issue_id": "cluster_003_issue_008",
+          "type": "Temporal ambiguity",
+          "severity": "Medium",
+          "description": "Project completion timeframe not specified.",
+          "reason": "Chunk ID 6a1f1c571432456e92a961e1a0f4b70c_chunk_0093 uses the claim 'Total 10+ projects completed valued around 500 Cr+' without specifying the timeframe for project completion.",
+          "evidence": [
+            {
+              "chunk_id": "6a1f1c571432456e92a961e1a0f4b70c_chunk_0093",
+              "quote": "Total 10+ projects completed valued around 500 Cr+"
+            }
+          ],
+          "affected_claims": [
+            "6a1f1c571432456e92a961e1a0f4b70c_chunk_0093_claim_000"
+          ],
+          "suggested_resolution": "Specify the timeframe within which these projects were completed.",
+          "requires_claude_verification": false,
+          "confidence": 0.85
+        },
+        {
+          "issue_id": "cluster_003_issue_009",
+          "type": "Temporal ambiguity",
+          "severity": "Medium",
+          "description": "Project ongoing status not specified.",
+          "reason": "Chunk ID 6a1f1c571432456e92a961e1a0f4b70c_chunk_0093 uses the claim 'Total 5+ projects Ongoing valued around 200 Cr+' without specifying the current status or expected completion of these ongoing projects.",
+          "evidence": [
+            {
+              "chunk_id": "6a1f1c571432456e92a961e1a0f4b70c_chunk_0093",
+              "quote": "Total 5+ projects Ongoing valued around 200 Cr+"
+            }
+          ],
+          "affected_claims": [
+            "6a1f1c571432456e92a961e1a0f4b70c_chunk_0093_claim_001"
+          ],
+          "suggested_resolution": "Specify the current status or expected completion of these ongoing projects.",
+          "requires_claude_verification": false,
+          "confidence": 0.85
+        }
+      ],
+      "overall_cluster_risk": "Medium",
+      "overall_confidence": 0.92
+    },
+    {
+      "cluster_id": "cluster_004",
+      "cluster_topic": "Our vision & India & Excellence",
+      "cluster_findings": [
+        {
+          "issue_id": "cluster_004_issue_001",
+          "type": "Cross-reference inconsistency",
+          "severity": "Low",
+          "description": "Inconsistent references to the same section.",
+          "reason": "Multiple chunks refer to similar sections (e.g., Our mission) without providing specific content or details, leading to potential confusion about what information is being referenced.",
+          "evidence": [
+            {
+              "chunk_id": "6a1f1c571432456e92a961e1a0f4b70c_chunk_0018",
+              "quote": "Our mission"
+            },
+            {
+              "chunk_id": "6a1f1c571432456e92a961e1a0f4b70c_chunk_0019",
+              "quote": "Our mission"
+            }
+          ],
+          "affected_claims": [],
+          "suggested_resolution": "Ensure that each section reference provides clear and specific content or details to avoid ambiguity.",
+          "requires_claude_verification": true,
+          "confidence": 0.85
+        },
+        {
+          "issue_id": "cluster_004_issue_002",
+          "type": "Terminology inconsistency",
+          "severity": "Medium",
+          "description": "Inconsistent use of terminology.",
+          "reason": "The phrase 'Our vision' is used in different chunks, but only one provides specific content. The other instances are vague and do not provide additional details about the vision.",
+          "evidence": [
+            {
+              "chunk_id": "6a1f1c571432456e92a961e1a0f4b70c_chunk_0016",
+              "quote": "Our vision"
+            },
+            {
+              "chunk_id": "6a1f1c571432456e92a961e1a0f4b70c_chunk_0017",
+              "quote": "To be the engineering partner of choice in India's infrastructure journey of value through innovation, precision, and excellence in every project we undertake."
+            }
+          ],
+          "affected_claims": [],
+          "suggested_resolution": "Use consistent terminology and provide specific details for all instances of 'Our vision' to avoid confusion.",
+          "requires_claude_verification": true,
+          "confidence": 0.9
+        },
+        {
+          "issue_id": "cluster_004_issue_003",
+          "type": "Vague wording",
+          "severity": "Medium",
+          "description": "Multiple instances of vague wording.",
+          "reason": "Several chunks use vague phrases without providing specific details, leading to ambiguity in understanding the content.",
+          "evidence": [
+            {
+              "chunk_id": "6a1f1c571432456e92a961e1a0f4b70c_chunk_0016",
+              "quote": "Our vision"
+            },
+            {
+              "chunk_id": "6a1f1c571432456e92a961e1a0f4b70c_chunk_0018",
+              "quote": "Our mission"
+            },
+            {
+              "chunk_id": "6a1f1c571432456e92a961e1a0f4b70c_chunk_0022",
+              "quote": "Our collaborations"
+            }
+          ],
+          "affected_claims": [],
+          "suggested_resolution": "Provide more specific and detailed information in place of vague phrases to enhance clarity.",
+          "requires_claude_verification": true,
+          "confidence": 0.9
+        },
+        {
+          "issue_id": "cluster_004_issue_004",
+          "type": "Terminology inconsistency",
+          "severity": "Low",
+          "description": "Inconsistent use of 'Our' prefix in section titles.",
+          "reason": "Some sections use the 'Our' prefix (e.g., Our mission, Our workforce) while others do not (e.g., What we are and What we do). This inconsistency can lead to confusion.",
+          "evidence": [
+            {
+              "chunk_id": "6a1f1c571432456e92a961e1a0f4b70c_chunk_0018",
+              "quote": "Our mission"
+            },
+            {
+              "chunk_id": "6a1f1c571432456e92a961e1a0f4b70c_chunk_0024",
+              "quote": "Our workforce"
+            },
+            {
+              "chunk_id": "6a1f1c571432456e92a961e1a0f4b70c_chunk_0008",
+              "quote": "What we are and What we do"
+            }
+          ],
+          "affected_claims": [],
+          "suggested_resolution": "Decide on a consistent use of the 'Our' prefix in section titles to maintain uniformity.",
+          "requires_claude_verification": true,
+          "confidence": 0.85
+        },
+        {
+          "issue_id": "cluster_004_issue_005",
+          "type": "Vague wording",
+          "severity": "Medium",
+          "description": "Use of vague phrases in multiple sections.",
+          "reason": "Sections such as 'Our workforce' and 'What we are and What we do' use vague phrases without additional context, leading to ambiguity.",
+          "evidence": [
+            {
+              "chunk_id": "6a1f1c571432456e92a961e1a0f4b70c_chunk_0024",
+              "quote": "Our workforce"
+            },
+            {
+              "chunk_id": "6a1f1c571432456e92a961e1a0f4b70c_chunk_0008",
+              "quote": "What we are and What we do"
+            }
+          ],
+          "affected_claims": [],
+          "suggested_resolution": "Provide detailed information about 'Our workforce' and clarify the content of 'What we are and What we do'.",
+          "requires_claude_verification": true,
+          "confidence": 0.9
+        },
+        {
+          "issue_id": "cluster_004_issue_006",
+          "type": "Cross-reference inconsistency",
+          "severity": "Low",
+          "description": "Inconsistent use of section references.",
+          "reason": "Sections refer to other sections without providing the actual content, leading to potential confusion about what information is being referenced.",
+          "evidence": [
+            {
+              "chunk_id": "6a1f1c571432456e92a961e1a0f4b70c_chunk_0020",
+              "quote": "Our infrastructure and strategic presence"
+            },
+            {
+              "chunk_id": "6a1f1c571432456e92a961e1a0f4b70c_chunk_0022",
+              "quote": "Our collaborations"
+            }
+          ],
+          "affected_claims": [],
+          "suggested_resolution": "Ensure that section references are accompanied by specific content or details to avoid ambiguity.",
+          "requires_claude_verification": true,
+          "confidence": 0.85
+        }
+      ],
+      "overall_cluster_risk": "Medium",
+      "overall_confidence": 0.89
+    },
+    {
+      "cluster_id": "cluster_005",
+      "cluster_topic": "Bulk Material Handling systems are widely used in: & Handling & Material",
+      "cluster_findings": [
+        {
+          "issue_id": "cluster_005_issue_000",
+          "type": "Terminology inconsistency",
+          "severity": "Low",
+          "description": "Inconsistent use of terminology 'Bulk Material Handling systems' vs. 'Bulk Material Handling System'.",
+          "reason": "There is a minor spelling variation with the plural and singular forms, which may cause confusion in certain contexts.",
+          "evidence": [
+            {
+              "chunk_id": "6a1f1c571432456e92a961e1a0f4b70c_chunk_0075",
+              "quote": "Bulk Material Handling systems"
+            },
+            {
+              "chunk_id": "6a1f1c571432456e92a961e1a0f4b70c_chunk_0070",
+              "quote": "Bulk Material Handling Systems"
+            }
+          ],
+          "affected_claims": [
+            "6a1f1c571432456e92a961e1a0f4b70c_chunk_0075_claim_000"
+          ],
+          "suggested_resolution": "Standardize the terminology to either 'Bulk Material Handling Systems' or 'Bulk Material Handling systems' throughout the document.",
+          "requires_claude_verification": true,
+          "confidence": 0.95
+        },
+        {
+          "issue_id": "cluster_005_issue_001",
+          "type": "Terminology inconsistency",
+          "severity": "Low",
+          "description": "Inconsistent use of terminology 'Department' vs. 'Industry'.",
+          "reason": "While both terms can refer to similar entities, they are used interchangeably in the document without clear distinction.",
+          "evidence": [
+            {
+              "chunk_id": "6a1f1c571432456e92a961e1a0f4b70c_chunk_0076",
+              "quote": "Mining and minerals (Department)"
+            },
+            {
+              "chunk_id": "6a1f1c571432456e92a961e1a0f4b70c_chunk_0072",
+              "quote": "steel industry (Department)"
+            }
+          ],
+          "affected_claims": [
+            "6a1f1c571432456e92a961e1a0f4b70c_chunk_0076_claim_000"
+          ],
+          "suggested_resolution": "Consistently use 'Industry' or 'Department' throughout the document for clarity.",
+          "requires_claude_verification": true,
+          "confidence": 0.95
+        },
+        {
+          "issue_id": "cluster_005_issue_002",
+          "type": "Cross-reference inconsistency",
+          "severity": "Low",
+          "description": "Inconsistent cross-referencing in section headings.",
+          "reason": "Section headings refer to 'Bulk Material Handling systems' and 'Key elements of Bulk Material Handling system', but the content does not provide detailed information as expected from a cross-reference.",
+          "evidence": [
+            {
+              "chunk_id": "6a1f1c571432456e92a961e1a0f4b70c_chunk_0075",
+              "quote": "Bulk Material Handling systems are widely used in:"
+            },
+            {
+              "chunk_id": "6a1f1c571432456e92a961e1a0f4b70c_chunk_0071",
+              "quote": "Key elements of Bulk Material Handling system"
+            }
+          ],
+          "affected_claims": [
+            "6a1f1c571432456e92a961e1a0f4b70c_chunk_0075_claim_000",
+            "6a1f1c571432456e92a961e1a0f4b70c_chunk_0071_claim_000"
+          ],
+          "suggested_resolution": "Ensure that section headings are linked to content sections that provide detailed information.",
+          "requires_claude_verification": true,
+          "confidence": 0.95
+        }
+      ],
+      "overall_cluster_risk": "Low",
+      "overall_confidence": 0.92
+    }
+  ]
+}

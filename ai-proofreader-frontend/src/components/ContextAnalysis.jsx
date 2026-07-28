@@ -170,18 +170,30 @@ export default function ContextAnalysis({ id }) {
   }, [finalReport, claudeReport]);
 
   const funnelData = useMemo(() => {
+    let initial = docProgress?.context_analysis_issues_count || claimsReport?.data?.claims?.length || chunkReport?.data?.chunks?.length || consolidatedFindings.length;
+    let confirmed = claudeReport?.data?.verified_findings?.filter(f => f.status === "confirmed")?.length || consolidatedFindings.length;
+    let rejected = claudeReport?.data?.verified_findings?.filter(f => f.status === "rejected" || f.status === "false_positive")?.length || 0;
+    let executive = consolidatedFindings.length;
+
     if (finalReport?.data?.claude_verification_summary) {
-      return finalReport.data.claude_verification_summary;
+      const summary = finalReport.data.claude_verification_summary;
+      initial = summary.initial_automated_detection ?? summary.potential_findings ?? initial;
+      confirmed = summary.claude_verified ?? summary.claude_confirmed ?? confirmed;
+      rejected = summary.rejected_false_positives ?? rejected;
+      executive = summary.final_findings_presented ?? summary.executive_findings ?? executive;
     }
-    const initial = docProgress?.context_analysis_issues_count || 90;
-    const finalCount = consolidatedFindings.length || 44;
+
+    if (initial < confirmed + rejected) {
+      initial = confirmed + rejected;
+    }
+
     return {
-      initial_automated_detection: initial,
-      claude_verified: 60,
-      rejected_false_positives: 30,
-      final_findings_presented: finalCount
+      potential_findings: initial,
+      claude_confirmed: confirmed,
+      rejected_false_positives: rejected,
+      executive_findings: executive
     };
-  }, [finalReport, docProgress, consolidatedFindings]);
+  }, [finalReport, claudeReport, claimsReport, chunkReport, docProgress, consolidatedFindings]);
 
   const filteredFindings = useMemo(() => {
     return consolidatedFindings.filter(f => {
@@ -326,37 +338,40 @@ export default function ContextAnalysis({ id }) {
         </button>
       </div>
 
-      {/* Issue 8: Local LLM vs Claude Workflow Card */}
+      {/* Requirement 6: AI Validation Workflow Card */}
       <div style={styles.funnelCard}>
-        <h3 style={styles.funnelTitle}>Local LLM vs Claude Review Architecture</h3>
+        <h3 style={styles.funnelTitle}>AI Validation Workflow</h3>
         <p style={styles.funnelSub}>
-          The initial review identifies all potential issues, while Claude validates each finding, removes false positives, and presents only verified recommendations.
+          The local LLM engine detects potential ambiguities and policy contradictions. Claude validates each finding, eliminates false positives, and consolidates verified findings for executive review.
         </p>
 
         <div style={styles.funnelStepsRow}>
           <div style={styles.funnelStepBox}>
-            <div style={styles.funnelVal}>{funnelData.initial_automated_detection || 90}</div>
-            <div style={styles.funnelLbl}>Initial Automated Detection</div>
+            <div style={styles.funnelVal}>{funnelData.potential_findings}</div>
+            <div style={styles.funnelLbl}>Potential Findings Detected</div>
           </div>
           <div style={styles.funnelArrow}>↓</div>
 
           <div style={styles.funnelStepBox}>
-            <div style={{ ...styles.funnelVal, color: "#2563eb" }}>{funnelData.claude_verified || 60}</div>
-            <div style={styles.funnelLbl}>Claude Verified</div>
+            <div style={{ ...styles.funnelVal, color: "#2563eb" }}>{funnelData.claude_confirmed}</div>
+            <div style={styles.funnelLbl}>Claude Confirmed Findings</div>
           </div>
           <div style={styles.funnelArrow}>↓</div>
 
           <div style={styles.funnelStepBox}>
-            <div style={{ ...styles.funnelVal, color: "#dc2626" }}>{funnelData.rejected_false_positives || 30}</div>
+            <div style={{ ...styles.funnelVal, color: "#dc2626" }}>{funnelData.rejected_false_positives}</div>
             <div style={styles.funnelLbl}>Rejected False Positives</div>
           </div>
           <div style={styles.funnelArrow}>↓</div>
 
           <div style={{ ...styles.funnelStepBox, borderColor: "#059669", background: "#f0fdf4" }}>
-            <div style={{ ...styles.funnelVal, color: "#059669" }}>{funnelData.final_findings_presented || 44}</div>
-            <div style={styles.funnelLbl}>Final Findings</div>
+            <div style={{ ...styles.funnelVal, color: "#059669" }}>{funnelData.executive_findings}</div>
+            <div style={styles.funnelLbl}>Executive Findings Reported</div>
           </div>
         </div>
+        <p style={{ margin: "12px 0 0", fontSize: 11.5, color: "#64748b", fontStyle: "italic", textAlign: "center" }}>
+          * Executive Findings represent consolidated, deduplicated findings ready for compliance action.
+        </p>
       </div>
 
       {/* Issue 7: Professional Audit Cards */}

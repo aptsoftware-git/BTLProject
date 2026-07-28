@@ -44,6 +44,15 @@ ALLOWED_DOWNLOADS = {
     "context_report.json": "report.json",
     "context_report.html": "report.html",
     "business_report.html": "business_report.html",
+    "comparative_report.html": "comparative_analysis/comparative_report.html",
+    "comparative_report.json": "comparative_analysis/comparative_report.json",
+    "executive_dashboard.html": "comparative_analysis/executive_dashboard.html",
+    "company_profile.json": "comparative_analysis/company_profile.json",
+    "competitor_profiles.json": "comparative_analysis/competitor_profiles.json",
+    "comparison_matrix.json": "comparative_analysis/comparison_matrix.json",
+    "gap_analysis.json": "comparative_analysis/gap_analysis.json",
+    "swot_analysis.json": "comparative_analysis/swot_analysis.json",
+    "recommendations.json": "comparative_analysis/recommendations.json",
 }
 
 
@@ -398,8 +407,12 @@ async def get_system_status():
 
 
 @router.post(
-    "/documents",
+    "/documents/upload",
     summary="Upload and start analysis on a document",
+)
+@router.post(
+    "/documents",
+    summary="Upload and start analysis on a document (Alias)",
 )
 async def upload_and_start_document(file: UploadFile = File(...)):
     if not file.filename:
@@ -1038,16 +1051,49 @@ def get_report_meta(job_id: str, relative_file_path: Path):
 
 
 def _handle_report_response(job_id: str, relative_path: Path):
-    from backend.services import get_job_dir, get_job
+    from backend.services import get_job_dir, get_job, save_job_metadata, backend_logger
     job = get_job(job_id)
     if not job:
         raise HTTPException(status_code=404, detail=f"Job '{job_id}' not found.")
 
     job_dir = get_job_dir(job_id)
     report_file = job_dir / relative_path
+
+    # On-demand Comparative Analysis generation if report is missing
+    if not report_file.exists() and relative_path.parts[0] == "comparative_analysis":
+        comp_status = job.get("comparative_analysis_status")
+        if comp_status != "failed":
+            try:
+                backend_logger.info("Executing on-demand Comparative Analysis for job_id: %s", job_id)
+                from src.comparative_analysis.service import ComparativeAnalysisService
+                from src.comparative_analysis.models import ComparativeAnalysisRequest
+
+                job["comparative_analysis_status"] = "running"
+                comp_service = ComparativeAnalysisService()
+                comp_req = ComparativeAnalysisRequest(document_id=job_id)
+                comp_resp = comp_service.run_analysis(comp_req)
+                
+                if comp_resp.status == "completed" and report_file.exists():
+                    job["comparative_analysis_status"] = "completed"
+                    save_job_metadata(job_id)
+            except Exception as comp_err:
+                backend_logger.error("On-demand comparative analysis failed for job %s: %s", job_id, comp_err)
+                job["comparative_analysis_status"] = "failed"
+                save_job_metadata(job_id)
+
     if not report_file.exists():
-        if job.get("status") in ("processing", "pending", "running") or job.get("context_analysis_status") in ("running", "pending"):
+        comp_status = job.get("comparative_analysis_status")
+        ctx_status = job.get("context_analysis_status")
+        job_status = job.get("status")
+
+        if (
+            job_status in ("processing", "pending", "running") or
+            ctx_status in ("running", "pending") or
+            comp_status in ("running", "pending") or
+            comp_status is None
+        ):
             meta = get_report_meta(job_id, relative_path)
+            meta["status"] = "generating"
             return {"metadata": meta, "data": None}
         raise HTTPException(status_code=404, detail=f"Report file '{relative_path.name}' not found.")
 
@@ -1055,6 +1101,7 @@ def _handle_report_response(job_id: str, relative_path: Path):
         with open(report_file, "r", encoding="utf-8") as f:
             data = json.load(f)
         meta = get_report_meta(job_id, relative_path)
+        meta["status"] = "ready"
         return {"metadata": meta, "data": data}
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
@@ -1077,6 +1124,17 @@ REPORT_PATH_MAP = {
     "final_report": Path("15_final_report/final_report.json"),
     "executive": Path("15_final_report/final_report.json"),
     "consistency": Path("report.json"),
+    "comparative-analysis": Path("comparative_analysis/comparative_report.json"),
+    "comparative_analysis": Path("comparative_analysis/comparative_report.json"),
+    "company-profile": Path("comparative_analysis/company_profile.json"),
+    "company_profile": Path("comparative_analysis/company_profile.json"),
+    "competitor-profiles": Path("comparative_analysis/competitor_profiles.json"),
+    "competitor_profiles": Path("comparative_analysis/competitor_profiles.json"),
+    "comparison-matrix": Path("comparative_analysis/comparison_matrix.json"),
+    "comparison_matrix": Path("comparative_analysis/comparison_matrix.json"),
+    "swot": Path("comparative_analysis/swot_analysis.json"),
+    "swot_analysis": Path("comparative_analysis/swot_analysis.json"),
+    "recommendations": Path("comparative_analysis/recommendations.json"),
 }
 
 
@@ -1140,6 +1198,36 @@ async def get_report_final_report_alias(job_id: str):
     return _handle_report_response(job_id, Path("15_final_report/final_report.json"))
 
 
+@router.get("/reports/{job_id}/comparative-analysis", summary="Get Comparative Analysis Report")
+async def get_report_comparative_analysis(job_id: str):
+    return _handle_report_response(job_id, Path("comparative_analysis/comparative_report.json"))
+
+
+@router.get("/reports/{job_id}/company-profile", summary="Get Target Company Profile")
+async def get_report_company_profile(job_id: str):
+    return _handle_report_response(job_id, Path("comparative_analysis/company_profile.json"))
+
+
+@router.get("/reports/{job_id}/competitor-profiles", summary="Get Competitor Profiles")
+async def get_report_competitor_profiles(job_id: str):
+    return _handle_report_response(job_id, Path("comparative_analysis/competitor_profiles.json"))
+
+
+@router.get("/reports/{job_id}/comparison-matrix", summary="Get Comparison Matrix")
+async def get_report_comparison_matrix(job_id: str):
+    return _handle_report_response(job_id, Path("comparative_analysis/comparison_matrix.json"))
+
+
+@router.get("/reports/{job_id}/swot", summary="Get SWOT Analysis")
+async def get_report_swot(job_id: str):
+    return _handle_report_response(job_id, Path("comparative_analysis/swot_analysis.json"))
+
+
+@router.get("/reports/{job_id}/recommendations", summary="Get Strategic Recommendations")
+async def get_report_recommendations(job_id: str):
+    return _handle_report_response(job_id, Path("comparative_analysis/recommendations.json"))
+
+
 @router.get("/reports/{job_id}/{report_type}", summary="Get dynamic report by type")
 async def get_report_by_type(job_id: str, report_type: str):
     if report_type.lower() in REPORT_PATH_MAP:
@@ -1183,6 +1271,10 @@ async def download_report_pdf(job_id: str, report_type: str):
         "semantic-clusters": job_dir / "09_semantic_clusters" / "cluster_inspector.html",
         "annotated-original": job_dir / "10_final" / "annotated_original.html",
         "corrected-document": job_dir / "10_final" / "corrected_document.html",
+        "comparative-analysis": job_dir / "comparative_analysis" / "comparative_report.html",
+        "comparative_analysis": job_dir / "comparative_analysis" / "comparative_report.html",
+        "comparative": job_dir / "comparative_analysis" / "comparative_report.html",
+        "executive-dashboard": job_dir / "comparative_analysis" / "executive_dashboard.html",
     }
 
     html_file = report_html_map.get(report_type.lower())

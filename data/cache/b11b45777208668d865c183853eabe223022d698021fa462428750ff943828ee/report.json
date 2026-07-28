@@ -1,0 +1,33 @@
+{
+  "document_id": "6a1f1c571432456e92a961e1a0f4b70c",
+  "source_file": "6a1f1c571432456e92a961e1a0f4b70c_BTL AR SS 09-10-2025 (c2c)-1-10.pdf",
+  "created_time": "2026-07-22T06:50:23Z",
+  "summary": {
+    "document_name": "6a1f1c571432456e92a961e1a0f4b70c_BTL AR SS 09-10-2025 (c2c)-1-10.pdf",
+    "document_type": "PDF Document",
+    "pages_analysed": 10,
+    "total_segments": 227,
+    "processing_time": "N/A",
+    "analysis_completed_on": "2026-07-22 12:20:23",
+    "total_issues": 0,
+    "high_severity": 0,
+    "medium_severity": 0,
+    "low_severity": 0,
+    "overall_health": "Excellent",
+    "health_description": "No contextual inconsistencies or contradictions detected in this document.",
+    "categories_distribution": {
+      "Numeric Inconsistencies": 0,
+      "Reference Conflicts": 0,
+      "Terminology Conflicts": 0,
+      "Policy Conflicts": 0,
+      "Entity Inconsistencies": 0,
+      "Date Conflicts": 0,
+      "Cross-section Contradictions": 0,
+      "Missing References": 0,
+      "Broken References": 0,
+      "Duplicate Information": 0
+    },
+    "status": "Completed Successfully"
+  },
+  "issues": []
+}

@@ -1,0 +1,62 @@
+{
+  "image_id": "#/pictures/3",
+  "page": 4,
+  "caption": null,
+  "ocr_text": null,
+  "bounding_box": {
+    "l": 143.46627807617188,
+    "t": 746.693977355957,
+    "r": 450.5592956542969,
+    "b": 531.7311401367188,
+    "coord_origin": "BOTTOMLEFT"
+  },
+  "image_path": "05_images/image_004.png",
+  "image_type": "Diagram",
+  "objects": [
+    "Analysts",
+    "Chief Executive Officer",
+    "Directors",
+    "Engineers",
+    "Individual Contributors",
+    "Managers",
+    "Success Leads",
+    "VP Engineering",
+    "VP Finance",
+    "VP Human Resources",
+    "VP Operations",
+    "VP Sales & Marketing",
+    "and various departments and roles."
+  ],
+  "keywords": [
+    "Analysts",
+    "Chief Executive Officer",
+    "Directors",
+    "Engineers",
+    "Individual Contributors",
+    "Managers",
+    "Organization Chart",
+    "Success Leads.",
+    "VP Engineering",
+    "VP Finance",
+    "VP Human Resources",
+    "VP Operations",
+    "VP Sales & Marketing",
+    "Vertexa Solutions"
+  ],
+  "semantic_description": "This is an organizational chart for Vertexa Solutions, illustrating the hierarchical structure of the company. It shows the reporting relationships between various departments and their respective leaders, including the Chief Executive Officer (CEO) and other vice presidents (VPs) such as VP Engineering, VP Human Resources, VP Finance, VP Sales & Marketing, and VP Operations. The chart also includes levels of management and individual contributors, indicating a detailed breakdown of the company's structure.",
+  "detected_entities": [
+    "Analysts",
+    "Chief Executive Officer",
+    "Directors",
+    "Engineers",
+    "Individual Contributors",
+    "Managers",
+    "Success Leads.",
+    "VP Engineering",
+    "VP Finance",
+    "VP Human Resources",
+    "VP Operations",
+    "VP Sales & Marketing",
+    "Vertexa Solutions"
+  ]
+}

@@ -1,0 +1,1796 @@
+{
+  "entities": [
+    {
+      "entity_id": "6a1f1c571432456e92a961e1a0f4b70c_chunk_0078_ent_000",
+      "text": "AHP and CHP, Adani Raigarh, Chhattisgarh",
+      "type": "Project",
+      "chunk_id": "6a1f1c571432456e92a961e1a0f4b70c_chunk_0078",
+      "claim_id": "6a1f1c571432456e92a961e1a0f4b70c_chunk_0078_claim_000"
+    },
+    {
+      "entity_id": "6a1f1c571432456e92a961e1a0f4b70c_chunk_0066_ent_002",
+      "text": "Adani",
+      "type": "Organization",
+      "chunk_id": "6a1f1c571432456e92a961e1a0f4b70c_chunk_0066",
+      "claim_id": "6a1f1c571432456e92a961e1a0f4b70c_chunk_0066_claim_000"
+    },
+    {
+      "entity_id": "6a1f1c571432456e92a961e1a0f4b70c_chunk_0030_ent_002",
+      "text": "Adani Group",
+      "type": "Organization",
+      "chunk_id": "6a1f1c571432456e92a961e1a0f4b70c_chunk_0030",
+      "claim_id": "6a1f1c571432456e92a961e1a0f4b70c_chunk_0030_claim_001"
+    },
+    {
+      "entity_id": "6a1f1c571432456e92a961e1a0f4b70c_chunk_0082_ent_002",
+      "text": "Adani Power",
+      "type": "Organization",
+      "chunk_id": "6a1f1c571432456e92a961e1a0f4b70c_chunk_0082",
+      "claim_id": "6a1f1c571432456e92a961e1a0f4b70c_chunk_0082_claim_000"
+    },
+    {
+      "entity_id": "6a1f1c571432456e92a961e1a0f4b70c_chunk_0030_ent_001",
+      "text": "Adani Power Limited",
+      "type": "Organization",
+      "chunk_id": "6a1f1c571432456e92a961e1a0f4b70c_chunk_0030",
+      "claim_id": "6a1f1c571432456e92a961e1a0f4b70c_chunk_0030_claim_001"
+    },
+    {
+      "entity_id": "6a1f1c571432456e92a961e1a0f4b70c_chunk_0055_ent_002",
+      "text": "Adani Power, Raigarh",
+      "type": "Project",
+      "chunk_id": "6a1f1c571432456e92a961e1a0f4b70c_chunk_0055",
+      "claim_id": "6a1f1c571432456e92a961e1a0f4b70c_chunk_0055_claim_000"
+    },
+    {
+      "entity_id": "6a1f1c571432456e92a961e1a0f4b70c_chunk_0062_ent_002",
+      "text": "Adani's Raigarh thermal power project (2X800 MW)",
+      "type": "Project",
+      "chunk_id": "6a1f1c571432456e92a961e1a0f4b70c_chunk_0062",
+      "claim_id": "6a1f1c571432456e92a961e1a0f4b70c_chunk_0062_claim_001"
+    },
+    {
+      "entity_id": "6a1f1c571432456e92a961e1a0f4b70c_chunk_0082_ent_000",
+      "text": "Adani-Raigarh CHP and AHP projects",
+      "type": "Project",
+      "chunk_id": "6a1f1c571432456e92a961e1a0f4b70c_chunk_0082",
+      "claim_id": "6a1f1c571432456e92a961e1a0f4b70c_chunk_0082_claim_000"
+    },
+    {
+      "entity_id": "6a1f1c571432456e92a961e1a0f4b70c_chunk_0050_ent_000",
+      "text": "Agrimech",
+      "type": "Organization",
+      "chunk_id": "6a1f1c571432456e92a961e1a0f4b70c_chunk_0050",
+      "claim_id": null
+    },
+    {
+      "entity_id": "6a1f1c571432456e92a961e1a0f4b70c_chunk_0090_ent_002",
+      "text": "Ammonium sulphate plant",
+      "type": "Project",
+      "chunk_id": "6a1f1c571432456e92a961e1a0f4b70c_chunk_0090",
+      "claim_id": "6a1f1c571432456e92a961e1a0f4b70c_chunk_0090_claim_001"
+    },
+    {
+      "entity_id": "6a1f1c571432456e92a961e1a0f4b70c_chunk_0045_ent_000",
+      "text": "Ash Handling",
+      "type": "Project",
+      "chunk_id": "6a1f1c571432456e92a961e1a0f4b70c_chunk_0045",
+      "claim_id": "6a1f1c571432456e92a961e1a0f4b70c_chunk_0045_claim_000"
+    },
+    {
+      "entity_id": "6a1f1c571432456e92a961e1a0f4b70c_chunk_0053_ent_000",
+      "text": "Ash Handling Division",
+      "type": "Department",
+      "chunk_id": "6a1f1c571432456e92a961e1a0f4b70c_chunk_0053",
+      "claim_id": "6a1f1c571432456e92a961e1a0f4b70c_chunk_0053_claim_000"
+    },
+    {
+      "entity_id": "6a1f1c571432456e92a961e1a0f4b70c_chunk_0078_ent_002",
+      "text": "Ash handling plant package from BHEL, Yadadri, Telengana",
+      "type": "Project",
+      "chunk_id": "6a1f1c571432456e92a961e1a0f4b70c_chunk_0078",
+      "claim_id": "6a1f1c571432456e92a961e1a0f4b70c_chunk_0078_claim_000"
+    },
+    {
+      "entity_id": "6a1f1c571432456e92a961e1a0f4b70c_chunk_0081_ent_003",
+      "text": "BHEL-ISG",
+      "type": "Organization",
+      "chunk_id": "6a1f1c571432456e92a961e1a0f4b70c_chunk_0081",
+      "claim_id": "6a1f1c571432456e92a961e1a0f4b70c_chunk_0081_claim_001"
+    },
+    {
+      "entity_id": "6a1f1c571432456e92a961e1a0f4b70c_chunk_0081_ent_000",
+      "text": "BHEL-Maitree Project",
+      "type": "Project",
+      "chunk_id": "6a1f1c571432456e92a961e1a0f4b70c_chunk_0081",
+      "claim_id": "6a1f1c571432456e92a961e1a0f4b70c_chunk_0081_claim_000"
+    },
+    {
+      "entity_id": "6a1f1c571432456e92a961e1a0f4b70c_chunk_0002_ent_002",
+      "text": "BTL",
+      "type": "Organization",
+      "chunk_id": "6a1f1c571432456e92a961e1a0f4b70c_chunk_0002",
+      "claim_id": "6a1f1c571432456e92a961e1a0f4b70c_chunk_0002_claim_002"
+    },
+    {
+      "entity_id": "6a1f1c571432456e92a961e1a0f4b70c_chunk_0004_ent_001",
+      "text": "BTL EPC",
+      "type": "Organization",
+      "chunk_id": "6a1f1c571432456e92a961e1a0f4b70c_chunk_0004",
+      "claim_id": "6a1f1c571432456e92a961e1a0f4b70c_chunk_0004_claim_000"
+    },
+    {
+      "entity_id": "6a1f1c571432456e92a961e1a0f4b70c_chunk_0015_ent_000",
+      "text": "BTL EPC",
+      "type": "Organization",
+      "chunk_id": "6a1f1c571432456e92a961e1a0f4b70c_chunk_0015",
+      "claim_id": "6a1f1c571432456e92a961e1a0f4b70c_chunk_0015_claim_000"
+    },
+    {
+      "entity_id": "6a1f1c571432456e92a961e1a0f4b70c_chunk_0023_ent_000",
+      "text": "BTL EPC",
+      "type": "Organization",
+      "chunk_id": "6a1f1c571432456e92a961e1a0f4b70c_chunk_0023",
+      "claim_id": "6a1f1c571432456e92a961e1a0f4b70c_chunk_0023_claim_000"
+    },
+    {
+      "entity_id": "6a1f1c571432456e92a961e1a0f4b70c_chunk_0025_ent_000",
+      "text": "BTL EPC",
+      "type": "Organization",
+      "chunk_id": "6a1f1c571432456e92a961e1a0f4b70c_chunk_0025",
+      "claim_id": "6a1f1c571432456e92a961e1a0f4b70c_chunk_0025_claim_000"
+    },
+    {
+      "entity_id": "6a1f1c571432456e92a961e1a0f4b70c_chunk_0057_ent_000",
+      "text": "BTL EPC",
+      "type": "Organization",
+      "chunk_id": "6a1f1c571432456e92a961e1a0f4b70c_chunk_0057",
+      "claim_id": "6a1f1c571432456e92a961e1a0f4b70c_chunk_0057_claim_000"
+    },
+    {
+      "entity_id": "6a1f1c571432456e92a961e1a0f4b70c_chunk_0064_ent_000",
+      "text": "BTL EPC",
+      "type": "Organization",
+      "chunk_id": "6a1f1c571432456e92a961e1a0f4b70c_chunk_0064",
+      "claim_id": "6a1f1c571432456e92a961e1a0f4b70c_chunk_0064_claim_000"
+    },
+    {
+      "entity_id": "6a1f1c571432456e92a961e1a0f4b70c_chunk_0066_ent_000",
+      "text": "BTL EPC",
+      "type": "Organization",
+      "chunk_id": "6a1f1c571432456e92a961e1a0f4b70c_chunk_0066",
+      "claim_id": "6a1f1c571432456e92a961e1a0f4b70c_chunk_0066_claim_001"
+    },
+    {
+      "entity_id": "6a1f1c571432456e92a961e1a0f4b70c_chunk_0080_ent_001",
+      "text": "BTL EPC",
+      "type": "Organization",
+      "chunk_id": "6a1f1c571432456e92a961e1a0f4b70c_chunk_0080",
+      "claim_id": "6a1f1c571432456e92a961e1a0f4b70c_chunk_0080_claim_000"
+    },
+    {
+      "entity_id": "6a1f1c571432456e92a961e1a0f4b70c_chunk_0081_ent_002",
+      "text": "BTL EPC",
+      "type": "Organization",
+      "chunk_id": "6a1f1c571432456e92a961e1a0f4b70c_chunk_0081",
+      "claim_id": "6a1f1c571432456e92a961e1a0f4b70c_chunk_0081_claim_001"
+    },
+    {
+      "entity_id": "6a1f1c571432456e92a961e1a0f4b70c_chunk_0082_ent_001",
+      "text": "BTL EPC",
+      "type": "Organization",
+      "chunk_id": "6a1f1c571432456e92a961e1a0f4b70c_chunk_0082",
+      "claim_id": "6a1f1c571432456e92a961e1a0f4b70c_chunk_0082_claim_000"
+    },
+    {
+      "entity_id": "6a1f1c571432456e92a961e1a0f4b70c_chunk_0083_ent_000",
+      "text": "BTL EPC",
+      "type": "Organization",
+      "chunk_id": "6a1f1c571432456e92a961e1a0f4b70c_chunk_0083",
+      "claim_id": "6a1f1c571432456e92a961e1a0f4b70c_chunk_0083_claim_000"
+    },
+    {
+      "entity_id": "6a1f1c571432456e92a961e1a0f4b70c_chunk_0000_ent_000",
+      "text": "BTL EPC LIMITED",
+      "type": "Organization",
+      "chunk_id": "6a1f1c571432456e92a961e1a0f4b70c_chunk_0000",
+      "claim_id": null
+    },
+    {
+      "entity_id": "6a1f1c571432456e92a961e1a0f4b70c_chunk_0010_ent_000",
+      "text": "BTL EPC LIMITED",
+      "type": "Organization",
+      "chunk_id": "6a1f1c571432456e92a961e1a0f4b70c_chunk_0010",
+      "claim_id": "6a1f1c571432456e92a961e1a0f4b70c_chunk_0010_claim_000"
+    },
+    {
+      "entity_id": "6a1f1c571432456e92a961e1a0f4b70c_chunk_0004_ent_000",
+      "text": "BTL EPC LTD.",
+      "type": "Organization",
+      "chunk_id": "6a1f1c571432456e92a961e1a0f4b70c_chunk_0004",
+      "claim_id": "6a1f1c571432456e92a961e1a0f4b70c_chunk_0004_claim_000"
+    },
+    {
+      "entity_id": "6a1f1c571432456e92a961e1a0f4b70c_chunk_0006_ent_000",
+      "text": "BTL EPC Limited",
+      "type": "Organization",
+      "chunk_id": "6a1f1c571432456e92a961e1a0f4b70c_chunk_0006",
+      "claim_id": "6a1f1c571432456e92a961e1a0f4b70c_chunk_0006_claim_000"
+    },
+    {
+      "entity_id": "6a1f1c571432456e92a961e1a0f4b70c_chunk_0011_ent_000",
+      "text": "BTL EPC Limited",
+      "type": "Organization",
+      "chunk_id": "6a1f1c571432456e92a961e1a0f4b70c_chunk_0011",
+      "claim_id": "6a1f1c571432456e92a961e1a0f4b70c_chunk_0011_claim_000"
+    },
+    {
+      "entity_id": "6a1f1c571432456e92a961e1a0f4b70c_chunk_0013_ent_000",
+      "text": "BTL EPC Limited",
+      "type": "Organization",
+      "chunk_id": "6a1f1c571432456e92a961e1a0f4b70c_chunk_0013",
+      "claim_id": "6a1f1c571432456e92a961e1a0f4b70c_chunk_0013_claim_000"
+    },
+    {
+      "entity_id": "6a1f1c571432456e92a961e1a0f4b70c_chunk_0055_ent_000",
+      "text": "BTL EPC Ltd.",
+      "type": "Organization",
+      "chunk_id": "6a1f1c571432456e92a961e1a0f4b70c_chunk_0055",
+      "claim_id": "6a1f1c571432456e92a961e1a0f4b70c_chunk_0055_claim_000"
+    },
+    {
+      "entity_id": "6a1f1c571432456e92a961e1a0f4b70c_chunk_0062_ent_001",
+      "text": "BTL EPC Ltd.",
+      "type": "Organization",
+      "chunk_id": "6a1f1c571432456e92a961e1a0f4b70c_chunk_0062",
+      "claim_id": "6a1f1c571432456e92a961e1a0f4b70c_chunk_0062_claim_000"
+    },
+    {
+      "entity_id": "6a1f1c571432456e92a961e1a0f4b70c_chunk_0021_ent_009",
+      "text": "Bangalore",
+      "type": "Location",
+      "chunk_id": "6a1f1c571432456e92a961e1a0f4b70c_chunk_0021",
+      "claim_id": "6a1f1c571432456e92a961e1a0f4b70c_chunk_0021_claim_000"
+    },
+    {
+      "entity_id": "6a1f1c571432456e92a961e1a0f4b70c_chunk_0081_ent_001",
+      "text": "BangladeshIndia Friendship Power Company Ltd.",
+      "type": "Organization",
+      "chunk_id": "6a1f1c571432456e92a961e1a0f4b70c_chunk_0081",
+      "claim_id": "6a1f1c571432456e92a961e1a0f4b70c_chunk_0081_claim_000"
+    },
+    {
+      "entity_id": "6a1f1c571432456e92a961e1a0f4b70c_chunk_0013_ent_003",
+      "text": "Bengal Tools Limited",
+      "type": "Organization",
+      "chunk_id": "6a1f1c571432456e92a961e1a0f4b70c_chunk_0013",
+      "claim_id": "6a1f1c571432456e92a961e1a0f4b70c_chunk_0013_claim_001"
+    },
+    {
+      "entity_id": "6a1f1c571432456e92a961e1a0f4b70c_chunk_0090_ent_000",
+      "text": "Benzol absorption and Distillation plant",
+      "type": "Project",
+      "chunk_id": "6a1f1c571432456e92a961e1a0f4b70c_chunk_0090",
+      "claim_id": "6a1f1c571432456e92a961e1a0f4b70c_chunk_0090_claim_000"
+    },
+    {
+      "entity_id": "6a1f1c571432456e92a961e1a0f4b70c_chunk_0032_ent_004",
+      "text": "Bhabha Atomic Research Centre (BARC)",
+      "type": "Organization",
+      "chunk_id": "6a1f1c571432456e92a961e1a0f4b70c_chunk_0032",
+      "claim_id": "6a1f1c571432456e92a961e1a0f4b70c_chunk_0032_claim_006"
+    },
+    {
+      "entity_id": "6a1f1c571432456e92a961e1a0f4b70c_chunk_0028_ent_000",
+      "text": "Bharat Heavy Electricals Limited",
+      "type": "Organization",
+      "chunk_id": "6a1f1c571432456e92a961e1a0f4b70c_chunk_0028",
+      "claim_id": "6a1f1c571432456e92a961e1a0f4b70c_chunk_0028_claim_000"
+    },
+    {
+      "entity_id": "6a1f1c571432456e92a961e1a0f4b70c_chunk_0030_ent_007",
+      "text": "Brahmaputra Cracker and Polymer Limited",
+      "type": "Organization",
+      "chunk_id": "6a1f1c571432456e92a961e1a0f4b70c_chunk_0030",
+      "claim_id": "6a1f1c571432456e92a961e1a0f4b70c_chunk_0030_claim_006"
+    },
+    {
+      "entity_id": "6a1f1c571432456e92a961e1a0f4b70c_chunk_0043_ent_000",
+      "text": "Bulk Material Handling",
+      "type": "Project",
+      "chunk_id": "6a1f1c571432456e92a961e1a0f4b70c_chunk_0043",
+      "claim_id": null
+    },
+    {
+      "entity_id": "6a1f1c571432456e92a961e1a0f4b70c_chunk_0068_ent_000",
+      "text": "Bulk Material Handling Division",
+      "type": "Department",
+      "chunk_id": "6a1f1c571432456e92a961e1a0f4b70c_chunk_0068",
+      "claim_id": "6a1f1c571432456e92a961e1a0f4b70c_chunk_0068_claim_000"
+    },
+    {
+      "entity_id": "6a1f1c571432456e92a961e1a0f4b70c_chunk_0070_ent_000",
+      "text": "Bulk Material Handling Systems",
+      "type": "System",
+      "chunk_id": "6a1f1c571432456e92a961e1a0f4b70c_chunk_0070",
+      "claim_id": null
+    },
+    {
+      "entity_id": "6a1f1c571432456e92a961e1a0f4b70c_chunk_0071_ent_000",
+      "text": "Bulk Material Handling system",
+      "type": "System",
+      "chunk_id": "6a1f1c571432456e92a961e1a0f4b70c_chunk_0071",
+      "claim_id": "6a1f1c571432456e92a961e1a0f4b70c_chunk_0071_claim_000"
+    },
+    {
+      "entity_id": "6a1f1c571432456e92a961e1a0f4b70c_chunk_0075_ent_000",
+      "text": "Bulk Material Handling systems",
+      "type": "System",
+      "chunk_id": "6a1f1c571432456e92a961e1a0f4b70c_chunk_0075",
+      "claim_id": "6a1f1c571432456e92a961e1a0f4b70c_chunk_0075_claim_000"
+    },
+    {
+      "entity_id": "6a1f1c571432456e92a961e1a0f4b70c_chunk_0076_ent_000",
+      "text": "Bulk Material Handling systems",
+      "type": "System",
+      "chunk_id": "6a1f1c571432456e92a961e1a0f4b70c_chunk_0076",
+      "claim_id": "6a1f1c571432456e92a961e1a0f4b70c_chunk_0076_claim_000"
+    },
+    {
+      "entity_id": "6a1f1c571432456e92a961e1a0f4b70c_chunk_0090_ent_005",
+      "text": "Byproduct plant",
+      "type": "Project",
+      "chunk_id": "6a1f1c571432456e92a961e1a0f4b70c_chunk_0090",
+      "claim_id": "6a1f1c571432456e92a961e1a0f4b70c_chunk_0090_claim_002"
+    },
+    {
+      "entity_id": "6a1f1c571432456e92a961e1a0f4b70c_chunk_0002_ent_001",
+      "text": "Chief financial officer's performance overview",
+      "type": "System",
+      "chunk_id": "6a1f1c571432456e92a961e1a0f4b70c_chunk_0002",
+      "claim_id": "6a1f1c571432456e92a961e1a0f4b70c_chunk_0002_claim_000"
+    },
+    {
+      "entity_id": "6a1f1c571432456e92a961e1a0f4b70c_chunk_0046_ent_000",
+      "text": "Coal Chemical",
+      "type": "Product",
+      "chunk_id": "6a1f1c571432456e92a961e1a0f4b70c_chunk_0046",
+      "claim_id": null
+    },
+    {
+      "entity_id": "6a1f1c571432456e92a961e1a0f4b70c_chunk_0084_ent_000",
+      "text": "Coal Chemical Division",
+      "type": "Department",
+      "chunk_id": "6a1f1c571432456e92a961e1a0f4b70c_chunk_0084",
+      "claim_id": "6a1f1c571432456e92a961e1a0f4b70c_chunk_0084_claim_000"
+    },
+    {
+      "entity_id": "6a1f1c571432456e92a961e1a0f4b70c_chunk_0087_ent_000",
+      "text": "Coal Chemical Division",
+      "type": "Department",
+      "chunk_id": "6a1f1c571432456e92a961e1a0f4b70c_chunk_0087",
+      "claim_id": null
+    },
+    {
+      "entity_id": "6a1f1c571432456e92a961e1a0f4b70c_chunk_0088_ent_000",
+      "text": "Coal Chemical Division",
+      "type": "Department",
+      "chunk_id": "6a1f1c571432456e92a961e1a0f4b70c_chunk_0088",
+      "claim_id": "6a1f1c571432456e92a961e1a0f4b70c_chunk_0088_claim_000"
+    },
+    {
+      "entity_id": "6a1f1c571432456e92a961e1a0f4b70c_chunk_0086_ent_001",
+      "text": "Coal Chemical Division (CCD)",
+      "type": "Department",
+      "chunk_id": "6a1f1c571432456e92a961e1a0f4b70c_chunk_0086",
+      "claim_id": "6a1f1c571432456e92a961e1a0f4b70c_chunk_0086_claim_003"
+    },
+    {
+      "entity_id": "6a1f1c571432456e92a961e1a0f4b70c_chunk_0030_ent_003",
+      "text": "Coal India Limited",
+      "type": "Organization",
+      "chunk_id": "6a1f1c571432456e92a961e1a0f4b70c_chunk_0030",
+      "claim_id": "6a1f1c571432456e92a961e1a0f4b70c_chunk_0030_claim_002"
+    },
+    {
+      "entity_id": "6a1f1c571432456e92a961e1a0f4b70c_chunk_0032_ent_014",
+      "text": "Coal India Limited",
+      "type": "Organization",
+      "chunk_id": "6a1f1c571432456e92a961e1a0f4b70c_chunk_0032",
+      "claim_id": "6a1f1c571432456e92a961e1a0f4b70c_chunk_0032_claim_019"
+    },
+    {
+      "entity_id": "6a1f1c571432456e92a961e1a0f4b70c_chunk_0074_ent_004",
+      "text": "Coal handling plant and Wagon tippler package NBPPL 1X500 MW Unchahar, Uttar Pradesh",
+      "type": "Project",
+      "chunk_id": "6a1f1c571432456e92a961e1a0f4b70c_chunk_0074",
+      "claim_id": "6a1f1c571432456e92a961e1a0f4b70c_chunk_0074_claim_000"
+    },
+    {
+      "entity_id": "6a1f1c571432456e92a961e1a0f4b70c_chunk_0074_ent_010",
+      "text": "Coal handling plant of NTPC Lara, Chhattisgarh",
+      "type": "Project",
+      "chunk_id": "6a1f1c571432456e92a961e1a0f4b70c_chunk_0074",
+      "claim_id": "6a1f1c571432456e92a961e1a0f4b70c_chunk_0074_claim_000"
+    },
+    {
+      "entity_id": "6a1f1c571432456e92a961e1a0f4b70c_chunk_0074_ent_000",
+      "text": "Coal handling plant, BIFPCL Bangaldesh Maitree",
+      "type": "Project",
+      "chunk_id": "6a1f1c571432456e92a961e1a0f4b70c_chunk_0074",
+      "claim_id": "6a1f1c571432456e92a961e1a0f4b70c_chunk_0074_claim_000"
+    },
+    {
+      "entity_id": "6a1f1c571432456e92a961e1a0f4b70c_chunk_0074_ent_005",
+      "text": "Coal handling plant, Ennore SEZ, Tamil Nadu",
+      "type": "Project",
+      "chunk_id": "6a1f1c571432456e92a961e1a0f4b70c_chunk_0074",
+      "claim_id": "6a1f1c571432456e92a961e1a0f4b70c_chunk_0074_claim_000"
+    },
+    {
+      "entity_id": "6a1f1c571432456e92a961e1a0f4b70c_chunk_0078_ent_003",
+      "text": "Coal handling plant, NTPC Pakri, Bihar",
+      "type": "Project",
+      "chunk_id": "6a1f1c571432456e92a961e1a0f4b70c_chunk_0078",
+      "claim_id": "6a1f1c571432456e92a961e1a0f4b70c_chunk_0078_claim_000"
+    },
+    {
+      "entity_id": "6a1f1c571432456e92a961e1a0f4b70c_chunk_0078_ent_005",
+      "text": "Coal handling plant, NTPC Sipat, Chhattisgarh",
+      "type": "Project",
+      "chunk_id": "6a1f1c571432456e92a961e1a0f4b70c_chunk_0078",
+      "claim_id": "6a1f1c571432456e92a961e1a0f4b70c_chunk_0078_claim_000"
+    },
+    {
+      "entity_id": "6a1f1c571432456e92a961e1a0f4b70c_chunk_0078_ent_004",
+      "text": "Coal handling plant, NTPC Talaipalli, Chhattisgarh",
+      "type": "Project",
+      "chunk_id": "6a1f1c571432456e92a961e1a0f4b70c_chunk_0078",
+      "claim_id": "6a1f1c571432456e92a961e1a0f4b70c_chunk_0078_claim_000"
+    },
+    {
+      "entity_id": "6a1f1c571432456e92a961e1a0f4b70c_chunk_0074_ent_006",
+      "text": "Coal handling plant, Sagardighi, WBPDCL (A/C BHEL), West Bengal",
+      "type": "Project",
+      "chunk_id": "6a1f1c571432456e92a961e1a0f4b70c_chunk_0074",
+      "claim_id": "6a1f1c571432456e92a961e1a0f4b70c_chunk_0074_claim_000"
+    },
+    {
+      "entity_id": "6a1f1c571432456e92a961e1a0f4b70c_chunk_0078_ent_001",
+      "text": "Coal handling, Lime Stone and Gypsum Handling Plant, Yadadri 5x800MW power plant, TSGENCO, Telengana",
+      "type": "Project",
+      "chunk_id": "6a1f1c571432456e92a961e1a0f4b70c_chunk_0078",
+      "claim_id": "6a1f1c571432456e92a961e1a0f4b70c_chunk_0078_claim_000"
+    },
+    {
+      "entity_id": "6a1f1c571432456e92a961e1a0f4b70c_chunk_0088_ent_001",
+      "text": "Coke oven gas treatment",
+      "type": "System",
+      "chunk_id": "6a1f1c571432456e92a961e1a0f4b70c_chunk_0088",
+      "claim_id": "6a1f1c571432456e92a961e1a0f4b70c_chunk_0088_claim_000"
+    },
+    {
+      "entity_id": "6a1f1c571432456e92a961e1a0f4b70c_chunk_0072_ent_000",
+      "text": "Company",
+      "type": "Organization",
+      "chunk_id": "6a1f1c571432456e92a961e1a0f4b70c_chunk_0072",
+      "claim_id": "6a1f1c571432456e92a961e1a0f4b70c_chunk_0072_claim_000"
+    },
+    {
+      "entity_id": "6a1f1c571432456e92a961e1a0f4b70c_chunk_0086_ent_000",
+      "text": "Company",
+      "type": "Organization",
+      "chunk_id": "6a1f1c571432456e92a961e1a0f4b70c_chunk_0086",
+      "claim_id": "6a1f1c571432456e92a961e1a0f4b70c_chunk_0086_claim_000"
+    },
+    {
+      "entity_id": "6a1f1c571432456e92a961e1a0f4b70c_chunk_0023_ent_006",
+      "text": "Consarc Engineering",
+      "type": "Organization",
+      "chunk_id": "6a1f1c571432456e92a961e1a0f4b70c_chunk_0023",
+      "claim_id": "6a1f1c571432456e92a961e1a0f4b70c_chunk_0023_claim_000"
+    },
+    {
+      "entity_id": "6a1f1c571432456e92a961e1a0f4b70c_chunk_0001_ent_000",
+      "text": "Contents",
+      "type": "Project",
+      "chunk_id": "6a1f1c571432456e92a961e1a0f4b70c_chunk_0001",
+      "claim_id": null
+    },
+    {
+      "entity_id": "6a1f1c571432456e92a961e1a0f4b70c_chunk_0002_ent_000",
+      "text": "Corporate Overview",
+      "type": "System",
+      "chunk_id": "6a1f1c571432456e92a961e1a0f4b70c_chunk_0002",
+      "claim_id": "6a1f1c571432456e92a961e1a0f4b70c_chunk_0002_claim_000"
+    },
+    {
+      "entity_id": "6a1f1c571432456e92a961e1a0f4b70c_chunk_0009_ent_000",
+      "text": "Corporate Overview Corporate snapshot",
+      "type": "System",
+      "chunk_id": "6a1f1c571432456e92a961e1a0f4b70c_chunk_0009",
+      "claim_id": null
+    },
+    {
+      "entity_id": "6a1f1c571432456e92a961e1a0f4b70c_chunk_0021_ent_005",
+      "text": "Cuttack",
+      "type": "Location",
+      "chunk_id": "6a1f1c571432456e92a961e1a0f4b70c_chunk_0021",
+      "claim_id": "6a1f1c571432456e92a961e1a0f4b70c_chunk_0021_claim_000"
+    },
+    {
+      "entity_id": "6a1f1c571432456e92a961e1a0f4b70c_chunk_0023_ent_003",
+      "text": "Dalenergomash",
+      "type": "Organization",
+      "chunk_id": "6a1f1c571432456e92a961e1a0f4b70c_chunk_0023",
+      "claim_id": "6a1f1c571432456e92a961e1a0f4b70c_chunk_0023_claim_000"
+    },
+    {
+      "entity_id": "6a1f1c571432456e92a961e1a0f4b70c_chunk_0032_ent_009",
+      "text": "Damodar Valley Corporation Limited",
+      "type": "Organization",
+      "chunk_id": "6a1f1c571432456e92a961e1a0f4b70c_chunk_0032",
+      "claim_id": "6a1f1c571432456e92a961e1a0f4b70c_chunk_0032_claim_015"
+    },
+    {
+      "entity_id": "6a1f1c571432456e92a961e1a0f4b70c_chunk_0090_ent_008",
+      "text": "De-nitration plant",
+      "type": "Project",
+      "chunk_id": "6a1f1c571432456e92a961e1a0f4b70c_chunk_0090",
+      "claim_id": "6a1f1c571432456e92a961e1a0f4b70c_chunk_0090_claim_004"
+    },
+    {
+      "entity_id": "6a1f1c571432456e92a961e1a0f4b70c_chunk_0023_ent_005",
+      "text": "Dearborn Mid-West Conveyor Company",
+      "type": "Organization",
+      "chunk_id": "6a1f1c571432456e92a961e1a0f4b70c_chunk_0023",
+      "claim_id": "6a1f1c571432456e92a961e1a0f4b70c_chunk_0023_claim_000"
+    },
+    {
+      "entity_id": "6a1f1c571432456e92a961e1a0f4b70c_chunk_0048_ent_000",
+      "text": "Defense",
+      "type": "Department",
+      "chunk_id": "6a1f1c571432456e92a961e1a0f4b70c_chunk_0048",
+      "claim_id": null
+    },
+    {
+      "entity_id": "6a1f1c571432456e92a961e1a0f4b70c_chunk_0038_ent_008",
+      "text": "Development Consultants Private Limited",
+      "type": "Organization",
+      "chunk_id": "6a1f1c571432456e92a961e1a0f4b70c_chunk_0038",
+      "claim_id": "6a1f1c571432456e92a961e1a0f4b70c_chunk_0038_claim_007"
+    },
+    {
+      "entity_id": "6a1f1c571432456e92a961e1a0f4b70c_chunk_0003_ent_000",
+      "text": "Disclaimer",
+      "type": "Policy",
+      "chunk_id": "6a1f1c571432456e92a961e1a0f4b70c_chunk_0003",
+      "claim_id": null
+    },
+    {
+      "entity_id": "6a1f1c571432456e92a961e1a0f4b70c_chunk_0021_ent_002",
+      "text": "Durgapur Steel city",
+      "type": "Location",
+      "chunk_id": "6a1f1c571432456e92a961e1a0f4b70c_chunk_0021",
+      "claim_id": "6a1f1c571432456e92a961e1a0f4b70c_chunk_0021_claim_000"
+    },
+    {
+      "entity_id": "6a1f1c571432456e92a961e1a0f4b70c_chunk_0074_ent_003",
+      "text": "EPC for urea bag handling and wagon loading system, HURLSindri, Jharkhand and Barauni, Bihar",
+      "type": "Project",
+      "chunk_id": "6a1f1c571432456e92a961e1a0f4b70c_chunk_0074",
+      "claim_id": "6a1f1c571432456e92a961e1a0f4b70c_chunk_0074_claim_000"
+    },
+    {
+      "entity_id": "6a1f1c571432456e92a961e1a0f4b70c_chunk_0086_ent_007",
+      "text": "EPC services",
+      "type": "Service",
+      "chunk_id": "6a1f1c571432456e92a961e1a0f4b70c_chunk_0086",
+      "claim_id": "6a1f1c571432456e92a961e1a0f4b70c_chunk_0086_claim_001"
+    },
+    {
+      "entity_id": "6a1f1c571432456e92a961e1a0f4b70c_chunk_0090_ent_007",
+      "text": "Electric exhauster",
+      "type": "Project",
+      "chunk_id": "6a1f1c571432456e92a961e1a0f4b70c_chunk_0090",
+      "claim_id": "6a1f1c571432456e92a961e1a0f4b70c_chunk_0090_claim_003"
+    },
+    {
+      "entity_id": "6a1f1c571432456e92a961e1a0f4b70c_chunk_0038_ent_000",
+      "text": "Engineers India Limited",
+      "type": "Organization",
+      "chunk_id": "6a1f1c571432456e92a961e1a0f4b70c_chunk_0038",
+      "claim_id": "6a1f1c571432456e92a961e1a0f4b70c_chunk_0038_claim_000"
+    },
+    {
+      "entity_id": "6a1f1c571432456e92a961e1a0f4b70c_chunk_0023_ent_001",
+      "text": "Far Eastern Power Engineering Plant",
+      "type": "Organization",
+      "chunk_id": "6a1f1c571432456e92a961e1a0f4b70c_chunk_0023",
+      "claim_id": "6a1f1c571432456e92a961e1a0f4b70c_chunk_0023_claim_000"
+    },
+    {
+      "entity_id": "6a1f1c571432456e92a961e1a0f4b70c_chunk_0021_ent_006",
+      "text": "Faridabad",
+      "type": "Location",
+      "chunk_id": "6a1f1c571432456e92a961e1a0f4b70c_chunk_0021",
+      "claim_id": "6a1f1c571432456e92a961e1a0f4b70c_chunk_0021_claim_000"
+    },
+    {
+      "entity_id": "6a1f1c571432456e92a961e1a0f4b70c_chunk_0076_ent_005",
+      "text": "Fertiliser",
+      "type": "Department",
+      "chunk_id": "6a1f1c571432456e92a961e1a0f4b70c_chunk_0076",
+      "claim_id": "6a1f1c571432456e92a961e1a0f4b70c_chunk_0076_claim_000"
+    },
+    {
+      "entity_id": "6a1f1c571432456e92a961e1a0f4b70c_chunk_0032_ent_017",
+      "text": "Fertiliser Corporation of India Limited",
+      "type": "Organization",
+      "chunk_id": "6a1f1c571432456e92a961e1a0f4b70c_chunk_0032",
+      "claim_id": "6a1f1c571432456e92a961e1a0f4b70c_chunk_0032_claim_019"
+    },
+    {
+      "entity_id": "6a1f1c571432456e92a961e1a0f4b70c_chunk_0039_ent_002",
+      "text": "Fichtner GmbH",
+      "type": "Organization",
+      "chunk_id": "6a1f1c571432456e92a961e1a0f4b70c_chunk_0039",
+      "claim_id": "6a1f1c571432456e92a961e1a0f4b70c_chunk_0039_claim_002"
+    },
+    {
+      "entity_id": "6a1f1c571432456e92a961e1a0f4b70c_chunk_0039_ent_001",
+      "text": "Fichtner India",
+      "type": "Organization",
+      "chunk_id": "6a1f1c571432456e92a961e1a0f4b70c_chunk_0039",
+      "claim_id": "6a1f1c571432456e92a961e1a0f4b70c_chunk_0039_claim_003"
+    },
+    {
+      "entity_id": "6a1f1c571432456e92a961e1a0f4b70c_chunk_0030_ent_009",
+      "text": "GAIL (India) Ltd.",
+      "type": "Organization",
+      "chunk_id": "6a1f1c571432456e92a961e1a0f4b70c_chunk_0030",
+      "claim_id": "6a1f1c571432456e92a961e1a0f4b70c_chunk_0030_claim_000"
+    },
+    {
+      "entity_id": "6a1f1c571432456e92a961e1a0f4b70c_chunk_0032_ent_003",
+      "text": "Government of India",
+      "type": "Organization",
+      "chunk_id": "6a1f1c571432456e92a961e1a0f4b70c_chunk_0032",
+      "claim_id": "6a1f1c571432456e92a961e1a0f4b70c_chunk_0032_claim_002"
+    },
+    {
+      "entity_id": "6a1f1c571432456e92a961e1a0f4b70c_chunk_0032_ent_010",
+      "text": "Government of India",
+      "type": "Organization",
+      "chunk_id": "6a1f1c571432456e92a961e1a0f4b70c_chunk_0032",
+      "claim_id": "6a1f1c571432456e92a961e1a0f4b70c_chunk_0032_claim_002"
+    },
+    {
+      "entity_id": "6a1f1c571432456e92a961e1a0f4b70c_chunk_0021_ent_007",
+      "text": "Guwahati",
+      "type": "Location",
+      "chunk_id": "6a1f1c571432456e92a961e1a0f4b70c_chunk_0021",
+      "claim_id": "6a1f1c571432456e92a961e1a0f4b70c_chunk_0021_claim_000"
+    },
+    {
+      "entity_id": "6a1f1c571432456e92a961e1a0f4b70c_chunk_0023_ent_004",
+      "text": "HBE Press",
+      "type": "Organization",
+      "chunk_id": "6a1f1c571432456e92a961e1a0f4b70c_chunk_0023",
+      "claim_id": "6a1f1c571432456e92a961e1a0f4b70c_chunk_0023_claim_000"
+    },
+    {
+      "entity_id": "6a1f1c571432456e92a961e1a0f4b70c_chunk_0090_ent_009",
+      "text": "HWB BARC, Chennai, Tamil Nadu",
+      "type": "Location",
+      "chunk_id": "6a1f1c571432456e92a961e1a0f4b70c_chunk_0090",
+      "claim_id": "6a1f1c571432456e92a961e1a0f4b70c_chunk_0090_claim_004"
+    },
+    {
+      "entity_id": "6a1f1c571432456e92a961e1a0f4b70c_chunk_0013_ent_007",
+      "text": "Harvard Business School",
+      "type": "Location",
+      "chunk_id": "6a1f1c571432456e92a961e1a0f4b70c_chunk_0013",
+      "claim_id": "6a1f1c571432456e92a961e1a0f4b70c_chunk_0013_claim_005"
+    },
+    {
+      "entity_id": "6a1f1c571432456e92a961e1a0f4b70c_chunk_0032_ent_018",
+      "text": "Hindustan Fertiliser Corporation Limited",
+      "type": "Organization",
+      "chunk_id": "6a1f1c571432456e92a961e1a0f4b70c_chunk_0032",
+      "claim_id": "6a1f1c571432456e92a961e1a0f4b70c_chunk_0032_claim_019"
+    },
+    {
+      "entity_id": "6a1f1c571432456e92a961e1a0f4b70c_chunk_0032_ent_013",
+      "text": "Hindustan Urvarak and Rasayan Limited (HURL)",
+      "type": "Organization",
+      "chunk_id": "6a1f1c571432456e92a961e1a0f4b70c_chunk_0032",
+      "claim_id": "6a1f1c571432456e92a961e1a0f4b70c_chunk_0032_claim_019"
+    },
+    {
+      "entity_id": "6a1f1c571432456e92a961e1a0f4b70c_chunk_0021_ent_004",
+      "text": "Hyderabad",
+      "type": "Location",
+      "chunk_id": "6a1f1c571432456e92a961e1a0f4b70c_chunk_0021",
+      "claim_id": "6a1f1c571432456e92a961e1a0f4b70c_chunk_0021_claim_000"
+    },
+    {
+      "entity_id": "6a1f1c571432456e92a961e1a0f4b70c_chunk_0005_ent_000",
+      "text": "India",
+      "type": "Location",
+      "chunk_id": "6a1f1c571432456e92a961e1a0f4b70c_chunk_0005",
+      "claim_id": "6a1f1c571432456e92a961e1a0f4b70c_chunk_0005_claim_000"
+    },
+    {
+      "entity_id": "6a1f1c571432456e92a961e1a0f4b70c_chunk_0006_ent_001",
+      "text": "India",
+      "type": "Location",
+      "chunk_id": "6a1f1c571432456e92a961e1a0f4b70c_chunk_0006",
+      "claim_id": "6a1f1c571432456e92a961e1a0f4b70c_chunk_0006_claim_000"
+    },
+    {
+      "entity_id": "6a1f1c571432456e92a961e1a0f4b70c_chunk_0007_ent_000",
+      "text": "India",
+      "type": "Location",
+      "chunk_id": "6a1f1c571432456e92a961e1a0f4b70c_chunk_0007",
+      "claim_id": null
+    },
+    {
+      "entity_id": "6a1f1c571432456e92a961e1a0f4b70c_chunk_0017_ent_000",
+      "text": "India's infrastructure",
+      "type": "Location",
+      "chunk_id": "6a1f1c571432456e92a961e1a0f4b70c_chunk_0017",
+      "claim_id": "6a1f1c571432456e92a961e1a0f4b70c_chunk_0017_claim_000"
+    },
+    {
+      "entity_id": "6a1f1c571432456e92a961e1a0f4b70c_chunk_0027_ent_000",
+      "text": "India's leading public and private enterprises",
+      "type": "Organization",
+      "chunk_id": "6a1f1c571432456e92a961e1a0f4b70c_chunk_0027",
+      "claim_id": "6a1f1c571432456e92a961e1a0f4b70c_chunk_0027_claim_000"
+    },
+    {
+      "entity_id": "6a1f1c571432456e92a961e1a0f4b70c_chunk_0032_ent_016",
+      "text": "Indian Oil Corporation Limited",
+      "type": "Organization",
+      "chunk_id": "6a1f1c571432456e92a961e1a0f4b70c_chunk_0032",
+      "claim_id": "6a1f1c571432456e92a961e1a0f4b70c_chunk_0032_claim_019"
+    },
+    {
+      "entity_id": "6a1f1c571432456e92a961e1a0f4b70c_chunk_0030_ent_005",
+      "text": "Indian Oil Corporation Limited (IOCL)",
+      "type": "Organization",
+      "chunk_id": "6a1f1c571432456e92a961e1a0f4b70c_chunk_0030",
+      "claim_id": "6a1f1c571432456e92a961e1a0f4b70c_chunk_0030_claim_004"
+    },
+    {
+      "entity_id": "6a1f1c571432456e92a961e1a0f4b70c_chunk_0036_ent_003",
+      "text": "Indu Projects Limited (INDU)",
+      "type": "Organization",
+      "chunk_id": "6a1f1c571432456e92a961e1a0f4b70c_chunk_0036",
+      "claim_id": "6a1f1c571432456e92a961e1a0f4b70c_chunk_0036_claim_000"
+    },
+    {
+      "entity_id": "6a1f1c571432456e92a961e1a0f4b70c_chunk_0033_ent_001",
+      "text": "JMS Mining Private Limited",
+      "type": "Organization",
+      "chunk_id": "6a1f1c571432456e92a961e1a0f4b70c_chunk_0033",
+      "claim_id": "6a1f1c571432456e92a961e1a0f4b70c_chunk_0033_claim_000"
+    },
+    {
+      "entity_id": "6a1f1c571432456e92a961e1a0f4b70c_chunk_0032_ent_011",
+      "text": "Jharkhand",
+      "type": "Location",
+      "chunk_id": "6a1f1c571432456e92a961e1a0f4b70c_chunk_0032",
+      "claim_id": "6a1f1c571432456e92a961e1a0f4b70c_chunk_0032_claim_015"
+    },
+    {
+      "entity_id": "6a1f1c571432456e92a961e1a0f4b70c_chunk_0036_ent_002",
+      "text": "Jharkhand Urban Infrastructure Development Company Limited (JUIDCO)",
+      "type": "Organization",
+      "chunk_id": "6a1f1c571432456e92a961e1a0f4b70c_chunk_0036",
+      "claim_id": "6a1f1c571432456e92a961e1a0f4b70c_chunk_0036_claim_000"
+    },
+    {
+      "entity_id": "6a1f1c571432456e92a961e1a0f4b70c_chunk_0021_ent_003",
+      "text": "Kharagpur",
+      "type": "Location",
+      "chunk_id": "6a1f1c571432456e92a961e1a0f4b70c_chunk_0021",
+      "claim_id": "6a1f1c571432456e92a961e1a0f4b70c_chunk_0021_claim_000"
+    },
+    {
+      "entity_id": "6a1f1c571432456e92a961e1a0f4b70c_chunk_0021_ent_001",
+      "text": "Kolkata",
+      "type": "Location",
+      "chunk_id": "6a1f1c571432456e92a961e1a0f4b70c_chunk_0021",
+      "claim_id": "6a1f1c571432456e92a961e1a0f4b70c_chunk_0021_claim_000"
+    },
+    {
+      "entity_id": "6a1f1c571432456e92a961e1a0f4b70c_chunk_0032_ent_002",
+      "text": "Krishak Bharati Cooperative Limited (KRIBHCO)",
+      "type": "Organization",
+      "chunk_id": "6a1f1c571432456e92a961e1a0f4b70c_chunk_0032",
+      "claim_id": "6a1f1c571432456e92a961e1a0f4b70c_chunk_0032_claim_002"
+    },
+    {
+      "entity_id": "6a1f1c571432456e92a961e1a0f4b70c_chunk_0032_ent_006",
+      "text": "Larsen & Toubro",
+      "type": "Organization",
+      "chunk_id": "6a1f1c571432456e92a961e1a0f4b70c_chunk_0032",
+      "claim_id": "6a1f1c571432456e92a961e1a0f4b70c_chunk_0032_claim_009"
+    },
+    {
+      "entity_id": "6a1f1c571432456e92a961e1a0f4b70c_chunk_0021_ent_010",
+      "text": "Lucknow",
+      "type": "Location",
+      "chunk_id": "6a1f1c571432456e92a961e1a0f4b70c_chunk_0021",
+      "claim_id": "6a1f1c571432456e92a961e1a0f4b70c_chunk_0021_claim_000"
+    },
+    {
+      "entity_id": "6a1f1c571432456e92a961e1a0f4b70c_chunk_0039_ent_000",
+      "text": "M N Dastur & Company (P) Ltd.",
+      "type": "Organization",
+      "chunk_id": "6a1f1c571432456e92a961e1a0f4b70c_chunk_0039",
+      "claim_id": "6a1f1c571432456e92a961e1a0f4b70c_chunk_0039_claim_000"
+    },
+    {
+      "entity_id": "6a1f1c571432456e92a961e1a0f4b70c_chunk_0074_ent_009",
+      "text": "Main conveyor package (CHP, LHP and GHP), Talcher TPP , Stage-III, Odisha",
+      "type": "Project",
+      "chunk_id": "6a1f1c571432456e92a961e1a0f4b70c_chunk_0074",
+      "claim_id": "6a1f1c571432456e92a961e1a0f4b70c_chunk_0074_claim_000"
+    },
+    {
+      "entity_id": "6a1f1c571432456e92a961e1a0f4b70c_chunk_0047_ent_000",
+      "text": "Manufacturing",
+      "type": "System",
+      "chunk_id": "6a1f1c571432456e92a961e1a0f4b70c_chunk_0047",
+      "claim_id": "6a1f1c571432456e92a961e1a0f4b70c_chunk_0047_claim_000"
+    },
+    {
+      "entity_id": "6a1f1c571432456e92a961e1a0f4b70c_chunk_0038_ent_004",
+      "text": "Mecon",
+      "type": "Organization",
+      "chunk_id": "6a1f1c571432456e92a961e1a0f4b70c_chunk_0038",
+      "claim_id": "6a1f1c571432456e92a961e1a0f4b70c_chunk_0038_claim_003"
+    },
+    {
+      "entity_id": "6a1f1c571432456e92a961e1a0f4b70c_chunk_0076_ent_001",
+      "text": "Mining and minerals",
+      "type": "Department",
+      "chunk_id": "6a1f1c571432456e92a961e1a0f4b70c_chunk_0076",
+      "claim_id": "6a1f1c571432456e92a961e1a0f4b70c_chunk_0076_claim_000"
+    },
+    {
+      "entity_id": "6a1f1c571432456e92a961e1a0f4b70c_chunk_0032_ent_008",
+      "text": "Ministry of Mines",
+      "type": "Department",
+      "chunk_id": "6a1f1c571432456e92a961e1a0f4b70c_chunk_0032",
+      "claim_id": "6a1f1c571432456e92a961e1a0f4b70c_chunk_0032_claim_012"
+    },
+    {
+      "entity_id": "6a1f1c571432456e92a961e1a0f4b70c_chunk_0038_ent_001",
+      "text": "Ministry of Petroleum and Natural Gas",
+      "type": "Organization",
+      "chunk_id": "6a1f1c571432456e92a961e1a0f4b70c_chunk_0038",
+      "claim_id": "6a1f1c571432456e92a961e1a0f4b70c_chunk_0038_claim_000"
+    },
+    {
+      "entity_id": "6a1f1c571432456e92a961e1a0f4b70c_chunk_0013_ent_004",
+      "text": "Mr. Ravi Todi",
+      "type": "Person",
+      "chunk_id": "6a1f1c571432456e92a961e1a0f4b70c_chunk_0013",
+      "claim_id": "6a1f1c571432456e92a961e1a0f4b70c_chunk_0013_claim_003"
+    },
+    {
+      "entity_id": "6a1f1c571432456e92a961e1a0f4b70c_chunk_0019_ent_000",
+      "text": "Mr. Ravi Todi",
+      "type": "Person",
+      "chunk_id": "6a1f1c571432456e92a961e1a0f4b70c_chunk_0019",
+      "claim_id": "6a1f1c571432456e92a961e1a0f4b70c_chunk_0019_claim_002"
+    },
+    {
+      "entity_id": "6a1f1c571432456e92a961e1a0f4b70c_chunk_0013_ent_002",
+      "text": "Mr. S.K. Todi",
+      "type": "Person",
+      "chunk_id": "6a1f1c571432456e92a961e1a0f4b70c_chunk_0013",
+      "claim_id": "6a1f1c571432456e92a961e1a0f4b70c_chunk_0013_claim_000"
+    },
+    {
+      "entity_id": "6a1f1c571432456e92a961e1a0f4b70c_chunk_0080_ent_002",
+      "text": "NTPC",
+      "type": "Organization",
+      "chunk_id": "6a1f1c571432456e92a961e1a0f4b70c_chunk_0080",
+      "claim_id": "6a1f1c571432456e92a961e1a0f4b70c_chunk_0080_claim_000"
+    },
+    {
+      "entity_id": "6a1f1c571432456e92a961e1a0f4b70c_chunk_0081_ent_004",
+      "text": "NTPC",
+      "type": "Organization",
+      "chunk_id": "6a1f1c571432456e92a961e1a0f4b70c_chunk_0081",
+      "claim_id": "6a1f1c571432456e92a961e1a0f4b70c_chunk_0081_claim_004"
+    },
+    {
+      "entity_id": "6a1f1c571432456e92a961e1a0f4b70c_chunk_0032_ent_015",
+      "text": "NTPC Limited",
+      "type": "Organization",
+      "chunk_id": "6a1f1c571432456e92a961e1a0f4b70c_chunk_0032",
+      "claim_id": "6a1f1c571432456e92a961e1a0f4b70c_chunk_0032_claim_019"
+    },
+    {
+      "entity_id": "6a1f1c571432456e92a961e1a0f4b70c_chunk_0080_ent_000",
+      "text": "NTPC-Pakri project",
+      "type": "Project",
+      "chunk_id": "6a1f1c571432456e92a961e1a0f4b70c_chunk_0080",
+      "claim_id": "6a1f1c571432456e92a961e1a0f4b70c_chunk_0080_claim_001"
+    },
+    {
+      "entity_id": "6a1f1c571432456e92a961e1a0f4b70c_chunk_0034_ent_002",
+      "text": "Nagpur",
+      "type": "Location",
+      "chunk_id": "6a1f1c571432456e92a961e1a0f4b70c_chunk_0034",
+      "claim_id": "6a1f1c571432456e92a961e1a0f4b70c_chunk_0034_claim_000"
+    },
+    {
+      "entity_id": "6a1f1c571432456e92a961e1a0f4b70c_chunk_0032_ent_007",
+      "text": "National Aluminium Company Limited (NALCO)",
+      "type": "Organization",
+      "chunk_id": "6a1f1c571432456e92a961e1a0f4b70c_chunk_0032",
+      "claim_id": "6a1f1c571432456e92a961e1a0f4b70c_chunk_0032_claim_012"
+    },
+    {
+      "entity_id": "6a1f1c571432456e92a961e1a0f4b70c_chunk_0029_ent_000",
+      "text": "National Thermal Power Corporation",
+      "type": "Organization",
+      "chunk_id": "6a1f1c571432456e92a961e1a0f4b70c_chunk_0029",
+      "claim_id": null
+    },
+    {
+      "entity_id": "6a1f1c571432456e92a961e1a0f4b70c_chunk_0030_ent_000",
+      "text": "National Thermal Power Corporation",
+      "type": "Organization",
+      "chunk_id": "6a1f1c571432456e92a961e1a0f4b70c_chunk_0030",
+      "claim_id": "6a1f1c571432456e92a961e1a0f4b70c_chunk_0030_claim_000"
+    },
+    {
+      "entity_id": "6a1f1c571432456e92a961e1a0f4b70c_chunk_0031_ent_000",
+      "text": "Neelachal Ispat Nigam Limited",
+      "type": "Organization",
+      "chunk_id": "6a1f1c571432456e92a961e1a0f4b70c_chunk_0031",
+      "claim_id": null
+    },
+    {
+      "entity_id": "6a1f1c571432456e92a961e1a0f4b70c_chunk_0032_ent_000",
+      "text": "Neelachal Ispat Nigam Limited",
+      "type": "Organization",
+      "chunk_id": "6a1f1c571432456e92a961e1a0f4b70c_chunk_0032",
+      "claim_id": "6a1f1c571432456e92a961e1a0f4b70c_chunk_0032_claim_000"
+    },
+    {
+      "entity_id": "6a1f1c571432456e92a961e1a0f4b70c_chunk_0033_ent_000",
+      "text": "Neelachal Ispat Nigam Limited",
+      "type": "Organization",
+      "chunk_id": "6a1f1c571432456e92a961e1a0f4b70c_chunk_0033",
+      "claim_id": "6a1f1c571432456e92a961e1a0f4b70c_chunk_0033_claim_000"
+    },
+    {
+      "entity_id": "6a1f1c571432456e92a961e1a0f4b70c_chunk_0034_ent_000",
+      "text": "Neelachal Ispat Nigam Limited",
+      "type": "Organization",
+      "chunk_id": "6a1f1c571432456e92a961e1a0f4b70c_chunk_0034",
+      "claim_id": "6a1f1c571432456e92a961e1a0f4b70c_chunk_0034_claim_000"
+    },
+    {
+      "entity_id": "6a1f1c571432456e92a961e1a0f4b70c_chunk_0030_ent_006",
+      "text": "Numaligarh Refinery Limited",
+      "type": "Organization",
+      "chunk_id": "6a1f1c571432456e92a961e1a0f4b70c_chunk_0030",
+      "claim_id": "6a1f1c571432456e92a961e1a0f4b70c_chunk_0030_claim_005"
+    },
+    {
+      "entity_id": "6a1f1c571432456e92a961e1a0f4b70c_chunk_0032_ent_020",
+      "text": "Odisha",
+      "type": "Location",
+      "chunk_id": "6a1f1c571432456e92a961e1a0f4b70c_chunk_0032",
+      "claim_id": "6a1f1c571432456e92a961e1a0f4b70c_chunk_0032_claim_020"
+    },
+    {
+      "entity_id": "6a1f1c571432456e92a961e1a0f4b70c_chunk_0030_ent_008",
+      "text": "Oil and Natural Gas Corporation Limited",
+      "type": "Organization",
+      "chunk_id": "6a1f1c571432456e92a961e1a0f4b70c_chunk_0030",
+      "claim_id": "6a1f1c571432456e92a961e1a0f4b70c_chunk_0030_claim_007"
+    },
+    {
+      "entity_id": "6a1f1c571432456e92a961e1a0f4b70c_chunk_0034_ent_001",
+      "text": "Ordnance Factory, Ambajhari (OFAJ)",
+      "type": "Organization",
+      "chunk_id": "6a1f1c571432456e92a961e1a0f4b70c_chunk_0034",
+      "claim_id": "6a1f1c571432456e92a961e1a0f4b70c_chunk_0034_claim_000"
+    },
+    {
+      "entity_id": "6a1f1c571432456e92a961e1a0f4b70c_chunk_0041_ent_000",
+      "text": "Our businesses",
+      "type": "Department",
+      "chunk_id": "6a1f1c571432456e92a961e1a0f4b70c_chunk_0041",
+      "claim_id": null
+    },
+    {
+      "entity_id": "6a1f1c571432456e92a961e1a0f4b70c_chunk_0037_ent_000",
+      "text": "Our consultants",
+      "type": "Team",
+      "chunk_id": "6a1f1c571432456e92a961e1a0f4b70c_chunk_0037",
+      "claim_id": null
+    },
+    {
+      "entity_id": "6a1f1c571432456e92a961e1a0f4b70c_chunk_0014_ent_000",
+      "text": "Our heritage",
+      "type": "Policy",
+      "chunk_id": "6a1f1c571432456e92a961e1a0f4b70c_chunk_0014",
+      "claim_id": null
+    },
+    {
+      "entity_id": "6a1f1c571432456e92a961e1a0f4b70c_chunk_0012_ent_000",
+      "text": "Our leadership",
+      "type": "Team",
+      "chunk_id": "6a1f1c571432456e92a961e1a0f4b70c_chunk_0012",
+      "claim_id": null
+    },
+    {
+      "entity_id": "6a1f1c571432456e92a961e1a0f4b70c_chunk_0018_ent_000",
+      "text": "Our mission",
+      "type": "Policy",
+      "chunk_id": "6a1f1c571432456e92a961e1a0f4b70c_chunk_0018",
+      "claim_id": null
+    },
+    {
+      "entity_id": "6a1f1c571432456e92a961e1a0f4b70c_chunk_0024_ent_000",
+      "text": "Our workforce",
+      "type": "Team",
+      "chunk_id": "6a1f1c571432456e92a961e1a0f4b70c_chunk_0024",
+      "claim_id": null
+    },
+    {
+      "entity_id": "6a1f1c571432456e92a961e1a0f4b70c_chunk_0013_ent_006",
+      "text": "Owner President Management Program (OPM)",
+      "type": "System",
+      "chunk_id": "6a1f1c571432456e92a961e1a0f4b70c_chunk_0013",
+      "claim_id": "6a1f1c571432456e92a961e1a0f4b70c_chunk_0013_claim_005"
+    },
+    {
+      "entity_id": "6a1f1c571432456e92a961e1a0f4b70c_chunk_0074_ent_002",
+      "text": "Pet coke handling system, IOCLParadip, Odisha",
+      "type": "Project",
+      "chunk_id": "6a1f1c571432456e92a961e1a0f4b70c_chunk_0074",
+      "claim_id": "6a1f1c571432456e92a961e1a0f4b70c_chunk_0074_claim_000"
+    },
+    {
+      "entity_id": "6a1f1c571432456e92a961e1a0f4b70c_chunk_0059_ent_000",
+      "text": "Policy",
+      "type": "Policy",
+      "chunk_id": "6a1f1c571432456e92a961e1a0f4b70c_chunk_0059",
+      "claim_id": null
+    },
+    {
+      "entity_id": "6a1f1c571432456e92a961e1a0f4b70c_chunk_0076_ent_004",
+      "text": "Ports and terminals",
+      "type": "Department",
+      "chunk_id": "6a1f1c571432456e92a961e1a0f4b70c_chunk_0076",
+      "claim_id": "6a1f1c571432456e92a961e1a0f4b70c_chunk_0076_claim_000"
+    },
+    {
+      "entity_id": "6a1f1c571432456e92a961e1a0f4b70c_chunk_0051_ent_000",
+      "text": "Power Transmission",
+      "type": "Department",
+      "chunk_id": "6a1f1c571432456e92a961e1a0f4b70c_chunk_0051",
+      "claim_id": null
+    },
+    {
+      "entity_id": "6a1f1c571432456e92a961e1a0f4b70c_chunk_0035_ent_000",
+      "text": "Power Transmission Corporation of Uttarakhand Limited (PTCUL)",
+      "type": "Organization",
+      "chunk_id": "6a1f1c571432456e92a961e1a0f4b70c_chunk_0035",
+      "claim_id": null
+    },
+    {
+      "entity_id": "6a1f1c571432456e92a961e1a0f4b70c_chunk_0036_ent_000",
+      "text": "Power Transmission Corporation of Uttarakhand Limited (PTCUL)",
+      "type": "Organization",
+      "chunk_id": "6a1f1c571432456e92a961e1a0f4b70c_chunk_0036",
+      "claim_id": "6a1f1c571432456e92a961e1a0f4b70c_chunk_0036_claim_000"
+    },
+    {
+      "entity_id": "6a1f1c571432456e92a961e1a0f4b70c_chunk_0076_ent_002",
+      "text": "Power plants",
+      "type": "Department",
+      "chunk_id": "6a1f1c571432456e92a961e1a0f4b70c_chunk_0076",
+      "claim_id": "6a1f1c571432456e92a961e1a0f4b70c_chunk_0076_claim_000"
+    },
+    {
+      "entity_id": "6a1f1c571432456e92a961e1a0f4b70c_chunk_0038_ent_009",
+      "text": "Praj Industries",
+      "type": "Organization",
+      "chunk_id": "6a1f1c571432456e92a961e1a0f4b70c_chunk_0038",
+      "claim_id": "6a1f1c571432456e92a961e1a0f4b70c_chunk_0038_claim_008"
+    },
+    {
+      "entity_id": "6a1f1c571432456e92a961e1a0f4b70c_chunk_0077_ent_000",
+      "text": "Project milestones",
+      "type": "Project",
+      "chunk_id": "6a1f1c571432456e92a961e1a0f4b70c_chunk_0077",
+      "claim_id": null
+    },
+    {
+      "entity_id": "6a1f1c571432456e92a961e1a0f4b70c_chunk_0092_ent_000",
+      "text": "Project milestones",
+      "type": "Project",
+      "chunk_id": "6a1f1c571432456e92a961e1a0f4b70c_chunk_0092",
+      "claim_id": null
+    },
+    {
+      "entity_id": "6a1f1c571432456e92a961e1a0f4b70c_chunk_0073_ent_000",
+      "text": "Projects",
+      "type": "Project",
+      "chunk_id": "6a1f1c571432456e92a961e1a0f4b70c_chunk_0073",
+      "claim_id": null
+    },
+    {
+      "entity_id": "6a1f1c571432456e92a961e1a0f4b70c_chunk_0089_ent_000",
+      "text": "Projects",
+      "type": "Project",
+      "chunk_id": "6a1f1c571432456e92a961e1a0f4b70c_chunk_0089",
+      "claim_id": null
+    },
+    {
+      "entity_id": "6a1f1c571432456e92a961e1a0f4b70c_chunk_0038_ent_010",
+      "text": "Projects and Development India Limited",
+      "type": "Organization",
+      "chunk_id": "6a1f1c571432456e92a961e1a0f4b70c_chunk_0038",
+      "claim_id": "6a1f1c571432456e92a961e1a0f4b70c_chunk_0038_claim_009"
+    },
+    {
+      "entity_id": "6a1f1c571432456e92a961e1a0f4b70c_chunk_0066_ent_003",
+      "text": "Raigarh, Chhattisgarh",
+      "type": "Location",
+      "chunk_id": "6a1f1c571432456e92a961e1a0f4b70c_chunk_0066",
+      "claim_id": "6a1f1c571432456e92a961e1a0f4b70c_chunk_0066_claim_000"
+    },
+    {
+      "entity_id": "6a1f1c571432456e92a961e1a0f4b70c_chunk_0074_ent_001",
+      "text": "Raw material handling plant, SAILDSP, West Bengal",
+      "type": "Project",
+      "chunk_id": "6a1f1c571432456e92a961e1a0f4b70c_chunk_0074",
+      "claim_id": "6a1f1c571432456e92a961e1a0f4b70c_chunk_0074_claim_000"
+    },
+    {
+      "entity_id": "6a1f1c571432456e92a961e1a0f4b70c_chunk_0090_ent_003",
+      "text": "SAIL Bokaro, Jharkhand",
+      "type": "Location",
+      "chunk_id": "6a1f1c571432456e92a961e1a0f4b70c_chunk_0090",
+      "claim_id": "6a1f1c571432456e92a961e1a0f4b70c_chunk_0090_claim_001"
+    },
+    {
+      "entity_id": "6a1f1c571432456e92a961e1a0f4b70c_chunk_0038_ent_005",
+      "text": "SAIL Centre for Engineering and Technology (CET)",
+      "type": "Organization",
+      "chunk_id": "6a1f1c571432456e92a961e1a0f4b70c_chunk_0038",
+      "claim_id": "6a1f1c571432456e92a961e1a0f4b70c_chunk_0038_claim_004"
+    },
+    {
+      "entity_id": "6a1f1c571432456e92a961e1a0f4b70c_chunk_0090_ent_006",
+      "text": "SAIL-Bhilai, Chhattisgarh",
+      "type": "Location",
+      "chunk_id": "6a1f1c571432456e92a961e1a0f4b70c_chunk_0090",
+      "claim_id": "6a1f1c571432456e92a961e1a0f4b70c_chunk_0090_claim_002"
+    },
+    {
+      "entity_id": "6a1f1c571432456e92a961e1a0f4b70c_chunk_0090_ent_001",
+      "text": "SAIL-DSP, West Bengal",
+      "type": "Location",
+      "chunk_id": "6a1f1c571432456e92a961e1a0f4b70c_chunk_0090",
+      "claim_id": "6a1f1c571432456e92a961e1a0f4b70c_chunk_0090_claim_000"
+    },
+    {
+      "entity_id": "6a1f1c571432456e92a961e1a0f4b70c_chunk_0013_ent_001",
+      "text": "Shrachi Group",
+      "type": "Organization",
+      "chunk_id": "6a1f1c571432456e92a961e1a0f4b70c_chunk_0013",
+      "claim_id": "6a1f1c571432456e92a961e1a0f4b70c_chunk_0013_claim_000"
+    },
+    {
+      "entity_id": "6a1f1c571432456e92a961e1a0f4b70c_chunk_0049_ent_000",
+      "text": "Special Business",
+      "type": "Product",
+      "chunk_id": "6a1f1c571432456e92a961e1a0f4b70c_chunk_0049",
+      "claim_id": null
+    },
+    {
+      "entity_id": "6a1f1c571432456e92a961e1a0f4b70c_chunk_0013_ent_005",
+      "text": "St. Xavier's College, Kolkata",
+      "type": "Location",
+      "chunk_id": "6a1f1c571432456e92a961e1a0f4b70c_chunk_0013",
+      "claim_id": "6a1f1c571432456e92a961e1a0f4b70c_chunk_0013_claim_000"
+    },
+    {
+      "entity_id": "6a1f1c571432456e92a961e1a0f4b70c_chunk_0039_ent_003",
+      "text": "Steag",
+      "type": "Organization",
+      "chunk_id": "6a1f1c571432456e92a961e1a0f4b70c_chunk_0039",
+      "claim_id": "6a1f1c571432456e92a961e1a0f4b70c_chunk_0039_claim_004"
+    },
+    {
+      "entity_id": "6a1f1c571432456e92a961e1a0f4b70c_chunk_0076_ent_003",
+      "text": "Steel",
+      "type": "Department",
+      "chunk_id": "6a1f1c571432456e92a961e1a0f4b70c_chunk_0076",
+      "claim_id": "6a1f1c571432456e92a961e1a0f4b70c_chunk_0076_claim_000"
+    },
+    {
+      "entity_id": "6a1f1c571432456e92a961e1a0f4b70c_chunk_0030_ent_004",
+      "text": "Steel Authority of India Limited",
+      "type": "Organization",
+      "chunk_id": "6a1f1c571432456e92a961e1a0f4b70c_chunk_0030",
+      "claim_id": "6a1f1c571432456e92a961e1a0f4b70c_chunk_0030_claim_003"
+    },
+    {
+      "entity_id": "6a1f1c571432456e92a961e1a0f4b70c_chunk_0056_ent_000",
+      "text": "Strengths",
+      "type": "Department",
+      "chunk_id": "6a1f1c571432456e92a961e1a0f4b70c_chunk_0056",
+      "claim_id": null
+    },
+    {
+      "entity_id": "6a1f1c571432456e92a961e1a0f4b70c_chunk_0032_ent_019",
+      "text": "Talcher Fertilisers Limited",
+      "type": "Organization",
+      "chunk_id": "6a1f1c571432456e92a961e1a0f4b70c_chunk_0032",
+      "claim_id": "6a1f1c571432456e92a961e1a0f4b70c_chunk_0032_claim_020"
+    },
+    {
+      "entity_id": "6a1f1c571432456e92a961e1a0f4b70c_chunk_0036_ent_001",
+      "text": "Tata Steel Limited",
+      "type": "Organization",
+      "chunk_id": "6a1f1c571432456e92a961e1a0f4b70c_chunk_0036",
+      "claim_id": "6a1f1c571432456e92a961e1a0f4b70c_chunk_0036_claim_003"
+    },
+    {
+      "entity_id": "6a1f1c571432456e92a961e1a0f4b70c_chunk_0032_ent_001",
+      "text": "Tata Steel long products",
+      "type": "Organization",
+      "chunk_id": "6a1f1c571432456e92a961e1a0f4b70c_chunk_0032",
+      "claim_id": "6a1f1c571432456e92a961e1a0f4b70c_chunk_0032_claim_000"
+    },
+    {
+      "entity_id": "6a1f1c571432456e92a961e1a0f4b70c_chunk_0038_ent_006",
+      "text": "Technip",
+      "type": "Organization",
+      "chunk_id": "6a1f1c571432456e92a961e1a0f4b70c_chunk_0038",
+      "claim_id": "6a1f1c571432456e92a961e1a0f4b70c_chunk_0038_claim_005"
+    },
+    {
+      "entity_id": "6a1f1c571432456e92a961e1a0f4b70c_chunk_0038_ent_002",
+      "text": "Thyssenkrupp",
+      "type": "Organization",
+      "chunk_id": "6a1f1c571432456e92a961e1a0f4b70c_chunk_0038",
+      "claim_id": "6a1f1c571432456e92a961e1a0f4b70c_chunk_0038_claim_001"
+    },
+    {
+      "entity_id": "6a1f1c571432456e92a961e1a0f4b70c_chunk_0038_ent_007",
+      "text": "Toyo Engineering",
+      "type": "Organization",
+      "chunk_id": "6a1f1c571432456e92a961e1a0f4b70c_chunk_0038",
+      "claim_id": "6a1f1c571432456e92a961e1a0f4b70c_chunk_0038_claim_006"
+    },
+    {
+      "entity_id": "6a1f1c571432456e92a961e1a0f4b70c_chunk_0021_ent_008",
+      "text": "Trichy",
+      "type": "Location",
+      "chunk_id": "6a1f1c571432456e92a961e1a0f4b70c_chunk_0021",
+      "claim_id": "6a1f1c571432456e92a961e1a0f4b70c_chunk_0021_claim_000"
+    },
+    {
+      "entity_id": "6a1f1c571432456e92a961e1a0f4b70c_chunk_0074_ent_008",
+      "text": "Udangudi main CHP Conveyor Package, Tamil Nadu",
+      "type": "Project",
+      "chunk_id": "6a1f1c571432456e92a961e1a0f4b70c_chunk_0074",
+      "claim_id": "6a1f1c571432456e92a961e1a0f4b70c_chunk_0074_claim_000"
+    },
+    {
+      "entity_id": "6a1f1c571432456e92a961e1a0f4b70c_chunk_0036_ent_004",
+      "text": "UltraTech Cement Limited",
+      "type": "Organization",
+      "chunk_id": "6a1f1c571432456e92a961e1a0f4b70c_chunk_0036",
+      "claim_id": "6a1f1c571432456e92a961e1a0f4b70c_chunk_0036_claim_010"
+    },
+    {
+      "entity_id": "6a1f1c571432456e92a961e1a0f4b70c_chunk_0044_ent_000",
+      "text": "Underground Coal Mining",
+      "type": "Product",
+      "chunk_id": "6a1f1c571432456e92a961e1a0f4b70c_chunk_0044",
+      "claim_id": "6a1f1c571432456e92a961e1a0f4b70c_chunk_0044_claim_000"
+    },
+    {
+      "entity_id": "6a1f1c571432456e92a961e1a0f4b70c_chunk_0067_ent_000",
+      "text": "United Conveyor Corporation LLP, USA",
+      "type": "Organization",
+      "chunk_id": "6a1f1c571432456e92a961e1a0f4b70c_chunk_0067",
+      "claim_id": "6a1f1c571432456e92a961e1a0f4b70c_chunk_0067_claim_002"
+    },
+    {
+      "entity_id": "6a1f1c571432456e92a961e1a0f4b70c_chunk_0074_ent_007",
+      "text": "Urea handling and bagging package from Talcher Fertilisers Ltd., Odisha",
+      "type": "Project",
+      "chunk_id": "6a1f1c571432456e92a961e1a0f4b70c_chunk_0074",
+      "claim_id": "6a1f1c571432456e92a961e1a0f4b70c_chunk_0074_claim_000"
+    },
+    {
+      "entity_id": "6a1f1c571432456e92a961e1a0f4b70c_chunk_0023_ent_002",
+      "text": "VUKhIN Russia",
+      "type": "Organization",
+      "chunk_id": "6a1f1c571432456e92a961e1a0f4b70c_chunk_0023",
+      "claim_id": "6a1f1c571432456e92a961e1a0f4b70c_chunk_0023_claim_000"
+    },
+    {
+      "entity_id": "6a1f1c571432456e92a961e1a0f4b70c_chunk_0090_ent_004",
+      "text": "Vizag Steel, Andhra Pradesh",
+      "type": "Location",
+      "chunk_id": "6a1f1c571432456e92a961e1a0f4b70c_chunk_0090",
+      "claim_id": "6a1f1c571432456e92a961e1a0f4b70c_chunk_0090_claim_001"
+    },
+    {
+      "entity_id": "6a1f1c571432456e92a961e1a0f4b70c_chunk_0052_ent_000",
+      "text": "Water Management",
+      "type": "Department",
+      "chunk_id": "6a1f1c571432456e92a961e1a0f4b70c_chunk_0052",
+      "claim_id": null
+    },
+    {
+      "entity_id": "6a1f1c571432456e92a961e1a0f4b70c_chunk_0021_ent_000",
+      "text": "West Bengal",
+      "type": "Location",
+      "chunk_id": "6a1f1c571432456e92a961e1a0f4b70c_chunk_0021",
+      "claim_id": "6a1f1c571432456e92a961e1a0f4b70c_chunk_0021_claim_000"
+    },
+    {
+      "entity_id": "6a1f1c571432456e92a961e1a0f4b70c_chunk_0032_ent_012",
+      "text": "West Bengal",
+      "type": "Location",
+      "chunk_id": "6a1f1c571432456e92a961e1a0f4b70c_chunk_0032",
+      "claim_id": "6a1f1c571432456e92a961e1a0f4b70c_chunk_0032_claim_015"
+    },
+    {
+      "entity_id": "6a1f1c571432456e92a961e1a0f4b70c_chunk_0008_ent_000",
+      "text": "What we are and What we do",
+      "type": "Team|Project",
+      "chunk_id": "6a1f1c571432456e92a961e1a0f4b70c_chunk_0008",
+      "claim_id": null
+    },
+    {
+      "entity_id": "6a1f1c571432456e92a961e1a0f4b70c_chunk_0038_ent_003",
+      "text": "Worley",
+      "type": "Organization",
+      "chunk_id": "6a1f1c571432456e92a961e1a0f4b70c_chunk_0038",
+      "claim_id": "6a1f1c571432456e92a961e1a0f4b70c_chunk_0038_claim_002"
+    },
+    {
+      "entity_id": "6a1f1c571432456e92a961e1a0f4b70c_chunk_0055_ent_001",
+      "text": "YADADRI - TSGENCO",
+      "type": "Project",
+      "chunk_id": "6a1f1c571432456e92a961e1a0f4b70c_chunk_0055",
+      "claim_id": "6a1f1c571432456e92a961e1a0f4b70c_chunk_0055_claim_000"
+    },
+    {
+      "entity_id": "6a1f1c571432456e92a961e1a0f4b70c_chunk_0066_ent_001",
+      "text": "Yadadri, Telengana",
+      "type": "Location",
+      "chunk_id": "6a1f1c571432456e92a961e1a0f4b70c_chunk_0066",
+      "claim_id": "6a1f1c571432456e92a961e1a0f4b70c_chunk_0066_claim_000"
+    },
+    {
+      "entity_id": "6a1f1c571432456e92a961e1a0f4b70c_chunk_0086_ent_013",
+      "text": "agitator tanks",
+      "type": "Equipment",
+      "chunk_id": "6a1f1c571432456e92a961e1a0f4b70c_chunk_0086",
+      "claim_id": "6a1f1c571432456e92a961e1a0f4b70c_chunk_0086_claim_002"
+    },
+    {
+      "entity_id": "6a1f1c571432456e92a961e1a0f4b70c_chunk_0091_ent_001",
+      "text": "ammonia",
+      "type": "Product",
+      "chunk_id": "6a1f1c571432456e92a961e1a0f4b70c_chunk_0091",
+      "claim_id": "6a1f1c571432456e92a961e1a0f4b70c_chunk_0091_claim_000"
+    },
+    {
+      "entity_id": "6a1f1c571432456e92a961e1a0f4b70c_chunk_0086_ent_010",
+      "text": "ammonium sulfate",
+      "type": "Material",
+      "chunk_id": "6a1f1c571432456e92a961e1a0f4b70c_chunk_0086",
+      "claim_id": "6a1f1c571432456e92a961e1a0f4b70c_chunk_0086_claim_001"
+    },
+    {
+      "entity_id": "6a1f1c571432456e92a961e1a0f4b70c_chunk_0062_ent_000",
+      "text": "ash handling division",
+      "type": "Department",
+      "chunk_id": "6a1f1c571432456e92a961e1a0f4b70c_chunk_0062",
+      "claim_id": "6a1f1c571432456e92a961e1a0f4b70c_chunk_0062_claim_000"
+    },
+    {
+      "entity_id": "6a1f1c571432456e92a961e1a0f4b70c_chunk_0058_ent_000",
+      "text": "ash handling systems",
+      "type": "System",
+      "chunk_id": "6a1f1c571432456e92a961e1a0f4b70c_chunk_0058",
+      "claim_id": "6a1f1c571432456e92a961e1a0f4b70c_chunk_0058_claim_000"
+    },
+    {
+      "entity_id": "6a1f1c571432456e92a961e1a0f4b70c_chunk_0086_ent_011",
+      "text": "benzol",
+      "type": "Material",
+      "chunk_id": "6a1f1c571432456e92a961e1a0f4b70c_chunk_0086",
+      "claim_id": "6a1f1c571432456e92a961e1a0f4b70c_chunk_0086_claim_001"
+    },
+    {
+      "entity_id": "6a1f1c571432456e92a961e1a0f4b70c_chunk_0091_ent_002",
+      "text": "benzol",
+      "type": "Product",
+      "chunk_id": "6a1f1c571432456e92a961e1a0f4b70c_chunk_0091",
+      "claim_id": "6a1f1c571432456e92a961e1a0f4b70c_chunk_0091_claim_000"
+    },
+    {
+      "entity_id": "6a1f1c571432456e92a961e1a0f4b70c_chunk_0072_ent_001",
+      "text": "bulk material handling system",
+      "type": "System",
+      "chunk_id": "6a1f1c571432456e92a961e1a0f4b70c_chunk_0072",
+      "claim_id": "6a1f1c571432456e92a961e1a0f4b70c_chunk_0072_claim_000"
+    },
+    {
+      "entity_id": "6a1f1c571432456e92a961e1a0f4b70c_chunk_0072_ent_008",
+      "text": "cement industry",
+      "type": "Department",
+      "chunk_id": "6a1f1c571432456e92a961e1a0f4b70c_chunk_0072",
+      "claim_id": "6a1f1c571432456e92a961e1a0f4b70c_chunk_0072_claim_000"
+    },
+    {
+      "entity_id": "6a1f1c571432456e92a961e1a0f4b70c_chunk_0086_ent_012",
+      "text": "chemical processing",
+      "type": "Process",
+      "chunk_id": "6a1f1c571432456e92a961e1a0f4b70c_chunk_0086",
+      "claim_id": "6a1f1c571432456e92a961e1a0f4b70c_chunk_0086_claim_002"
+    },
+    {
+      "entity_id": "6a1f1c571432456e92a961e1a0f4b70c_chunk_0091_ent_003",
+      "text": "clean gas",
+      "type": "Product",
+      "chunk_id": "6a1f1c571432456e92a961e1a0f4b70c_chunk_0091",
+      "claim_id": "6a1f1c571432456e92a961e1a0f4b70c_chunk_0091_claim_001"
+    },
+    {
+      "entity_id": "6a1f1c571432456e92a961e1a0f4b70c_chunk_0072_ent_012",
+      "text": "coal",
+      "type": "Product",
+      "chunk_id": "6a1f1c571432456e92a961e1a0f4b70c_chunk_0072",
+      "claim_id": "6a1f1c571432456e92a961e1a0f4b70c_chunk_0072_claim_003"
+    },
+    {
+      "entity_id": "6a1f1c571432456e92a961e1a0f4b70c_chunk_0060_ent_002",
+      "text": "coal and lignite-based thermal power plants (TPPs)",
+      "type": "Location",
+      "chunk_id": "6a1f1c571432456e92a961e1a0f4b70c_chunk_0060",
+      "claim_id": "6a1f1c571432456e92a961e1a0f4b70c_chunk_0060_claim_000"
+    },
+    {
+      "entity_id": "6a1f1c571432456e92a961e1a0f4b70c_chunk_0086_ent_004",
+      "text": "coal blending",
+      "type": "Process",
+      "chunk_id": "6a1f1c571432456e92a961e1a0f4b70c_chunk_0086",
+      "claim_id": "6a1f1c571432456e92a961e1a0f4b70c_chunk_0086_claim_000"
+    },
+    {
+      "entity_id": "6a1f1c571432456e92a961e1a0f4b70c_chunk_0086_ent_009",
+      "text": "coal tar",
+      "type": "Material",
+      "chunk_id": "6a1f1c571432456e92a961e1a0f4b70c_chunk_0086",
+      "claim_id": "6a1f1c571432456e92a961e1a0f4b70c_chunk_0086_claim_001"
+    },
+    {
+      "entity_id": "6a1f1c571432456e92a961e1a0f4b70c_chunk_0086_ent_020",
+      "text": "coke oven batteries",
+      "type": "System",
+      "chunk_id": "6a1f1c571432456e92a961e1a0f4b70c_chunk_0086",
+      "claim_id": "6a1f1c571432456e92a961e1a0f4b70c_chunk_0086_claim_004"
+    },
+    {
+      "entity_id": "6a1f1c571432456e92a961e1a0f4b70c_chunk_0086_ent_008",
+      "text": "coke oven by-product recovery",
+      "type": "Process",
+      "chunk_id": "6a1f1c571432456e92a961e1a0f4b70c_chunk_0086",
+      "claim_id": "6a1f1c571432456e92a961e1a0f4b70c_chunk_0086_claim_001"
+    },
+    {
+      "entity_id": "6a1f1c571432456e92a961e1a0f4b70c_chunk_0086_ent_003",
+      "text": "coke ovens",
+      "type": "System",
+      "chunk_id": "6a1f1c571432456e92a961e1a0f4b70c_chunk_0086",
+      "claim_id": "6a1f1c571432456e92a961e1a0f4b70c_chunk_0086_claim_003"
+    },
+    {
+      "entity_id": "6a1f1c571432456e92a961e1a0f4b70c_chunk_0091_ent_004",
+      "text": "coke ovens",
+      "type": "System",
+      "chunk_id": "6a1f1c571432456e92a961e1a0f4b70c_chunk_0091",
+      "claim_id": "6a1f1c571432456e92a961e1a0f4b70c_chunk_0091_claim_001"
+    },
+    {
+      "entity_id": "6a1f1c571432456e92a961e1a0f4b70c_chunk_0022_ent_000",
+      "text": "collaborations",
+      "type": "Team",
+      "chunk_id": "6a1f1c571432456e92a961e1a0f4b70c_chunk_0022",
+      "claim_id": null
+    },
+    {
+      "entity_id": "6a1f1c571432456e92a961e1a0f4b70c_chunk_0086_ent_015",
+      "text": "condensate tanks",
+      "type": "Equipment",
+      "chunk_id": "6a1f1c571432456e92a961e1a0f4b70c_chunk_0086",
+      "claim_id": "6a1f1c571432456e92a961e1a0f4b70c_chunk_0086_claim_002"
+    },
+    {
+      "entity_id": "6a1f1c571432456e92a961e1a0f4b70c_chunk_0072_ent_002",
+      "text": "conveyors",
+      "type": "Product",
+      "chunk_id": "6a1f1c571432456e92a961e1a0f4b70c_chunk_0072",
+      "claim_id": "6a1f1c571432456e92a961e1a0f4b70c_chunk_0072_claim_002"
+    },
+    {
+      "entity_id": "6a1f1c571432456e92a961e1a0f4b70c_chunk_0086_ent_016",
+      "text": "decanters",
+      "type": "Equipment",
+      "chunk_id": "6a1f1c571432456e92a961e1a0f4b70c_chunk_0086",
+      "claim_id": "6a1f1c571432456e92a961e1a0f4b70c_chunk_0086_claim_002"
+    },
+    {
+      "entity_id": "6a1f1c571432456e92a961e1a0f4b70c_chunk_0032_ent_005",
+      "text": "department of atomic energy",
+      "type": "Department",
+      "chunk_id": "6a1f1c571432456e92a961e1a0f4b70c_chunk_0032",
+      "claim_id": "6a1f1c571432456e92a961e1a0f4b70c_chunk_0032_claim_006"
+    },
+    {
+      "entity_id": "6a1f1c571432456e92a961e1a0f4b70c_chunk_0086_ent_014",
+      "text": "distillation columns",
+      "type": "Equipment",
+      "chunk_id": "6a1f1c571432456e92a961e1a0f4b70c_chunk_0086",
+      "claim_id": "6a1f1c571432456e92a961e1a0f4b70c_chunk_0086_claim_002"
+    },
+    {
+      "entity_id": "6a1f1c571432456e92a961e1a0f4b70c_chunk_0086_ent_005",
+      "text": "feeding",
+      "type": "Process",
+      "chunk_id": "6a1f1c571432456e92a961e1a0f4b70c_chunk_0086",
+      "claim_id": "6a1f1c571432456e92a961e1a0f4b70c_chunk_0086_claim_000"
+    },
+    {
+      "entity_id": "6a1f1c571432456e92a961e1a0f4b70c_chunk_0072_ent_017",
+      "text": "fertiliser plants",
+      "type": "Location",
+      "chunk_id": "6a1f1c571432456e92a961e1a0f4b70c_chunk_0072",
+      "claim_id": "6a1f1c571432456e92a961e1a0f4b70c_chunk_0072_claim_000"
+    },
+    {
+      "entity_id": "6a1f1c571432456e92a961e1a0f4b70c_chunk_0060_ent_001",
+      "text": "fly ash",
+      "type": "Product",
+      "chunk_id": "6a1f1c571432456e92a961e1a0f4b70c_chunk_0060",
+      "claim_id": "6a1f1c571432456e92a961e1a0f4b70c_chunk_0060_claim_000"
+    },
+    {
+      "entity_id": "6a1f1c571432456e92a961e1a0f4b70c_chunk_0091_ent_006",
+      "text": "furnaces",
+      "type": "System",
+      "chunk_id": "6a1f1c571432456e92a961e1a0f4b70c_chunk_0091",
+      "claim_id": "6a1f1c571432456e92a961e1a0f4b70c_chunk_0091_claim_001"
+    },
+    {
+      "entity_id": "6a1f1c571432456e92a961e1a0f4b70c_chunk_0060_ent_000",
+      "text": "government policies for the ash handling business",
+      "type": "Policy",
+      "chunk_id": "6a1f1c571432456e92a961e1a0f4b70c_chunk_0060",
+      "claim_id": "6a1f1c571432456e92a961e1a0f4b70c_chunk_0060_claim_000"
+    },
+    {
+      "entity_id": "6a1f1c571432456e92a961e1a0f4b70c_chunk_0072_ent_004",
+      "text": "hoists",
+      "type": "Product",
+      "chunk_id": "6a1f1c571432456e92a961e1a0f4b70c_chunk_0072",
+      "claim_id": "6a1f1c571432456e92a961e1a0f4b70c_chunk_0072_claim_002"
+    },
+    {
+      "entity_id": "6a1f1c571432456e92a961e1a0f4b70c_chunk_0020_ent_000",
+      "text": "infrastructure and strategic presence",
+      "type": "System",
+      "chunk_id": "6a1f1c571432456e92a961e1a0f4b70c_chunk_0020",
+      "claim_id": "6a1f1c571432456e92a961e1a0f4b70c_chunk_0020_claim_000"
+    },
+    {
+      "entity_id": "6a1f1c571432456e92a961e1a0f4b70c_chunk_0086_ent_002",
+      "text": "integrated steel plant",
+      "type": "Location",
+      "chunk_id": "6a1f1c571432456e92a961e1a0f4b70c_chunk_0086",
+      "claim_id": "6a1f1c571432456e92a961e1a0f4b70c_chunk_0086_claim_003"
+    },
+    {
+      "entity_id": "6a1f1c571432456e92a961e1a0f4b70c_chunk_0072_ent_013",
+      "text": "iron ore",
+      "type": "Product",
+      "chunk_id": "6a1f1c571432456e92a961e1a0f4b70c_chunk_0072",
+      "claim_id": "6a1f1c571432456e92a961e1a0f4b70c_chunk_0072_claim_003"
+    },
+    {
+      "entity_id": "6a1f1c571432456e92a961e1a0f4b70c_chunk_0086_ent_019",
+      "text": "metallurgical coal",
+      "type": "Material",
+      "chunk_id": "6a1f1c571432456e92a961e1a0f4b70c_chunk_0086",
+      "claim_id": "6a1f1c571432456e92a961e1a0f4b70c_chunk_0086_claim_004"
+    },
+    {
+      "entity_id": "6a1f1c571432456e92a961e1a0f4b70c_chunk_0072_ent_010",
+      "text": "metallurgy industry",
+      "type": "Department",
+      "chunk_id": "6a1f1c571432456e92a961e1a0f4b70c_chunk_0072",
+      "claim_id": "6a1f1c571432456e92a961e1a0f4b70c_chunk_0072_claim_000"
+    },
+    {
+      "entity_id": "6a1f1c571432456e92a961e1a0f4b70c_chunk_0072_ent_014",
+      "text": "minerals",
+      "type": "Product",
+      "chunk_id": "6a1f1c571432456e92a961e1a0f4b70c_chunk_0072",
+      "claim_id": "6a1f1c571432456e92a961e1a0f4b70c_chunk_0072_claim_003"
+    },
+    {
+      "entity_id": "6a1f1c571432456e92a961e1a0f4b70c_chunk_0072_ent_011",
+      "text": "minerals industry",
+      "type": "Department",
+      "chunk_id": "6a1f1c571432456e92a961e1a0f4b70c_chunk_0072",
+      "claim_id": "6a1f1c571432456e92a961e1a0f4b70c_chunk_0072_claim_000"
+    },
+    {
+      "entity_id": "6a1f1c571432456e92a961e1a0f4b70c_chunk_0072_ent_009",
+      "text": "mining industry",
+      "type": "Department",
+      "chunk_id": "6a1f1c571432456e92a961e1a0f4b70c_chunk_0072",
+      "claim_id": "6a1f1c571432456e92a961e1a0f4b70c_chunk_0072_claim_000"
+    },
+    {
+      "entity_id": "6a1f1c571432456e92a961e1a0f4b70c_chunk_0072_ent_007",
+      "text": "oil & gas industry",
+      "type": "Department",
+      "chunk_id": "6a1f1c571432456e92a961e1a0f4b70c_chunk_0072",
+      "claim_id": "6a1f1c571432456e92a961e1a0f4b70c_chunk_0072_claim_000"
+    },
+    {
+      "entity_id": "6a1f1c571432456e92a961e1a0f4b70c_chunk_0072_ent_003",
+      "text": "paddle feeders",
+      "type": "Product",
+      "chunk_id": "6a1f1c571432456e92a961e1a0f4b70c_chunk_0072",
+      "claim_id": "6a1f1c571432456e92a961e1a0f4b70c_chunk_0072_claim_002"
+    },
+    {
+      "entity_id": "6a1f1c571432456e92a961e1a0f4b70c_chunk_0072_ent_006",
+      "text": "power industry",
+      "type": "Department",
+      "chunk_id": "6a1f1c571432456e92a961e1a0f4b70c_chunk_0072",
+      "claim_id": "6a1f1c571432456e92a961e1a0f4b70c_chunk_0072_claim_000"
+    },
+    {
+      "entity_id": "6a1f1c571432456e92a961e1a0f4b70c_chunk_0072_ent_015",
+      "text": "power plants",
+      "type": "Location",
+      "chunk_id": "6a1f1c571432456e92a961e1a0f4b70c_chunk_0072",
+      "claim_id": "6a1f1c571432456e92a961e1a0f4b70c_chunk_0072_claim_000"
+    },
+    {
+      "entity_id": "6a1f1c571432456e92a961e1a0f4b70c_chunk_0091_ent_007",
+      "text": "power plants",
+      "type": "System",
+      "chunk_id": "6a1f1c571432456e92a961e1a0f4b70c_chunk_0091",
+      "claim_id": "6a1f1c571432456e92a961e1a0f4b70c_chunk_0091_claim_001"
+    },
+    {
+      "entity_id": "6a1f1c571432456e92a961e1a0f4b70c_chunk_0086_ent_018",
+      "text": "pressure vessels",
+      "type": "Equipment",
+      "chunk_id": "6a1f1c571432456e92a961e1a0f4b70c_chunk_0086",
+      "claim_id": "6a1f1c571432456e92a961e1a0f4b70c_chunk_0086_claim_002"
+    },
+    {
+      "entity_id": "6a1f1c571432456e92a961e1a0f4b70c_chunk_0072_ent_018",
+      "text": "process plants",
+      "type": "Location",
+      "chunk_id": "6a1f1c571432456e92a961e1a0f4b70c_chunk_0072",
+      "claim_id": "6a1f1c571432456e92a961e1a0f4b70c_chunk_0072_claim_000"
+    },
+    {
+      "entity_id": "6a1f1c571432456e92a961e1a0f4b70c_chunk_0093_ent_000",
+      "text": "projects",
+      "type": "Project",
+      "chunk_id": "6a1f1c571432456e92a961e1a0f4b70c_chunk_0093",
+      "claim_id": "6a1f1c571432456e92a961e1a0f4b70c_chunk_0093_claim_000"
+    },
+    {
+      "entity_id": "6a1f1c571432456e92a961e1a0f4b70c_chunk_0086_ent_022",
+      "text": "raw coke oven gas (COG)",
+      "type": "Material",
+      "chunk_id": "6a1f1c571432456e92a961e1a0f4b70c_chunk_0086",
+      "claim_id": "6a1f1c571432456e92a961e1a0f4b70c_chunk_0086_claim_004"
+    },
+    {
+      "entity_id": "6a1f1c571432456e92a961e1a0f4b70c_chunk_0091_ent_005",
+      "text": "rolling mills",
+      "type": "System",
+      "chunk_id": "6a1f1c571432456e92a961e1a0f4b70c_chunk_0091",
+      "claim_id": "6a1f1c571432456e92a961e1a0f4b70c_chunk_0091_claim_001"
+    },
+    {
+      "entity_id": "6a1f1c571432456e92a961e1a0f4b70c_chunk_0086_ent_006",
+      "text": "specialised chemical plant units",
+      "type": "Product",
+      "chunk_id": "6a1f1c571432456e92a961e1a0f4b70c_chunk_0086",
+      "claim_id": "6a1f1c571432456e92a961e1a0f4b70c_chunk_0086_claim_000"
+    },
+    {
+      "entity_id": "6a1f1c571432456e92a961e1a0f4b70c_chunk_0072_ent_005",
+      "text": "steel industry",
+      "type": "Department",
+      "chunk_id": "6a1f1c571432456e92a961e1a0f4b70c_chunk_0072",
+      "claim_id": "6a1f1c571432456e92a961e1a0f4b70c_chunk_0072_claim_000"
+    },
+    {
+      "entity_id": "6a1f1c571432456e92a961e1a0f4b70c_chunk_0072_ent_016",
+      "text": "steel plants",
+      "type": "Location",
+      "chunk_id": "6a1f1c571432456e92a961e1a0f4b70c_chunk_0072",
+      "claim_id": "6a1f1c571432456e92a961e1a0f4b70c_chunk_0072_claim_004"
+    },
+    {
+      "entity_id": "6a1f1c571432456e92a961e1a0f4b70c_chunk_0086_ent_017",
+      "text": "storage tanks",
+      "type": "Equipment",
+      "chunk_id": "6a1f1c571432456e92a961e1a0f4b70c_chunk_0086",
+      "claim_id": "6a1f1c571432456e92a961e1a0f4b70c_chunk_0086_claim_002"
+    },
+    {
+      "entity_id": "6a1f1c571432456e92a961e1a0f4b70c_chunk_0091_ent_000",
+      "text": "tar",
+      "type": "Product",
+      "chunk_id": "6a1f1c571432456e92a961e1a0f4b70c_chunk_0091",
+      "claim_id": "6a1f1c571432456e92a961e1a0f4b70c_chunk_0091_claim_000"
+    },
+    {
+      "entity_id": "6a1f1c571432456e92a961e1a0f4b70c_chunk_0004_ent_002",
+      "text": "the Company",
+      "type": "Organization",
+      "chunk_id": "6a1f1c571432456e92a961e1a0f4b70c_chunk_0004",
+      "claim_id": "6a1f1c571432456e92a961e1a0f4b70c_chunk_0004_claim_000"
+    },
+    {
+      "entity_id": "6a1f1c571432456e92a961e1a0f4b70c_chunk_0086_ent_021",
+      "text": "volatile compounds",
+      "type": "Material",
+      "chunk_id": "6a1f1c571432456e92a961e1a0f4b70c_chunk_0086",
+      "claim_id": "6a1f1c571432456e92a961e1a0f4b70c_chunk_0086_claim_004"
+    },
+    {
+      "entity_id": "6a1f1c571432456e92a961e1a0f4b70c_chunk_0004_ent_003",
+      "text": "we",
+      "type": "Organization",
+      "chunk_id": "6a1f1c571432456e92a961e1a0f4b70c_chunk_0004",
+      "claim_id": "6a1f1c571432456e92a961e1a0f4b70c_chunk_0004_claim_000"
+    },
+    {
+      "entity_id": "6a1f1c571432456e92a961e1a0f4b70c_chunk_0042_ent_000",
+      "text": "world's fastest growing major economy",
+      "type": "Location",
+      "chunk_id": "6a1f1c571432456e92a961e1a0f4b70c_chunk_0042",
+      "claim_id": "6a1f1c571432456e92a961e1a0f4b70c_chunk_0042_claim_000"
+    }
+  ]
+}

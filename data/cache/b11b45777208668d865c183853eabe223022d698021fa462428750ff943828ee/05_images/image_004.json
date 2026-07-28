@@ -1,0 +1,43 @@
+{
+  "image_id": "#/pictures/3",
+  "page": 5,
+  "caption": null,
+  "ocr_text": null,
+  "bounding_box": {
+    "l": 0.0,
+    "t": 841.8900146484375,
+    "r": 1189.2618408203125,
+    "b": 546.6134338378906,
+    "coord_origin": "BOTTOMLEFT"
+  },
+  "image_path": "05_images/image_004.png",
+  "image_type": "Screenshot",
+  "objects": [
+    "Blue pipes",
+    "Coal handling plant",
+    "Construction equipment",
+    "Construction sites",
+    "Industrial structures",
+    "Large cylindrical structures",
+    "Machinery",
+    "Process column"
+  ],
+  "keywords": [
+    "BHCL",
+    "BTL EPC Ltd.",
+    "Coal handling plant",
+    "Construction",
+    "Guwahati",
+    "Indian Oil Corporation",
+    "Industrial",
+    "Process column",
+    "Projects",
+    "Tamil Nadu"
+  ],
+  "semantic_description": "This image is a screenshot from a document showcasing various industrial projects and construction sites managed by BTL EPC Ltd. It highlights different stages of construction and completed projects, including a coal handling plant and a process column for the Indian Oil Corporation.",
+  "detected_entities": [
+    "BHCL, Udangudi, Tamil Nadu",
+    "BTL EPC Ltd.",
+    "Indian Oil Corporation, Guwahati"
+  ]
+}

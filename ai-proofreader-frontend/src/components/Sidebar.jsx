@@ -6,6 +6,7 @@ const NAV_ITEMS = [
   { key: "proofreading", label: "Proofreading", icon: "check-square" },
   { key: "assistant", label: "AI Assistant", icon: "message-square" },
   { key: "analysis", label: "Context Analysis", icon: "search" },
+  { key: "comparative", label: "Comparative Analysis", icon: "layers" },
   { key: "reports", label: "Reports", icon: "bar-chart" },
   { key: "settings", label: "Settings", icon: "settings" },
 ];
@@ -21,6 +22,8 @@ function Icon({ name }) {
       return <svg {...common}><path d="M4 20V10" /><path d="M12 20V4" /><path d="M20 20v-7" /></svg>;
     case "search":
       return <svg {...common}><circle cx="11" cy="11" r="8" /><line x1="21" y1="21" x2="16.65" y2="16.65" /></svg>;
+    case "layers":
+      return <svg {...common}><polygon points="12 2 2 7 12 12 22 7 12 2" /><polyline points="2 17 12 22 22 17" /><polyline points="2 12 12 17 22 12" /></svg>;
     case "settings":
       return <svg {...common}><circle cx="12" cy="12" r="3" /><path d="M19.4 15a1.7 1.7 0 00.34 1.87l.06.06a2 2 0 11-2.83 2.83l-.06-.06a1.7 1.7 0 00-1.87-.34 1.7 1.7 0 00-1 1.55V21a2 2 0 11-4 0v-.09a1.7 1.7 0 00-1-1.55 1.7 1.7 0 00-1.87.34l-.06.06a2 2 0 11-2.83-2.83l.06-.06a1.7 1.7 0 00.34-1.87 1.7 1.7 0 00-1.55-1H3a2 2 0 110-4h.09a1.7 1.7 0 001.55-1 1.7 1.7 0 00-.34-1.87l-.06-.06a2 2 0 112.83-2.83l.06.06a1.7 1.7 0 001.87.34H9a1.7 1.7 0 001-1.55V3a2 2 0 114 0v.09a1.7 1.7 0 001 1.55 1.7 1.7 0 001.87-.34l.06-.06a2 2 0 112.83 2.83l-.06.06a1.7 1.7 0 00-.34 1.87V9a1.7 1.7 0 001.55 1H21a2 2 0 110 4h-.09a1.7 1.7 0 00-1.55 1z" /></svg>;
     case "message-square":
@@ -30,14 +33,25 @@ function Icon({ name }) {
   }
 }
 
-const SYSTEM_STATUS = [
+const DEFAULT_SYSTEM_STATUS = [
   { name: "Backend", online: true },
   { name: "LLM (Ollama)", online: true },
   { name: "LanguageTool", online: true },
   { name: "SymSpell", online: true },
 ];
 
-export default function Sidebar({ systemStatus = SYSTEM_STATUS }) {
+export default function Sidebar({ systemStatus }) {
+  const statusList = Array.isArray(systemStatus)
+    ? systemStatus
+    : Array.isArray(systemStatus?.status_list)
+    ? systemStatus.status_list
+    : [
+        { name: "Backend", online: true },
+        { name: "LLM (Ollama)", online: systemStatus?.ollama_status === "Online" || systemStatus?.ollama_status === true },
+        { name: "LanguageTool", online: true },
+        { name: "SymSpell", online: true }
+      ];
+
   return (
     <aside style={styles.sidebar}>
       <div>
@@ -60,7 +74,7 @@ export default function Sidebar({ systemStatus = SYSTEM_STATUS }) {
             const storedDocId = localStorage.getItem("currentlyOpenDocId");
             let dest = item.key === "dashboard" ? "/" : item.key === "settings" ? "/settings" : `/${item.key}`;
             
-            if (storedDocId && ["proofreading", "assistant", "analysis", "reports"].includes(item.key)) {
+            if (storedDocId && ["proofreading", "assistant", "analysis", "comparative", "reports"].includes(item.key)) {
               dest = `/documents/${storedDocId}?tab=${item.key}`;
             }
             return (
@@ -94,7 +108,7 @@ export default function Sidebar({ systemStatus = SYSTEM_STATUS }) {
           </svg>
           <span>System status</span>
         </div>
-        {systemStatus.map((s) => (
+        {statusList.map((s) => (
           <div key={s.name} style={styles.statusRow}>
             <span style={styles.statusName}>
               <span style={{ ...styles.dot, background: s.online ? "var(--green)" : "var(--red)" }} />
@@ -152,7 +166,7 @@ const styles = {
     marginBottom: 10,
   },
   statusRow: {
-    display: "flex", alignItems: "center", justifyContext: "space-between",
+    display: "flex", alignItems: "center",
     justifyContent: "space-between",
     padding: "5px 0", fontSize: 12.5,
   },

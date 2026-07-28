@@ -1,0 +1,35 @@
+{
+  "image_id": "#/pictures/44",
+  "page": 10,
+  "caption": null,
+  "ocr_text": null,
+  "bounding_box": {
+    "l": 881.41357421875,
+    "t": 322.8919677734375,
+    "r": 1189.6456298828125,
+    "b": 57.03656005859375,
+    "coord_origin": "BOTTOMLEFT"
+  },
+  "image_path": "05_images/image_045.png",
+  "image_type": "Photo",
+  "objects": [
+    "Large cylindrical structures",
+    "industrial equipment.",
+    "machinery",
+    "pipes",
+    "scaffolding"
+  ],
+  "keywords": [
+    "Generator",
+    "Industrial",
+    "Machinery",
+    "Pipes",
+    "Power Plant",
+    "Scaffolding",
+    "Turbine"
+  ],
+  "semantic_description": "The image depicts an industrial setting, likely a power plant or a similar facility, with large cylindrical structures that appear to be part of a turbine or generator system. The environment is complex with various pipes, machinery, and scaffolding, indicating a heavy industrial operation.",
+  "detected_entities": [
+    "None"
+  ]
+}

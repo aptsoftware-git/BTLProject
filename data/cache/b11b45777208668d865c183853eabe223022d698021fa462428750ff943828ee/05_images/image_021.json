@@ -1,0 +1,28 @@
+{
+  "image_id": "#/pictures/20",
+  "page": 6,
+  "caption": null,
+  "ocr_text": null,
+  "bounding_box": {
+    "l": 936.73779296875,
+    "t": 130.88507080078125,
+    "r": 1012.4763793945312,
+    "b": 56.58001708984375,
+    "coord_origin": "BOTTOMLEFT"
+  },
+  "image_path": "05_images/image_021.png",
+  "image_type": "Logo",
+  "objects": [
+    "The logo text \"United Registrar of Systems\" and the ISO 45001 certification mark."
+  ],
+  "keywords": [
+    "Certification",
+    "ISO 45001",
+    "Standard",
+    "United Registrar of Systems"
+  ],
+  "semantic_description": "This image is a logo for the \"United Registrar of Systems\" (URS), which is associated with the ISO 45001 standard. The logo includes the acronym \"URS\" and the ISO 45001 certification mark, indicating that the organization is certified under this standard.",
+  "detected_entities": [
+    "United Registrar of Systems (URS)"
+  ]
+}

@@ -1,0 +1,36 @@
+{
+  "image_id": "#/pictures/27",
+  "page": 7,
+  "caption": null,
+  "ocr_text": null,
+  "bounding_box": {
+    "l": 299.1942138671875,
+    "t": 281.6871337890625,
+    "r": 541.4100341796875,
+    "b": 85.2464599609375,
+    "coord_origin": "BOTTOMLEFT"
+  },
+  "image_path": "05_images/image_028.png",
+  "image_type": "Photo",
+  "objects": [
+    "Large pipes",
+    "and industrial equipment.",
+    "buildings",
+    "conveyor belts",
+    "machinery",
+    "scaffolding"
+  ],
+  "keywords": [
+    "Conveyors",
+    "Equipment",
+    "Industrial",
+    "Infrastructure",
+    "Machinery",
+    "Pipes",
+    "Plant"
+  ],
+  "semantic_description": "The image depicts an industrial setting, likely a chemical or petrochemical plant, showcasing a complex network of pipes, machinery, and structures. The image highlights the intricate and large-scale nature of industrial operations, emphasizing the infrastructure and equipment used in such facilities.",
+  "detected_entities": [
+    "None"
+  ]
+}

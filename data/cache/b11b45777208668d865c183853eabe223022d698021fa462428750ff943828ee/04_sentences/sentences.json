@@ -1,0 +1,2562 @@
+[
+  {
+    "sentence_id": 0,
+    "paragraph_id": 0,
+    "page": 1,
+    "text": "6a1f1c571432456e92a961e1a0f4b70cBTL AR SS 09-10-2025 (c2c)-1-10",
+    "start_offset": 0,
+    "end_offset": 63,
+    "doc_char_start": 0,
+    "doc_char_end": 63
+  },
+  {
+    "sentence_id": 1,
+    "paragraph_id": 1,
+    "page": 1,
+    "text": "LTD",
+    "start_offset": 0,
+    "end_offset": 3,
+    "doc_char_start": 65,
+    "doc_char_end": 68
+  },
+  {
+    "sentence_id": 2,
+    "paragraph_id": 2,
+    "page": 1,
+    "text": "BTL EPC LIMITED | ANNUAL REPORT 2024-25",
+    "start_offset": 0,
+    "end_offset": 39,
+    "doc_char_start": 70,
+    "doc_char_end": 109
+  },
+  {
+    "sentence_id": 3,
+    "paragraph_id": 3,
+    "page": 1,
+    "text": "Contents",
+    "start_offset": 0,
+    "end_offset": 8,
+    "doc_char_start": 111,
+    "doc_char_end": 119
+  },
+  {
+    "sentence_id": 4,
+    "paragraph_id": 4,
+    "page": 1,
+    "text": "Disclaimer:",
+    "start_offset": 0,
+    "end_offset": 11,
+    "doc_char_start": 121,
+    "doc_char_end": 132
+  },
+  {
+    "sentence_id": 5,
+    "paragraph_id": 5,
+    "page": 1,
+    "text": "This document contains statements about expected future events and financials of BTL EPC LTD.",
+    "start_offset": 0,
+    "end_offset": 93,
+    "doc_char_start": 134,
+    "doc_char_end": 227
+  },
+  {
+    "sentence_id": 6,
+    "paragraph_id": 5,
+    "page": 1,
+    "text": "('BTL EPC' or 'the Company 'or 'we'), which are forward-looking.",
+    "start_offset": 94,
+    "end_offset": 158,
+    "doc_char_start": 228,
+    "doc_char_end": 292
+  },
+  {
+    "sentence_id": 7,
+    "paragraph_id": 5,
+    "page": 1,
+    "text": "It includes statements about anticipated outcomes based on management's plans and assumptions, indicated by terms like 'anticipate,' 'estimate,' 'expect,' and others.",
+    "start_offset": 159,
+    "end_offset": 325,
+    "doc_char_start": 293,
+    "doc_char_end": 459
+  },
+  {
+    "sentence_id": 8,
+    "paragraph_id": 5,
+    "page": 1,
+    "text": "There is a significant risk that the assumptions, predictions and other forward-looking statements may not prove to be accurate.",
+    "start_offset": 326,
+    "end_offset": 454,
+    "doc_char_start": 460,
+    "doc_char_end": 588
+  },
+  {
+    "sentence_id": 9,
+    "paragraph_id": 5,
+    "page": 1,
+    "text": "Readers are cautioned not to place undue reliance on forward-looking statements as several factors could cause assumptions, actual future results and events to differ materially from those expressed in the forward- looking statements.",
+    "start_offset": 455,
+    "end_offset": 689,
+    "doc_char_start": 589,
+    "doc_char_end": 823
+  },
+  {
+    "sentence_id": 10,
+    "paragraph_id": 6,
+    "page": 1,
+    "text": "Building for India.",
+    "start_offset": 0,
+    "end_offset": 19,
+    "doc_char_start": 825,
+    "doc_char_end": 844
+  },
+  {
+    "sentence_id": 11,
+    "paragraph_id": 6,
+    "page": 1,
+    "text": "Banking on India.",
+    "start_offset": 20,
+    "end_offset": 37,
+    "doc_char_start": 845,
+    "doc_char_end": 862
+  },
+  {
+    "sentence_id": 12,
+    "paragraph_id": 7,
+    "page": 1,
+    "text": "Empowering Infrastructure.",
+    "start_offset": 0,
+    "end_offset": 26,
+    "doc_char_start": 864,
+    "doc_char_end": 890
+  },
+  {
+    "sentence_id": 13,
+    "paragraph_id": 7,
+    "page": 1,
+    "text": "Enabling Progress.",
+    "start_offset": 27,
+    "end_offset": 45,
+    "doc_char_start": 891,
+    "doc_char_end": 909
+  },
+  {
+    "sentence_id": 14,
+    "paragraph_id": 8,
+    "page": 1,
+    "text": "BTL EPC Limited stands among India's fastest-growing heavy engineering EPC companies, delivering integrated solutions across the core sectors of powering India's economy.",
+    "start_offset": 0,
+    "end_offset": 170,
+    "doc_char_start": 911,
+    "doc_char_end": 1081
+  },
+  {
+    "sentence_id": 15,
+    "paragraph_id": 9,
+    "page": 1,
+    "text": "From complex project execution to precision-engineered fabrication, BTL EPC plays a pivotal role in India's industrial transformation.",
+    "start_offset": 0,
+    "end_offset": 134,
+    "doc_char_start": 1083,
+    "doc_char_end": 1217
+  },
+  {
+    "sentence_id": 16,
+    "paragraph_id": 10,
+    "page": 1,
+    "text": "Our investments in technology, talent, and infrastructure validate our commitment to India's growth ambition and infrastructure revolution.",
+    "start_offset": 0,
+    "end_offset": 139,
+    "doc_char_start": 1219,
+    "doc_char_end": 1358
+  },
+  {
+    "sentence_id": 17,
+    "paragraph_id": 11,
+    "page": 1,
+    "text": "PART ONE",
+    "start_offset": 0,
+    "end_offset": 8,
+    "doc_char_start": 1360,
+    "doc_char_end": 1368
+  },
+  {
+    "sentence_id": 18,
+    "paragraph_id": 12,
+    "page": 1,
+    "text": "What we are and What we do",
+    "start_offset": 0,
+    "end_offset": 26,
+    "doc_char_start": 1370,
+    "doc_char_end": 1396
+  },
+  {
+    "sentence_id": 19,
+    "paragraph_id": 13,
+    "page": 1,
+    "text": "Corporate Overview Corporate snapshot",
+    "start_offset": 0,
+    "end_offset": 37,
+    "doc_char_start": 1398,
+    "doc_char_end": 1435
+  },
+  {
+    "sentence_id": 20,
+    "paragraph_id": 14,
+    "page": 1,
+    "text": "BTL EPC LIMITED is an attractive proxy of India's heavy engineering solutions sector.",
+    "start_offset": 0,
+    "end_offset": 85,
+    "doc_char_start": 1437,
+    "doc_char_end": 1522
+  },
+  {
+    "sentence_id": 21,
+    "paragraph_id": 15,
+    "page": 1,
+    "text": "BTL EPC Limited is an established multi-decade player in India's heavy engineering solutions sector.",
+    "start_offset": 0,
+    "end_offset": 100,
+    "doc_char_start": 1524,
+    "doc_char_end": 1624
+  },
+  {
+    "sentence_id": 22,
+    "paragraph_id": 16,
+    "page": 1,
+    "text": "The Company leverages five decades of experience to deliver end-to-end engineering solutions - from design and planning to precision fabrication and on-site execution.",
+    "start_offset": 0,
+    "end_offset": 167,
+    "doc_char_start": 1626,
+    "doc_char_end": 1793
+  },
+  {
+    "sentence_id": 23,
+    "paragraph_id": 17,
+    "page": 1,
+    "text": "The Company services the growing critical equipment needs of India's power, mining, fertiliser, and metal sectors, empowering them to scale and address an unprecedented national opportunity.",
+    "start_offset": 0,
+    "end_offset": 190,
+    "doc_char_start": 1795,
+    "doc_char_end": 1985
+  },
+  {
+    "sentence_id": 24,
+    "paragraph_id": 18,
+    "page": 1,
+    "text": "The Company is respected for embracing challenging assignments, completing all projects engaging in timely projects handover, high project quality benchmark and a culture of continuous improvement.",
+    "start_offset": 0,
+    "end_offset": 197,
+    "doc_char_start": 1987,
+    "doc_char_end": 2184
+  },
+  {
+    "sentence_id": 25,
+    "paragraph_id": 19,
+    "page": 1,
+    "text": "By accelerating the building of national infrastructure and catalysing national progress, we are engaged in doing two things.",
+    "start_offset": 0,
+    "end_offset": 125,
+    "doc_char_start": 2186,
+    "doc_char_end": 2311
+  },
+  {
+    "sentence_id": 26,
+    "paragraph_id": 19,
+    "page": 1,
+    "text": "Building for India.",
+    "start_offset": 126,
+    "end_offset": 145,
+    "doc_char_start": 2312,
+    "doc_char_end": 2331
+  },
+  {
+    "sentence_id": 27,
+    "paragraph_id": 19,
+    "page": 1,
+    "text": "Banking on India.",
+    "start_offset": 146,
+    "end_offset": 163,
+    "doc_char_start": 2332,
+    "doc_char_end": 2349
+  },
+  {
+    "sentence_id": 28,
+    "paragraph_id": 20,
+    "page": 1,
+    "text": "Our leadership",
+    "start_offset": 0,
+    "end_offset": 14,
+    "doc_char_start": 2351,
+    "doc_char_end": 2365
+  },
+  {
+    "sentence_id": 29,
+    "paragraph_id": 21,
+    "page": 1,
+    "text": "BTL EPC Limited, the engineering arm of the Kolkata-based Shrachi Group, was founded in 1965 by the visionary Mr. S.K.",
+    "start_offset": 0,
+    "end_offset": 118,
+    "doc_char_start": 2367,
+    "doc_char_end": 2485
+  },
+  {
+    "sentence_id": 30,
+    "paragraph_id": 21,
+    "page": 1,
+    "text": "Todi.",
+    "start_offset": 119,
+    "end_offset": 124,
+    "doc_char_start": 2486,
+    "doc_char_end": 2491
+  },
+  {
+    "sentence_id": 31,
+    "paragraph_id": 21,
+    "page": 1,
+    "text": "Originally established as Bengal Tools Limited, the Company evolved into a diversified EPC contracting firm with a rich legacy in engineering excellence.",
+    "start_offset": 125,
+    "end_offset": 278,
+    "doc_char_start": 2492,
+    "doc_char_end": 2645
+  },
+  {
+    "sentence_id": 32,
+    "paragraph_id": 22,
+    "page": 1,
+    "text": "Today, the business is managed by Mr. Ravi Todi, Promoter and Managing Director, with over 31 + years of experience across various business domains, Mr. Todi has been instrumental in shaping the Group's trajectory.",
+    "start_offset": 0,
+    "end_offset": 214,
+    "doc_char_start": 2647,
+    "doc_char_end": 2861
+  },
+  {
+    "sentence_id": 33,
+    "paragraph_id": 22,
+    "page": 1,
+    "text": "An alumnus of St. Xavier's College, Kolkata, he deepened his leadership acumen through the Owner President Management Program (OPM) at Harvard Business School.",
+    "start_offset": 215,
+    "end_offset": 374,
+    "doc_char_start": 2862,
+    "doc_char_end": 3021
+  },
+  {
+    "sentence_id": 34,
+    "paragraph_id": 23,
+    "page": 1,
+    "text": "Our heritage",
+    "start_offset": 0,
+    "end_offset": 12,
+    "doc_char_start": 3023,
+    "doc_char_end": 3035
+  },
+  {
+    "sentence_id": 35,
+    "paragraph_id": 24,
+    "page": 1,
+    "text": "BTL EPC is a dynamic, multidisciplinary engineering, procurement, and construction company.",
+    "start_offset": 0,
+    "end_offset": 91,
+    "doc_char_start": 3037,
+    "doc_char_end": 3128
+  },
+  {
+    "sentence_id": 36,
+    "paragraph_id": 24,
+    "page": 1,
+    "text": "Its engineering division encompasses capabilities in project execution, as well as the manufacture of precision-engineered products and process equipment for a range of downstream industries.",
+    "start_offset": 92,
+    "end_offset": 283,
+    "doc_char_start": 3129,
+    "doc_char_end": 3320
+  },
+  {
+    "sentence_id": 37,
+    "paragraph_id": 24,
+    "page": 1,
+    "text": "Since venturing into the EPC sector in 2006, the Company has witnessed attractive growth, securing new opportunities and expanding its technical and operational capabilities.",
+    "start_offset": 284,
+    "end_offset": 458,
+    "doc_char_start": 3321,
+    "doc_char_end": 3495
+  },
+  {
+    "sentence_id": 38,
+    "paragraph_id": 25,
+    "page": 1,
+    "text": "Statutory Reports",
+    "start_offset": 0,
+    "end_offset": 17,
+    "doc_char_start": 3497,
+    "doc_char_end": 3514
+  },
+  {
+    "sentence_id": 39,
+    "paragraph_id": 26,
+    "page": 1,
+    "text": "Our vision",
+    "start_offset": 0,
+    "end_offset": 10,
+    "doc_char_start": 3516,
+    "doc_char_end": 3526
+  },
+  {
+    "sentence_id": 40,
+    "paragraph_id": 27,
+    "page": 1,
+    "text": "To be the engineering partner of choice in India's infrastructure journey of value through innovation, precision, and excellence in every project we undertake.",
+    "start_offset": 0,
+    "end_offset": 159,
+    "doc_char_start": 3528,
+    "doc_char_end": 3687
+  },
+  {
+    "sentence_id": 41,
+    "paragraph_id": 28,
+    "page": 1,
+    "text": "Our mission",
+    "start_offset": 0,
+    "end_offset": 11,
+    "doc_char_start": 3689,
+    "doc_char_end": 3700
+  },
+  {
+    "sentence_id": 42,
+    "paragraph_id": 29,
+    "page": 1,
+    "text": "To consistently deliver highquality, on-time projects that strengthen India's industrial foundation.",
+    "start_offset": 0,
+    "end_offset": 100,
+    "doc_char_start": 3702,
+    "doc_char_end": 3802
+  },
+  {
+    "sentence_id": 43,
+    "paragraph_id": 30,
+    "page": 1,
+    "text": "The promoter's legacy of innovation, integrity, and excellence remains our guiding force.",
+    "start_offset": 0,
+    "end_offset": 89,
+    "doc_char_start": 3804,
+    "doc_char_end": 3893
+  },
+  {
+    "sentence_id": 44,
+    "paragraph_id": 30,
+    "page": 1,
+    "text": "Under the dynamic leadership of Mr. Ravi Todi, we are building on this foundation to scale new heights in engineering excellence, delivering critical components for infrastructure projects in India and beyond.",
+    "start_offset": 90,
+    "end_offset": 299,
+    "doc_char_start": 3894,
+    "doc_char_end": 4103
+  },
+  {
+    "sentence_id": 45,
+    "paragraph_id": 31,
+    "page": 1,
+    "text": "vendor network of 70+ vendor-partners, ensuring seamless materials procurement and timely projects completion.",
+    "start_offset": 0,
+    "end_offset": 110,
+    "doc_char_start": 4105,
+    "doc_char_end": 4215
+  },
+  {
+    "sentence_id": 46,
+    "paragraph_id": 32,
+    "page": 1,
+    "text": "Our infrastructure and strategic presence",
+    "start_offset": 0,
+    "end_offset": 41,
+    "doc_char_start": 4217,
+    "doc_char_end": 4258
+  },
+  {
+    "sentence_id": 47,
+    "paragraph_id": 33,
+    "page": 1,
+    "text": "With five state-of-the-art manufacturing units in West Bengal and a panIndia presence, we are strategically positioned near industrial hubs, raw material sources, and talent clusters.",
+    "start_offset": 0,
+    "end_offset": 183,
+    "doc_char_start": 4260,
+    "doc_char_end": 4443
+  },
+  {
+    "sentence_id": 48,
+    "paragraph_id": 33,
+    "page": 1,
+    "text": "This provides us with a strong logistical edge and enhances our execution capabilities.",
+    "start_offset": 184,
+    "end_offset": 271,
+    "doc_char_start": 4444,
+    "doc_char_end": 4531
+  },
+  {
+    "sentence_id": 49,
+    "paragraph_id": 34,
+    "page": 1,
+    "text": "Our design and engineering teams are backed by advanced infrastructure, cutting-edge technology, and over 150 experienced project management professionals.",
+    "start_offset": 0,
+    "end_offset": 155,
+    "doc_char_start": 4533,
+    "doc_char_end": 4688
+  },
+  {
+    "sentence_id": 50,
+    "paragraph_id": 34,
+    "page": 1,
+    "text": "We operate modern machine shops equipped with precision grinding, heat treatment, and full-scale fabrication facilities, including sheet metalwork.",
+    "start_offset": 156,
+    "end_offset": 303,
+    "doc_char_start": 4689,
+    "doc_char_end": 4836
+  },
+  {
+    "sentence_id": 51,
+    "paragraph_id": 34,
+    "page": 1,
+    "text": "This robust setup empowers us to deliver a wide range of high-quality products for diverse downstream industries.",
+    "start_offset": 304,
+    "end_offset": 417,
+    "doc_char_start": 4837,
+    "doc_char_end": 4950
+  },
+  {
+    "sentence_id": 52,
+    "paragraph_id": 35,
+    "page": 1,
+    "text": "Our manufacturing units are located in Kolkata (three), Durgapur Steel city (one) and Kharagpur (one).",
+    "start_offset": 0,
+    "end_offset": 102,
+    "doc_char_start": 4952,
+    "doc_char_end": 5054
+  },
+  {
+    "sentence_id": 53,
+    "paragraph_id": 35,
+    "page": 1,
+    "text": "These units are supported by a nationwide Our agro-assembly units are present in Kolkata, Hyderabad, Cuttack, Faridabad, Guwahati, Trichy, and Bangalore, with branch offices in Kolkata, Guwahati, Cuttack, Hyderabad, Faridabad, and Lucknow.",
+    "start_offset": 103,
+    "end_offset": 342,
+    "doc_char_start": 5055,
+    "doc_char_end": 5294
+  },
+  {
+    "sentence_id": 54,
+    "paragraph_id": 36,
+    "page": 1,
+    "text": "Our collaborations",
+    "start_offset": 0,
+    "end_offset": 18,
+    "doc_char_start": 5296,
+    "doc_char_end": 5314
+  },
+  {
+    "sentence_id": 55,
+    "paragraph_id": 37,
+    "page": 1,
+    "text": "BTL EPC enjoys strong international linkages that help draw global expertise into projects.",
+    "start_offset": 0,
+    "end_offset": 91,
+    "doc_char_start": 5316,
+    "doc_char_end": 5407
+  },
+  {
+    "sentence_id": 56,
+    "paragraph_id": 37,
+    "page": 1,
+    "text": "The Company partnered overseas firms to access advanced engineering practices, project management capabilities, and cuttingedge technologies.",
+    "start_offset": 92,
+    "end_offset": 233,
+    "doc_char_start": 5408,
+    "doc_char_end": 5549
+  },
+  {
+    "sentence_id": 57,
+    "paragraph_id": 38,
+    "page": 1,
+    "text": "The Company's international collaborators comprise Far Eastern Power Engineering Plant, VUKhIN Russia, Dalenergomash, HBE Press, Dearborn Mid-West Conveyor Company and Consarc Engineering.",
+    "start_offset": 0,
+    "end_offset": 188,
+    "doc_char_start": 5551,
+    "doc_char_end": 5739
+  },
+  {
+    "sentence_id": 58,
+    "paragraph_id": 39,
+    "page": 1,
+    "text": "Our workforce",
+    "start_offset": 0,
+    "end_offset": 13,
+    "doc_char_start": 5741,
+    "doc_char_end": 5754
+  },
+  {
+    "sentence_id": 59,
+    "paragraph_id": 40,
+    "page": 1,
+    "text": "BTL EPC is driven by a skilled and experienced workforce across its manufacturing and EPC operations, making it a trusted player in the heavy engineering solutions sector.",
+    "start_offset": 0,
+    "end_offset": 171,
+    "doc_char_start": 5756,
+    "doc_char_end": 5927
+  },
+  {
+    "sentence_id": 60,
+    "paragraph_id": 40,
+    "page": 1,
+    "text": "The total employee strength stood at 720, with an average employee age of 31 years.",
+    "start_offset": 172,
+    "end_offset": 255,
+    "doc_char_start": 5928,
+    "doc_char_end": 6011
+  },
+  {
+    "sentence_id": 61,
+    "paragraph_id": 41,
+    "page": 1,
+    "text": "Our marquee clients",
+    "start_offset": 0,
+    "end_offset": 19,
+    "doc_char_start": 6013,
+    "doc_char_end": 6032
+  },
+  {
+    "sentence_id": 62,
+    "paragraph_id": 42,
+    "page": 1,
+    "text": "We are proud to serve India's leading public and private enterprises, powering the nation's growth across energy, infrastructure, mining, and manufacturing.",
+    "start_offset": 0,
+    "end_offset": 156,
+    "doc_char_start": 6034,
+    "doc_char_end": 6190
+  },
+  {
+    "sentence_id": 63,
+    "paragraph_id": 43,
+    "page": 1,
+    "text": "Bharat Heavy Electricals Limited: A Maharatna PSU, the Company is India's largest engineering and manufacturing company in the energy and infrastructure sectors with strong EPC capabilities.",
+    "start_offset": 0,
+    "end_offset": 190,
+    "doc_char_start": 6192,
+    "doc_char_end": 6382
+  },
+  {
+    "sentence_id": 64,
+    "paragraph_id": 43,
+    "page": 1,
+    "text": "It offers end-to-end services for power projects and is expanding into non-conventional energy and digital technologies.",
+    "start_offset": 191,
+    "end_offset": 311,
+    "doc_char_start": 6383,
+    "doc_char_end": 6503
+  },
+  {
+    "sentence_id": 65,
+    "paragraph_id": 44,
+    "page": 1,
+    "text": "National Thermal Power Corporation:",
+    "start_offset": 0,
+    "end_offset": 35,
+    "doc_char_start": 6505,
+    "doc_char_end": 6540
+  },
+  {
+    "sentence_id": 66,
+    "paragraph_id": 45,
+    "page": 1,
+    "text": "A Maharatna PSU under the Ministry of Power, the Company is India's largest power utility with a diverse portfolio of thermal, hydro, solar, and wind projects.",
+    "start_offset": 0,
+    "end_offset": 159,
+    "doc_char_start": 6542,
+    "doc_char_end": 6701
+  },
+  {
+    "sentence_id": 67,
+    "paragraph_id": 45,
+    "page": 1,
+    "text": "It is central to the country's energy supply and is targeting 60 GW of renewable capacity by 2032 as a part of its green transition commitment.",
+    "start_offset": 160,
+    "end_offset": 303,
+    "doc_char_start": 6702,
+    "doc_char_end": 6845
+  },
+  {
+    "sentence_id": 68,
+    "paragraph_id": 46,
+    "page": 1,
+    "text": "Adani Power Limited: APL is the largest private thermal power producer in India and a part of the Adani Group.",
+    "start_offset": 0,
+    "end_offset": 110,
+    "doc_char_start": 6847,
+    "doc_char_end": 6957
+  },
+  {
+    "sentence_id": 69,
+    "paragraph_id": 46,
+    "page": 1,
+    "text": "As of mid 2025, its operational capacity was around 15,250-17,550 MW, spread across thermal plants in Gujarat, Maharashtra, Karnataka, Rajasthan, Chhattisgarh, Madhya Pradesh, Jharkhand, and Tamil Nadu.",
+    "start_offset": 111,
+    "end_offset": 313,
+    "doc_char_start": 6958,
+    "doc_char_end": 7160
+  },
+  {
+    "sentence_id": 70,
+    "paragraph_id": 46,
+    "page": 1,
+    "text": "The Company intends to expand to 42,000 MW by 2032.",
+    "start_offset": 314,
+    "end_offset": 365,
+    "doc_char_start": 7161,
+    "doc_char_end": 7212
+  },
+  {
+    "sentence_id": 71,
+    "paragraph_id": 47,
+    "page": 1,
+    "text": "Coal India Limited: A Maharatna PSU under the Ministry of Coal, the Company is the world's largest coal producer, contributing over 80% of India's coal output.",
+    "start_offset": 0,
+    "end_offset": 159,
+    "doc_char_start": 7214,
+    "doc_char_end": 7373
+  },
+  {
+    "sentence_id": 72,
+    "paragraph_id": 47,
+    "page": 1,
+    "text": "Operating through eight subsidiaries, it plays a vital role in energy security, while advancing sustainable and digital mining practices.",
+    "start_offset": 160,
+    "end_offset": 297,
+    "doc_char_start": 7374,
+    "doc_char_end": 7511
+  },
+  {
+    "sentence_id": 73,
+    "paragraph_id": 48,
+    "page": 1,
+    "text": "Steel Authority of India Limited: A Maharatna PSU under the Ministry of Steel, the Company is one of India's largest steel producers with integrated plants across the country.",
+    "start_offset": 0,
+    "end_offset": 175,
+    "doc_char_start": 7513,
+    "doc_char_end": 7688
+  },
+  {
+    "sentence_id": 74,
+    "paragraph_id": 48,
+    "page": 1,
+    "text": "It plays a key role in sectors like infrastructure, defense, and railways, while focusing on modernisation and capacity growth.",
+    "start_offset": 176,
+    "end_offset": 303,
+    "doc_char_start": 7689,
+    "doc_char_end": 7816
+  },
+  {
+    "sentence_id": 75,
+    "paragraph_id": 49,
+    "page": 1,
+    "text": "Indian Oil Corporation Limited (IOCL): India's largest oil refining and marketing company, IOCL operates across the entire hydrocarbon value chain.",
+    "start_offset": 0,
+    "end_offset": 147,
+    "doc_char_start": 7818,
+    "doc_char_end": 7965
+  },
+  {
+    "sentence_id": 76,
+    "paragraph_id": 49,
+    "page": 1,
+    "text": "It plays a vital role in the nation's energy security, supplying fuel, lubricants, and petrochemicals.",
+    "start_offset": 148,
+    "end_offset": 250,
+    "doc_char_start": 7966,
+    "doc_char_end": 8068
+  },
+  {
+    "sentence_id": 77,
+    "paragraph_id": 50,
+    "page": 1,
+    "text": "Numaligarh Refinery Limited: A public sector refinery located in Assam, known for its eco-friendly operations.",
+    "start_offset": 0,
+    "end_offset": 110,
+    "doc_char_start": 8070,
+    "doc_char_end": 8180
+  },
+  {
+    "sentence_id": 78,
+    "paragraph_id": 50,
+    "page": 1,
+    "text": "It processes crude oil into high-value petroleum products for Northeast India and beyond.",
+    "start_offset": 111,
+    "end_offset": 200,
+    "doc_char_start": 8181,
+    "doc_char_end": 8270
+  },
+  {
+    "sentence_id": 79,
+    "paragraph_id": 51,
+    "page": 1,
+    "text": "Brahmaputra Cracker and Polymer Limited: A central PSU engaged in producing polymers from natural gas in Assam.",
+    "start_offset": 0,
+    "end_offset": 111,
+    "doc_char_start": 8272,
+    "doc_char_end": 8383
+  },
+  {
+    "sentence_id": 80,
+    "paragraph_id": 51,
+    "page": 1,
+    "text": "It operates a petrochemical complex in Lepetkata, providing a boost to the region's industrial development.",
+    "start_offset": 112,
+    "end_offset": 219,
+    "doc_char_start": 8384,
+    "doc_char_end": 8491
+  },
+  {
+    "sentence_id": 81,
+    "paragraph_id": 51,
+    "page": 1,
+    "text": "BCPL is a subsidiary of GAIL (India) Ltd.",
+    "start_offset": 220,
+    "end_offset": 261,
+    "doc_char_start": 8492,
+    "doc_char_end": 8533
+  },
+  {
+    "sentence_id": 82,
+    "paragraph_id": 52,
+    "page": 1,
+    "text": "Oil and Natural Gas Corporation Limited: India's largest oil and gas exploration and production company.",
+    "start_offset": 0,
+    "end_offset": 104,
+    "doc_char_start": 8535,
+    "doc_char_end": 8639
+  },
+  {
+    "sentence_id": 83,
+    "paragraph_id": 52,
+    "page": 1,
+    "text": "It plays a critical role in meeting the country's energy demands through offshore and onshore fields.",
+    "start_offset": 105,
+    "end_offset": 206,
+    "doc_char_start": 8640,
+    "doc_char_end": 8741
+  },
+  {
+    "sentence_id": 84,
+    "paragraph_id": 52,
+    "page": 1,
+    "text": "ONGC is actively involved in energy transition through renewable and alternate energy projects.",
+    "start_offset": 207,
+    "end_offset": 302,
+    "doc_char_start": 8742,
+    "doc_char_end": 8837
+  },
+  {
+    "sentence_id": 85,
+    "paragraph_id": 53,
+    "page": 1,
+    "text": "Neelachal Ispat Nigam Limited:",
+    "start_offset": 0,
+    "end_offset": 30,
+    "doc_char_start": 8839,
+    "doc_char_end": 8869
+  },
+  {
+    "sentence_id": 86,
+    "paragraph_id": 54,
+    "page": 1,
+    "text": "Under Tata Steel long products, the Company is being revived to enhance steel production.",
+    "start_offset": 0,
+    "end_offset": 89,
+    "doc_char_start": 8871,
+    "doc_char_end": 8960
+  },
+  {
+    "sentence_id": 87,
+    "paragraph_id": 54,
+    "page": 1,
+    "text": "Located in Odisha, it focuses on integrated steel manufacturing and raw material optimisation.",
+    "start_offset": 90,
+    "end_offset": 184,
+    "doc_char_start": 8961,
+    "doc_char_end": 9055
+  },
+  {
+    "sentence_id": 88,
+    "paragraph_id": 55,
+    "page": 1,
+    "text": "Krishak Bharati Cooperative Limited (KRIBHCO): A national-level Indian cooperative society founded in 1980 by the Government of India.",
+    "start_offset": 0,
+    "end_offset": 134,
+    "doc_char_start": 9057,
+    "doc_char_end": 9191
+  },
+  {
+    "sentence_id": 89,
+    "paragraph_id": 55,
+    "page": 1,
+    "text": "It is primarily engaged in the production and distribution of agricultural inputs, with a focus on fertilisers, and operates major production facilities in Hazira, and Shahjahanpur.",
+    "start_offset": 135,
+    "end_offset": 316,
+    "doc_char_start": 9192,
+    "doc_char_end": 9373
+  },
+  {
+    "sentence_id": 90,
+    "paragraph_id": 55,
+    "page": 1,
+    "text": "KRIBHCO aims to empower the farmer community by providing quality agricultural products.",
+    "start_offset": 317,
+    "end_offset": 405,
+    "doc_char_start": 9374,
+    "doc_char_end": 9462
+  },
+  {
+    "sentence_id": 91,
+    "paragraph_id": 56,
+    "page": 1,
+    "text": "Bhabha Atomic Research Centre: India's premier nuclear research facility under the department of atomic energy.",
+    "start_offset": 0,
+    "end_offset": 111,
+    "doc_char_start": 9464,
+    "doc_char_end": 9575
+  },
+  {
+    "sentence_id": 92,
+    "paragraph_id": 56,
+    "page": 1,
+    "text": "It pioneers research in nuclear science, reactors, and isotope technologies.",
+    "start_offset": 112,
+    "end_offset": 188,
+    "doc_char_start": 9576,
+    "doc_char_end": 9652
+  },
+  {
+    "sentence_id": 93,
+    "paragraph_id": 56,
+    "page": 1,
+    "text": "BARC also works in multidisciplinary areas like water treatment, agriculture, and healthcare.",
+    "start_offset": 189,
+    "end_offset": 282,
+    "doc_char_start": 9653,
+    "doc_char_end": 9746
+  },
+  {
+    "sentence_id": 94,
+    "paragraph_id": 57,
+    "page": 1,
+    "text": "Larsen & Toubro: Major Indian multinational in engineering, construction, and manufacturing.",
+    "start_offset": 0,
+    "end_offset": 92,
+    "doc_char_start": 9748,
+    "doc_char_end": 9840
+  },
+  {
+    "sentence_id": 95,
+    "paragraph_id": 57,
+    "page": 1,
+    "text": "It offers turnkey solutions across the infrastructure, power, defense, and hydrocarbons sectors.",
+    "start_offset": 93,
+    "end_offset": 189,
+    "doc_char_start": 9841,
+    "doc_char_end": 9937
+  },
+  {
+    "sentence_id": 96,
+    "paragraph_id": 57,
+    "page": 1,
+    "text": "Renowned for its execution strength, L&T is a trusted EPC partner for large-scale projects.",
+    "start_offset": 190,
+    "end_offset": 281,
+    "doc_char_start": 9938,
+    "doc_char_end": 10029
+  },
+  {
+    "sentence_id": 97,
+    "paragraph_id": 58,
+    "page": 1,
+    "text": "National Aluminium Company Limited (NALCO): A Navratna PSU under the Ministry of Mines, the Company is a leading producer of alumina and aluminum with integrated operations from mining to power generation.",
+    "start_offset": 0,
+    "end_offset": 205,
+    "doc_char_start": 10031,
+    "doc_char_end": 10236
+  },
+  {
+    "sentence_id": 98,
+    "paragraph_id": 58,
+    "page": 1,
+    "text": "It enjoys a strong export footprint and is committed to sustainability, renewable energy, and circular economy initiatives.",
+    "start_offset": 206,
+    "end_offset": 329,
+    "doc_char_start": 10237,
+    "doc_char_end": 10360
+  },
+  {
+    "sentence_id": 99,
+    "paragraph_id": 59,
+    "page": 1,
+    "text": "Damodar Valley Corporation Limited: Jointly owned by the Government of India and the States of Jharkhand and West Bengal, the Company is a key power utility in eastern India.",
+    "start_offset": 0,
+    "end_offset": 174,
+    "doc_char_start": 10362,
+    "doc_char_end": 10536
+  },
+  {
+    "sentence_id": 100,
+    "paragraph_id": 59,
+    "page": 1,
+    "text": "It operates thermal and hydel plants while supporting flood control, irrigation, and grid modernisation in the Damodar valley region.",
+    "start_offset": 175,
+    "end_offset": 308,
+    "doc_char_start": 10537,
+    "doc_char_end": 10670
+  },
+  {
+    "sentence_id": 101,
+    "paragraph_id": 60,
+    "page": 1,
+    "text": "Hindustan Urvarak and Rasayan Limited (HURL): A joint venture company of Coal India Limited, NTPC Limited and Indian Oil Corporation Limited as lead promoters with Fertiliser Corporation of India Limited and Hindustan Fertiliser Corporation Limited as other partners.",
+    "start_offset": 0,
+    "end_offset": 267,
+    "doc_char_start": 10672,
+    "doc_char_end": 10939
+  },
+  {
+    "sentence_id": 102,
+    "paragraph_id": 61,
+    "page": 1,
+    "text": "Talcher Fertilisers Limited: A joint venture company established to revive the closed Talcher plant in Odisha.",
+    "start_offset": 0,
+    "end_offset": 110,
+    "doc_char_start": 10941,
+    "doc_char_end": 11051
+  },
+  {
+    "sentence_id": 103,
+    "paragraph_id": 61,
+    "page": 1,
+    "text": "It is India's first coal gasification-based fertiliser project, aimed at producing urea while reducing a dependence on imported natural gas.",
+    "start_offset": 111,
+    "end_offset": 251,
+    "doc_char_start": 11052,
+    "doc_char_end": 11192
+  },
+  {
+    "sentence_id": 104,
+    "paragraph_id": 62,
+    "page": 1,
+    "text": "JMS Mining Private Limited: JMS Mining is among India's leading underground coal mining service providers.",
+    "start_offset": 0,
+    "end_offset": 106,
+    "doc_char_start": 11194,
+    "doc_char_end": 11300
+  },
+  {
+    "sentence_id": 105,
+    "paragraph_id": 62,
+    "page": 1,
+    "text": "The Company specialises in mine development and contract mining; it deployed of advanced technologies to ensure safe, efficient, and sustainable coal extraction.",
+    "start_offset": 107,
+    "end_offset": 268,
+    "doc_char_start": 11301,
+    "doc_char_end": 11462
+  },
+  {
+    "sentence_id": 106,
+    "paragraph_id": 63,
+    "page": 1,
+    "text": "Its operations play a crucial role in supporting the country's energy security.",
+    "start_offset": 0,
+    "end_offset": 79,
+    "doc_char_start": 11464,
+    "doc_char_end": 11543
+  },
+  {
+    "sentence_id": 107,
+    "paragraph_id": 64,
+    "page": 1,
+    "text": "Ordnance Factory, Ambajhari (OFAJ): Located in Nagpur, it is a major defense manufacturing facility.",
+    "start_offset": 0,
+    "end_offset": 100,
+    "doc_char_start": 11545,
+    "doc_char_end": 11645
+  },
+  {
+    "sentence_id": 108,
+    "paragraph_id": 64,
+    "page": 1,
+    "text": "Engaged in the production of ammunition, explosives, and ordnance equipment to support India's armed forces.",
+    "start_offset": 101,
+    "end_offset": 209,
+    "doc_char_start": 11646,
+    "doc_char_end": 11754
+  },
+  {
+    "sentence_id": 109,
+    "paragraph_id": 65,
+    "page": 1,
+    "text": "Power Transmission Corporation of Uttarakhand Limited (PTCUL):",
+    "start_offset": 0,
+    "end_offset": 62,
+    "doc_char_start": 11756,
+    "doc_char_end": 11818
+  },
+  {
+    "sentence_id": 110,
+    "paragraph_id": 66,
+    "page": 1,
+    "text": "A State-owned entity responsible for managing and strengthening the power transmission network in Uttarakhand.",
+    "start_offset": 0,
+    "end_offset": 110,
+    "doc_char_start": 11820,
+    "doc_char_end": 11930
+  },
+  {
+    "sentence_id": 111,
+    "paragraph_id": 66,
+    "page": 1,
+    "text": "It ensures reliable electricity supply across the state through the development, operation, and maintenance of high-voltage transmission systems.",
+    "start_offset": 111,
+    "end_offset": 256,
+    "doc_char_start": 11931,
+    "doc_char_end": 12076
+  },
+  {
+    "sentence_id": 112,
+    "paragraph_id": 66,
+    "page": 1,
+    "text": "The corporation plays a key role in integrating renewable energy projects into the State's grid.",
+    "start_offset": 257,
+    "end_offset": 353,
+    "doc_char_start": 12077,
+    "doc_char_end": 12173
+  },
+  {
+    "sentence_id": 113,
+    "paragraph_id": 67,
+    "page": 1,
+    "text": "Tata Steel Limited: A flagship company of the Tata Group, the Company is one of the world's largest steel producers with a strong global presence.",
+    "start_offset": 0,
+    "end_offset": 146,
+    "doc_char_start": 12175,
+    "doc_char_end": 12321
+  },
+  {
+    "sentence_id": 114,
+    "paragraph_id": 67,
+    "page": 1,
+    "text": "It has been a pioneer in adopting sustainable steel production practices and technological innovations.",
+    "start_offset": 147,
+    "end_offset": 250,
+    "doc_char_start": 12322,
+    "doc_char_end": 12425
+  },
+  {
+    "sentence_id": 115,
+    "paragraph_id": 68,
+    "page": 1,
+    "text": "Jharkhand Urban Infrastructure Development Company Limited (JUIDCO): JUIDCO is a governmentowned enterprise tasked with planning, developing, and implementing urban infrastructure projects in Jharkhand.",
+    "start_offset": 0,
+    "end_offset": 202,
+    "doc_char_start": 12427,
+    "doc_char_end": 12629
+  },
+  {
+    "sentence_id": 116,
+    "paragraph_id": 68,
+    "page": 1,
+    "text": "Its focus areas include water supply, sanitation, housing, and other essential civic amenities.",
+    "start_offset": 203,
+    "end_offset": 298,
+    "doc_char_start": 12630,
+    "doc_char_end": 12725
+  },
+  {
+    "sentence_id": 117,
+    "paragraph_id": 69,
+    "page": 1,
+    "text": "Indu Projects Limited (INDU): The Company is a diversified infrastructure and real estate company.",
+    "start_offset": 0,
+    "end_offset": 98,
+    "doc_char_start": 12727,
+    "doc_char_end": 12825
+  },
+  {
+    "sentence_id": 118,
+    "paragraph_id": 69,
+    "page": 1,
+    "text": "Its operations cover energy, power plants, coal mining, roads, railways, and property development.",
+    "start_offset": 99,
+    "end_offset": 197,
+    "doc_char_start": 12826,
+    "doc_char_end": 12924
+  },
+  {
+    "sentence_id": 119,
+    "paragraph_id": 69,
+    "page": 1,
+    "text": "The Company is known for delivering large projects across multiple sectors.",
+    "start_offset": 198,
+    "end_offset": 273,
+    "doc_char_start": 12925,
+    "doc_char_end": 13000
+  },
+  {
+    "sentence_id": 120,
+    "paragraph_id": 70,
+    "page": 1,
+    "text": "UltraTech Cement Limited: India's largest producer of grey cement, white cement, and ready-mix concrete.",
+    "start_offset": 0,
+    "end_offset": 104,
+    "doc_char_start": 13002,
+    "doc_char_end": 13106
+  },
+  {
+    "sentence_id": 121,
+    "paragraph_id": 70,
+    "page": 1,
+    "text": "It operates an extensive network of plants and terminals across India and overseas.",
+    "start_offset": 105,
+    "end_offset": 188,
+    "doc_char_start": 13107,
+    "doc_char_end": 13190
+  },
+  {
+    "sentence_id": 122,
+    "paragraph_id": 71,
+    "page": 1,
+    "text": "Our consultants",
+    "start_offset": 0,
+    "end_offset": 15,
+    "doc_char_start": 13192,
+    "doc_char_end": 13207
+  },
+  {
+    "sentence_id": 123,
+    "paragraph_id": 72,
+    "page": 1,
+    "text": "Engineers India Limited: A leading engineering consultancy and EPC firm under the Ministry of Petroleum and Natural Gas, specialising in refineries, petrochemicals, and infrastructure projects in India and abroad.",
+    "start_offset": 0,
+    "end_offset": 213,
+    "doc_char_start": 13209,
+    "doc_char_end": 13422
+  },
+  {
+    "sentence_id": 124,
+    "paragraph_id": 73,
+    "page": 1,
+    "text": "Thyssenkrupp: A German engineering company providing technology and EPC services in chemicals and mining, with a strong turnkey project presence in India.",
+    "start_offset": 0,
+    "end_offset": 154,
+    "doc_char_start": 13424,
+    "doc_char_end": 13578
+  },
+  {
+    "sentence_id": 125,
+    "paragraph_id": 74,
+    "page": 1,
+    "text": "Worley: A global EPC firm headquartered in Australia, delivering sustainable solutions in hydrocarbons, chemicals, and power, with Worley India driving major industrial and energy projects.",
+    "start_offset": 0,
+    "end_offset": 189,
+    "doc_char_start": 13580,
+    "doc_char_end": 13769
+  },
+  {
+    "sentence_id": 126,
+    "paragraph_id": 75,
+    "page": 1,
+    "text": "Mecon: A Government of India enterprise, that provides end-toend engineering and consultancy services across metals, power, oil & gas, and infrastructure sectors.",
+    "start_offset": 0,
+    "end_offset": 162,
+    "doc_char_start": 13771,
+    "doc_char_end": 13933
+  },
+  {
+    "sentence_id": 127,
+    "paragraph_id": 76,
+    "page": 1,
+    "text": "SAIL Centre for Engineering and Technology (CET): The in-house design and consultancy arm of SAIL, CET provides engineering, design, and project management services for steel plant modernisation, expansion, and external steel sector projects.",
+    "start_offset": 0,
+    "end_offset": 242,
+    "doc_char_start": 13935,
+    "doc_char_end": 14177
+  },
+  {
+    "sentence_id": 128,
+    "paragraph_id": 77,
+    "page": 1,
+    "text": "Technip: A global engineering leader in energy transition, offering FEED, EPC, and PMC services for refineries, petrochemicals, and hydrogen projects in India.",
+    "start_offset": 0,
+    "end_offset": 159,
+    "doc_char_start": 14179,
+    "doc_char_end": 14338
+  },
+  {
+    "sentence_id": 129,
+    "paragraph_id": 78,
+    "page": 1,
+    "text": "Toyo Engineering: A subsidiary of Japan's Toyo, providing EPC and consultancy services in hydrocarbons, chemicals, fertilisers, and infrastructure, combining Japanese quality with Indian execution.",
+    "start_offset": 0,
+    "end_offset": 197,
+    "doc_char_start": 14340,
+    "doc_char_end": 14537
+  },
+  {
+    "sentence_id": 130,
+    "paragraph_id": 79,
+    "page": 1,
+    "text": "Development Consultants Private Limited: A leading Indian engineering consultancy, that provides planning, design, and project management for power, steel, cement, and urban infrastructure projects.",
+    "start_offset": 0,
+    "end_offset": 198,
+    "doc_char_start": 14539,
+    "doc_char_end": 14737
+  },
+  {
+    "sentence_id": 131,
+    "paragraph_id": 80,
+    "page": 1,
+    "text": "Praj Industries: A process engineering company specialising in bioenergy, ethanol, and wastewater treatment, offering sustainable fuel and environmental solutions with a global focus on clean energy.",
+    "start_offset": 0,
+    "end_offset": 199,
+    "doc_char_start": 14739,
+    "doc_char_end": 14938
+  },
+  {
+    "sentence_id": 132,
+    "paragraph_id": 81,
+    "page": 1,
+    "text": "Projects and Development India Limited: A Government of India enterprise, that provides design, engineering, and consultancy services for fertiliser, chemical, and allied process industries, supporting domestic and international projects.",
+    "start_offset": 0,
+    "end_offset": 238,
+    "doc_char_start": 14940,
+    "doc_char_end": 15178
+  },
+  {
+    "sentence_id": 133,
+    "paragraph_id": 82,
+    "page": 1,
+    "text": "M N Dastur:",
+    "start_offset": 0,
+    "end_offset": 11,
+    "doc_char_start": 15180,
+    "doc_char_end": 15191
+  },
+  {
+    "sentence_id": 134,
+    "paragraph_id": 82,
+    "page": 1,
+    "text": "M N Dastur & Company (P) Ltd. is a leading engineering consultancy firm in India, specialising in metallurgical, power, and infrastructure sectors.",
+    "start_offset": 12,
+    "end_offset": 159,
+    "doc_char_start": 15192,
+    "doc_char_end": 15339
+  },
+  {
+    "sentence_id": 135,
+    "paragraph_id": 82,
+    "page": 1,
+    "text": "It provides end-to-end services in project planning, design, and implementation for steel plants and industrial projects globally",
+    "start_offset": 160,
+    "end_offset": 289,
+    "doc_char_start": 15340,
+    "doc_char_end": 15469
+  },
+  {
+    "sentence_id": 136,
+    "paragraph_id": 83,
+    "page": 1,
+    "text": "Fitchner: Fichtner India is a subsidiary of the German engineering and consultancy group Fichtner GmbH.",
+    "start_offset": 0,
+    "end_offset": 103,
+    "doc_char_start": 15471,
+    "doc_char_end": 15574
+  },
+  {
+    "sentence_id": 137,
+    "paragraph_id": 83,
+    "page": 1,
+    "text": "It offers comprehensive engineering, procurement, and project management services across power, renewable energy, water, and infrastructure sectors.",
+    "start_offset": 104,
+    "end_offset": 252,
+    "doc_char_start": 15575,
+    "doc_char_end": 15723
+  },
+  {
+    "sentence_id": 138,
+    "paragraph_id": 84,
+    "page": 1,
+    "text": "Steag: Steag is an engineering and project management firm known for providing consultancy and execution services in steel, power, and industrial projects.",
+    "start_offset": 0,
+    "end_offset": 155,
+    "doc_char_start": 15725,
+    "doc_char_end": 15880
+  },
+  {
+    "sentence_id": 139,
+    "paragraph_id": 84,
+    "page": 1,
+    "text": "The company focuses on delivering customised solutions from concept to commissioning.",
+    "start_offset": 156,
+    "end_offset": 241,
+    "doc_char_start": 15881,
+    "doc_char_end": 15966
+  },
+  {
+    "sentence_id": 140,
+    "paragraph_id": 85,
+    "page": 1,
+    "text": "Our certifications",
+    "start_offset": 0,
+    "end_offset": 18,
+    "doc_char_start": 15968,
+    "doc_char_end": 15986
+  },
+  {
+    "sentence_id": 141,
+    "paragraph_id": 86,
+    "page": 1,
+    "text": "Our businesses",
+    "start_offset": 0,
+    "end_offset": 14,
+    "doc_char_start": 15988,
+    "doc_char_end": 16002
+  },
+  {
+    "sentence_id": 142,
+    "paragraph_id": 87,
+    "page": 1,
+    "text": "The sectors where we are present represent attractive growth proxies of the world's fastest growing major economy.",
+    "start_offset": 0,
+    "end_offset": 114,
+    "doc_char_start": 16004,
+    "doc_char_end": 16118
+  },
+  {
+    "sentence_id": 143,
+    "paragraph_id": 88,
+    "page": 1,
+    "text": "Our business: Ash Handling Division",
+    "start_offset": 0,
+    "end_offset": 35,
+    "doc_char_start": 16120,
+    "doc_char_end": 16155
+  },
+  {
+    "sentence_id": 144,
+    "paragraph_id": 89,
+    "page": 1,
+    "text": "Overview",
+    "start_offset": 0,
+    "end_offset": 8,
+    "doc_char_start": 16157,
+    "doc_char_end": 16165
+  },
+  {
+    "sentence_id": 145,
+    "paragraph_id": 90,
+    "page": 1,
+    "text": "The ash handling division at BTL EPC Ltd. focuses on providing turnkey solution for the collection, transportation, and disposal of ash generated in coal-based thermal power plants.",
+    "start_offset": 0,
+    "end_offset": 181,
+    "doc_char_start": 16167,
+    "doc_char_end": 16348
+  },
+  {
+    "sentence_id": 146,
+    "paragraph_id": 90,
+    "page": 1,
+    "text": "As emission norms tighten and demand for efficient ash disposal systems grows, the division plays an increasingly important role in diversifying BTL 's project portfolio, strengthening its technical credentials and expanding its market presence across private and public sector opportunities.",
+    "start_offset": 182,
+    "end_offset": 474,
+    "doc_char_start": 16349,
+    "doc_char_end": 16641
+  },
+  {
+    "sentence_id": 147,
+    "paragraph_id": 90,
+    "page": 1,
+    "text": "Key projects include YADADRI - TSGENCO and Adani Power, Raigarh.",
+    "start_offset": 475,
+    "end_offset": 539,
+    "doc_char_start": 16642,
+    "doc_char_end": 16706
+  },
+  {
+    "sentence_id": 148,
+    "paragraph_id": 90,
+    "page": 1,
+    "text": "The Company anticipates a gradual improvement in margins over the coming years as experience and operational efficiencies grow.",
+    "start_offset": 540,
+    "end_offset": 667,
+    "doc_char_start": 16707,
+    "doc_char_end": 16834
+  },
+  {
+    "sentence_id": 149,
+    "paragraph_id": 90,
+    "page": 1,
+    "text": "The spares business where BTL EPC operates as an Original Equipment Manufacturer (OEM) offers higher margins of 20% to 30%.",
+    "start_offset": 668,
+    "end_offset": 791,
+    "doc_char_start": 16835,
+    "doc_char_end": 16958
+  },
+  {
+    "sentence_id": 150,
+    "paragraph_id": 91,
+    "page": 1,
+    "text": "Strengths",
+    "start_offset": 0,
+    "end_offset": 9,
+    "doc_char_start": 16960,
+    "doc_char_end": 16969
+  },
+  {
+    "sentence_id": 151,
+    "paragraph_id": 92,
+    "page": 1,
+    "text": "BTL EPC's presence in the ash handling segment is supported by key strengths:",
+    "start_offset": 0,
+    "end_offset": 77,
+    "doc_char_start": 16971,
+    "doc_char_end": 17048
+  },
+  {
+    "sentence_id": 152,
+    "paragraph_id": 93,
+    "page": 1,
+    "text": " Experienced engineers with a domain expertise in ash handling systems.",
+    "start_offset": 0,
+    "end_offset": 72,
+    "doc_char_start": 17050,
+    "doc_char_end": 17122
+  },
+  {
+    "sentence_id": 153,
+    "paragraph_id": 94,
+    "page": 1,
+    "text": " Robust in-house engineering and design capabilities.",
+    "start_offset": 0,
+    "end_offset": 54,
+    "doc_char_start": 17124,
+    "doc_char_end": 17178
+  },
+  {
+    "sentence_id": 154,
+    "paragraph_id": 95,
+    "page": 1,
+    "text": " Access to a network of reliable vendors.",
+    "start_offset": 0,
+    "end_offset": 42,
+    "doc_char_start": 17180,
+    "doc_char_end": 17222
+  },
+  {
+    "sentence_id": 155,
+    "paragraph_id": 96,
+    "page": 1,
+    "text": " In-house manufacturing facilities that ensure cost effectiveness and quality.",
+    "start_offset": 0,
+    "end_offset": 79,
+    "doc_char_start": 17224,
+    "doc_char_end": 17303
+  },
+  {
+    "sentence_id": 156,
+    "paragraph_id": 97,
+    "page": 1,
+    "text": "Policy",
+    "start_offset": 0,
+    "end_offset": 6,
+    "doc_char_start": 17305,
+    "doc_char_end": 17311
+  },
+  {
+    "sentence_id": 157,
+    "paragraph_id": 98,
+    "page": 1,
+    "text": "In alignment with national priorities, the government policies for the ash handling business aim to boost environmental sustainability and ensure effective fly ash disposal from coal and lignite-based thermal power plants (TPPs) in eco-friendly manner, enabling utilisation.",
+    "start_offset": 0,
+    "end_offset": 274,
+    "doc_char_start": 17313,
+    "doc_char_end": 17587
+  },
+  {
+    "sentence_id": 158,
+    "paragraph_id": 98,
+    "page": 1,
+    "text": "Key measures include mandating 100% fly ash utilisation over a three-year cycle, with at least 80% to be achieved annually; non-compliance attracts a penalty of H 1,000 per tonne.",
+    "start_offset": 275,
+    "end_offset": 454,
+    "doc_char_start": 17588,
+    "doc_char_end": 17767
+  },
+  {
+    "sentence_id": 159,
+    "paragraph_id": 98,
+    "page": 1,
+    "text": "The policy supports micro and small enterprises by requiring TPPs to reserve and supply fly ash to",
+    "start_offset": 455,
+    "end_offset": 553,
+    "doc_char_start": 17768,
+    "doc_char_end": 17866
+  },
+  {
+    "sentence_id": 160,
+    "paragraph_id": 99,
+    "page": 1,
+    "text": "Challenges and mitigations them at concessional rates or via limited auctions for use in manufacturing ashbased products.",
+    "start_offset": 0,
+    "end_offset": 121,
+    "doc_char_start": 17868,
+    "doc_char_end": 17989
+  },
+  {
+    "sentence_id": 161,
+    "paragraph_id": 100,
+    "page": 1,
+    "text": "Growth",
+    "start_offset": 0,
+    "end_offset": 6,
+    "doc_char_start": 17991,
+    "doc_char_end": 17997
+  },
+  {
+    "sentence_id": 162,
+    "paragraph_id": 101,
+    "page": 1,
+    "text": "The ash handling division at BTL EPC Ltd. demonstrated momentum in FY 2024-25, marked by a strategic breakthrough in the form of a H 185 Crore EPC order for Adani's Raigarh thermal power project (2X800 MW).",
+    "start_offset": 0,
+    "end_offset": 206,
+    "doc_char_start": 17999,
+    "doc_char_end": 18205
+  },
+  {
+    "sentence_id": 163,
+    "paragraph_id": 101,
+    "page": 1,
+    "text": "This order not only reinforces BTL 's credibility but also positions the Company to qualify independently for high-value tenders without technical collaborators.",
+    "start_offset": 207,
+    "end_offset": 368,
+    "doc_char_start": 18206,
+    "doc_char_end": 18367
+  },
+  {
+    "sentence_id": 164,
+    "paragraph_id": 102,
+    "page": 1,
+    "text": "Limited sector-specific experience:",
+    "start_offset": 0,
+    "end_offset": 35,
+    "doc_char_start": 18369,
+    "doc_char_end": 18404
+  },
+  {
+    "sentence_id": 165,
+    "paragraph_id": 103,
+    "page": 1,
+    "text": "Limited prior experience in ash handling made it difficult for BTL EPC to qualify independently for certain tenders.",
+    "start_offset": 0,
+    "end_offset": 116,
+    "doc_char_start": 18406,
+    "doc_char_end": 18522
+  },
+  {
+    "sentence_id": 166,
+    "paragraph_id": 104,
+    "page": 1,
+    "text": "Highlights, FY 2024-25",
+    "start_offset": 0,
+    "end_offset": 22,
+    "doc_char_start": 18524,
+    "doc_char_end": 18546
+  },
+  {
+    "sentence_id": 167,
+    "paragraph_id": 105,
+    "page": 1,
+    "text": " Engineering activities for the project are progressing satisfactorily.",
+    "start_offset": 0,
+    "end_offset": 72,
+    "doc_char_start": 18548,
+    "doc_char_end": 18620
+  },
+  {
+    "sentence_id": 168,
+    "paragraph_id": 106,
+    "page": 1,
+    "text": " Successful execution of this project is expected to strengthen BTL EPC's qualifications, empowering its participation in similar tenders without any collaboration.",
+    "start_offset": 0,
+    "end_offset": 165,
+    "doc_char_start": 18622,
+    "doc_char_end": 18787
+  },
+  {
+    "sentence_id": 169,
+    "paragraph_id": 107,
+    "page": 1,
+    "text": " Data-centric predictive analysis.",
+    "start_offset": 0,
+    "end_offset": 35,
+    "doc_char_start": 18789,
+    "doc_char_end": 18824
+  },
+  {
+    "sentence_id": 170,
+    "paragraph_id": 108,
+    "page": 1,
+    "text": " Currently executing 5X800 MW Thermal Power Station at Yadadri, Telengana and 2x800 MW thermal power station for Adani in Raigarh, Chhattisgarh.",
+    "start_offset": 0,
+    "end_offset": 145,
+    "doc_char_start": 18826,
+    "doc_char_end": 18971
+  },
+  {
+    "sentence_id": 171,
+    "paragraph_id": 109,
+    "page": 1,
+    "text": "Constraints in securing qualified collaboration partners: There is limited availability of qualified collaborator / consortium partners.",
+    "start_offset": 0,
+    "end_offset": 136,
+    "doc_char_start": 18973,
+    "doc_char_end": 19109
+  },
+  {
+    "sentence_id": 172,
+    "paragraph_id": 110,
+    "page": 1,
+    "text": "Mitigation: The Company undertook aggressive marketing to seek a relaxation in some pre-qualification criteria from clients and explore possibilities of tie-ups.",
+    "start_offset": 0,
+    "end_offset": 161,
+    "doc_char_start": 19111,
+    "doc_char_end": 19272
+  },
+  {
+    "sentence_id": 173,
+    "paragraph_id": 111,
+    "page": 1,
+    "text": "Mitigation: The Company collaborated with a world renowned ash handling company namely United Conveyor Corporation LLP ,USA.",
+    "start_offset": 0,
+    "end_offset": 124,
+    "doc_char_start": 19274,
+    "doc_char_end": 19398
+  },
+  {
+    "sentence_id": 174,
+    "paragraph_id": 112,
+    "page": 1,
+    "text": "Our business: Bulk Material Handling Division",
+    "start_offset": 0,
+    "end_offset": 45,
+    "doc_char_start": 19400,
+    "doc_char_end": 19445
+  },
+  {
+    "sentence_id": 175,
+    "paragraph_id": 113,
+    "page": 1,
+    "text": "Overview",
+    "start_offset": 0,
+    "end_offset": 8,
+    "doc_char_start": 19447,
+    "doc_char_end": 19455
+  },
+  {
+    "sentence_id": 176,
+    "paragraph_id": 114,
+    "page": 1,
+    "text": "Bulk Material Handling Systems",
+    "start_offset": 0,
+    "end_offset": 30,
+    "doc_char_start": 19457,
+    "doc_char_end": 19487
+  },
+  {
+    "sentence_id": 177,
+    "paragraph_id": 115,
+    "page": 1,
+    "text": "Key elements of Bulk Material Handling system",
+    "start_offset": 0,
+    "end_offset": 45,
+    "doc_char_start": 19489,
+    "doc_char_end": 19534
+  },
+  {
+    "sentence_id": 178,
+    "paragraph_id": 116,
+    "page": 1,
+    "text": "The Company entered in bulk material handling in the 1980s and provides turnkey solutions from design to commissioning for industries like steel, power, oil & gas, cement, mining, metallurgy and minerals.",
+    "start_offset": 0,
+    "end_offset": 204,
+    "doc_char_start": 19536,
+    "doc_char_end": 19740
+  },
+  {
+    "sentence_id": 179,
+    "paragraph_id": 116,
+    "page": 1,
+    "text": "Its offerings include conveyors, paddle feeders, hoists, and related equipment, delivering end-to-end systems for coal, iron ore, and other minerals, including conveying, crushing, and stacking for power, steel plants, fertilisers and process plant.",
+    "start_offset": 205,
+    "end_offset": 454,
+    "doc_char_start": 19741,
+    "doc_char_end": 19990
+  },
+  {
+    "sentence_id": 180,
+    "paragraph_id": 117,
+    "page": 1,
+    "text": "Projects",
+    "start_offset": 0,
+    "end_offset": 8,
+    "doc_char_start": 19992,
+    "doc_char_end": 20000
+  },
+  {
+    "sentence_id": 181,
+    "paragraph_id": 118,
+    "page": 1,
+    "text": " Coal handling plant, BIFPCL Bangaldesh Maitree",
+    "start_offset": 0,
+    "end_offset": 48,
+    "doc_char_start": 20002,
+    "doc_char_end": 20050
+  },
+  {
+    "sentence_id": 182,
+    "paragraph_id": 119,
+    "page": 1,
+    "text": " Raw material handling plant, SAILDSP, West Bengal",
+    "start_offset": 0,
+    "end_offset": 51,
+    "doc_char_start": 20052,
+    "doc_char_end": 20103
+  },
+  {
+    "sentence_id": 183,
+    "paragraph_id": 120,
+    "page": 1,
+    "text": " Pet coke handling system, IOCLParadip, Odisha",
+    "start_offset": 0,
+    "end_offset": 47,
+    "doc_char_start": 20105,
+    "doc_char_end": 20152
+  },
+  {
+    "sentence_id": 184,
+    "paragraph_id": 121,
+    "page": 1,
+    "text": " EPC for urea bag handling and wagon loading system, HURLSindri, Jharkhand and Barauni, Bihar",
+    "start_offset": 0,
+    "end_offset": 94,
+    "doc_char_start": 20154,
+    "doc_char_end": 20248
+  },
+  {
+    "sentence_id": 185,
+    "paragraph_id": 122,
+    "page": 1,
+    "text": " Coal handling plant and Wagon tippler package NBPPL 1X500 MW Unchahar, Uttar Pradesh",
+    "start_offset": 0,
+    "end_offset": 86,
+    "doc_char_start": 20250,
+    "doc_char_end": 20336
+  },
+  {
+    "sentence_id": 186,
+    "paragraph_id": 123,
+    "page": 1,
+    "text": " Conveying equipment: Belt conveyors, screw conveyors, pipe conveyor.",
+    "start_offset": 0,
+    "end_offset": 70,
+    "doc_char_start": 20338,
+    "doc_char_end": 20408
+  },
+  {
+    "sentence_id": 187,
+    "paragraph_id": 124,
+    "page": 1,
+    "text": " Storage solutions: Silos, hoppers, stockyards.",
+    "start_offset": 0,
+    "end_offset": 48,
+    "doc_char_start": 20410,
+    "doc_char_end": 20458
+  },
+  {
+    "sentence_id": 188,
+    "paragraph_id": 125,
+    "page": 1,
+    "text": " Feeding and discharge equipment: Feeders, stackers, reclaimers, ship loaders/unloaders.",
+    "start_offset": 0,
+    "end_offset": 89,
+    "doc_char_start": 20460,
+    "doc_char_end": 20549
+  },
+  {
+    "sentence_id": 189,
+    "paragraph_id": 126,
+    "page": 1,
+    "text": " Auxiliary systems: Dust suppression, weighing, sampling, and automation.",
+    "start_offset": 0,
+    "end_offset": 74,
+    "doc_char_start": 20551,
+    "doc_char_end": 20625
+  },
+  {
+    "sentence_id": 190,
+    "paragraph_id": 127,
+    "page": 1,
+    "text": " Coal handling plant, Ennore SEZ, Tamil Nadu",
+    "start_offset": 0,
+    "end_offset": 45,
+    "doc_char_start": 20627,
+    "doc_char_end": 20672
+  },
+  {
+    "sentence_id": 191,
+    "paragraph_id": 128,
+    "page": 1,
+    "text": " Coal handling plant, Sagardighi, WBPDCL (A/C BHEL), West Bengal",
+    "start_offset": 0,
+    "end_offset": 65,
+    "doc_char_start": 20674,
+    "doc_char_end": 20739
+  },
+  {
+    "sentence_id": 192,
+    "paragraph_id": 129,
+    "page": 1,
+    "text": " Urea handling and bagging package from Talcher Fertilisers Ltd., Odisha",
+    "start_offset": 0,
+    "end_offset": 73,
+    "doc_char_start": 20741,
+    "doc_char_end": 20814
+  },
+  {
+    "sentence_id": 193,
+    "paragraph_id": 130,
+    "page": 1,
+    "text": " Udangudi main CHP Conveyor Package, Tamil Nadu",
+    "start_offset": 0,
+    "end_offset": 48,
+    "doc_char_start": 20816,
+    "doc_char_end": 20864
+  },
+  {
+    "sentence_id": 194,
+    "paragraph_id": 131,
+    "page": 1,
+    "text": " Main conveyor package (CHP, LHP and GHP), Talcher TPP , Stage-III, Odisha",
+    "start_offset": 0,
+    "end_offset": 75,
+    "doc_char_start": 20866,
+    "doc_char_end": 20941
+  },
+  {
+    "sentence_id": 195,
+    "paragraph_id": 132,
+    "page": 1,
+    "text": " Coal handling plant of NTPC Lara, Chhattisgarh",
+    "start_offset": 0,
+    "end_offset": 48,
+    "doc_char_start": 20943,
+    "doc_char_end": 20991
+  },
+  {
+    "sentence_id": 196,
+    "paragraph_id": 133,
+    "page": 1,
+    "text": "Bulk Material Handling systems are widely used in:",
+    "start_offset": 0,
+    "end_offset": 50,
+    "doc_char_start": 20993,
+    "doc_char_end": 21043
+  },
+  {
+    "sentence_id": 197,
+    "paragraph_id": 134,
+    "page": 1,
+    "text": " Mining and minerals: Handling of iron ore, bauxite, limestone, coal, etc.",
+    "start_offset": 0,
+    "end_offset": 75,
+    "doc_char_start": 21045,
+    "doc_char_end": 21120
+  },
+  {
+    "sentence_id": 198,
+    "paragraph_id": 135,
+    "page": 1,
+    "text": " Power plants: Coal handling systems for thermal power stations.",
+    "start_offset": 0,
+    "end_offset": 65,
+    "doc_char_start": 21122,
+    "doc_char_end": 21187
+  },
+  {
+    "sentence_id": 199,
+    "paragraph_id": 136,
+    "page": 1,
+    "text": " Steel : Raw material handling systems, slag handling system.",
+    "start_offset": 0,
+    "end_offset": 62,
+    "doc_char_start": 21189,
+    "doc_char_end": 21251
+  },
+  {
+    "sentence_id": 200,
+    "paragraph_id": 137,
+    "page": 1,
+    "text": " Ports and terminals: Ship loading/ unloading of coal, fertiliser, grain, etc.",
+    "start_offset": 0,
+    "end_offset": 79,
+    "doc_char_start": 21253,
+    "doc_char_end": 21332
+  },
+  {
+    "sentence_id": 201,
+    "paragraph_id": 138,
+    "page": 1,
+    "text": " Fertiliser : Urea baggage handling.",
+    "start_offset": 0,
+    "end_offset": 37,
+    "doc_char_start": 21334,
+    "doc_char_end": 21371
+  },
+  {
+    "sentence_id": 202,
+    "paragraph_id": 139,
+    "page": 1,
+    "text": "Project milestones",
+    "start_offset": 0,
+    "end_offset": 18,
+    "doc_char_start": 21373,
+    "doc_char_end": 21391
+  },
+  {
+    "sentence_id": 203,
+    "paragraph_id": 140,
+    "page": 1,
+    "text": " Total 45+ projects completed valued around 1500 Crore+",
+    "start_offset": 0,
+    "end_offset": 56,
+    "doc_char_start": 21393,
+    "doc_char_end": 21449
+  },
+  {
+    "sentence_id": 204,
+    "paragraph_id": 141,
+    "page": 1,
+    "text": " Total 20+ projects Ongoing valued around 4500 Crore+",
+    "start_offset": 0,
+    "end_offset": 54,
+    "doc_char_start": 21451,
+    "doc_char_end": 21505
+  },
+  {
+    "sentence_id": 205,
+    "paragraph_id": 142,
+    "page": 1,
+    "text": " AHP and CHP, Adani Raigarh, Chhattisgarh",
+    "start_offset": 0,
+    "end_offset": 42,
+    "doc_char_start": 21507,
+    "doc_char_end": 21549
+  },
+  {
+    "sentence_id": 206,
+    "paragraph_id": 143,
+    "page": 1,
+    "text": " Coal handling, Lime Stone and Gypsum Handling Plant, Yadadri 5x800MW power plant, TSGENCO, Telengana",
+    "start_offset": 0,
+    "end_offset": 102,
+    "doc_char_start": 21551,
+    "doc_char_end": 21653
+  },
+  {
+    "sentence_id": 207,
+    "paragraph_id": 144,
+    "page": 1,
+    "text": " Ash handling plant package from BHEL, Yadadri, Telengana",
+    "start_offset": 0,
+    "end_offset": 58,
+    "doc_char_start": 21655,
+    "doc_char_end": 21713
+  },
+  {
+    "sentence_id": 208,
+    "paragraph_id": 145,
+    "page": 1,
+    "text": " Coal handling plant, NTPC Pakri, Bihar",
+    "start_offset": 0,
+    "end_offset": 40,
+    "doc_char_start": 21715,
+    "doc_char_end": 21755
+  },
+  {
+    "sentence_id": 209,
+    "paragraph_id": 146,
+    "page": 1,
+    "text": " Coal handling plant, NTPC Talaipalli, Chhattisgarh",
+    "start_offset": 0,
+    "end_offset": 52,
+    "doc_char_start": 21757,
+    "doc_char_end": 21809
+  },
+  {
+    "sentence_id": 210,
+    "paragraph_id": 147,
+    "page": 1,
+    "text": " Coal handling plant, NTPC Sipat, Chhattisgarh",
+    "start_offset": 0,
+    "end_offset": 47,
+    "doc_char_start": 21811,
+    "doc_char_end": 21858
+  },
+  {
+    "sentence_id": 211,
+    "paragraph_id": 148,
+    "page": 1,
+    "text": "We have demonstrated a commitment to embrace challenging projects and outperform",
+    "start_offset": 0,
+    "end_offset": 80,
+    "doc_char_start": 21860,
+    "doc_char_end": 21940
+  },
+  {
+    "sentence_id": 212,
+    "paragraph_id": 149,
+    "page": 1,
+    "text": "The challenging NTPC-Pakri project Reality: This was BTL EPC's first direct large order from NTPC worth H 268 Crore.",
+    "start_offset": 0,
+    "end_offset": 116,
+    "doc_char_start": 21942,
+    "doc_char_end": 22058
+  },
+  {
+    "sentence_id": 213,
+    "paragraph_id": 149,
+    "page": 1,
+    "text": "The location of the project was marked by law-and-order issues and political sensitivities.",
+    "start_offset": 117,
+    "end_offset": 208,
+    "doc_char_start": 22059,
+    "doc_char_end": 22150
+  },
+  {
+    "sentence_id": 214,
+    "paragraph_id": 149,
+    "page": 1,
+    "text": "The project posed operational and logistical challenges on account of extensive civil works, structural steel fabrication, and complex mechanical, electrical, control cum instrumentation and utility systems integration.",
+    "start_offset": 209,
+    "end_offset": 428,
+    "doc_char_start": 22151,
+    "doc_char_end": 22370
+  },
+  {
+    "sentence_id": 215,
+    "paragraph_id": 150,
+    "page": 1,
+    "text": "The BHEL-Maitree project Reality: The BHEL-Maitree Project comprises a coal handling system for the 2x660 MW at Rampal in Khulna, Bangladesh, owned by BangladeshIndia Friendship Power Company Ltd.",
+    "start_offset": 0,
+    "end_offset": 196,
+    "doc_char_start": 22372,
+    "doc_char_end": 22568
+  },
+  {
+    "sentence_id": 216,
+    "paragraph_id": 150,
+    "page": 1,
+    "text": "This was BTL EPC's first EPC project outside India, a milestone.",
+    "start_offset": 197,
+    "end_offset": 261,
+    "doc_char_start": 22569,
+    "doc_char_end": 22633
+  },
+  {
+    "sentence_id": 217,
+    "paragraph_id": 150,
+    "page": 1,
+    "text": "The project encountered challenges due to international statutory compliances, Activity: BTL EPC aggregated a strong team.",
+    "start_offset": 262,
+    "end_offset": 384,
+    "doc_char_start": 22634,
+    "doc_char_end": 22756
+  },
+  {
+    "sentence_id": 218,
+    "paragraph_id": 150,
+    "page": 1,
+    "text": "The team charted out sequential processes.",
+    "start_offset": 385,
+    "end_offset": 427,
+    "doc_char_start": 22757,
+    "doc_char_end": 22799
+  },
+  {
+    "sentence_id": 219,
+    "paragraph_id": 150,
+    "page": 1,
+    "text": "The project comprised the design and execution of the mechanical transport and loading arrangement from TP-10 (existing NTPC facility) to Banadag railway siding.",
+    "start_offset": 428,
+    "end_offset": 589,
+    "doc_char_start": 22800,
+    "doc_char_end": 22961
+  },
+  {
+    "sentence_id": 220,
+    "paragraph_id": 150,
+    "page": 1,
+    "text": "BTL EPC conducted end-toend EPC activities (civil construction, structural fabrication, mechanical and electrical systems, equipment erection, cabling, instrumentation, and commissioning).",
+    "start_offset": 590,
+    "end_offset": 778,
+    "doc_char_start": 22962,
+    "doc_char_end": 23150
+  },
+  {
+    "sentence_id": 221,
+    "paragraph_id": 151,
+    "page": 1,
+    "text": "Overcome: BTL EPC ensured milestoned progress through effective site management and ongoing stakeholder engagement.",
+    "start_offset": 0,
+    "end_offset": 115,
+    "doc_char_start": 23152,
+    "doc_char_end": 23267
+  },
+  {
+    "sentence_id": 222,
+    "paragraph_id": 151,
+    "page": 1,
+    "text": "The project was completed successfully without any delay.",
+    "start_offset": 116,
+    "end_offset": 173,
+    "doc_char_start": 23268,
+    "doc_char_end": 23325
+  },
+  {
+    "sentence_id": 223,
+    "paragraph_id": 151,
+    "page": 1,
+    "text": "NTPC appreciated BTL EPC's performance, positioning the latter as a preferred EPC partner.",
+    "start_offset": 174,
+    "end_offset": 264,
+    "doc_char_start": 23326,
+    "doc_char_end": 23416
+  },
+  {
+    "sentence_id": 224,
+    "paragraph_id": 152,
+    "page": 1,
+    "text": "political instability, and related delays that translated into cost overruns.",
+    "start_offset": 0,
+    "end_offset": 77,
+    "doc_char_start": 23418,
+    "doc_char_end": 23495
+  },
+  {
+    "sentence_id": 225,
+    "paragraph_id": 153,
+    "page": 1,
+    "text": "Activity: BTL EPC was awarded the project by BHEL-ISG to execute mechanical, electrical, control instrumentation, and auxiliary utility systems.",
+    "start_offset": 0,
+    "end_offset": 144,
+    "doc_char_start": 23497,
+    "doc_char_end": 23641
+  },
+  {
+    "sentence_id": 226,
+    "paragraph_id": 153,
+    "page": 1,
+    "text": "The scope involved fullscale EPC execution in a cross-border setting, requiring detailed coordination with foreign stakeholders and regulatory bodies.",
+    "start_offset": 145,
+    "end_offset": 295,
+    "doc_char_start": 23642,
+    "doc_char_end": 23792
+  },
+  {
+    "sentence_id": 227,
+    "paragraph_id": 153,
+    "page": 1,
+    "text": "BTL EPC ensured compliance, design integrity, and implementation standards in line with BHEL and BIFPCL requirements.",
+    "start_offset": 296,
+    "end_offset": 413,
+    "doc_char_start": 23793,
+    "doc_char_end": 23910
+  },
+  {
+    "sentence_id": 228,
+    "paragraph_id": 154,
+    "page": 1,
+    "text": "Overcome: Despite statutory hurdles, political unrest, as well as time and cost overruns, BTL EPC completed the project.",
+    "start_offset": 0,
+    "end_offset": 120,
+    "doc_char_start": 23912,
+    "doc_char_end": 24032
+  },
+  {
+    "sentence_id": 229,
+    "paragraph_id": 154,
+    "page": 1,
+    "text": "The plant has been in commercial operation for over two years.",
+    "start_offset": 121,
+    "end_offset": 183,
+    "doc_char_start": 24033,
+    "doc_char_end": 24095
+  },
+  {
+    "sentence_id": 230,
+    "paragraph_id": 154,
+    "page": 1,
+    "text": "The project established BTL EPC credentials as a capable regional EPC contractor, extending its footprint beyond India.",
+    "start_offset": 184,
+    "end_offset": 303,
+    "doc_char_start": 24096,
+    "doc_char_end": 24215
+  },
+  {
+    "sentence_id": 231,
+    "paragraph_id": 155,
+    "page": 1,
+    "text": "Adani-Raigarh CHP and AHP projects",
+    "start_offset": 0,
+    "end_offset": 34,
+    "doc_char_start": 24217,
+    "doc_char_end": 24251
+  },
+  {
+    "sentence_id": 232,
+    "paragraph_id": 156,
+    "page": 1,
+    "text": "Reality: BTL EPC was awarded the coal handling plant and ash handling plant contracts by Adani Power, its first major engagement with a private sector power giant.",
+    "start_offset": 0,
+    "end_offset": 163,
+    "doc_char_start": 24253,
+    "doc_char_end": 24416
+  },
+  {
+    "sentence_id": 233,
+    "paragraph_id": 156,
+    "page": 1,
+    "text": "This project signified a strategic policy shift for BTL EPC from working exclusively with PSUs to engaging with private players.",
+    "start_offset": 164,
+    "end_offset": 292,
+    "doc_char_start": 24417,
+    "doc_char_end": 24545
+  },
+  {
+    "sentence_id": 234,
+    "paragraph_id": 157,
+    "page": 1,
+    "text": "Activity: The scope included complete EPC execution of coal handling and ash handling plants systems, including structural, civil, mechanical and electrical.",
+    "start_offset": 0,
+    "end_offset": 157,
+    "doc_char_start": 24547,
+    "doc_char_end": 24704
+  },
+  {
+    "sentence_id": 235,
+    "paragraph_id": 157,
+    "page": 1,
+    "text": "BTL EPC achieved full structural and civil design-engineering for both projects within the first five months.",
+    "start_offset": 158,
+    "end_offset": 267,
+    "doc_char_start": 24705,
+    "doc_char_end": 24814
+  },
+  {
+    "sentence_id": 236,
+    "paragraph_id": 157,
+    "page": 1,
+    "text": "This rapid design progress set the tone for streamlined project execution.",
+    "start_offset": 268,
+    "end_offset": 342,
+    "doc_char_start": 24815,
+    "doc_char_end": 24889
+  },
+  {
+    "sentence_id": 237,
+    "paragraph_id": 158,
+    "page": 1,
+    "text": "Overcome: BTL EPC overcame the typical bottlenecks of delayed design and sluggish project commencement common in Indian EPC projects by accelerating the engineering phase.",
+    "start_offset": 0,
+    "end_offset": 171,
+    "doc_char_start": 24891,
+    "doc_char_end": 25062
+  },
+  {
+    "sentence_id": 238,
+    "paragraph_id": 158,
+    "page": 1,
+    "text": "This helped establish a robust execution momentum; and both projects are progressing at full pace.",
+    "start_offset": 172,
+    "end_offset": 270,
+    "doc_char_start": 25063,
+    "doc_char_end": 25161
+  },
+  {
+    "sentence_id": 239,
+    "paragraph_id": 158,
+    "page": 1,
+    "text": "The project highlights BTL EPC's adaptability and capability in fastpaced private sector projects.",
+    "start_offset": 271,
+    "end_offset": 369,
+    "doc_char_start": 25162,
+    "doc_char_end": 25260
+  },
+  {
+    "sentence_id": 240,
+    "paragraph_id": 159,
+    "page": 1,
+    "text": "Our business: Coal Chemical Division",
+    "start_offset": 0,
+    "end_offset": 36,
+    "doc_char_start": 25262,
+    "doc_char_end": 25298
+  },
+  {
+    "sentence_id": 241,
+    "paragraph_id": 160,
+    "page": 1,
+    "text": "Overview",
+    "start_offset": 0,
+    "end_offset": 8,
+    "doc_char_start": 25300,
+    "doc_char_end": 25308
+  },
+  {
+    "sentence_id": 242,
+    "paragraph_id": 161,
+    "page": 1,
+    "text": "The Company delivers turnkey coal chemical handling solutions, including coal blending, feeding, and specialised chemical plant units.",
+    "start_offset": 0,
+    "end_offset": 134,
+    "doc_char_start": 25310,
+    "doc_char_end": 25444
+  },
+  {
+    "sentence_id": 243,
+    "paragraph_id": 161,
+    "page": 1,
+    "text": "It offers EPC services and key components for coke oven by-product recovery, managing materials like coal tar, ammonium sulfate and benzol, and supports chemical processing with equipment such as agitator tanks, distillation columns, condensate tanks, decanters, storage tanks and pressure vessels.",
+    "start_offset": 135,
+    "end_offset": 433,
+    "doc_char_start": 25445,
+    "doc_char_end": 25743
+  },
+  {
+    "sentence_id": 244,
+    "paragraph_id": 162,
+    "page": 1,
+    "text": "The Coal Chemical Division (CCD) is a critical auxiliary unit of an integrated steel plant, primarily associated with the operation of coke ovens.",
+    "start_offset": 0,
+    "end_offset": 146,
+    "doc_char_start": 25745,
+    "doc_char_end": 25891
+  },
+  {
+    "sentence_id": 245,
+    "paragraph_id": 162,
+    "page": 1,
+    "text": "During the carbonisation of metallurgical coal in coke oven batteries, various volatile compounds are released along with raw coke oven gas (COG).",
+    "start_offset": 147,
+    "end_offset": 293,
+    "doc_char_start": 25892,
+    "doc_char_end": 26038
+  },
+  {
+    "sentence_id": 246,
+    "paragraph_id": 162,
+    "page": 1,
+    "text": "The role of the Coal Chemical Division is to recover, process, and utilise these coal chemicals while purifying coke oven gas for efficient and clean use across the plant.",
+    "start_offset": 294,
+    "end_offset": 465,
+    "doc_char_start": 26039,
+    "doc_char_end": 26210
+  },
+  {
+    "sentence_id": 247,
+    "paragraph_id": 163,
+    "page": 1,
+    "text": "Core functions of Coal Chemical Division",
+    "start_offset": 0,
+    "end_offset": 40,
+    "doc_char_start": 26212,
+    "doc_char_end": 26252
+  },
+  {
+    "sentence_id": 248,
+    "paragraph_id": 164,
+    "page": 1,
+    "text": " Coke oven gas treatment: Cooling, cleaning, and purifying COG.",
+    "start_offset": 0,
+    "end_offset": 64,
+    "doc_char_start": 26254,
+    "doc_char_end": 26318
+  },
+  {
+    "sentence_id": 249,
+    "paragraph_id": 165,
+    "page": 1,
+    "text": "Projects",
+    "start_offset": 0,
+    "end_offset": 8,
+    "doc_char_start": 26320,
+    "doc_char_end": 26328
+  },
+  {
+    "sentence_id": 250,
+    "paragraph_id": 166,
+    "page": 1,
+    "text": "Benzol absorption and Distillation plant at SAIL-DSP, West Bengal Ammonium sulphate plant at SAIL Bokaro, Jharkhand and Vizag Steel, Andhra Pradesh Byproduct plant at SAIL-Bhilai, Chhattisgarh Electric exhauster at SAIL Bokaro, Jharkhand De-nitration plant at HWB BARC, Chennai, Tamil Nadu",
+    "start_offset": 0,
+    "end_offset": 289,
+    "doc_char_start": 26330,
+    "doc_char_end": 26619
+  },
+  {
+    "sentence_id": 251,
+    "paragraph_id": 167,
+    "page": 1,
+    "text": " By-product recovery: Extraction of tar, ammonia, benzol, and other chemicals.",
+    "start_offset": 0,
+    "end_offset": 79,
+    "doc_char_start": 26621,
+    "doc_char_end": 26700
+  },
+  {
+    "sentence_id": 252,
+    "paragraph_id": 168,
+    "page": 1,
+    "text": " Utility supply: Providing clean gas as fuel to coke ovens, rolling mills, furnaces, and power plants.",
+    "start_offset": 0,
+    "end_offset": 103,
+    "doc_char_start": 26702,
+    "doc_char_end": 26805
+  },
+  {
+    "sentence_id": 253,
+    "paragraph_id": 169,
+    "page": 1,
+    "text": "Project milestones",
+    "start_offset": 0,
+    "end_offset": 18,
+    "doc_char_start": 26807,
+    "doc_char_end": 26825
+  },
+  {
+    "sentence_id": 254,
+    "paragraph_id": 170,
+    "page": 1,
+    "text": " Total 10+ projects completed valued around 500 Cr+",
+    "start_offset": 0,
+    "end_offset": 52,
+    "doc_char_start": 26827,
+    "doc_char_end": 26879
+  },
+  {
+    "sentence_id": 255,
+    "paragraph_id": 171,
+    "page": 1,
+    "text": " Total 5+ projects Ongoing valued around 200 Cr+",
+    "start_offset": 0,
+    "end_offset": 49,
+    "doc_char_start": 26881,
+    "doc_char_end": 26930
+  }
+]

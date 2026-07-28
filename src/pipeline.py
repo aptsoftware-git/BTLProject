@@ -119,13 +119,13 @@ class ProofreadingPipeline:
         for path in stage_dirs.values():
             path.mkdir(parents=True, exist_ok=True)
 
-        log_file = stage_dirs["logs"] / "pipeline.log"
-        self.logger = get_logger("pipeline", log_file=log_file)
-
         # SHA-256 Cache Check (Requirement 1 & Primary Objective)
         doc_hash = compute_file_hash(input_path)
         cache_mgr = DocumentCacheManager(doc_hash, input_path.name)
         cache_mgr.sync_to_job_dir(run_dir)
+
+        log_file = stage_dirs["logs"] / "pipeline.log"
+        self.logger = get_logger("pipeline", log_file=log_file)
 
         proof_report_file = stage_dirs["10_final"] / "report.json"
         if proof_report_file.exists() and proof_report_file.stat().st_size > 0:

@@ -1,0 +1,35 @@
+{
+  "image_id": "#/pictures/25",
+  "page": 7,
+  "caption": null,
+  "ocr_text": null,
+  "bounding_box": {
+    "l": 41.19258117675781,
+    "t": 281.2039794921875,
+    "r": 285.0149841308594,
+    "b": 84.73883056640625,
+    "coord_origin": "BOTTOMLEFT"
+  },
+  "image_path": "05_images/image_026.png",
+  "image_type": "Photo",
+  "objects": [
+    "Electrical components",
+    "Gears",
+    "Metal frame",
+    "Motor",
+    "Roller or conveyor belt"
+  ],
+  "keywords": [
+    "Industrial",
+    "conveyor",
+    "gears",
+    "machinery",
+    "metal frame",
+    "motor",
+    "roller"
+  ],
+  "semantic_description": "The image shows a mechanical device, likely part of industrial equipment, possibly a conveyor or a roller system used in processing or material handling. The device appears to be mounted on a metal frame, and there are visible mechanical components such as gears and a motor.",
+  "detected_entities": [
+    "None"
+  ]
+}

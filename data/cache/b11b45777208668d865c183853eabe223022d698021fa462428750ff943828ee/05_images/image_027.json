@@ -1,0 +1,36 @@
+{
+  "image_id": "#/pictures/26",
+  "page": 7,
+  "caption": null,
+  "ocr_text": null,
+  "bounding_box": {
+    "l": 299.4732666015625,
+    "t": 520.4628601074219,
+    "r": 541.9030151367188,
+    "b": 324.26214599609375,
+    "coord_origin": "BOTTOMLEFT"
+  },
+  "image_path": "05_images/image_027.png",
+  "image_type": "Photo",
+  "objects": [
+    "Large concrete silos",
+    "blue-topped structures",
+    "dirt ground",
+    "equipment.",
+    "smaller structures"
+  ],
+  "keywords": [
+    "Industrial",
+    "blue",
+    "concrete",
+    "equipment.",
+    "ground",
+    "processing",
+    "silos",
+    "storage"
+  ],
+  "semantic_description": "The image depicts an industrial setting, likely a storage or processing facility, featuring large concrete silos with blue tops. The area appears to be an open space with a dirt ground, and there are some smaller structures and equipment visible in the background.",
+  "detected_entities": [
+    "None"
+  ]
+}

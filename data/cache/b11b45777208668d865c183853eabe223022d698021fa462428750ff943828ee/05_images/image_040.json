@@ -1,0 +1,35 @@
+{
+  "image_id": "#/pictures/39",
+  "page": 9,
+  "caption": null,
+  "ocr_text": null,
+  "bounding_box": {
+    "l": 647.751953125,
+    "t": 385.6936340332031,
+    "r": 977.8464965820312,
+    "b": 184.17022705078125,
+    "coord_origin": "BOTTOMLEFT"
+  },
+  "image_path": "05_images/image_040.png",
+  "image_type": "Photo",
+  "objects": [
+    "Blue-topped industrial buildings",
+    "Large cylindrical structures (possibly cooling towers or storage tanks)",
+    "Open sky with some clouds",
+    "Text overlay with OCR information"
+  ],
+  "keywords": [
+    "BHEL",
+    "Blue-tops",
+    "Industrial",
+    "Mattrie project",
+    "Power plant",
+    "Structures",
+    "Text overlay"
+  ],
+  "semantic_description": "The image depicts a large industrial facility, likely a power plant or a similar industrial complex, with multiple structures and blue-topped buildings. The OCR text suggests it is related to a project by Bharat Heavy Electricals Limited (BHEL) and mentions \"Mattrie project.\"",
+  "detected_entities": [
+    "Bharat Heavy Electricals Limited (BHEL)",
+    "Mattrie project"
+  ]
+}

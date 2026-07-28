@@ -1,0 +1,35 @@
+{
+  "image_id": "#/pictures/35",
+  "page": 8,
+  "caption": null,
+  "ocr_text": null,
+  "bounding_box": {
+    "l": 40.552398681640625,
+    "t": 706.7384796142578,
+    "r": 543.0929565429688,
+    "b": 330.5379638671875,
+    "coord_origin": "BOTTOMLEFT"
+  },
+  "image_path": "05_images/image_036.png",
+  "image_type": "Photo",
+  "objects": [
+    "Concrete silos",
+    "construction materials",
+    "construction site.",
+    "industrial machinery",
+    "supporting frameworks"
+  ],
+  "keywords": [
+    "Ash handling plant",
+    "Telangana",
+    "Yadadri",
+    "concrete silos",
+    "construction",
+    "industrial",
+    "waste management."
+  ],
+  "semantic_description": "The image shows a large industrial facility, specifically an ash handling plant, located in Yadadri, Telangana. The structure appears to be in the construction phase, with concrete silos and supporting frameworks visible. The image captures the scale and complexity of the industrial project, highlighting the infrastructure involved in managing waste materials, likely from a power plant or similar facility.",
+  "detected_entities": [
+    "None (no people or organizations are visible in the image)."
+  ]
+}

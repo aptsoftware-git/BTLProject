@@ -1,0 +1,37 @@
+{
+  "image_id": "#/pictures/43",
+  "page": 10,
+  "caption": null,
+  "ocr_text": null,
+  "bounding_box": {
+    "l": 594.423583984375,
+    "t": 322.83978271484375,
+    "r": 866.2672729492188,
+    "b": 57.88714599609375,
+    "coord_origin": "BOTTOMLEFT"
+  },
+  "image_path": "05_images/image_044.png",
+  "image_type": "Photo",
+  "objects": [
+    "Large industrial pipes",
+    "and structural supports.",
+    "conveyor belts",
+    "machinery",
+    "storage tanks"
+  ],
+  "keywords": [
+    "Ammonium sulphate plant",
+    "Bokaro",
+    "Jharkhand",
+    "SAIL",
+    "conveyor belts",
+    "industrial",
+    "machinery",
+    "pipes",
+    "storage tanks."
+  ],
+  "semantic_description": "The image depicts an industrial setting, specifically an ammonium sulphate plant located at SAIL (Steel Authority of India Limited) in Bokaro, Jharkhand, India. The photo shows large industrial machinery, pipes, and structures typical of a chemical processing facility. The environment suggests a heavy industrial area with complex equipment used for manufacturing or processing.",
+  "detected_entities": [
+    "No people or specific names are detected in the image."
+  ]
+}

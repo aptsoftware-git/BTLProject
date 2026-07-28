@@ -1,0 +1,28 @@
+[
+  {
+    "sentence_id": 32,
+    "char_start": 1521,
+    "char_end": 1525,
+    "original_text": "-one",
+    "suggested_text": "one",
+    "issue_type": "grammar",
+    "source": "llm",
+    "reason": "Extra hyphen before 'one'",
+    "confidence": 0.7,
+    "is_protected": false,
+    "protected_reason": null
+  },
+  {
+    "sentence_id": 33,
+    "char_start": 1621,
+    "char_end": 1629,
+    "original_text": "-systems",
+    "suggested_text": "systems",
+    "issue_type": "grammar",
+    "source": "llm",
+    "reason": "Incorrect spacing after hyphen",
+    "confidence": 0.7,
+    "is_protected": false,
+    "protected_reason": null
+  }
+]

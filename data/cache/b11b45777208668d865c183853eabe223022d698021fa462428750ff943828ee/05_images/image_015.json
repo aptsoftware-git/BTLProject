@@ -1,0 +1,21 @@
+{
+  "image_id": "#/pictures/14",
+  "page": 6,
+  "caption": null,
+  "ocr_text": null,
+  "bounding_box": {
+    "l": 1013.7047729492188,
+    "t": 322.11279296875,
+    "r": 1058.9779052734375,
+    "b": 286.8939208984375,
+    "coord_origin": "BOTTOMLEFT"
+  },
+  "image_path": "05_images/image_015.png",
+  "image_type": "Decorative",
+  "objects": [],
+  "keywords": [
+    "decorative"
+  ],
+  "semantic_description": "Decorative graphics skipped by smart VLM filter.",
+  "detected_entities": []
+}

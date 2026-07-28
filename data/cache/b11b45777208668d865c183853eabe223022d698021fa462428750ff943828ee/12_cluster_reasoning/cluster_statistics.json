@@ -1,0 +1,12 @@
+{
+  "total_clusters_analyzed": 5,
+  "total_findings_identified": 27,
+  "total_critical_conflicts": 15,
+  "severity_breakdown": {
+    "Critical": 0,
+    "High": 1,
+    "Medium": 14,
+    "Low": 12
+  },
+  "average_confidence": 0.892
+}

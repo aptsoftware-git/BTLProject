@@ -202,19 +202,23 @@ class DocumentCacheManager:
     def sync_to_job_dir(self, job_dir: Path) -> None:
         """
         Synchronizes all cached artifacts into a specific job directory so all backend API endpoints and UI links work seamlessly.
-        Uses fast directory tree copy or hardlinking.
+        Uses fast directory tree copy with dirs_exist_ok=True to prevent file-locking PermissionErrors on Windows.
         """
         job_dir.mkdir(parents=True, exist_ok=True)
         for item in self.cache_dir.iterdir():
-            if item.name == "cache_metadata.json":
+            if item.name in ["cache_metadata.json"]:
                 continue
             dest = job_dir / item.name
             if item.is_dir():
-                if dest.exists():
-                    shutil.rmtree(dest)
-                shutil.copytree(item, dest)
+                try:
+                    shutil.copytree(item, dest, dirs_exist_ok=True)
+                except Exception as e:
+                    logger.warning("Partial sync warning for directory %s: %s", item.name, e)
             else:
-                shutil.copy2(item, dest)
+                try:
+                    shutil.copy2(item, dest)
+                except Exception as e:
+                    logger.warning("Partial sync warning for file %s: %s", item.name, e)
 
     def sync_from_job_dir(self, job_dir: Path) -> None:
         """
@@ -222,17 +226,21 @@ class DocumentCacheManager:
         """
         if not job_dir.exists():
             return
-        
+
         for item in job_dir.iterdir():
             if item.name in ["metadata.json", "pipeline.log"]:
                 continue
             dest = self.cache_dir / item.name
             if item.is_dir():
-                if dest.exists():
-                    shutil.rmtree(dest)
-                shutil.copytree(item, dest)
+                try:
+                    shutil.copytree(item, dest, dirs_exist_ok=True)
+                except Exception as e:
+                    logger.warning("Partial sync warning for directory %s: %s", item.name, e)
             else:
-                shutil.copy2(item, dest)
+                try:
+                    shutil.copy2(item, dest)
+                except Exception as e:
+                    logger.warning("Partial sync warning for file %s: %s", item.name, e)
 
         # Infer completed stages
         for stage_name, artifacts in STAGE_ARTIFACTS_MAP.items():

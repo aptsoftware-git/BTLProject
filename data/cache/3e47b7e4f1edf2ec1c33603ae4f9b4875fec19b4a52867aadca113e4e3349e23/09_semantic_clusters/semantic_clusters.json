@@ -1,0 +1,1979 @@
+[
+  {
+    "cluster_id": "cluster_001",
+    "cluster_size": 17,
+    "topic_summary": "BOARD & KEY LEADERSHIP & Larsen & Toubro",
+    "average_similarity": 0.7951,
+    "chunk_ids": [
+      "9b580a49750843d68ba1ae78c6a67538_chunk_0030",
+      "9b580a49750843d68ba1ae78c6a67538_chunk_0001",
+      "9b580a49750843d68ba1ae78c6a67538_chunk_0007",
+      "9b580a49750843d68ba1ae78c6a67538_chunk_0025",
+      "9b580a49750843d68ba1ae78c6a67538_chunk_0009",
+      "9b580a49750843d68ba1ae78c6a67538_chunk_0002",
+      "9b580a49750843d68ba1ae78c6a67538_chunk_0004",
+      "9b580a49750843d68ba1ae78c6a67538_chunk_0008",
+      "9b580a49750843d68ba1ae78c6a67538_chunk_0023",
+      "9b580a49750843d68ba1ae78c6a67538_chunk_0011",
+      "9b580a49750843d68ba1ae78c6a67538_chunk_0029",
+      "9b580a49750843d68ba1ae78c6a67538_chunk_0026",
+      "9b580a49750843d68ba1ae78c6a67538_chunk_0031",
+      "9b580a49750843d68ba1ae78c6a67538_chunk_0003",
+      "9b580a49750843d68ba1ae78c6a67538_chunk_0014",
+      "9b580a49750843d68ba1ae78c6a67538_chunk_0010",
+      "9b580a49750843d68ba1ae78c6a67538_chunk_0000"
+    ],
+    "chunks": [
+      {
+        "chunk_id": "9b580a49750843d68ba1ae78c6a67538_chunk_0030",
+        "page": 3,
+        "heading_path": "b1_#/texts/52",
+        "chunk_type": "heading",
+        "text": "Document Section: Larsen & Toubro Limited\nContent:\nLarsen & Toubro Limited",
+        "metadata": {
+          "chunk_id": "9b580a49750843d68ba1ae78c6a67538_chunk_0030",
+          "document_id": "9b580a49750843d68ba1ae78c6a67538",
+          "page_number": 3,
+          "chunk_type": "heading",
+          "heading": "Larsen & Toubro Limited",
+          "section": "Larsen & Toubro Limited",
+          "hierarchy_path": [
+            "b1_#/texts/52"
+          ],
+          "source_element_ids": [
+            "b1_#/texts/52"
+          ],
+          "word_count": 9,
+          "token_estimate": 21,
+          "bounding_boxes": [
+            {
+              "l": 63.024,
+              "t": 314.24,
+              "r": 164.99448000000004,
+              "b": 304.28,
+              "coord_origin": "BOTTOMLEFT"
+            }
+          ],
+          "element_types": [
+            "heading"
+          ],
+          "relationships": {
+            "belongs_to": "body",
+            "previous": "9b580a49750843d68ba1ae78c6a67538_chunk_0029"
+          },
+          "people": [
+            "Toubro Limited"
+          ],
+          "organizations": [
+            "Larsen & Toubro Limited"
+          ],
+          "groups": [],
+          "dates": [],
+          "weapons": [],
+          "locations": [],
+          "keywords": [
+            "larsen",
+            "toubro",
+            "limited"
+          ]
+        },
+        "similarity": 0.7993
+      },
+      {
+        "chunk_id": "9b580a49750843d68ba1ae78c6a67538_chunk_0001",
+        "page": 1,
+        "heading_path": "b1_#/texts/1",
+        "chunk_type": "heading",
+        "text": "Document Section: LARSEN & TOUBRO\nContent:\nLARSEN & TOUBRO",
+        "metadata": {
+          "chunk_id": "9b580a49750843d68ba1ae78c6a67538_chunk_0001",
+          "document_id": "9b580a49750843d68ba1ae78c6a67538",
+          "page_number": 1,
+          "chunk_type": "heading",
+          "heading": "LARSEN & TOUBRO",
+          "section": "LARSEN & TOUBRO",
+          "hierarchy_path": [
+            "b1_#/texts/1"
+          ],
+          "source_element_ids": [
+            "b1_#/texts/1"
+          ],
+          "word_count": 7,
+          "token_estimate": 20,
+          "bounding_boxes": [
+            {
+              "l": 186.14,
+              "t": 604.0,
+              "r": 425.80999999999983,
+              "b": 574.0,
+              "coord_origin": "BOTTOMLEFT"
+            }
+          ],
+          "element_types": [
+            "heading"
+          ],
+          "relationships": {
+            "belongs_to": "body",
+            "previous": "9b580a49750843d68ba1ae78c6a67538_chunk_0000"
+          },
+          "people": [],
+          "organizations": [
+            "LARSEN & TOUBRO"
+          ],
+          "groups": [],
+          "dates": [],
+          "weapons": [],
+          "locations": [],
+          "keywords": [
+            "larsen",
+            "toubro"
+          ]
+        },
+        "similarity": 0.7988
+      },
+      {
+        "chunk_id": "9b580a49750843d68ba1ae78c6a67538_chunk_0007",
+        "page": 2,
+        "heading_path": "b1_#/texts/11",
+        "chunk_type": "heading",
+        "text": "Document Section: COMPANY SNAPSHOT\nContent:\nCOMPANY SNAPSHOT",
+        "metadata": {
+          "chunk_id": "9b580a49750843d68ba1ae78c6a67538_chunk_0007",
+          "document_id": "9b580a49750843d68ba1ae78c6a67538",
+          "page_number": 2,
+          "chunk_type": "heading",
+          "heading": "COMPANY SNAPSHOT",
+          "section": "COMPANY SNAPSHOT",
+          "hierarchy_path": [
+            "b1_#/texts/11"
+          ],
+          "source_element_ids": [
+            "b1_#/texts/11"
+          ],
+          "word_count": 7,
+          "token_estimate": 13,
+          "bounding_boxes": [
+            {
+              "l": 63.024,
+              "t": 720.58,
+              "r": 173.076,
+              "b": 708.58,
+              "coord_origin": "BOTTOMLEFT"
+            }
+          ],
+          "element_types": [
+            "heading"
+          ],
+          "relationships": {
+            "belongs_to": "body",
+            "previous": "9b580a49750843d68ba1ae78c6a67538_chunk_0006"
+          },
+          "people": [
+            "COMPANY SNAPSHOT"
+          ],
+          "organizations": [],
+          "groups": [],
+          "dates": [],
+          "weapons": [],
+          "locations": [],
+          "keywords": [
+            "company",
+            "snapshot"
+          ]
+        },
+        "similarity": 0.794
+      },
+      {
+        "chunk_id": "9b580a49750843d68ba1ae78c6a67538_chunk_0025",
+        "page": 3,
+        "heading_path": "b1_#/texts/47",
+        "chunk_type": "heading",
+        "text": "Document Section: Development Projects & Realty\nContent:\nDevelopment Projects & Realty",
+        "metadata": {
+          "chunk_id": "9b580a49750843d68ba1ae78c6a67538_chunk_0025",
+          "document_id": "9b580a49750843d68ba1ae78c6a67538",
+          "page_number": 3,
+          "chunk_type": "heading",
+          "heading": "Development Projects & Realty",
+          "section": "Development Projects & Realty",
+          "hierarchy_path": [
+            "b1_#/texts/47"
+          ],
+          "source_element_ids": [
+            "b1_#/texts/47"
+          ],
+          "word_count": 9,
+          "token_estimate": 14,
+          "bounding_boxes": [
+            {
+              "l": 63.024,
+              "t": 481.51,
+              "r": 199.33248,
+              "b": 470.95,
+              "coord_origin": "BOTTOMLEFT"
+            }
+          ],
+          "element_types": [
+            "heading"
+          ],
+          "relationships": {
+            "belongs_to": "body",
+            "previous": "9b580a49750843d68ba1ae78c6a67538_chunk_0024"
+          },
+          "people": [
+            "Development Projects"
+          ],
+          "organizations": [
+            "Development Projects & Realty"
+          ],
+          "groups": [],
+          "dates": [],
+          "weapons": [],
+          "locations": [],
+          "keywords": [
+            "development",
+            "projects",
+            "realty"
+          ]
+        },
+        "similarity": 0.7919
+      },
+      {
+        "chunk_id": "9b580a49750843d68ba1ae78c6a67538_chunk_0009",
+        "page": 2,
+        "heading_path": "b1_#/texts/13",
+        "chunk_type": "heading",
+        "text": "Document Section: BOARD & KEY LEADERSHIP\nContent:\nBOARD & KEY LEADERSHIP",
+        "metadata": {
+          "chunk_id": "9b580a49750843d68ba1ae78c6a67538_chunk_0009",
+          "document_id": "9b580a49750843d68ba1ae78c6a67538",
+          "page_number": 2,
+          "chunk_type": "heading",
+          "heading": "BOARD & KEY LEADERSHIP",
+          "section": "BOARD & KEY LEADERSHIP",
+          "hierarchy_path": [
+            "b1_#/texts/13"
+          ],
+          "source_element_ids": [
+            "b1_#/texts/13"
+          ],
+          "word_count": 9,
+          "token_estimate": 20,
+          "bounding_boxes": [
+            {
+              "l": 63.024,
+              "t": 648.34,
+              "r": 195.77999999999997,
+              "b": 636.34,
+              "coord_origin": "BOTTOMLEFT"
+            }
+          ],
+          "element_types": [
+            "heading"
+          ],
+          "relationships": {
+            "belongs_to": "body",
+            "previous": "9b580a49750843d68ba1ae78c6a67538_chunk_0008"
+          },
+          "people": [
+            "KEY LEADERSHIP"
+          ],
+          "organizations": [
+            "BOARD & KEY LEADERSHIP"
+          ],
+          "groups": [],
+          "dates": [],
+          "weapons": [],
+          "locations": [],
+          "keywords": [
+            "board",
+            "leadership"
+          ]
+        },
+        "similarity": 0.7892
+      },
+      {
+        "chunk_id": "9b580a49750843d68ba1ae78c6a67538_chunk_0002",
+        "page": 1,
+        "heading_path": "b1_#/texts/1",
+        "chunk_type": "text",
+        "text": "Document Section: LARSEN & TOUBRO\nContent:\nEngineering the Nation's Growth Since 1938\n\nWebsite\n\nwww.larsentoubro.com",
+        "metadata": {
+          "chunk_id": "9b580a49750843d68ba1ae78c6a67538_chunk_0002",
+          "document_id": "9b580a49750843d68ba1ae78c6a67538",
+          "page_number": 1,
+          "chunk_type": "text",
+          "heading": "LARSEN & TOUBRO",
+          "section": "LARSEN & TOUBRO",
+          "hierarchy_path": [
+            "b1_#/texts/1"
+          ],
+          "source_element_ids": [
+            "b1_#/texts/2",
+            "b1_#/texts/3",
+            "b1_#/texts/4"
+          ],
+          "word_count": 16,
+          "token_estimate": 32,
+          "bounding_boxes": [
+            {
+              "l": 199.25,
+              "t": 568.06,
+              "r": 412.75399999999985,
+              "b": 556.06,
+              "coord_origin": "BOTTOMLEFT"
+            },
+            {
+              "l": 287.09,
+              "t": 431.86408,
+              "r": 325.08968,
+              "b": 422.5781018181818,
+              "coord_origin": "BOTTOMLEFT"
+            },
+            {
+              "l": 254.33,
+              "t": 415.48071999999996,
+              "r": 360.16,
+              "b": 405.97528,
+              "coord_origin": "BOTTOMLEFT"
+            }
+          ],
+          "element_types": [
+            "paragraph",
+            "paragraph",
+            "paragraph"
+          ],
+          "relationships": {
+            "belongs_to": "b1_#/texts/1",
+            "previous": "9b580a49750843d68ba1ae78c6a67538_chunk_0001"
+          },
+          "people": [],
+          "organizations": [
+            "Growth Since"
+          ],
+          "groups": [],
+          "dates": [
+            "1938"
+          ],
+          "weapons": [],
+          "locations": [],
+          "keywords": [
+            "engineering",
+            "nation",
+            "growth",
+            "since",
+            "website",
+            "larsentoubro"
+          ]
+        },
+        "similarity": 0.8032
+      },
+      {
+        "chunk_id": "9b580a49750843d68ba1ae78c6a67538_chunk_0004",
+        "page": 1,
+        "heading_path": "b1_#/texts/5",
+        "chunk_type": "text",
+        "text": "Document Section: Headquarters\nContent:\nL&T House, Ballard Estate, Mumbai, Maharashtra, India",
+        "metadata": {
+          "chunk_id": "9b580a49750843d68ba1ae78c6a67538_chunk_0004",
+          "document_id": "9b580a49750843d68ba1ae78c6a67538",
+          "page_number": 1,
+          "chunk_type": "text",
+          "heading": "Headquarters",
+          "section": "Headquarters",
+          "hierarchy_path": [
+            "b1_#/texts/5"
+          ],
+          "source_element_ids": [
+            "b1_#/texts/6"
+          ],
+          "word_count": 12,
+          "token_estimate": 19,
+          "bounding_boxes": [
+            {
+              "l": 180.14,
+              "t": 371.06072,
+              "r": 434.44,
+              "b": 361.55528000000004,
+              "coord_origin": "BOTTOMLEFT"
+            }
+          ],
+          "element_types": [
+            "paragraph"
+          ],
+          "relationships": {
+            "belongs_to": "b1_#/texts/5",
+            "previous": "9b580a49750843d68ba1ae78c6a67538_chunk_0003"
+          },
+          "people": [],
+          "organizations": [
+            "Ballard Estate",
+            "L&T House",
+            "Maharashtra"
+          ],
+          "groups": [],
+          "dates": [],
+          "weapons": [],
+          "locations": [
+            "Ballard Estate",
+            "India",
+            "Mumbai"
+          ],
+          "keywords": [
+            "house",
+            "ballard",
+            "estate",
+            "mumbai",
+            "maharashtra",
+            "india"
+          ]
+        },
+        "similarity": 0.7803
+      },
+      {
+        "chunk_id": "9b580a49750843d68ba1ae78c6a67538_chunk_0008",
+        "page": 2,
+        "heading_path": "b1_#/texts/11",
+        "chunk_type": "text",
+        "text": "Document Section: COMPANY SNAPSHOT\nContent:\nLarsen & Toubro Limited (L&T) is an Indian multinational conglomerate headquartered in Mumbai, founded in 1938 by Danish engineers Henning Holck-Larsen and Søren Kristian Toubro and incorporated in 1946. Today the group operates in more than 50 countries and is listed on the NSE and BSE (ticker: LT), with no single majority shareholder.",
+        "metadata": {
+          "chunk_id": "9b580a49750843d68ba1ae78c6a67538_chunk_0008",
+          "document_id": "9b580a49750843d68ba1ae78c6a67538",
+          "page_number": 2,
+          "chunk_type": "text",
+          "heading": "COMPANY SNAPSHOT",
+          "section": "COMPANY SNAPSHOT",
+          "hierarchy_path": [
+            "b1_#/texts/11"
+          ],
+          "source_element_ids": [
+            "b1_#/texts/12"
+          ],
+          "word_count": 59,
+          "token_estimate": 93,
+          "bounding_boxes": [
+            {
+              "l": 63.024,
+              "t": 700.21,
+              "r": 548.4081200000003,
+              "b": 665.77,
+              "coord_origin": "BOTTOMLEFT"
+            }
+          ],
+          "element_types": [
+            "paragraph"
+          ],
+          "relationships": {
+            "belongs_to": "b1_#/texts/11",
+            "previous": "9b580a49750843d68ba1ae78c6a67538_chunk_0007"
+          },
+          "people": [
+            "Henning Holck-Larsen"
+          ],
+          "organizations": [
+            "BSE",
+            "L&T",
+            "Larsen & Toubro Limited",
+            "NSE",
+            "Søren Kristian Toubro"
+          ],
+          "groups": [],
+          "dates": [
+            "1938",
+            "1946",
+            "Today"
+          ],
+          "weapons": [],
+          "locations": [
+            "Mumbai"
+          ],
+          "keywords": [
+            "larsen",
+            "toubro",
+            "limited",
+            "indian",
+            "multinational",
+            "conglomerate",
+            "headquartered",
+            "mumbai",
+            "founded",
+            "danish"
+          ]
+        },
+        "similarity": 0.8014
+      },
+      {
+        "chunk_id": "9b580a49750843d68ba1ae78c6a67538_chunk_0023",
+        "page": 3,
+        "heading_path": "b1_#/texts/45",
+        "chunk_type": "heading",
+        "text": "Document Section: Financial Services\nContent:\nFinancial Services",
+        "metadata": {
+          "chunk_id": "9b580a49750843d68ba1ae78c6a67538_chunk_0023",
+          "document_id": "9b580a49750843d68ba1ae78c6a67538",
+          "page_number": 3,
+          "chunk_type": "heading",
+          "heading": "Financial Services",
+          "section": "Financial Services",
+          "hierarchy_path": [
+            "b1_#/texts/45"
+          ],
+          "source_element_ids": [
+            "b1_#/texts/45"
+          ],
+          "word_count": 7,
+          "token_estimate": 10,
+          "bounding_boxes": [
+            {
+              "l": 63.024,
+              "t": 517.51,
+              "r": 139.46783999999994,
+              "b": 506.95,
+              "coord_origin": "BOTTOMLEFT"
+            }
+          ],
+          "element_types": [
+            "heading"
+          ],
+          "relationships": {
+            "belongs_to": "body",
+            "previous": "9b580a49750843d68ba1ae78c6a67538_chunk_0022"
+          },
+          "people": [
+            "Financial Services"
+          ],
+          "organizations": [
+            "Financial Services"
+          ],
+          "groups": [],
+          "dates": [],
+          "weapons": [],
+          "locations": [],
+          "keywords": [
+            "financial",
+            "services"
+          ]
+        },
+        "similarity": 0.7931
+      },
+      {
+        "chunk_id": "9b580a49750843d68ba1ae78c6a67538_chunk_0011",
+        "page": 2,
+        "heading_path": "b1_#/texts/13",
+        "chunk_type": "text",
+        "text": "Document Section: BOARD & KEY LEADERSHIP\nContent:\nName\n\nRole\n\nS N Subrahmanyan\n\nChairman & Managing Director\n\nR Shankar Raman\n\nWhole-time Director, President & CFO\n\nSubramanian Sarma\n\nDeputy Managing Director & President\n\nS V Desai\n\nWhole-time Director\n\nT Madhava Das\n\nWhole-time Director & Senior EVP, Utilities",
+        "metadata": {
+          "chunk_id": "9b580a49750843d68ba1ae78c6a67538_chunk_0011",
+          "document_id": "9b580a49750843d68ba1ae78c6a67538",
+          "page_number": 2,
+          "chunk_type": "text",
+          "heading": "BOARD & KEY LEADERSHIP",
+          "section": "BOARD & KEY LEADERSHIP",
+          "hierarchy_path": [
+            "b1_#/texts/13"
+          ],
+          "source_element_ids": [
+            "b1_#/texts/14",
+            "b1_#/texts/15",
+            "b1_#/texts/16",
+            "b1_#/texts/17",
+            "b1_#/texts/18",
+            "b1_#/texts/19",
+            "b1_#/texts/20",
+            "b1_#/texts/21",
+            "b1_#/texts/22",
+            "b1_#/texts/23",
+            "b1_#/texts/24",
+            "b1_#/texts/25"
+          ],
+          "word_count": 43,
+          "token_estimate": 80,
+          "bounding_boxes": [
+            {
+              "l": 69.264,
+              "t": 622.11796,
+              "r": 93.00191999999998,
+              "b": 614.1441309090909,
+              "coord_origin": "BOTTOMLEFT"
+            },
+            {
+              "l": 294.29,
+              "t": 622.11796,
+              "r": 312.76652,
+              "b": 614.1441309090909,
+              "coord_origin": "BOTTOMLEFT"
+            },
+            {
+              "l": 69.264,
+              "t": 601.6022800000001,
+              "r": 145.67000000000002,
+              "b": 593.0267200000001,
+              "coord_origin": "BOTTOMLEFT"
+            },
+            {
+              "l": 294.29,
+              "t": 601.6022800000001,
+              "r": 418.96000000000004,
+              "b": 593.0267200000001,
+              "coord_origin": "BOTTOMLEFT"
+            },
+            {
+              "l": 69.264,
+              "t": 581.20228,
+              "r": 140.87,
+              "b": 572.62672,
+              "coord_origin": "BOTTOMLEFT"
+            },
+            {
+              "l": 294.29,
+              "t": 581.20228,
+              "r": 446.92,
+              "b": 572.62672,
+              "coord_origin": "BOTTOMLEFT"
+            },
+            {
+              "l": 69.264,
+              "t": 560.80228,
+              "r": 148.55,
+              "b": 552.22672,
+              "coord_origin": "BOTTOMLEFT"
+            },
+            {
+              "l": 294.29,
+              "t": 560.80228,
+              "r": 447.28000000000003,
+              "b": 552.22672,
+              "coord_origin": "BOTTOMLEFT"
+            },
+            {
+              "l": 69.264,
+              "t": 540.37228,
+              "r": 110.27,
+              "b": 531.79672,
+              "coord_origin": "BOTTOMLEFT"
+            },
+            {
+              "l": 294.29,
+              "t": 540.37228,
+              "r": 376.24,
+              "b": 531.79672,
+              "coord_origin": "BOTTOMLEFT"
+            },
+            {
+              "l": 69.264,
+              "t": 519.9722800000001,
+              "r": 132.47,
+              "b": 511.3967200000001,
+              "coord_origin": "BOTTOMLEFT"
+            },
+            {
+              "l": 294.29,
+              "t": 519.9722800000001,
+              "r": 468.79,
+              "b": 511.3967200000001,
+              "coord_origin": "BOTTOMLEFT"
+            }
+          ],
+          "element_types": [
+            "paragraph",
+            "paragraph",
+            "paragraph",
+            "paragraph",
+            "paragraph",
+            "paragraph",
+            "paragraph",
+            "paragraph",
+            "paragraph",
+            "paragraph",
+            "paragraph",
+            "paragraph"
+          ],
+          "relationships": {
+            "belongs_to": "b1_#/texts/13",
+            "previous": "9b580a49750843d68ba1ae78c6a67538_chunk_0010"
+          },
+          "people": [
+            "Shankar Raman\n\nWhole-time"
+          ],
+          "organizations": [
+            "EVP",
+            "President & CFO",
+            "Utilities"
+          ],
+          "groups": [],
+          "dates": [],
+          "weapons": [],
+          "locations": [],
+          "keywords": [
+            "director",
+            "whole",
+            "managing",
+            "president",
+            "subrahmanyan",
+            "chairman",
+            "shankar",
+            "raman",
+            "subramanian",
+            "sarma"
+          ]
+        },
+        "similarity": 0.8276
+      },
+      {
+        "chunk_id": "9b580a49750843d68ba1ae78c6a67538_chunk_0029",
+        "page": 3,
+        "heading_path": "b1_#/texts/51",
+        "chunk_type": "heading",
+        "text": "Document Section: CONTACT\nContent:\nCONTACT",
+        "metadata": {
+          "chunk_id": "9b580a49750843d68ba1ae78c6a67538_chunk_0029",
+          "document_id": "9b580a49750843d68ba1ae78c6a67538",
+          "page_number": 3,
+          "chunk_type": "heading",
+          "heading": "CONTACT",
+          "section": "CONTACT",
+          "hierarchy_path": [
+            "b1_#/texts/51"
+          ],
+          "source_element_ids": [
+            "b1_#/texts/51"
+          ],
+          "word_count": 5,
+          "token_estimate": 8,
+          "bounding_boxes": [
+            {
+              "l": 63.024,
+              "t": 334.61,
+              "r": 110.928,
+              "b": 322.61,
+              "coord_origin": "BOTTOMLEFT"
+            }
+          ],
+          "element_types": [
+            "heading"
+          ],
+          "relationships": {
+            "belongs_to": "body",
+            "previous": "9b580a49750843d68ba1ae78c6a67538_chunk_0028"
+          },
+          "people": [],
+          "organizations": [],
+          "groups": [],
+          "dates": [],
+          "weapons": [],
+          "locations": [],
+          "keywords": [
+            "contact"
+          ]
+        },
+        "similarity": 0.7836
+      },
+      {
+        "chunk_id": "9b580a49750843d68ba1ae78c6a67538_chunk_0026",
+        "page": 3,
+        "heading_path": "b1_#/texts/47",
+        "chunk_type": "text",
+        "text": "Document Section: Development Projects & Realty\nContent:\nRoads and transmission assets, the Hyderabad Metro Rail project, power development projects, and premium residential & commercial real estate through L&T Realty.",
+        "metadata": {
+          "chunk_id": "9b580a49750843d68ba1ae78c6a67538_chunk_0026",
+          "document_id": "9b580a49750843d68ba1ae78c6a67538",
+          "page_number": 3,
+          "chunk_type": "text",
+          "heading": "Development Projects & Realty",
+          "section": "Development Projects & Realty",
+          "hierarchy_path": [
+            "b1_#/texts/47"
+          ],
+          "source_element_ids": [
+            "b1_#/texts/48"
+          ],
+          "word_count": 28,
+          "token_estimate": 38,
+          "bounding_boxes": [
+            {
+              "l": 63.024,
+              "t": 465.70000000000005,
+              "r": 511.4331600000002,
+              "b": 443.5,
+              "coord_origin": "BOTTOMLEFT"
+            }
+          ],
+          "element_types": [
+            "paragraph"
+          ],
+          "relationships": {
+            "belongs_to": "b1_#/texts/47",
+            "previous": "9b580a49750843d68ba1ae78c6a67538_chunk_0025"
+          },
+          "people": [
+            "Hyderabad Metro Rail"
+          ],
+          "organizations": [
+            "L&T Realty",
+            "the Hyderabad Metro Rail"
+          ],
+          "groups": [],
+          "dates": [],
+          "weapons": [],
+          "locations": [],
+          "keywords": [
+            "roads",
+            "transmission",
+            "assets",
+            "hyderabad",
+            "metro",
+            "project",
+            "power",
+            "development",
+            "projects",
+            "premium"
+          ]
+        },
+        "similarity": 0.8047
+      },
+      {
+        "chunk_id": "9b580a49750843d68ba1ae78c6a67538_chunk_0031",
+        "page": 3,
+        "heading_path": "b1_#/texts/52",
+        "chunk_type": "text",
+        "text": "Document Section: Larsen & Toubro Limited\nContent:\nL&T House, N.M. Marg, Ballard Estate, Mumbai, Maharashtra -400 001, India\n\nTel: +91 22 6752 5656\n\nEmail: infodesk@larsentoubro.com\n\nWebsite: www.larsentoubro.com",
+        "metadata": {
+          "chunk_id": "9b580a49750843d68ba1ae78c6a67538_chunk_0031",
+          "document_id": "9b580a49750843d68ba1ae78c6a67538",
+          "page_number": 3,
+          "chunk_type": "text",
+          "heading": "Larsen & Toubro Limited",
+          "section": "Larsen & Toubro Limited",
+          "hierarchy_path": [
+            "b1_#/texts/52"
+          ],
+          "source_element_ids": [
+            "b1_#/texts/53",
+            "b1_#/texts/54",
+            "b1_#/texts/55",
+            "b1_#/texts/56"
+          ],
+          "word_count": 32,
+          "token_estimate": 69,
+          "bounding_boxes": [
+            {
+              "l": 63.024,
+              "t": 296.0,
+              "r": 379.09936,
+              "b": 286.03999999999996,
+              "coord_origin": "BOTTOMLEFT"
+            },
+            {
+              "l": 63.024,
+              "t": 277.8800000000001,
+              "r": 152.55444000000006,
+              "b": 267.9200000000001,
+              "coord_origin": "BOTTOMLEFT"
+            },
+            {
+              "l": 63.024,
+              "t": 259.64,
+              "r": 206.17908000000008,
+              "b": 249.67999999999995,
+              "coord_origin": "BOTTOMLEFT"
+            },
+            {
+              "l": 63.024,
+              "t": 241.39999999999998,
+              "r": 198.06168000000005,
+              "b": 231.44000000000005,
+              "coord_origin": "BOTTOMLEFT"
+            }
+          ],
+          "element_types": [
+            "paragraph",
+            "paragraph",
+            "paragraph",
+            "paragraph"
+          ],
+          "relationships": {
+            "belongs_to": "b1_#/texts/52",
+            "previous": "9b580a49750843d68ba1ae78c6a67538_chunk_0030"
+          },
+          "people": [],
+          "organizations": [
+            "Ballard Estate",
+            "L&T House",
+            "Maharashtra -400 001"
+          ],
+          "groups": [],
+          "dates": [
+            "6752 5656"
+          ],
+          "weapons": [],
+          "locations": [
+            "Ballard Estate",
+            "India",
+            "India\n\nTel",
+            "Mumbai"
+          ],
+          "keywords": [
+            "larsentoubro",
+            "house",
+            "ballard",
+            "estate",
+            "mumbai",
+            "maharashtra",
+            "india",
+            "email",
+            "infodesk",
+            "website"
+          ]
+        },
+        "similarity": 0.7995
+      },
+      {
+        "chunk_id": "9b580a49750843d68ba1ae78c6a67538_chunk_0003",
+        "page": 1,
+        "heading_path": "b1_#/texts/5",
+        "chunk_type": "heading",
+        "text": "Document Section: Headquarters\nContent:\nHeadquarters",
+        "metadata": {
+          "chunk_id": "9b580a49750843d68ba1ae78c6a67538_chunk_0003",
+          "document_id": "9b580a49750843d68ba1ae78c6a67538",
+          "page_number": 1,
+          "chunk_type": "heading",
+          "heading": "Headquarters",
+          "section": "Headquarters",
+          "hierarchy_path": [
+            "b1_#/texts/5"
+          ],
+          "source_element_ids": [
+            "b1_#/texts/5"
+          ],
+          "word_count": 5,
+          "token_estimate": 9,
+          "bounding_boxes": [
+            {
+              "l": 273.29,
+              "t": 387.58408000000003,
+              "r": 338.7572,
+              "b": 378.2981018181818,
+              "coord_origin": "BOTTOMLEFT"
+            }
+          ],
+          "element_types": [
+            "heading"
+          ],
+          "relationships": {
+            "belongs_to": "body",
+            "previous": "9b580a49750843d68ba1ae78c6a67538_chunk_0002"
+          },
+          "people": [],
+          "organizations": [],
+          "groups": [],
+          "dates": [],
+          "weapons": [],
+          "locations": [],
+          "keywords": [
+            "headquarters"
+          ]
+        },
+        "similarity": 0.7864
+      },
+      {
+        "chunk_id": "9b580a49750843d68ba1ae78c6a67538_chunk_0014",
+        "page": 3,
+        "heading_path": "b1_#/texts/36",
+        "chunk_type": "heading",
+        "text": "Document Section: BUSINESS SEGMENTS / SERVICE LINES\nContent:\nBUSINESS SEGMENTS / SERVICE LINES",
+        "metadata": {
+          "chunk_id": "9b580a49750843d68ba1ae78c6a67538_chunk_0014",
+          "document_id": "9b580a49750843d68ba1ae78c6a67538",
+          "page_number": 3,
+          "chunk_type": "heading",
+          "heading": "BUSINESS SEGMENTS / SERVICE LINES",
+          "section": "BUSINESS SEGMENTS / SERVICE LINES",
+          "hierarchy_path": [
+            "b1_#/texts/36"
+          ],
+          "source_element_ids": [
+            "b1_#/texts/36"
+          ],
+          "word_count": 11,
+          "token_estimate": 21,
+          "bounding_boxes": [
+            {
+              "l": 63.024,
+              "t": 720.58,
+              "r": 251.1239999999999,
+              "b": 708.58,
+              "coord_origin": "BOTTOMLEFT"
+            }
+          ],
+          "element_types": [
+            "heading"
+          ],
+          "relationships": {
+            "belongs_to": "body",
+            "previous": "9b580a49750843d68ba1ae78c6a67538_chunk_0013"
+          },
+          "people": [
+            "BUSINESS SEGMENTS",
+            "SERVICE LINES"
+          ],
+          "organizations": [],
+          "groups": [],
+          "dates": [],
+          "weapons": [],
+          "locations": [],
+          "keywords": [
+            "business",
+            "segments",
+            "service",
+            "lines"
+          ]
+        },
+        "similarity": 0.809
+      },
+      {
+        "chunk_id": "9b580a49750843d68ba1ae78c6a67538_chunk_0010",
+        "page": 2,
+        "heading_path": "b1_#/texts/13",
+        "chunk_type": "table",
+        "text": "Document Section: BOARD & KEY LEADERSHIP\nContent:\nColumn Headers: None\nRow Headers: None\nMarkdown Table:\n| Name  Role  S N Subrahmanyan  Chairman &amp; Managing Director  R Shankar Raman  Whole-time Director, President &amp; CFO  Subramanian Sarma  Deputy Managing Director &amp; President  S V Desai  Whole-time Director  T Madhava Das  Whole-time Director &amp; Senior EVP, Utilities   |\n|------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|",
+        "metadata": {
+          "chunk_id": "9b580a49750843d68ba1ae78c6a67538_chunk_0010",
+          "document_id": "9b580a49750843d68ba1ae78c6a67538",
+          "page_number": 2,
+          "chunk_type": "table",
+          "heading": "BOARD & KEY LEADERSHIP",
+          "section": "BOARD & KEY LEADERSHIP",
+          "hierarchy_path": [
+            "b1_#/texts/13"
+          ],
+          "source_element_ids": [
+            "b1_#/tables/0"
+          ],
+          "word_count": 55,
+          "token_estimate": 109,
+          "bounding_boxes": [
+            {
+              "l": 61.852149963378906,
+              "t": 630.8906707763672,
+              "r": 553.9063110351562,
+              "b": 505.9059753417969,
+              "coord_origin": "BOTTOMLEFT"
+            }
+          ],
+          "element_types": [
+            "table"
+          ],
+          "relationships": {
+            "belongs_to": "b1_#/texts/13"
+          },
+          "table_id": "b1_#/tables/0",
+          "people": [
+            "Shankar Raman  Whole-time"
+          ],
+          "organizations": [
+            "CFO",
+            "EVP",
+            "Managing Director &amp",
+            "President &amp",
+            "Utilities"
+          ],
+          "groups": [],
+          "dates": [],
+          "weapons": [],
+          "locations": [],
+          "keywords": [
+            "director",
+            "whole",
+            "headers",
+            "managing",
+            "president",
+            "column",
+            "markdown",
+            "subrahmanyan",
+            "chairman",
+            "shankar"
+          ]
+        },
+        "similarity": 0.8199
+      },
+      {
+        "chunk_id": "9b580a49750843d68ba1ae78c6a67538_chunk_0000",
+        "page": 1,
+        "heading_path": "Root",
+        "chunk_type": "text",
+        "text": "Document Section: Root\nContent:\nCOMPANY PROFILE",
+        "metadata": {
+          "chunk_id": "9b580a49750843d68ba1ae78c6a67538_chunk_0000",
+          "document_id": "9b580a49750843d68ba1ae78c6a67538",
+          "page_number": 1,
+          "chunk_type": "text",
+          "heading": null,
+          "section": "Root",
+          "hierarchy_path": [],
+          "source_element_ids": [
+            "b1_#/texts/0"
+          ],
+          "word_count": 6,
+          "token_estimate": 10,
+          "bounding_boxes": [
+            {
+              "l": 261.89,
+              "t": 626.38,
+              "r": 350.27624,
+              "b": 615.34,
+              "coord_origin": "BOTTOMLEFT"
+            }
+          ],
+          "element_types": [
+            "paragraph"
+          ],
+          "relationships": {
+            "belongs_to": "body"
+          },
+          "people": [
+            "COMPANY PROFILE"
+          ],
+          "organizations": [
+            "PROFILE"
+          ],
+          "groups": [],
+          "dates": [],
+          "weapons": [],
+          "locations": [],
+          "keywords": [
+            "company",
+            "profile"
+          ]
+        },
+        "similarity": 0.785
+      }
+    ]
+  },
+  {
+    "cluster_id": "cluster_002",
+    "cluster_size": 9,
+    "topic_summary": "Infrastructure (EPC) & Infrastructure & Industry",
+    "average_similarity": 0.7973,
+    "chunk_ids": [
+      "9b580a49750843d68ba1ae78c6a67538_chunk_0015",
+      "9b580a49750843d68ba1ae78c6a67538_chunk_0027",
+      "9b580a49750843d68ba1ae78c6a67538_chunk_0019",
+      "9b580a49750843d68ba1ae78c6a67538_chunk_0018",
+      "9b580a49750843d68ba1ae78c6a67538_chunk_0017",
+      "9b580a49750843d68ba1ae78c6a67538_chunk_0012",
+      "9b580a49750843d68ba1ae78c6a67538_chunk_0016",
+      "9b580a49750843d68ba1ae78c6a67538_chunk_0005",
+      "9b580a49750843d68ba1ae78c6a67538_chunk_0020"
+    ],
+    "chunks": [
+      {
+        "chunk_id": "9b580a49750843d68ba1ae78c6a67538_chunk_0015",
+        "page": 3,
+        "heading_path": "b1_#/texts/37",
+        "chunk_type": "heading",
+        "text": "Document Section: Infrastructure (EPC)\nContent:\nInfrastructure (EPC)",
+        "metadata": {
+          "chunk_id": "9b580a49750843d68ba1ae78c6a67538_chunk_0015",
+          "document_id": "9b580a49750843d68ba1ae78c6a67538",
+          "page_number": 3,
+          "chunk_type": "heading",
+          "heading": "Infrastructure (EPC)",
+          "section": "Infrastructure (EPC)",
+          "hierarchy_path": [
+            "b1_#/texts/37"
+          ],
+          "source_element_ids": [
+            "b1_#/texts/37"
+          ],
+          "word_count": 7,
+          "token_estimate": 15,
+          "bounding_boxes": [
+            {
+              "l": 63.024,
+              "t": 698.26,
+              "r": 148.84512000000004,
+              "b": 687.7,
+              "coord_origin": "BOTTOMLEFT"
+            }
+          ],
+          "element_types": [
+            "heading"
+          ],
+          "relationships": {
+            "belongs_to": "body",
+            "previous": "9b580a49750843d68ba1ae78c6a67538_chunk_0014"
+          },
+          "people": [],
+          "organizations": [
+            "EPC"
+          ],
+          "groups": [],
+          "dates": [],
+          "weapons": [],
+          "locations": [],
+          "keywords": [
+            "infrastructure"
+          ]
+        },
+        "similarity": 0.8037
+      },
+      {
+        "chunk_id": "9b580a49750843d68ba1ae78c6a67538_chunk_0027",
+        "page": 3,
+        "heading_path": "b1_#/texts/49",
+        "chunk_type": "heading",
+        "text": "Document Section: INDUSTRY\nContent:\nINDUSTRY",
+        "metadata": {
+          "chunk_id": "9b580a49750843d68ba1ae78c6a67538_chunk_0027",
+          "document_id": "9b580a49750843d68ba1ae78c6a67538",
+          "page_number": 3,
+          "chunk_type": "heading",
+          "heading": "INDUSTRY",
+          "section": "INDUSTRY",
+          "hierarchy_path": [
+            "b1_#/texts/49"
+          ],
+          "source_element_ids": [
+            "b1_#/texts/49"
+          ],
+          "word_count": 5,
+          "token_estimate": 14,
+          "bounding_boxes": [
+            {
+              "l": 63.024,
+              "t": 406.87,
+              "r": 114.11999999999999,
+              "b": 394.87,
+              "coord_origin": "BOTTOMLEFT"
+            }
+          ],
+          "element_types": [
+            "heading"
+          ],
+          "relationships": {
+            "belongs_to": "body",
+            "previous": "9b580a49750843d68ba1ae78c6a67538_chunk_0026"
+          },
+          "people": [],
+          "organizations": [],
+          "groups": [],
+          "dates": [],
+          "weapons": [],
+          "locations": [],
+          "keywords": [
+            "industry"
+          ]
+        },
+        "similarity": 0.8126
+      },
+      {
+        "chunk_id": "9b580a49750843d68ba1ae78c6a67538_chunk_0019",
+        "page": 3,
+        "heading_path": "b1_#/texts/41",
+        "chunk_type": "heading",
+        "text": "Document Section: Hi-Tech Manufacturing & Defence Engineering\nContent:\nHi-Tech Manufacturing & Defence Engineering",
+        "metadata": {
+          "chunk_id": "9b580a49750843d68ba1ae78c6a67538_chunk_0019",
+          "document_id": "9b580a49750843d68ba1ae78c6a67538",
+          "page_number": 3,
+          "chunk_type": "heading",
+          "heading": "Hi-Tech Manufacturing & Defence Engineering",
+          "section": "Hi-Tech Manufacturing & Defence Engineering",
+          "hierarchy_path": [
+            "b1_#/texts/41"
+          ],
+          "source_element_ids": [
+            "b1_#/texts/41"
+          ],
+          "word_count": 13,
+          "token_estimate": 20,
+          "bounding_boxes": [
+            {
+              "l": 63.024,
+              "t": 614.02,
+              "r": 264.9081599999999,
+              "b": 603.46,
+              "coord_origin": "BOTTOMLEFT"
+            }
+          ],
+          "element_types": [
+            "heading"
+          ],
+          "relationships": {
+            "belongs_to": "body",
+            "previous": "9b580a49750843d68ba1ae78c6a67538_chunk_0018"
+          },
+          "people": [
+            "Defence Engineering",
+            "Tech Manufacturing"
+          ],
+          "organizations": [],
+          "groups": [],
+          "dates": [],
+          "weapons": [],
+          "locations": [],
+          "keywords": [
+            "manufacturing",
+            "defence",
+            "engineering"
+          ]
+        },
+        "similarity": 0.7943
+      },
+      {
+        "chunk_id": "9b580a49750843d68ba1ae78c6a67538_chunk_0018",
+        "page": 3,
+        "heading_path": "b1_#/texts/39",
+        "chunk_type": "text",
+        "text": "Document Section: Energy -Hydrocarbon & Power\nContent:\nEnd-to-end EPC for upstream, midstream and downstream oil & gas, and power generation infrastructure.",
+        "metadata": {
+          "chunk_id": "9b580a49750843d68ba1ae78c6a67538_chunk_0018",
+          "document_id": "9b580a49750843d68ba1ae78c6a67538",
+          "page_number": 3,
+          "chunk_type": "text",
+          "heading": "Energy -Hydrocarbon & Power",
+          "section": "Energy -Hydrocarbon & Power",
+          "hierarchy_path": [
+            "b1_#/texts/39"
+          ],
+          "source_element_ids": [
+            "b1_#/texts/40"
+          ],
+          "word_count": 21,
+          "token_estimate": 34,
+          "bounding_boxes": [
+            {
+              "l": 63.024,
+              "t": 634.21,
+              "r": 494.1634800000003,
+              "b": 624.25,
+              "coord_origin": "BOTTOMLEFT"
+            }
+          ],
+          "element_types": [
+            "paragraph"
+          ],
+          "relationships": {
+            "belongs_to": "b1_#/texts/39",
+            "previous": "9b580a49750843d68ba1ae78c6a67538_chunk_0017"
+          },
+          "people": [],
+          "organizations": [
+            "EPC"
+          ],
+          "groups": [],
+          "dates": [],
+          "weapons": [],
+          "locations": [],
+          "keywords": [
+            "upstream",
+            "midstream",
+            "downstream",
+            "power",
+            "generation",
+            "infrastructure"
+          ]
+        },
+        "similarity": 0.8467
+      },
+      {
+        "chunk_id": "9b580a49750843d68ba1ae78c6a67538_chunk_0017",
+        "page": 3,
+        "heading_path": "b1_#/texts/39",
+        "chunk_type": "heading",
+        "text": "Document Section: Energy -Hydrocarbon & Power\nContent:\nEnergy -Hydrocarbon & Power",
+        "metadata": {
+          "chunk_id": "9b580a49750843d68ba1ae78c6a67538_chunk_0017",
+          "document_id": "9b580a49750843d68ba1ae78c6a67538",
+          "page_number": 3,
+          "chunk_type": "heading",
+          "heading": "Energy -Hydrocarbon & Power",
+          "section": "Energy -Hydrocarbon & Power",
+          "hierarchy_path": [
+            "b1_#/texts/39"
+          ],
+          "source_element_ids": [
+            "b1_#/texts/39"
+          ],
+          "word_count": 9,
+          "token_estimate": 20,
+          "bounding_boxes": [
+            {
+              "l": 63.024,
+              "t": 650.02,
+              "r": 204.13807999999997,
+              "b": 639.46,
+              "coord_origin": "BOTTOMLEFT"
+            }
+          ],
+          "element_types": [
+            "heading"
+          ],
+          "relationships": {
+            "belongs_to": "body",
+            "previous": "9b580a49750843d68ba1ae78c6a67538_chunk_0016"
+          },
+          "people": [],
+          "organizations": [
+            "Energy -Hydrocarbon & Power"
+          ],
+          "groups": [],
+          "dates": [],
+          "weapons": [],
+          "locations": [],
+          "keywords": [
+            "energy",
+            "hydrocarbon",
+            "power"
+          ]
+        },
+        "similarity": 0.7969
+      },
+      {
+        "chunk_id": "9b580a49750843d68ba1ae78c6a67538_chunk_0012",
+        "page": 2,
+        "heading_path": "b1_#/texts/26",
+        "chunk_type": "heading",
+        "text": "Document Section: MARQUEE PROJECTS\nContent:\nMARQUEE PROJECTS",
+        "metadata": {
+          "chunk_id": "9b580a49750843d68ba1ae78c6a67538_chunk_0012",
+          "document_id": "9b580a49750843d68ba1ae78c6a67538",
+          "page_number": 2,
+          "chunk_type": "heading",
+          "heading": "MARQUEE PROJECTS",
+          "section": "MARQUEE PROJECTS",
+          "hierarchy_path": [
+            "b1_#/texts/26"
+          ],
+          "source_element_ids": [
+            "b1_#/texts/26"
+          ],
+          "word_count": 7,
+          "token_estimate": 16,
+          "bounding_boxes": [
+            {
+              "l": 63.024,
+              "t": 488.59,
+              "r": 167.16,
+              "b": 476.59,
+              "coord_origin": "BOTTOMLEFT"
+            }
+          ],
+          "element_types": [
+            "heading"
+          ],
+          "relationships": {
+            "belongs_to": "body",
+            "previous": "9b580a49750843d68ba1ae78c6a67538_chunk_0011"
+          },
+          "people": [
+            "MARQUEE PROJECTS"
+          ],
+          "organizations": [],
+          "groups": [],
+          "dates": [],
+          "weapons": [],
+          "locations": [],
+          "keywords": [
+            "marquee",
+            "projects"
+          ]
+        },
+        "similarity": 0.7695
+      },
+      {
+        "chunk_id": "9b580a49750843d68ba1ae78c6a67538_chunk_0016",
+        "page": 3,
+        "heading_path": "b1_#/texts/37",
+        "chunk_type": "text",
+        "text": "Document Section: Infrastructure (EPC)\nContent:\nEngineering, procurement and construction of buildings & factories, transportation infrastructure, heavy civil works, power transmission & distribution, and water & renewable energy projects.",
+        "metadata": {
+          "chunk_id": "9b580a49750843d68ba1ae78c6a67538_chunk_0016",
+          "document_id": "9b580a49750843d68ba1ae78c6a67538",
+          "page_number": 3,
+          "chunk_type": "text",
+          "heading": "Infrastructure (EPC)",
+          "section": "Infrastructure (EPC)",
+          "hierarchy_path": [
+            "b1_#/texts/37"
+          ],
+          "source_element_ids": [
+            "b1_#/texts/38"
+          ],
+          "word_count": 25,
+          "token_estimate": 39,
+          "bounding_boxes": [
+            {
+              "l": 63.024,
+              "t": 682.45,
+              "r": 536.3829599999999,
+              "b": 660.25,
+              "coord_origin": "BOTTOMLEFT"
+            }
+          ],
+          "element_types": [
+            "paragraph"
+          ],
+          "relationships": {
+            "belongs_to": "b1_#/texts/37",
+            "previous": "9b580a49750843d68ba1ae78c6a67538_chunk_0015"
+          },
+          "people": [],
+          "organizations": [],
+          "groups": [],
+          "dates": [],
+          "weapons": [],
+          "locations": [],
+          "keywords": [
+            "engineering",
+            "procurement",
+            "construction",
+            "buildings",
+            "factories",
+            "transportation",
+            "infrastructure",
+            "heavy",
+            "civil",
+            "works"
+          ]
+        },
+        "similarity": 0.7682
+      },
+      {
+        "chunk_id": "9b580a49750843d68ba1ae78c6a67538_chunk_0005",
+        "page": 1,
+        "heading_path": "b1_#/texts/7",
+        "chunk_type": "heading",
+        "text": "Document Section: Industry\nContent:\nIndustry",
+        "metadata": {
+          "chunk_id": "9b580a49750843d68ba1ae78c6a67538_chunk_0005",
+          "document_id": "9b580a49750843d68ba1ae78c6a67538",
+          "page_number": 1,
+          "chunk_type": "heading",
+          "heading": "Industry",
+          "section": "Industry",
+          "hierarchy_path": [
+            "b1_#/texts/7"
+          ],
+          "source_element_ids": [
+            "b1_#/texts/7"
+          ],
+          "word_count": 5,
+          "token_estimate": 8,
+          "bounding_boxes": [
+            {
+              "l": 285.53,
+              "t": 343.28408,
+              "r": 326.56567999999993,
+              "b": 333.9981018181818,
+              "coord_origin": "BOTTOMLEFT"
+            }
+          ],
+          "element_types": [
+            "heading"
+          ],
+          "relationships": {
+            "belongs_to": "body",
+            "previous": "9b580a49750843d68ba1ae78c6a67538_chunk_0004"
+          },
+          "people": [],
+          "organizations": [],
+          "groups": [],
+          "dates": [],
+          "weapons": [],
+          "locations": [],
+          "keywords": [
+            "industry"
+          ]
+        },
+        "similarity": 0.8126
+      },
+      {
+        "chunk_id": "9b580a49750843d68ba1ae78c6a67538_chunk_0020",
+        "page": 3,
+        "heading_path": "b1_#/texts/41",
+        "chunk_type": "text",
+        "text": "Document Section: Hi-Tech Manufacturing & Defence Engineering\nContent:\nDesign, manufacture and supply of engineered equipment for process plants, nuclear and green-hydrogen facilities, marine and land defence platforms, aerospace systems, and precision electronics for defence, security and space.",
+        "metadata": {
+          "chunk_id": "9b580a49750843d68ba1ae78c6a67538_chunk_0020",
+          "document_id": "9b580a49750843d68ba1ae78c6a67538",
+          "page_number": 3,
+          "chunk_type": "text",
+          "heading": "Hi-Tech Manufacturing & Defence Engineering",
+          "section": "Hi-Tech Manufacturing & Defence Engineering",
+          "hierarchy_path": [
+            "b1_#/texts/41"
+          ],
+          "source_element_ids": [
+            "b1_#/texts/42"
+          ],
+          "word_count": 38,
+          "token_estimate": 52,
+          "bounding_boxes": [
+            {
+              "l": 63.024,
+              "t": 598.21,
+              "r": 534.6018399999999,
+              "b": 576.01,
+              "coord_origin": "BOTTOMLEFT"
+            }
+          ],
+          "element_types": [
+            "paragraph"
+          ],
+          "relationships": {
+            "belongs_to": "b1_#/texts/41",
+            "previous": "9b580a49750843d68ba1ae78c6a67538_chunk_0019"
+          },
+          "people": [],
+          "organizations": [],
+          "groups": [],
+          "dates": [],
+          "weapons": [],
+          "locations": [],
+          "keywords": [
+            "defence",
+            "design",
+            "manufacture",
+            "supply",
+            "engineered",
+            "equipment",
+            "process",
+            "plants",
+            "nuclear",
+            "green"
+          ]
+        },
+        "similarity": 0.8065
+      }
+    ]
+  },
+  {
+    "cluster_id": "cluster_003",
+    "cluster_size": 5,
+    "topic_summary": "IT & Technology Services & Engineering & Technology",
+    "average_similarity": 0.752,
+    "chunk_ids": [
+      "9b580a49750843d68ba1ae78c6a67538_chunk_0006",
+      "9b580a49750843d68ba1ae78c6a67538_chunk_0024",
+      "9b580a49750843d68ba1ae78c6a67538_chunk_0022",
+      "9b580a49750843d68ba1ae78c6a67538_chunk_0028",
+      "9b580a49750843d68ba1ae78c6a67538_chunk_0021"
+    ],
+    "chunks": [
+      {
+        "chunk_id": "9b580a49750843d68ba1ae78c6a67538_chunk_0006",
+        "page": 1,
+        "heading_path": "b1_#/texts/7",
+        "chunk_type": "text",
+        "text": "Document Section: Industry\nContent:\nEngineering, Construction, Manufacturing, Technology & Financial Services Conglomerate\n\nThis brochure is an independently compiled profile based on public information and is not an official L&T publication.",
+        "metadata": {
+          "chunk_id": "9b580a49750843d68ba1ae78c6a67538_chunk_0006",
+          "document_id": "9b580a49750843d68ba1ae78c6a67538",
+          "page_number": 1,
+          "chunk_type": "text",
+          "heading": "Industry",
+          "section": "Industry",
+          "hierarchy_path": [
+            "b1_#/texts/7"
+          ],
+          "source_element_ids": [
+            "b1_#/texts/8",
+            "b1_#/texts/9"
+          ],
+          "word_count": 30,
+          "token_estimate": 42,
+          "bounding_boxes": [
+            {
+              "l": 103.46,
+              "t": 326.78072,
+              "r": 511.15000000000003,
+              "b": 317.27528,
+              "coord_origin": "BOTTOMLEFT"
+            },
+            {
+              "l": 114.86,
+              "t": 274.90976,
+              "r": 496.8243199999996,
+              "b": 267.9773309090908,
+              "coord_origin": "BOTTOMLEFT"
+            }
+          ],
+          "element_types": [
+            "paragraph",
+            "paragraph"
+          ],
+          "relationships": {
+            "belongs_to": "b1_#/texts/7",
+            "previous": "9b580a49750843d68ba1ae78c6a67538_chunk_0005"
+          },
+          "people": [
+            "Financial Services Conglomerate"
+          ],
+          "organizations": [
+            "Technology & Financial Services Conglomerate"
+          ],
+          "groups": [],
+          "dates": [],
+          "weapons": [],
+          "locations": [
+            "L&T"
+          ],
+          "keywords": [
+            "engineering",
+            "construction",
+            "manufacturing",
+            "technology",
+            "financial",
+            "services",
+            "conglomerate",
+            "brochure",
+            "independently",
+            "compiled"
+          ]
+        },
+        "similarity": 0.7438
+      },
+      {
+        "chunk_id": "9b580a49750843d68ba1ae78c6a67538_chunk_0024",
+        "page": 3,
+        "heading_path": "b1_#/texts/45",
+        "chunk_type": "text",
+        "text": "Document Section: Financial Services\nContent:\nRetail finance, wholesale finance and investment management, delivered through L&T Finance Holdings.",
+        "metadata": {
+          "chunk_id": "9b580a49750843d68ba1ae78c6a67538_chunk_0024",
+          "document_id": "9b580a49750843d68ba1ae78c6a67538",
+          "page_number": 3,
+          "chunk_type": "text",
+          "heading": "Financial Services",
+          "section": "Financial Services",
+          "hierarchy_path": [
+            "b1_#/texts/45"
+          ],
+          "source_element_ids": [
+            "b1_#/texts/46"
+          ],
+          "word_count": 18,
+          "token_estimate": 24,
+          "bounding_boxes": [
+            {
+              "l": 63.024,
+              "t": 501.58000000000004,
+              "r": 487.17060000000026,
+              "b": 491.62,
+              "coord_origin": "BOTTOMLEFT"
+            }
+          ],
+          "element_types": [
+            "paragraph"
+          ],
+          "relationships": {
+            "belongs_to": "b1_#/texts/45",
+            "previous": "9b580a49750843d68ba1ae78c6a67538_chunk_0023"
+          },
+          "people": [
+            "Finance Holdings"
+          ],
+          "organizations": [
+            "L&T Finance Holdings"
+          ],
+          "groups": [],
+          "dates": [],
+          "weapons": [],
+          "locations": [],
+          "keywords": [
+            "finance",
+            "retail",
+            "wholesale",
+            "investment",
+            "management",
+            "delivered",
+            "holdings"
+          ]
+        },
+        "similarity": 0.7494
+      },
+      {
+        "chunk_id": "9b580a49750843d68ba1ae78c6a67538_chunk_0022",
+        "page": 3,
+        "heading_path": "b1_#/texts/43",
+        "chunk_type": "text",
+        "text": "Document Section: IT & Technology Services\nContent:\nGlobal IT services, digital solutions, engineering R&D, e-commerce/digital platforms, data centres and semiconductor chip-design solutions, delivered through group entities such as LTIMindtree and L&T Technology Services.",
+        "metadata": {
+          "chunk_id": "9b580a49750843d68ba1ae78c6a67538_chunk_0022",
+          "document_id": "9b580a49750843d68ba1ae78c6a67538",
+          "page_number": 3,
+          "chunk_type": "text",
+          "heading": "IT & Technology Services",
+          "section": "IT & Technology Services",
+          "hierarchy_path": [
+            "b1_#/texts/43"
+          ],
+          "source_element_ids": [
+            "b1_#/texts/44"
+          ],
+          "word_count": 37,
+          "token_estimate": 51,
+          "bounding_boxes": [
+            {
+              "l": 63.024,
+              "t": 549.94,
+              "r": 540.26948,
+              "b": 527.74,
+              "coord_origin": "BOTTOMLEFT"
+            }
+          ],
+          "element_types": [
+            "paragraph"
+          ],
+          "relationships": {
+            "belongs_to": "b1_#/texts/43",
+            "previous": "9b580a49750843d68ba1ae78c6a67538_chunk_0021"
+          },
+          "people": [
+            "Global IT",
+            "Technology Services"
+          ],
+          "organizations": [
+            "L&T Technology Services",
+            "LTIMindtree"
+          ],
+          "groups": [],
+          "dates": [],
+          "weapons": [],
+          "locations": [],
+          "keywords": [
+            "services",
+            "digital",
+            "solutions",
+            "global",
+            "engineering",
+            "commerce",
+            "platforms",
+            "centres",
+            "semiconductor",
+            "design"
+          ]
+        },
+        "similarity": 0.7527
+      },
+      {
+        "chunk_id": "9b580a49750843d68ba1ae78c6a67538_chunk_0028",
+        "page": 3,
+        "heading_path": "b1_#/texts/49",
+        "chunk_type": "text",
+        "text": "Document Section: INDUSTRY\nContent:\nL&T operates at the intersection of engineering, construction, heavy manufacturing, information technology, defence and financial services -commonly classified under the capital goods / infrastructure & engineering sector in India, serving customers across more than 50 countries.",
+        "metadata": {
+          "chunk_id": "9b580a49750843d68ba1ae78c6a67538_chunk_0028",
+          "document_id": "9b580a49750843d68ba1ae78c6a67538",
+          "page_number": 3,
+          "chunk_type": "text",
+          "heading": "INDUSTRY",
+          "section": "INDUSTRY",
+          "hierarchy_path": [
+            "b1_#/texts/49"
+          ],
+          "source_element_ids": [
+            "b1_#/texts/50"
+          ],
+          "word_count": 39,
+          "token_estimate": 56,
+          "bounding_boxes": [
+            {
+              "l": 63.024,
+              "t": 386.62,
+              "r": 541.7912399999998,
+              "b": 352.15999999999997,
+              "coord_origin": "BOTTOMLEFT"
+            }
+          ],
+          "element_types": [
+            "paragraph"
+          ],
+          "relationships": {
+            "belongs_to": "b1_#/texts/49",
+            "previous": "9b580a49750843d68ba1ae78c6a67538_chunk_0027"
+          },
+          "people": [],
+          "organizations": [
+            "L&T"
+          ],
+          "groups": [],
+          "dates": [],
+          "weapons": [],
+          "locations": [
+            "India"
+          ],
+          "keywords": [
+            "engineering",
+            "operates",
+            "intersection",
+            "construction",
+            "heavy",
+            "manufacturing",
+            "information",
+            "technology",
+            "defence",
+            "financial"
+          ]
+        },
+        "similarity": 0.7612
+      },
+      {
+        "chunk_id": "9b580a49750843d68ba1ae78c6a67538_chunk_0021",
+        "page": 3,
+        "heading_path": "b1_#/texts/43",
+        "chunk_type": "heading",
+        "text": "Document Section: IT & Technology Services\nContent:\nIT & Technology Services",
+        "metadata": {
+          "chunk_id": "9b580a49750843d68ba1ae78c6a67538_chunk_0021",
+          "document_id": "9b580a49750843d68ba1ae78c6a67538",
+          "page_number": 3,
+          "chunk_type": "heading",
+          "heading": "IT & Technology Services",
+          "section": "IT & Technology Services",
+          "hierarchy_path": [
+            "b1_#/texts/43"
+          ],
+          "source_element_ids": [
+            "b1_#/texts/43"
+          ],
+          "word_count": 9,
+          "token_estimate": 14,
+          "bounding_boxes": [
+            {
+              "l": 63.024,
+              "t": 565.78,
+              "r": 170.99999999999994,
+              "b": 555.22,
+              "coord_origin": "BOTTOMLEFT"
+            }
+          ],
+          "element_types": [
+            "heading"
+          ],
+          "relationships": {
+            "belongs_to": "body",
+            "previous": "9b580a49750843d68ba1ae78c6a67538_chunk_0020"
+          },
+          "people": [
+            "Technology Services"
+          ],
+          "organizations": [
+            "IT & Technology Services"
+          ],
+          "groups": [],
+          "dates": [],
+          "weapons": [],
+          "locations": [],
+          "keywords": [
+            "technology",
+            "services"
+          ]
+        },
+        "similarity": 0.7586
+      }
+    ]
+  }
+]

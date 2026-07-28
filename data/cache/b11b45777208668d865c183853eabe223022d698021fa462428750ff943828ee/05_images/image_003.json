@@ -1,0 +1,38 @@
+{
+  "image_id": "#/pictures/2",
+  "page": 4,
+  "caption": null,
+  "ocr_text": null,
+  "bounding_box": {
+    "l": 597.3927612304688,
+    "t": 841.7624766528606,
+    "r": 951.2466430664062,
+    "b": 548.3537292480469,
+    "coord_origin": "BOTTOMLEFT"
+  },
+  "image_path": "05_images/image_003.png",
+  "image_type": "Photo",
+  "objects": [
+    "Worker",
+    "blue hard hat",
+    "blue uniform",
+    "industrial equipment",
+    "metalworking materials.",
+    "sparks"
+  ],
+  "keywords": [
+    "Industrial",
+    "equipment.",
+    "hard hat",
+    "metalworking",
+    "protective gear",
+    "sparks",
+    "uniform",
+    "welding",
+    "worker"
+  ],
+  "semantic_description": "The image depicts a worker in a industrial setting, likely a welding or metalworking environment, as indicated by the sparks and protective gear. The worker is wearing a blue hard hat and a blue uniform with visible text, suggesting a professional or corporate context. The background shows industrial equipment and materials, reinforcing the industrial theme.",
+  "detected_entities": [
+    "Worker (name or organization not discernible from the image)."
+  ]
+}

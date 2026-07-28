@@ -1,0 +1,328 @@
+{
+  "claims": [
+    {
+      "claim_id": "a8619fd4ae194817a13dad90f43659f8_chunk_0001_claim_000",
+      "chunk_id": "a8619fd4ae194817a13dad90f43659f8_chunk_0001",
+      "text": "Mini Company Handbook -Employee Reference Edition, v4.2 is an internal document.",
+      "type": "fact"
+    },
+    {
+      "claim_id": "a8619fd4ae194817a13dad90f43659f8_chunk_0004_claim_000",
+      "chunk_id": "a8619fd4ae194817a13dad90f43659f8_chunk_0004",
+      "text": "Vertexa Solutions Pvt. Ltd. was founded in 2011 by six engineers who set out to build tools that help enterprises make sense of unstructured documents.",
+      "type": "fact"
+    },
+    {
+      "claim_id": "a8619fd4ae194817a13dad90f43659f8_chunk_0004_claim_001",
+      "chunk_id": "a8619fd4ae194817a13dad90f43659f8_chunk_0004",
+      "text": "The company was incorporated in Bengaluru.",
+      "type": "fact"
+    },
+    {
+      "claim_id": "a8619fd4ae194817a13dad90f43659f8_chunk_0004_claim_002",
+      "chunk_id": "a8619fd4ae194817a13dad90f43659f8_chunk_0004",
+      "text": "Vertexa now serves over 300 clients across 14 countries.",
+      "type": "fact"
+    },
+    {
+      "claim_id": "a8619fd4ae194817a13dad90f43659f8_chunk_0006_claim_000",
+      "chunk_id": "a8619fd4ae194817a13dad90f43659f8_chunk_0006",
+      "text": "These four values were ratified in 2012",
+      "type": "fact"
+    },
+    {
+      "claim_id": "a8619fd4ae194817a13dad90f43659f8_chunk_0006_claim_001",
+      "chunk_id": "a8619fd4ae194817a13dad90f43659f8_chunk_0006",
+      "text": "a 2019 internal memo claims a fifth value, 'Simplicity', was added that year",
+      "type": "fact"
+    },
+    {
+      "claim_id": "a8619fd4ae194817a13dad90f43659f8_chunk_0006_claim_002",
+      "chunk_id": "a8619fd4ae194817a13dad90f43659f8_chunk_0006",
+      "text": "HR maintains the values have been constant since 2012",
+      "type": "fact"
+    },
+    {
+      "claim_id": "a8619fd4ae194817a13dad90f43659f8_chunk_0009_claim_000",
+      "chunk_id": "a8619fd4ae194817a13dad90f43659f8_chunk_0009",
+      "text": "Employees receive 18 annual leaves per calendar year, credited pro-rata for employees joining mid-year, plus 10 sick and 5 casual leaves.",
+      "type": "fact"
+    },
+    {
+      "claim_id": "a8619fd4ae194817a13dad90f43659f8_chunk_0009_claim_001",
+      "chunk_id": "a8619fd4ae194817a13dad90f43659f8_chunk_0009",
+      "text": "Employees receive 20 annual leaves per calendar year following the FY23 revision.",
+      "type": "fact"
+    },
+    {
+      "claim_id": "a8619fd4ae194817a13dad90f43659f8_chunk_0009_claim_002",
+      "chunk_id": "a8619fd4ae194817a13dad90f43659f8_chunk_0009",
+      "text": "Standard hours are 9:30 AM -6:30 PM.",
+      "type": "fact"
+    },
+    {
+      "claim_id": "a8619fd4ae194817a13dad90f43659f8_chunk_0009_claim_003",
+      "chunk_id": "a8619fd4ae194817a13dad90f43659f8_chunk_0009",
+      "text": "Repeated unexplained absences may effect an employee's rating.",
+      "type": "fact"
+    },
+    {
+      "claim_id": "a8619fd4ae194817a13dad90f43659f8_chunk_0009_claim_004",
+      "chunk_id": "a8619fd4ae194817a13dad90f43659f8_chunk_0009",
+      "text": "Employees who's conduct violates the Code of Conduct may face disciplinary action; their are no exceptions based on seniority.",
+      "type": "fact"
+    },
+    {
+      "claim_id": "a8619fd4ae194817a13dad90f43659f8_chunk_0011_claim_000",
+      "chunk_id": "a8619fd4ae194817a13dad90f43659f8_chunk_0011",
+      "text": "Employees may work remotely three days every week, subject to manager approval.",
+      "type": "fact"
+    },
+    {
+      "claim_id": "a8619fd4ae194817a13dad90f43659f8_chunk_0011_claim_001",
+      "chunk_id": "a8619fd4ae194817a13dad90f43659f8_chunk_0011",
+      "text": "Employees are expected to work from office full time, effective the date communicated by department heads.",
+      "type": "fact"
+    },
+    {
+      "claim_id": "a8619fd4ae194817a13dad90f43659f8_chunk_0013_claim_000",
+      "chunk_id": "a8619fd4ae194817a13dad90f43659f8_chunk_0013",
+      "text": "Travel should be approved whenever necessary.",
+      "type": "fact"
+    },
+    {
+      "claim_id": "a8619fd4ae194817a13dad90f43659f8_chunk_0016_claim_000",
+      "chunk_id": "a8619fd4ae194817a13dad90f43659f8_chunk_0016",
+      "text": "Passwords are atleast 12 characters, mixed case + numeric + special, and rotated every 90 days.",
+      "type": "fact"
+    },
+    {
+      "claim_id": "a8619fd4ae194817a13dad90f43659f8_chunk_0016_claim_001",
+      "chunk_id": "a8619fd4ae194817a13dad90f43659f8_chunk_0016",
+      "text": "MFA is mandatory for email, VPN, and internal apps within 48 hours of access being granted.",
+      "type": "fact"
+    },
+    {
+      "claim_id": "a8619fd4ae194817a13dad90f43659f8_chunk_0016_claim_002",
+      "chunk_id": "a8619fd4ae194817a13dad90f43659f8_chunk_0016",
+      "text": "VPN required for all off-network access; split tunneling disabled by default.",
+      "type": "fact"
+    },
+    {
+      "claim_id": "a8619fd4ae194817a13dad90f43659f8_chunk_0016_claim_003",
+      "chunk_id": "a8619fd4ae194817a13dad90f43659f8_chunk_0016",
+      "text": "Full-disk encryption mandatory on all company laptops.",
+      "type": "fact"
+    },
+    {
+      "claim_id": "a8619fd4ae194817a13dad90f43659f8_chunk_0016_claim_004",
+      "chunk_id": "a8619fd4ae194817a13dad90f43659f8_chunk_0016",
+      "text": "Personal USB drives are prohibited unless approved by IT Security; see Appendix B for data-handling obligations on removable media.",
+      "type": "fact"
+    },
+    {
+      "claim_id": "a8619fd4ae194817a13dad90f43659f8_chunk_0019_claim_000",
+      "chunk_id": "a8619fd4ae194817a13dad90f43659f8_chunk_0019",
+      "text": "Quarterly revenue and YoY growth (FY24) are reported to the Board.",
+      "type": "fact"
+    },
+    {
+      "claim_id": "a8619fd4ae194817a13dad90f43659f8_chunk_0020_claim_000",
+      "chunk_id": "a8619fd4ae194817a13dad90f43659f8_chunk_0020",
+      "text": "Quarterly revenue for Q1 FY24 was 42.6 ₹ Cr with a YoY growth of 18%.",
+      "type": "fact"
+    },
+    {
+      "claim_id": "a8619fd4ae194817a13dad90f43659f8_chunk_0020_claim_001",
+      "chunk_id": "a8619fd4ae194817a13dad90f43659f8_chunk_0020",
+      "text": "Quarterly revenue for Q2 FY24 was 45.1 ₹ Cr with a YoY growth of 16%.",
+      "type": "fact"
+    },
+    {
+      "claim_id": "a8619fd4ae194817a13dad90f43659f8_chunk_0020_claim_002",
+      "chunk_id": "a8619fd4ae194817a13dad90f43659f8_chunk_0020",
+      "text": "Quarterly revenue for Q3 FY24 was 48.9 ₹ Cr with a YoY growth of 17%.",
+      "type": "fact"
+    },
+    {
+      "claim_id": "a8619fd4ae194817a13dad90f43659f8_chunk_0020_claim_003",
+      "chunk_id": "a8619fd4ae194817a13dad90f43659f8_chunk_0020",
+      "text": "Quarterly revenue for Q4 FY24 was 51.3 ₹ Cr with a YoY growth of 15%.",
+      "type": "fact"
+    },
+    {
+      "claim_id": "a8619fd4ae194817a13dad90f43659f8_chunk_0021_claim_000",
+      "chunk_id": "a8619fd4ae194817a13dad90f43659f8_chunk_0021",
+      "text": "Quarterly revenue is published in the Q4 board deck.",
+      "type": "fact"
+    },
+    {
+      "claim_id": "a8619fd4ae194817a13dad90f43659f8_chunk_0021_claim_001",
+      "chunk_id": "a8619fd4ae194817a13dad90f43659f8_chunk_0021",
+      "text": "Q1 FY24 YoY growth is reported as 15% in the board deck.",
+      "type": "fact"
+    },
+    {
+      "claim_id": "a8619fd4ae194817a13dad90f43659f8_chunk_0021_claim_002",
+      "chunk_id": "a8619fd4ae194817a13dad90f43659f8_chunk_0021",
+      "text": "Table 1 shows Q1 FY24 YoY growth as 18%.",
+      "type": "fact"
+    },
+    {
+      "claim_id": "a8619fd4ae194817a13dad90f43659f8_chunk_0021_claim_003",
+      "chunk_id": "a8619fd4ae194817a13dad90f43659f8_chunk_0021",
+      "text": "The discrepancy between the Q1 FY24 YoY growth reports has not been reconciled.",
+      "type": "fact"
+    },
+    {
+      "claim_id": "a8619fd4ae194817a13dad90f43659f8_chunk_0023_claim_000",
+      "chunk_id": "a8619fd4ae194817a13dad90f43659f8_chunk_0023",
+      "text": "The platform is organized into four layers: Presentation, AI Platform/API, Processing, and Data.",
+      "type": "fact"
+    },
+    {
+      "claim_id": "a8619fd4ae194817a13dad90f43659f8_chunk_0024_claim_000",
+      "chunk_id": "a8619fd4ae194817a13dad90f43659f8_chunk_0024",
+      "text": "Docling Parser extracts text, tables, and images with layout metadata",
+      "type": "fact"
+    },
+    {
+      "claim_id": "a8619fd4ae194817a13dad90f43659f8_chunk_0024_claim_001",
+      "chunk_id": "a8619fd4ae194817a13dad90f43659f8_chunk_0024",
+      "text": "Chunking Engine builds semantic chunks (heading+text, table+caption, image+OCR)",
+      "type": "fact"
+    },
+    {
+      "claim_id": "a8619fd4ae194817a13dad90f43659f8_chunk_0024_claim_002",
+      "chunk_id": "a8619fd4ae194817a13dad90f43659f8_chunk_0024",
+      "text": "Embedding Service generates vector embeddings for retrieval",
+      "type": "fact"
+    },
+    {
+      "claim_id": "a8619fd4ae194817a13dad90f43659f8_chunk_0024_claim_003",
+      "chunk_id": "a8619fd4ae194817a13dad90f43659f8_chunk_0024",
+      "text": "Vector Store is a ChromaDB collection per document",
+      "type": "fact"
+    },
+    {
+      "claim_id": "a8619fd4ae194817a13dad90f43659f8_chunk_0027_claim_000",
+      "chunk_id": "a8619fd4ae194817a13dad90f43659f8_chunk_0027",
+      "text": "Escalation note: Alex informed Jordan that he would contact the customer directly to confirm the resolution timeline before the ticket is closed.",
+      "type": "fact"
+    },
+    {
+      "claim_id": "a8619fd4ae194817a13dad90f43659f8_chunk_0029_claim_000",
+      "chunk_id": "a8619fd4ae194817a13dad90f43659f8_chunk_0029",
+      "text": "Vertexa's data protection obligations are summarized here; for the full clause list and retention schedule, see Appendix B.",
+      "type": "fact"
+    },
+    {
+      "claim_id": "a8619fd4ae194817a13dad90f43659f8_chunk_0031_claim_000",
+      "chunk_id": "a8619fd4ae194817a13dad90f43659f8_chunk_0031",
+      "text": "Recovery Time Objective (RTO), per the DR runbook summary: critical systems must be restored within 4 hours of a declared incident.",
+      "type": "fact"
+    },
+    {
+      "claim_id": "a8619fd4ae194817a13dad90f43659f8_chunk_0031_claim_001",
+      "chunk_id": "a8619fd4ae194817a13dad90f43659f8_chunk_0031",
+      "text": "Recovery of the same critical systems is instead targeted within 12 hours for a 'major' incident.",
+      "type": "fact"
+    },
+    {
+      "claim_id": "a8619fd4ae194817a13dad90f43659f8_chunk_0033_claim_000",
+      "chunk_id": "a8619fd4ae194817a13dad90f43659f8_chunk_0033",
+      "text": "Vertexa's AI Platform underpins Document AI, RAG retrieval, and the Auth Gateway.",
+      "type": "fact"
+    },
+    {
+      "claim_id": "a8619fd4ae194817a13dad90f43659f8_chunk_0036_claim_000",
+      "chunk_id": "a8619fd4ae194817a13dad90f43659f8_chunk_0036",
+      "text": "Purchase approval steps:",
+      "type": "fact"
+    },
+    {
+      "claim_id": "a8619fd4ae194817a13dad90f43659f8_chunk_0037_claim_000",
+      "chunk_id": "a8619fd4ae194817a13dad90f43659f8_chunk_0037",
+      "text": "Raise a purchase requisition in the procurement portal.",
+      "type": "fact"
+    },
+    {
+      "claim_id": "a8619fd4ae194817a13dad90f43659f8_chunk_0037_claim_001",
+      "chunk_id": "a8619fd4ae194817a13dad90f43659f8_chunk_0037",
+      "text": "Obtain budget sign-off from the department head.",
+      "type": "fact"
+    },
+    {
+      "claim_id": "a8619fd4ae194817a13dad90f43659f8_chunk_0037_claim_002",
+      "chunk_id": "a8619fd4ae194817a13dad90f43659f8_chunk_0037",
+      "text": "Finance issues a purchase order to the approved vendor.",
+      "type": "fact"
+    },
+    {
+      "claim_id": "a8619fd4ae194817a13dad90f43659f8_chunk_0037_claim_003",
+      "chunk_id": "a8619fd4ae194817a13dad90f43659f8_chunk_0037",
+      "text": "Goods/services are received and matched against the PO before payment.",
+      "type": "fact"
+    },
+    {
+      "claim_id": "a8619fd4ae194817a13dad90f43659f8_chunk_0038_claim_000",
+      "chunk_id": "a8619fd4ae194817a13dad90f43659f8_chunk_0038",
+      "text": "Laptops & IT Hardware have an approval limit of ₹5,00,000.",
+      "type": "fact"
+    },
+    {
+      "claim_id": "a8619fd4ae194817a13dad90f43659f8_chunk_0038_claim_001",
+      "chunk_id": "a8619fd4ae194817a13dad90f43659f8_chunk_0038",
+      "text": "Office Supplies have an approval limit of ₹50,000.",
+      "type": "fact"
+    },
+    {
+      "claim_id": "a8619fd4ae194817a13dad90f43659f8_chunk_0038_claim_002",
+      "chunk_id": "a8619fd4ae194817a13dad90f43659f8_chunk_0038",
+      "text": "Software Licenses have an approval limit of ₹10,00,000.",
+      "type": "fact"
+    },
+    {
+      "claim_id": "a8619fd4ae194817a13dad90f43659f8_chunk_0041_claim_000",
+      "chunk_id": "a8619fd4ae194817a13dad90f43659f8_chunk_0041",
+      "text": "Per the Benefits Guide: Health insurance coverage begins after 30 days of continuous employment.",
+      "type": "fact"
+    },
+    {
+      "claim_id": "a8619fd4ae194817a13dad90f43659f8_chunk_0041_claim_001",
+      "chunk_id": "a8619fd4ae194817a13dad90f43659f8_chunk_0041",
+      "text": "Per the updated Total Rewards page circulated separately: health insurance coverage begins after 90 days of continuous employment.",
+      "type": "fact"
+    },
+    {
+      "claim_id": "a8619fd4ae194817a13dad90f43659f8_chunk_0047_claim_000",
+      "chunk_id": "a8619fd4ae194817a13dad90f43659f8_chunk_0047",
+      "text": "employees receive 18 or 20 annual leaves",
+      "type": "fact"
+    },
+    {
+      "claim_id": "a8619fd4ae194817a13dad90f43659f8_chunk_0047_claim_001",
+      "chunk_id": "a8619fd4ae194817a13dad90f43659f8_chunk_0047",
+      "text": "MFA is mandatory for all employees",
+      "type": "fact"
+    },
+    {
+      "claim_id": "a8619fd4ae194817a13dad90f43659f8_chunk_0047_claim_002",
+      "chunk_id": "a8619fd4ae194817a13dad90f43659f8_chunk_0047",
+      "text": "Q1 revenue growth is reported as 18% and 15%",
+      "type": "fact"
+    },
+    {
+      "claim_id": "a8619fd4ae194817a13dad90f43659f8_chunk_0047_claim_003",
+      "chunk_id": "a8619fd4ae194817a13dad90f43659f8_chunk_0047",
+      "text": "Appendix B is missing in this edition",
+      "type": "fact"
+    },
+    {
+      "claim_id": "a8619fd4ae194817a13dad90f43659f8_chunk_0049_claim_000",
+      "chunk_id": "a8619fd4ae194817a13dad90f43659f8_chunk_0049",
+      "text": "Appendix A -Organization Chart (see Fig. 3, Section 11). Appendix C -Approved Vendor List (referenced in Section 12; full vendor table maintained by Procurement separately). Appendix B, referenced in Sections 5 and 9, is not included in this edition.",
+      "type": "fact"
+    }
+  ]
+}

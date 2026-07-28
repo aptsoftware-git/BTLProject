@@ -1,0 +1,3619 @@
+[
+  {
+    "knowledge_id": "a8619fd4ae194817a13dad90f43659f8_chunk_0000",
+    "document_id": "a8619fd4ae194817a13dad90f43659f8",
+    "page_number": 1,
+    "chunk_type": "Image",
+    "heading": null,
+    "parent_heading": null,
+    "section_path": "Root",
+    "sequence_number": 0,
+    "text": "Image",
+    "metadata": {
+      "word_count": 1,
+      "token_estimate": 1,
+      "hierarchy_path": [],
+      "source_element_ids": [
+        "b1_#/pictures/0"
+      ],
+      "bounding_boxes": [
+        {
+          "l": 241.65342712402344,
+          "t": 735.4346542358398,
+          "r": 350.96795654296875,
+          "b": 695.7740783691406,
+          "coord_origin": "BOTTOMLEFT"
+        }
+      ]
+    },
+    "relationships": {
+      "belongs_to": null
+    },
+    "embedding_status": "Pending",
+    "source_file": "20eb0c7e0de84aa48ddd91284014d85e_Vertexa_Mini_Company_Handbook.pdf",
+    "bounding_box": {
+      "l": 241.65342712402344,
+      "t": 735.4346542358398,
+      "r": 350.96795654296875,
+      "b": 695.7740783691406,
+      "coord_origin": "BOTTOMLEFT"
+    },
+    "created_time": "2026-07-21T06:00:39.453094Z",
+    "confidence": 1.0
+  },
+  {
+    "knowledge_id": "a8619fd4ae194817a13dad90f43659f8_chunk_0001",
+    "document_id": "a8619fd4ae194817a13dad90f43659f8",
+    "page_number": 1,
+    "chunk_type": "Heading",
+    "heading": "Vertexa Solutions Pvt. Ltd.",
+    "parent_heading": null,
+    "section_path": "Vertexa Solutions Pvt. Ltd.",
+    "sequence_number": 1,
+    "text": "Vertexa Solutions Pvt. Ltd.",
+    "metadata": {
+      "word_count": 4,
+      "token_estimate": 7,
+      "hierarchy_path": [
+        "b1_#/texts/0"
+      ],
+      "source_element_ids": [
+        "b1_#/texts/0"
+      ],
+      "bounding_boxes": [
+        {
+          "l": 196.25,
+          "t": 666.13,
+          "r": 415.8884000000002,
+          "b": 646.09,
+          "coord_origin": "BOTTOMLEFT"
+        }
+      ]
+    },
+    "relationships": {
+      "belongs_to": null,
+      "parent": null
+    },
+    "embedding_status": "Pending",
+    "source_file": "20eb0c7e0de84aa48ddd91284014d85e_Vertexa_Mini_Company_Handbook.pdf",
+    "bounding_box": {
+      "l": 196.25,
+      "t": 666.13,
+      "r": 415.8884000000002,
+      "b": 646.09,
+      "coord_origin": "BOTTOMLEFT"
+    },
+    "created_time": "2026-07-21T06:00:39.453094Z",
+    "confidence": 1.0
+  },
+  {
+    "knowledge_id": "a8619fd4ae194817a13dad90f43659f8_chunk_0002",
+    "document_id": "a8619fd4ae194817a13dad90f43659f8",
+    "page_number": 1,
+    "chunk_type": "Paragraph",
+    "heading": "Vertexa Solutions Pvt. Ltd.",
+    "parent_heading": null,
+    "section_path": "Vertexa Solutions Pvt. Ltd.",
+    "sequence_number": 2,
+    "text": "Mini Company Handbook -Employee Reference Edition, v4.2",
+    "metadata": {
+      "word_count": 8,
+      "token_estimate": 12,
+      "hierarchy_path": [
+        "b1_#/texts/0"
+      ],
+      "source_element_ids": [
+        "b1_#/texts/1"
+      ],
+      "bounding_boxes": [
+        {
+          "l": 153.98,
+          "t": 629.74,
+          "r": 460.28247999999996,
+          "b": 617.74,
+          "coord_origin": "BOTTOMLEFT"
+        }
+      ]
+    },
+    "relationships": {
+      "belongs_to": "a8619fd4ae194817a13dad90f43659f8_chunk_0001",
+      "previous": null
+    },
+    "embedding_status": "Pending",
+    "source_file": "20eb0c7e0de84aa48ddd91284014d85e_Vertexa_Mini_Company_Handbook.pdf",
+    "bounding_box": {
+      "l": 153.98,
+      "t": 629.74,
+      "r": 460.28247999999996,
+      "b": 617.74,
+      "coord_origin": "BOTTOMLEFT"
+    },
+    "created_time": "2026-07-21T06:00:39.453094Z",
+    "confidence": 1.0
+  },
+  {
+    "knowledge_id": "a8619fd4ae194817a13dad90f43659f8_chunk_0003",
+    "document_id": "a8619fd4ae194817a13dad90f43659f8",
+    "page_number": 1,
+    "chunk_type": "Paragraph",
+    "heading": "Vertexa Solutions Pvt. Ltd.",
+    "parent_heading": null,
+    "section_path": "Vertexa Solutions Pvt. Ltd.",
+    "sequence_number": 3,
+    "text": "Internal Use Only. If in doubt, check with there reporting manager before acting on any policy below.",
+    "metadata": {
+      "word_count": 17,
+      "token_estimate": 20,
+      "hierarchy_path": [
+        "b1_#/texts/0"
+      ],
+      "source_element_ids": [
+        "b1_#/texts/2"
+      ],
+      "bounding_boxes": [
+        {
+          "l": 132.98,
+          "t": 603.49,
+          "r": 478.8153200000007,
+          "b": 594.97,
+          "coord_origin": "BOTTOMLEFT"
+        }
+      ]
+    },
+    "relationships": {
+      "belongs_to": "a8619fd4ae194817a13dad90f43659f8_chunk_0001",
+      "previous": "a8619fd4ae194817a13dad90f43659f8_chunk_0002"
+    },
+    "embedding_status": "Pending",
+    "source_file": "20eb0c7e0de84aa48ddd91284014d85e_Vertexa_Mini_Company_Handbook.pdf",
+    "bounding_box": {
+      "l": 132.98,
+      "t": 603.49,
+      "r": 478.8153200000007,
+      "b": 594.97,
+      "coord_origin": "BOTTOMLEFT"
+    },
+    "created_time": "2026-07-21T06:00:39.453094Z",
+    "confidence": 1.0
+  },
+  {
+    "knowledge_id": "a8619fd4ae194817a13dad90f43659f8_chunk_0004",
+    "document_id": "a8619fd4ae194817a13dad90f43659f8",
+    "page_number": 1,
+    "chunk_type": "Heading",
+    "heading": "1  Company Overview",
+    "parent_heading": null,
+    "section_path": "1  Company Overview",
+    "sequence_number": 4,
+    "text": "1  Company Overview",
+    "metadata": {
+      "word_count": 3,
+      "token_estimate": 4,
+      "hierarchy_path": [
+        "b1_#/texts/3"
+      ],
+      "source_element_ids": [
+        "b1_#/texts/3"
+      ],
+      "bounding_boxes": [
+        {
+          "l": 50.4,
+          "t": 556.96,
+          "r": 190.01,
+          "b": 541.96,
+          "coord_origin": "BOTTOMLEFT"
+        }
+      ]
+    },
+    "relationships": {
+      "belongs_to": "a8619fd4ae194817a13dad90f43659f8_chunk_0001",
+      "parent": "a8619fd4ae194817a13dad90f43659f8_chunk_0001"
+    },
+    "embedding_status": "Pending",
+    "source_file": "20eb0c7e0de84aa48ddd91284014d85e_Vertexa_Mini_Company_Handbook.pdf",
+    "bounding_box": {
+      "l": 50.4,
+      "t": 556.96,
+      "r": 190.01,
+      "b": 541.96,
+      "coord_origin": "BOTTOMLEFT"
+    },
+    "created_time": "2026-07-21T06:00:39.453094Z",
+    "confidence": 1.0
+  },
+  {
+    "knowledge_id": "a8619fd4ae194817a13dad90f43659f8_chunk_0005",
+    "document_id": "a8619fd4ae194817a13dad90f43659f8",
+    "page_number": 1,
+    "chunk_type": "Heading",
+    "heading": "1.1 History  |  1.2 Mission  |  1.3 Vision  |  1.4 Values",
+    "parent_heading": null,
+    "section_path": "1.1 History  |  1.2 Mission  |  1.3 Vision  |  1.4 Values",
+    "sequence_number": 5,
+    "text": "1.1 History  |  1.2 Mission  |  1.3 Vision  |  1.4 Values",
+    "metadata": {
+      "word_count": 12,
+      "token_estimate": 28,
+      "hierarchy_path": [
+        "b1_#/texts/4"
+      ],
+      "source_element_ids": [
+        "b1_#/texts/4"
+      ],
+      "bounding_boxes": [
+        {
+          "l": 50.4,
+          "t": 530.59,
+          "r": 302.77352,
+          "b": 519.07,
+          "coord_origin": "BOTTOMLEFT"
+        }
+      ]
+    },
+    "relationships": {
+      "belongs_to": "a8619fd4ae194817a13dad90f43659f8_chunk_0004",
+      "parent": "a8619fd4ae194817a13dad90f43659f8_chunk_0004"
+    },
+    "embedding_status": "Pending",
+    "source_file": "20eb0c7e0de84aa48ddd91284014d85e_Vertexa_Mini_Company_Handbook.pdf",
+    "bounding_box": {
+      "l": 50.4,
+      "t": 530.59,
+      "r": 302.77352,
+      "b": 519.07,
+      "coord_origin": "BOTTOMLEFT"
+    },
+    "created_time": "2026-07-21T06:00:39.453094Z",
+    "confidence": 1.0
+  },
+  {
+    "knowledge_id": "a8619fd4ae194817a13dad90f43659f8_chunk_0006",
+    "document_id": "a8619fd4ae194817a13dad90f43659f8",
+    "page_number": 1,
+    "chunk_type": "Paragraph",
+    "heading": "1.1 History  |  1.2 Mission  |  1.3 Vision  |  1.4 Values",
+    "parent_heading": null,
+    "section_path": "1.1 History  |  1.2 Mission  |  1.3 Vision  |  1.4 Values",
+    "sequence_number": 6,
+    "text": "Vertexa Solutions Pvt. Ltd. was founded in 2011 by six engineers who set out to build tools that helps enterprises make sense of unstructured documents. The company was incorporated in Bengaluru; it's first office was a two-room facility above a printing shop. Vertexa now serves over 300 clients accross 14 countries.",
+    "metadata": {
+      "word_count": 53,
+      "token_estimate": 68,
+      "hierarchy_path": [
+        "b1_#/texts/4"
+      ],
+      "source_element_ids": [
+        "b1_#/texts/5"
+      ],
+      "bounding_boxes": [
+        {
+          "l": 50.4,
+          "t": 512.74,
+          "r": 563.1961599999996,
+          "b": 476.62,
+          "coord_origin": "BOTTOMLEFT"
+        }
+      ]
+    },
+    "relationships": {
+      "belongs_to": "a8619fd4ae194817a13dad90f43659f8_chunk_0005",
+      "previous": "a8619fd4ae194817a13dad90f43659f8_chunk_0003"
+    },
+    "embedding_status": "Pending",
+    "source_file": "20eb0c7e0de84aa48ddd91284014d85e_Vertexa_Mini_Company_Handbook.pdf",
+    "bounding_box": {
+      "l": 50.4,
+      "t": 512.74,
+      "r": 563.1961599999996,
+      "b": 476.62,
+      "coord_origin": "BOTTOMLEFT"
+    },
+    "created_time": "2026-07-21T06:00:39.453094Z",
+    "confidence": 1.0
+  },
+  {
+    "knowledge_id": "a8619fd4ae194817a13dad90f43659f8_chunk_0007",
+    "document_id": "a8619fd4ae194817a13dad90f43659f8",
+    "page_number": 1,
+    "chunk_type": "Paragraph",
+    "heading": "1.1 History  |  1.2 Mission  |  1.3 Vision  |  1.4 Values",
+    "parent_heading": null,
+    "section_path": "1.1 History  |  1.2 Mission  |  1.3 Vision  |  1.4 Values",
+    "sequence_number": 7,
+    "text": "Note: Section 9 (Compliance) references a founding year of 2009 in a regulatory filing summary, though 2011 is the year on official incorporation records.",
+    "metadata": {
+      "word_count": 24,
+      "token_estimate": 35,
+      "hierarchy_path": [
+        "b1_#/texts/4"
+      ],
+      "source_element_ids": [
+        "b1_#/texts/6"
+      ],
+      "bounding_boxes": [
+        {
+          "l": 50.4,
+          "t": 469.78000000000003,
+          "r": 555.5901999999998,
+          "b": 446.98,
+          "coord_origin": "BOTTOMLEFT"
+        }
+      ]
+    },
+    "relationships": {
+      "belongs_to": "a8619fd4ae194817a13dad90f43659f8_chunk_0005",
+      "previous": "a8619fd4ae194817a13dad90f43659f8_chunk_0006"
+    },
+    "embedding_status": "Pending",
+    "source_file": "20eb0c7e0de84aa48ddd91284014d85e_Vertexa_Mini_Company_Handbook.pdf",
+    "bounding_box": {
+      "l": 50.4,
+      "t": 469.78000000000003,
+      "r": 555.5901999999998,
+      "b": 446.98,
+      "coord_origin": "BOTTOMLEFT"
+    },
+    "created_time": "2026-07-21T06:00:39.453094Z",
+    "confidence": 1.0
+  },
+  {
+    "knowledge_id": "a8619fd4ae194817a13dad90f43659f8_chunk_0008",
+    "document_id": "a8619fd4ae194817a13dad90f43659f8",
+    "page_number": 1,
+    "chunk_type": "Paragraph",
+    "heading": "1.1 History  |  1.2 Mission  |  1.3 Vision  |  1.4 Values",
+    "parent_heading": null,
+    "section_path": "1.1 History  |  1.2 Mission  |  1.3 Vision  |  1.4 Values",
+    "sequence_number": 8,
+    "text": "Mission: to help organizations unlock the value trapped in there documents by combining rigorous engineering with respect for the people who rely on our software everyday.",
+    "metadata": {
+      "word_count": 26,
+      "token_estimate": 28,
+      "hierarchy_path": [
+        "b1_#/texts/4"
+      ],
+      "source_element_ids": [
+        "b1_#/texts/7"
+      ],
+      "bounding_boxes": [
+        {
+          "l": 50.4,
+          "t": 440.02000000000004,
+          "r": 559.6321599999999,
+          "b": 417.21999999999997,
+          "coord_origin": "BOTTOMLEFT"
+        }
+      ]
+    },
+    "relationships": {
+      "belongs_to": "a8619fd4ae194817a13dad90f43659f8_chunk_0005",
+      "previous": "a8619fd4ae194817a13dad90f43659f8_chunk_0007"
+    },
+    "embedding_status": "Pending",
+    "source_file": "20eb0c7e0de84aa48ddd91284014d85e_Vertexa_Mini_Company_Handbook.pdf",
+    "bounding_box": {
+      "l": 50.4,
+      "t": 440.02000000000004,
+      "r": 559.6321599999999,
+      "b": 417.21999999999997,
+      "coord_origin": "BOTTOMLEFT"
+    },
+    "created_time": "2026-07-21T06:00:39.453094Z",
+    "confidence": 1.0
+  },
+  {
+    "knowledge_id": "a8619fd4ae194817a13dad90f43659f8_chunk_0009",
+    "document_id": "a8619fd4ae194817a13dad90f43659f8",
+    "page_number": 1,
+    "chunk_type": "Paragraph",
+    "heading": "1.1 History  |  1.2 Mission  |  1.3 Vision  |  1.4 Values",
+    "parent_heading": null,
+    "section_path": "1.1 History  |  1.2 Mission  |  1.3 Vision  |  1.4 Values",
+    "sequence_number": 9,
+    "text": "Vision: a future in which no employee ever has to manually search hundreds of pages to find a single fact.",
+    "metadata": {
+      "word_count": 20,
+      "token_estimate": 22,
+      "hierarchy_path": [
+        "b1_#/texts/4"
+      ],
+      "source_element_ids": [
+        "b1_#/texts/8"
+      ],
+      "bounding_boxes": [
+        {
+          "l": 50.4,
+          "t": 410.38,
+          "r": 459.80248,
+          "b": 400.9,
+          "coord_origin": "BOTTOMLEFT"
+        }
+      ]
+    },
+    "relationships": {
+      "belongs_to": "a8619fd4ae194817a13dad90f43659f8_chunk_0005",
+      "previous": "a8619fd4ae194817a13dad90f43659f8_chunk_0008"
+    },
+    "embedding_status": "Pending",
+    "source_file": "20eb0c7e0de84aa48ddd91284014d85e_Vertexa_Mini_Company_Handbook.pdf",
+    "bounding_box": {
+      "l": 50.4,
+      "t": 410.38,
+      "r": 459.80248,
+      "b": 400.9,
+      "coord_origin": "BOTTOMLEFT"
+    },
+    "created_time": "2026-07-21T06:00:39.453094Z",
+    "confidence": 1.0
+  },
+  {
+    "knowledge_id": "a8619fd4ae194817a13dad90f43659f8_chunk_0010",
+    "document_id": "a8619fd4ae194817a13dad90f43659f8",
+    "page_number": 1,
+    "chunk_type": "Bullet List",
+    "heading": "1.1 History  |  1.2 Mission  |  1.3 Vision  |  1.4 Values",
+    "parent_heading": null,
+    "section_path": "1.1 History  |  1.2 Mission  |  1.3 Vision  |  1.4 Values",
+    "sequence_number": 10,
+    "text": "Customer Obsession -we start with the customer's problem.",
+    "metadata": {
+      "word_count": 9,
+      "token_estimate": 12,
+      "hierarchy_path": [
+        "b1_#/texts/4"
+      ],
+      "source_element_ids": [
+        "b1_#/texts/9"
+      ],
+      "bounding_boxes": [
+        {
+          "l": 50.4,
+          "t": 393.58000000000004,
+          "r": 310.35247999999996,
+          "b": 384.1,
+          "coord_origin": "BOTTOMLEFT"
+        }
+      ]
+    },
+    "relationships": {
+      "belongs_to": "a8619fd4ae194817a13dad90f43659f8_chunk_0005"
+    },
+    "embedding_status": "Pending",
+    "source_file": "20eb0c7e0de84aa48ddd91284014d85e_Vertexa_Mini_Company_Handbook.pdf",
+    "bounding_box": {
+      "l": 50.4,
+      "t": 393.58000000000004,
+      "r": 310.35247999999996,
+      "b": 384.1,
+      "coord_origin": "BOTTOMLEFT"
+    },
+    "created_time": "2026-07-21T06:00:39.453094Z",
+    "confidence": 1.0
+  },
+  {
+    "knowledge_id": "a8619fd4ae194817a13dad90f43659f8_chunk_0011",
+    "document_id": "a8619fd4ae194817a13dad90f43659f8",
+    "page_number": 1,
+    "chunk_type": "Bullet List",
+    "heading": "1.1 History  |  1.2 Mission  |  1.3 Vision  |  1.4 Values",
+    "parent_heading": null,
+    "section_path": "1.1 History  |  1.2 Mission  |  1.3 Vision  |  1.4 Values",
+    "sequence_number": 11,
+    "text": "Ownership -every employee fixes what they see is broken.",
+    "metadata": {
+      "word_count": 9,
+      "token_estimate": 11,
+      "hierarchy_path": [
+        "b1_#/texts/4"
+      ],
+      "source_element_ids": [
+        "b1_#/texts/10"
+      ],
+      "bounding_boxes": [
+        {
+          "l": 50.4,
+          "t": 379.76,
+          "r": 303.27248,
+          "b": 370.28,
+          "coord_origin": "BOTTOMLEFT"
+        }
+      ]
+    },
+    "relationships": {
+      "belongs_to": "a8619fd4ae194817a13dad90f43659f8_chunk_0005"
+    },
+    "embedding_status": "Pending",
+    "source_file": "20eb0c7e0de84aa48ddd91284014d85e_Vertexa_Mini_Company_Handbook.pdf",
+    "bounding_box": {
+      "l": 50.4,
+      "t": 379.76,
+      "r": 303.27248,
+      "b": 370.28,
+      "coord_origin": "BOTTOMLEFT"
+    },
+    "created_time": "2026-07-21T06:00:39.453094Z",
+    "confidence": 1.0
+  },
+  {
+    "knowledge_id": "a8619fd4ae194817a13dad90f43659f8_chunk_0012",
+    "document_id": "a8619fd4ae194817a13dad90f43659f8",
+    "page_number": 1,
+    "chunk_type": "Bullet List",
+    "heading": "1.1 History  |  1.2 Mission  |  1.3 Vision  |  1.4 Values",
+    "parent_heading": null,
+    "section_path": "1.1 History  |  1.2 Mission  |  1.3 Vision  |  1.4 Values",
+    "sequence_number": 12,
+    "text": "Integrity -we do the right thing even when its inconvenient.",
+    "metadata": {
+      "word_count": 10,
+      "token_estimate": 13,
+      "hierarchy_path": [
+        "b1_#/texts/4"
+      ],
+      "source_element_ids": [
+        "b1_#/texts/11"
+      ],
+      "bounding_boxes": [
+        {
+          "l": 50.4,
+          "t": 365.84000000000003,
+          "r": 307.83248,
+          "b": 356.36,
+          "coord_origin": "BOTTOMLEFT"
+        }
+      ]
+    },
+    "relationships": {
+      "belongs_to": "a8619fd4ae194817a13dad90f43659f8_chunk_0005"
+    },
+    "embedding_status": "Pending",
+    "source_file": "20eb0c7e0de84aa48ddd91284014d85e_Vertexa_Mini_Company_Handbook.pdf",
+    "bounding_box": {
+      "l": 50.4,
+      "t": 365.84000000000003,
+      "r": 307.83248,
+      "b": 356.36,
+      "coord_origin": "BOTTOMLEFT"
+    },
+    "created_time": "2026-07-21T06:00:39.453094Z",
+    "confidence": 1.0
+  },
+  {
+    "knowledge_id": "a8619fd4ae194817a13dad90f43659f8_chunk_0013",
+    "document_id": "a8619fd4ae194817a13dad90f43659f8",
+    "page_number": 1,
+    "chunk_type": "Bullet List",
+    "heading": "1.1 History  |  1.2 Mission  |  1.3 Vision  |  1.4 Values",
+    "parent_heading": null,
+    "section_path": "1.1 History  |  1.2 Mission  |  1.3 Vision  |  1.4 Values",
+    "sequence_number": 13,
+    "text": "Curiosity -we treat contradictions as learning opportunities.",
+    "metadata": {
+      "word_count": 7,
+      "token_estimate": 10,
+      "hierarchy_path": [
+        "b1_#/texts/4"
+      ],
+      "source_element_ids": [
+        "b1_#/texts/12"
+      ],
+      "bounding_boxes": [
+        {
+          "l": 50.4,
+          "t": 352.04,
+          "r": 308.55248,
+          "b": 342.56,
+          "coord_origin": "BOTTOMLEFT"
+        }
+      ]
+    },
+    "relationships": {
+      "belongs_to": "a8619fd4ae194817a13dad90f43659f8_chunk_0005"
+    },
+    "embedding_status": "Pending",
+    "source_file": "20eb0c7e0de84aa48ddd91284014d85e_Vertexa_Mini_Company_Handbook.pdf",
+    "bounding_box": {
+      "l": 50.4,
+      "t": 352.04,
+      "r": 308.55248,
+      "b": 342.56,
+      "coord_origin": "BOTTOMLEFT"
+    },
+    "created_time": "2026-07-21T06:00:39.453094Z",
+    "confidence": 1.0
+  },
+  {
+    "knowledge_id": "a8619fd4ae194817a13dad90f43659f8_chunk_0014",
+    "document_id": "a8619fd4ae194817a13dad90f43659f8",
+    "page_number": 1,
+    "chunk_type": "Paragraph",
+    "heading": "1.1 History  |  1.2 Mission  |  1.3 Vision  |  1.4 Values",
+    "parent_heading": null,
+    "section_path": "1.1 History  |  1.2 Mission  |  1.3 Vision  |  1.4 Values",
+    "sequence_number": 14,
+    "text": "These four values were ratified in 2012; a 2019 internal memo claims a fifth value, 'Simplicity', was added that year -HR maintains the values have been constant since 2012.",
+    "metadata": {
+      "word_count": 29,
+      "token_estimate": 43,
+      "hierarchy_path": [
+        "b1_#/texts/4"
+      ],
+      "source_element_ids": [
+        "b1_#/texts/13"
+      ],
+      "bounding_boxes": [
+        {
+          "l": 50.4,
+          "t": 337.64,
+          "r": 560.4439599999998,
+          "b": 314.84,
+          "coord_origin": "BOTTOMLEFT"
+        }
+      ]
+    },
+    "relationships": {
+      "belongs_to": "a8619fd4ae194817a13dad90f43659f8_chunk_0005",
+      "previous": "a8619fd4ae194817a13dad90f43659f8_chunk_0009"
+    },
+    "embedding_status": "Pending",
+    "source_file": "20eb0c7e0de84aa48ddd91284014d85e_Vertexa_Mini_Company_Handbook.pdf",
+    "bounding_box": {
+      "l": 50.4,
+      "t": 337.64,
+      "r": 560.4439599999998,
+      "b": 314.84,
+      "coord_origin": "BOTTOMLEFT"
+    },
+    "created_time": "2026-07-21T06:00:39.453094Z",
+    "confidence": 1.0
+  },
+  {
+    "knowledge_id": "a8619fd4ae194817a13dad90f43659f8_chunk_0015",
+    "document_id": "a8619fd4ae194817a13dad90f43659f8",
+    "page_number": 1,
+    "chunk_type": "Heading",
+    "heading": "2  Human Resources Policies",
+    "parent_heading": null,
+    "section_path": "2  Human Resources Policies",
+    "sequence_number": 15,
+    "text": "2  Human Resources Policies",
+    "metadata": {
+      "word_count": 4,
+      "token_estimate": 5,
+      "hierarchy_path": [
+        "b1_#/texts/14"
+      ],
+      "source_element_ids": [
+        "b1_#/texts/14"
+      ],
+      "bounding_boxes": [
+        {
+          "l": 50.4,
+          "t": 303.98,
+          "r": 230.35999999999999,
+          "b": 288.98,
+          "coord_origin": "BOTTOMLEFT"
+        }
+      ]
+    },
+    "relationships": {
+      "belongs_to": "a8619fd4ae194817a13dad90f43659f8_chunk_0005",
+      "parent": "a8619fd4ae194817a13dad90f43659f8_chunk_0005"
+    },
+    "embedding_status": "Pending",
+    "source_file": "20eb0c7e0de84aa48ddd91284014d85e_Vertexa_Mini_Company_Handbook.pdf",
+    "bounding_box": {
+      "l": 50.4,
+      "t": 303.98,
+      "r": 230.35999999999999,
+      "b": 288.98,
+      "coord_origin": "BOTTOMLEFT"
+    },
+    "created_time": "2026-07-21T06:00:39.453094Z",
+    "confidence": 1.0
+  },
+  {
+    "knowledge_id": "a8619fd4ae194817a13dad90f43659f8_chunk_0016",
+    "document_id": "a8619fd4ae194817a13dad90f43659f8",
+    "page_number": 1,
+    "chunk_type": "Heading",
+    "heading": "2.1 Leave Policy  |  2.2 Attendance  |  2.3 Code of Conduct",
+    "parent_heading": null,
+    "section_path": "2.1 Leave Policy  |  2.2 Attendance  |  2.3 Code of Conduct",
+    "sequence_number": 16,
+    "text": "2.1 Leave Policy  |  2.2 Attendance  |  2.3 Code of Conduct",
+    "metadata": {
+      "word_count": 12,
+      "token_estimate": 23,
+      "hierarchy_path": [
+        "b1_#/texts/15"
+      ],
+      "source_element_ids": [
+        "b1_#/texts/15"
+      ],
+      "bounding_boxes": [
+        {
+          "l": 50.4,
+          "t": 277.61,
+          "r": 329.55352,
+          "b": 266.09000000000003,
+          "coord_origin": "BOTTOMLEFT"
+        }
+      ]
+    },
+    "relationships": {
+      "belongs_to": "a8619fd4ae194817a13dad90f43659f8_chunk_0015",
+      "parent": "a8619fd4ae194817a13dad90f43659f8_chunk_0015"
+    },
+    "embedding_status": "Pending",
+    "source_file": "20eb0c7e0de84aa48ddd91284014d85e_Vertexa_Mini_Company_Handbook.pdf",
+    "bounding_box": {
+      "l": 50.4,
+      "t": 277.61,
+      "r": 329.55352,
+      "b": 266.09000000000003,
+      "coord_origin": "BOTTOMLEFT"
+    },
+    "created_time": "2026-07-21T06:00:39.453094Z",
+    "confidence": 1.0
+  },
+  {
+    "knowledge_id": "a8619fd4ae194817a13dad90f43659f8_chunk_0017",
+    "document_id": "a8619fd4ae194817a13dad90f43659f8",
+    "page_number": 1,
+    "chunk_type": "Paragraph",
+    "heading": "2.1 Leave Policy  |  2.2 Attendance  |  2.3 Code of Conduct",
+    "parent_heading": null,
+    "section_path": "2.1 Leave Policy  |  2.2 Attendance  |  2.3 Code of Conduct",
+    "sequence_number": 17,
+    "text": "Page 4 of the original policy circular: Employees receive 18 annual leaves per calendar year, credited pro-rata for employees joining mid-year, plus 10 sick and 5 casual leaves.",
+    "metadata": {
+      "word_count": 30,
+      "token_estimate": 39,
+      "hierarchy_path": [
+        "b1_#/texts/15"
+      ],
+      "source_element_ids": [
+        "b1_#/texts/16"
+      ],
+      "bounding_boxes": [
+        {
+          "l": 50.4,
+          "t": 259.76,
+          "r": 559.3247199999998,
+          "b": 236.96000000000004,
+          "coord_origin": "BOTTOMLEFT"
+        }
+      ]
+    },
+    "relationships": {
+      "belongs_to": "a8619fd4ae194817a13dad90f43659f8_chunk_0016",
+      "previous": "a8619fd4ae194817a13dad90f43659f8_chunk_0014"
+    },
+    "embedding_status": "Pending",
+    "source_file": "20eb0c7e0de84aa48ddd91284014d85e_Vertexa_Mini_Company_Handbook.pdf",
+    "bounding_box": {
+      "l": 50.4,
+      "t": 259.76,
+      "r": 559.3247199999998,
+      "b": 236.96000000000004,
+      "coord_origin": "BOTTOMLEFT"
+    },
+    "created_time": "2026-07-21T06:00:39.453094Z",
+    "confidence": 1.0
+  },
+  {
+    "knowledge_id": "a8619fd4ae194817a13dad90f43659f8_chunk_0018",
+    "document_id": "a8619fd4ae194817a13dad90f43659f8",
+    "page_number": 1,
+    "chunk_type": "Paragraph",
+    "heading": "2.1 Leave Policy  |  2.2 Attendance  |  2.3 Code of Conduct",
+    "parent_heading": null,
+    "section_path": "2.1 Leave Policy  |  2.2 Attendance  |  2.3 Code of Conduct",
+    "sequence_number": 18,
+    "text": "Page 18 of the same circular (Annexure update): Employees receive 20 annual leaves per calendar year following the FY23 revision.",
+    "metadata": {
+      "word_count": 20,
+      "token_estimate": 28,
+      "hierarchy_path": [
+        "b1_#/texts/15"
+      ],
+      "source_element_ids": [
+        "b1_#/texts/17"
+      ],
+      "bounding_boxes": [
+        {
+          "l": 50.4,
+          "t": 230.12,
+          "r": 557.96248,
+          "b": 220.64,
+          "coord_origin": "BOTTOMLEFT"
+        }
+      ]
+    },
+    "relationships": {
+      "belongs_to": "a8619fd4ae194817a13dad90f43659f8_chunk_0016",
+      "previous": "a8619fd4ae194817a13dad90f43659f8_chunk_0017"
+    },
+    "embedding_status": "Pending",
+    "source_file": "20eb0c7e0de84aa48ddd91284014d85e_Vertexa_Mini_Company_Handbook.pdf",
+    "bounding_box": {
+      "l": 50.4,
+      "t": 230.12,
+      "r": 557.96248,
+      "b": 220.64,
+      "coord_origin": "BOTTOMLEFT"
+    },
+    "created_time": "2026-07-21T06:00:39.453094Z",
+    "confidence": 1.0
+  },
+  {
+    "knowledge_id": "a8619fd4ae194817a13dad90f43659f8_chunk_0019",
+    "document_id": "a8619fd4ae194817a13dad90f43659f8",
+    "page_number": 1,
+    "chunk_type": "Paragraph",
+    "heading": "2.1 Leave Policy  |  2.2 Attendance  |  2.3 Code of Conduct",
+    "parent_heading": null,
+    "section_path": "2.1 Leave Policy  |  2.2 Attendance  |  2.3 Code of Conduct",
+    "sequence_number": 19,
+    "text": "Standard hours are 9:30 AM -6:30 PM. Repeated unexplained absences may effect an employee's rating. Employees who's conduct",
+    "metadata": {
+      "word_count": 22,
+      "token_estimate": 31,
+      "hierarchy_path": [
+        "b1_#/texts/15"
+      ],
+      "source_element_ids": [
+        "b1_#/texts/18"
+      ],
+      "bounding_boxes": [
+        {
+          "l": 50.4,
+          "t": 213.76999999999998,
+          "r": 557.2177999999996,
+          "b": 204.28999999999996,
+          "coord_origin": "BOTTOMLEFT"
+        }
+      ]
+    },
+    "relationships": {
+      "belongs_to": "a8619fd4ae194817a13dad90f43659f8_chunk_0016",
+      "previous": "a8619fd4ae194817a13dad90f43659f8_chunk_0018"
+    },
+    "embedding_status": "Pending",
+    "source_file": "20eb0c7e0de84aa48ddd91284014d85e_Vertexa_Mini_Company_Handbook.pdf",
+    "bounding_box": {
+      "l": 50.4,
+      "t": 213.76999999999998,
+      "r": 557.2177999999996,
+      "b": 204.28999999999996,
+      "coord_origin": "BOTTOMLEFT"
+    },
+    "created_time": "2026-07-21T06:00:39.453094Z",
+    "confidence": 1.0
+  },
+  {
+    "knowledge_id": "a8619fd4ae194817a13dad90f43659f8_chunk_0020",
+    "document_id": "a8619fd4ae194817a13dad90f43659f8",
+    "page_number": 1,
+    "chunk_type": "Paragraph",
+    "heading": "2.1 Leave Policy  |  2.2 Attendance  |  2.3 Code of Conduct",
+    "parent_heading": null,
+    "section_path": "2.1 Leave Policy  |  2.2 Attendance  |  2.3 Code of Conduct",
+    "sequence_number": 20,
+    "text": "violates the Code of Conduct may face disciplinary action; their are no exceptions based on seniority.",
+    "metadata": {
+      "word_count": 16,
+      "token_estimate": 20,
+      "hierarchy_path": [
+        "b1_#/texts/15"
+      ],
+      "source_element_ids": [
+        "b1_#/texts/19"
+      ],
+      "bounding_boxes": [
+        {
+          "l": 50.4,
+          "t": 200.45000000000005,
+          "r": 441.89248,
+          "b": 190.97000000000003,
+          "coord_origin": "BOTTOMLEFT"
+        }
+      ]
+    },
+    "relationships": {
+      "belongs_to": "a8619fd4ae194817a13dad90f43659f8_chunk_0016",
+      "previous": "a8619fd4ae194817a13dad90f43659f8_chunk_0019"
+    },
+    "embedding_status": "Pending",
+    "source_file": "20eb0c7e0de84aa48ddd91284014d85e_Vertexa_Mini_Company_Handbook.pdf",
+    "bounding_box": {
+      "l": 50.4,
+      "t": 200.45000000000005,
+      "r": 441.89248,
+      "b": 190.97000000000003,
+      "coord_origin": "BOTTOMLEFT"
+    },
+    "created_time": "2026-07-21T06:00:39.453094Z",
+    "confidence": 1.0
+  },
+  {
+    "knowledge_id": "a8619fd4ae194817a13dad90f43659f8_chunk_0021",
+    "document_id": "a8619fd4ae194817a13dad90f43659f8",
+    "page_number": 1,
+    "chunk_type": "Heading",
+    "heading": "3  Work From Home",
+    "parent_heading": null,
+    "section_path": "3  Work From Home",
+    "sequence_number": 21,
+    "text": "3  Work From Home",
+    "metadata": {
+      "word_count": 4,
+      "token_estimate": 5,
+      "hierarchy_path": [
+        "b1_#/texts/20"
+      ],
+      "source_element_ids": [
+        "b1_#/texts/20"
+      ],
+      "bounding_boxes": [
+        {
+          "l": 50.4,
+          "t": 180.11,
+          "r": 178.97,
+          "b": 165.11,
+          "coord_origin": "BOTTOMLEFT"
+        }
+      ]
+    },
+    "relationships": {
+      "belongs_to": "a8619fd4ae194817a13dad90f43659f8_chunk_0016",
+      "parent": "a8619fd4ae194817a13dad90f43659f8_chunk_0016"
+    },
+    "embedding_status": "Pending",
+    "source_file": "20eb0c7e0de84aa48ddd91284014d85e_Vertexa_Mini_Company_Handbook.pdf",
+    "bounding_box": {
+      "l": 50.4,
+      "t": 180.11,
+      "r": 178.97,
+      "b": 165.11,
+      "coord_origin": "BOTTOMLEFT"
+    },
+    "created_time": "2026-07-21T06:00:39.453094Z",
+    "confidence": 1.0
+  },
+  {
+    "knowledge_id": "a8619fd4ae194817a13dad90f43659f8_chunk_0022",
+    "document_id": "a8619fd4ae194817a13dad90f43659f8",
+    "page_number": 1,
+    "chunk_type": "Paragraph",
+    "heading": "3  Work From Home",
+    "parent_heading": null,
+    "section_path": "3  Work From Home",
+    "sequence_number": 22,
+    "text": "Page 6: Employees may work remotely three days every week, subject to manager approval.",
+    "metadata": {
+      "word_count": 14,
+      "token_estimate": 18,
+      "hierarchy_path": [
+        "b1_#/texts/20"
+      ],
+      "source_element_ids": [
+        "b1_#/texts/21"
+      ],
+      "bounding_boxes": [
+        {
+          "l": 50.4,
+          "t": 158.09000000000003,
+          "r": 408.65247999999997,
+          "b": 148.61,
+          "coord_origin": "BOTTOMLEFT"
+        }
+      ]
+    },
+    "relationships": {
+      "belongs_to": "a8619fd4ae194817a13dad90f43659f8_chunk_0021",
+      "previous": "a8619fd4ae194817a13dad90f43659f8_chunk_0020"
+    },
+    "embedding_status": "Pending",
+    "source_file": "20eb0c7e0de84aa48ddd91284014d85e_Vertexa_Mini_Company_Handbook.pdf",
+    "bounding_box": {
+      "l": 50.4,
+      "t": 158.09000000000003,
+      "r": 408.65247999999997,
+      "b": 148.61,
+      "coord_origin": "BOTTOMLEFT"
+    },
+    "created_time": "2026-07-21T06:00:39.453094Z",
+    "confidence": 1.0
+  },
+  {
+    "knowledge_id": "a8619fd4ae194817a13dad90f43659f8_chunk_0023",
+    "document_id": "a8619fd4ae194817a13dad90f43659f8",
+    "page_number": 1,
+    "chunk_type": "Paragraph",
+    "heading": "3  Work From Home",
+    "parent_heading": null,
+    "section_path": "3  Work From Home",
+    "sequence_number": 23,
+    "text": "Page 25 (FY24 operating-model update): Employees are expected to work from office full time, effective the date communicated by department heads -this supersedes informal remote arrangements. It is not stated in this handbook which of the two rules governs in case of conflict.",
+    "metadata": {
+      "word_count": 44,
+      "token_estimate": 55,
+      "hierarchy_path": [
+        "b1_#/texts/20"
+      ],
+      "source_element_ids": [
+        "b1_#/texts/22"
+      ],
+      "bounding_boxes": [
+        {
+          "l": 50.4,
+          "t": 141.64999999999998,
+          "r": 560.1109999999996,
+          "b": 105.52999999999997,
+          "coord_origin": "BOTTOMLEFT"
+        }
+      ]
+    },
+    "relationships": {
+      "belongs_to": "a8619fd4ae194817a13dad90f43659f8_chunk_0021",
+      "previous": "a8619fd4ae194817a13dad90f43659f8_chunk_0022"
+    },
+    "embedding_status": "Pending",
+    "source_file": "20eb0c7e0de84aa48ddd91284014d85e_Vertexa_Mini_Company_Handbook.pdf",
+    "bounding_box": {
+      "l": 50.4,
+      "t": 141.64999999999998,
+      "r": 560.1109999999996,
+      "b": 105.52999999999997,
+      "coord_origin": "BOTTOMLEFT"
+    },
+    "created_time": "2026-07-21T06:00:39.453094Z",
+    "confidence": 1.0
+  },
+  {
+    "knowledge_id": "a8619fd4ae194817a13dad90f43659f8_chunk_0024",
+    "document_id": "a8619fd4ae194817a13dad90f43659f8",
+    "page_number": 2,
+    "chunk_type": "Heading",
+    "heading": "4  Travel Policy",
+    "parent_heading": null,
+    "section_path": "4  Travel Policy",
+    "sequence_number": 24,
+    "text": "4  Travel Policy",
+    "metadata": {
+      "word_count": 3,
+      "token_estimate": 4,
+      "hierarchy_path": [
+        "b1_#/texts/23"
+      ],
+      "source_element_ids": [
+        "b1_#/texts/23"
+      ],
+      "bounding_boxes": [
+        {
+          "l": 50.4,
+          "t": 745.77,
+          "r": 146.92999999999998,
+          "b": 730.77,
+          "coord_origin": "BOTTOMLEFT"
+        }
+      ]
+    },
+    "relationships": {
+      "belongs_to": "a8619fd4ae194817a13dad90f43659f8_chunk_0021",
+      "parent": "a8619fd4ae194817a13dad90f43659f8_chunk_0021"
+    },
+    "embedding_status": "Pending",
+    "source_file": "20eb0c7e0de84aa48ddd91284014d85e_Vertexa_Mini_Company_Handbook.pdf",
+    "bounding_box": {
+      "l": 50.4,
+      "t": 745.77,
+      "r": 146.92999999999998,
+      "b": 730.77,
+      "coord_origin": "BOTTOMLEFT"
+    },
+    "created_time": "2026-07-21T06:00:39.453094Z",
+    "confidence": 1.0
+  },
+  {
+    "knowledge_id": "a8619fd4ae194817a13dad90f43659f8_chunk_0025",
+    "document_id": "a8619fd4ae194817a13dad90f43659f8",
+    "page_number": 2,
+    "chunk_type": "Paragraph",
+    "heading": "4  Travel Policy",
+    "parent_heading": null,
+    "section_path": "4  Travel Policy",
+    "sequence_number": 25,
+    "text": "Travel should be approved whenever necessary -the policy does not specify who decides necessity, or according to whose judgement a trip qualifies. International travel needs ~4 weeks lead time for visa processing; travel insurance is mandatory. Employees below a certain grade may need additional sign-off, though the grade threshold is undefined here.",
+    "metadata": {
+      "word_count": 53,
+      "token_estimate": 61,
+      "hierarchy_path": [
+        "b1_#/texts/23"
+      ],
+      "source_element_ids": [
+        "b1_#/texts/24"
+      ],
+      "bounding_boxes": [
+        {
+          "l": 50.4,
+          "t": 723.75,
+          "r": 529.8869599999997,
+          "b": 687.61,
+          "coord_origin": "BOTTOMLEFT"
+        }
+      ]
+    },
+    "relationships": {
+      "belongs_to": "a8619fd4ae194817a13dad90f43659f8_chunk_0024",
+      "previous": "a8619fd4ae194817a13dad90f43659f8_chunk_0023"
+    },
+    "embedding_status": "Pending",
+    "source_file": "20eb0c7e0de84aa48ddd91284014d85e_Vertexa_Mini_Company_Handbook.pdf",
+    "bounding_box": {
+      "l": 50.4,
+      "t": 723.75,
+      "r": 529.8869599999997,
+      "b": 687.61,
+      "coord_origin": "BOTTOMLEFT"
+    },
+    "created_time": "2026-07-21T06:00:39.453094Z",
+    "confidence": 1.0
+  },
+  {
+    "knowledge_id": "a8619fd4ae194817a13dad90f43659f8_chunk_0026",
+    "document_id": "a8619fd4ae194817a13dad90f43659f8",
+    "page_number": 2,
+    "chunk_type": "Heading",
+    "heading": "5  IT Security",
+    "parent_heading": null,
+    "section_path": "5  IT Security",
+    "sequence_number": 26,
+    "text": "5  IT Security",
+    "metadata": {
+      "word_count": 3,
+      "token_estimate": 4,
+      "hierarchy_path": [
+        "b1_#/texts/25"
+      ],
+      "source_element_ids": [
+        "b1_#/texts/25"
+      ],
+      "bounding_boxes": [
+        {
+          "l": 50.4,
+          "t": 676.63,
+          "r": 133.25,
+          "b": 661.63,
+          "coord_origin": "BOTTOMLEFT"
+        }
+      ]
+    },
+    "relationships": {
+      "belongs_to": "a8619fd4ae194817a13dad90f43659f8_chunk_0024",
+      "parent": "a8619fd4ae194817a13dad90f43659f8_chunk_0024"
+    },
+    "embedding_status": "Pending",
+    "source_file": "20eb0c7e0de84aa48ddd91284014d85e_Vertexa_Mini_Company_Handbook.pdf",
+    "bounding_box": {
+      "l": 50.4,
+      "t": 676.63,
+      "r": 133.25,
+      "b": 661.63,
+      "coord_origin": "BOTTOMLEFT"
+    },
+    "created_time": "2026-07-21T06:00:39.453094Z",
+    "confidence": 1.0
+  },
+  {
+    "knowledge_id": "a8619fd4ae194817a13dad90f43659f8_chunk_0027",
+    "document_id": "a8619fd4ae194817a13dad90f43659f8",
+    "page_number": 2,
+    "chunk_type": "Heading",
+    "heading": "Password Policy | MFA | VPN | Device Encryption | USB Policy",
+    "parent_heading": null,
+    "section_path": "Password Policy | MFA | VPN | Device Encryption | USB Policy",
+    "sequence_number": 27,
+    "text": "Password Policy | MFA | VPN | Device Encryption | USB Policy",
+    "metadata": {
+      "word_count": 8,
+      "token_estimate": 13,
+      "hierarchy_path": [
+        "b1_#/texts/26"
+      ],
+      "source_element_ids": [
+        "b1_#/texts/26"
+      ],
+      "bounding_boxes": [
+        {
+          "l": 50.4,
+          "t": 650.26,
+          "r": 351.63352,
+          "b": 638.74,
+          "coord_origin": "BOTTOMLEFT"
+        }
+      ]
+    },
+    "relationships": {
+      "belongs_to": "a8619fd4ae194817a13dad90f43659f8_chunk_0026",
+      "parent": "a8619fd4ae194817a13dad90f43659f8_chunk_0026"
+    },
+    "embedding_status": "Pending",
+    "source_file": "20eb0c7e0de84aa48ddd91284014d85e_Vertexa_Mini_Company_Handbook.pdf",
+    "bounding_box": {
+      "l": 50.4,
+      "t": 650.26,
+      "r": 351.63352,
+      "b": 638.74,
+      "coord_origin": "BOTTOMLEFT"
+    },
+    "created_time": "2026-07-21T06:00:39.453094Z",
+    "confidence": 1.0
+  },
+  {
+    "knowledge_id": "a8619fd4ae194817a13dad90f43659f8_chunk_0028",
+    "document_id": "a8619fd4ae194817a13dad90f43659f8",
+    "page_number": 2,
+    "chunk_type": "List",
+    "heading": "Password Policy | MFA | VPN | Device Encryption | USB Policy",
+    "parent_heading": null,
+    "section_path": "Password Policy | MFA | VPN | Device Encryption | USB Policy",
+    "sequence_number": 28,
+    "text": "Passwords: atleast 12 characters, mixed case + numeric + special, rotated every 90 days.",
+    "metadata": {
+      "word_count": 12,
+      "token_estimate": 20,
+      "hierarchy_path": [
+        "b1_#/texts/26"
+      ],
+      "source_element_ids": [
+        "b1_#/texts/27"
+      ],
+      "bounding_boxes": [
+        {
+          "l": 50.4,
+          "t": 632.0500000000001,
+          "r": 410.69248,
+          "b": 622.57,
+          "coord_origin": "BOTTOMLEFT"
+        }
+      ]
+    },
+    "relationships": {
+      "belongs_to": "a8619fd4ae194817a13dad90f43659f8_chunk_0027"
+    },
+    "embedding_status": "Pending",
+    "source_file": "20eb0c7e0de84aa48ddd91284014d85e_Vertexa_Mini_Company_Handbook.pdf",
+    "bounding_box": {
+      "l": 50.4,
+      "t": 632.0500000000001,
+      "r": 410.69248,
+      "b": 622.57,
+      "coord_origin": "BOTTOMLEFT"
+    },
+    "created_time": "2026-07-21T06:00:39.453094Z",
+    "confidence": 1.0
+  },
+  {
+    "knowledge_id": "a8619fd4ae194817a13dad90f43659f8_chunk_0029",
+    "document_id": "a8619fd4ae194817a13dad90f43659f8",
+    "page_number": 2,
+    "chunk_type": "List",
+    "heading": "Password Policy | MFA | VPN | Device Encryption | USB Policy",
+    "parent_heading": null,
+    "section_path": "Password Policy | MFA | VPN | Device Encryption | USB Policy",
+    "sequence_number": 29,
+    "text": "MFA is mandatory for email, VPN, and internal apps within 48 hours of access being granted.",
+    "metadata": {
+      "word_count": 16,
+      "token_estimate": 21,
+      "hierarchy_path": [
+        "b1_#/texts/26"
+      ],
+      "source_element_ids": [
+        "b1_#/texts/28"
+      ],
+      "bounding_boxes": [
+        {
+          "l": 50.4,
+          "t": 618.13,
+          "r": 428.21247999999997,
+          "b": 608.65,
+          "coord_origin": "BOTTOMLEFT"
+        }
+      ]
+    },
+    "relationships": {
+      "belongs_to": "a8619fd4ae194817a13dad90f43659f8_chunk_0027"
+    },
+    "embedding_status": "Pending",
+    "source_file": "20eb0c7e0de84aa48ddd91284014d85e_Vertexa_Mini_Company_Handbook.pdf",
+    "bounding_box": {
+      "l": 50.4,
+      "t": 618.13,
+      "r": 428.21247999999997,
+      "b": 608.65,
+      "coord_origin": "BOTTOMLEFT"
+    },
+    "created_time": "2026-07-21T06:00:39.453094Z",
+    "confidence": 1.0
+  },
+  {
+    "knowledge_id": "a8619fd4ae194817a13dad90f43659f8_chunk_0030",
+    "document_id": "a8619fd4ae194817a13dad90f43659f8",
+    "page_number": 2,
+    "chunk_type": "Bullet List",
+    "heading": "Password Policy | MFA | VPN | Device Encryption | USB Policy",
+    "parent_heading": null,
+    "section_path": "Password Policy | MFA | VPN | Device Encryption | USB Policy",
+    "sequence_number": 30,
+    "text": "VPN required for all off-network access; split tunneling disabled by default.",
+    "metadata": {
+      "word_count": 12,
+      "token_estimate": 15,
+      "hierarchy_path": [
+        "b1_#/texts/26"
+      ],
+      "source_element_ids": [
+        "b1_#/texts/29"
+      ],
+      "bounding_boxes": [
+        {
+          "l": 50.4,
+          "t": 604.33,
+          "r": 359.69248,
+          "b": 594.85,
+          "coord_origin": "BOTTOMLEFT"
+        }
+      ]
+    },
+    "relationships": {
+      "belongs_to": "a8619fd4ae194817a13dad90f43659f8_chunk_0027"
+    },
+    "embedding_status": "Pending",
+    "source_file": "20eb0c7e0de84aa48ddd91284014d85e_Vertexa_Mini_Company_Handbook.pdf",
+    "bounding_box": {
+      "l": 50.4,
+      "t": 604.33,
+      "r": 359.69248,
+      "b": 594.85,
+      "coord_origin": "BOTTOMLEFT"
+    },
+    "created_time": "2026-07-21T06:00:39.453094Z",
+    "confidence": 1.0
+  },
+  {
+    "knowledge_id": "a8619fd4ae194817a13dad90f43659f8_chunk_0031",
+    "document_id": "a8619fd4ae194817a13dad90f43659f8",
+    "page_number": 2,
+    "chunk_type": "Bullet List",
+    "heading": "Password Policy | MFA | VPN | Device Encryption | USB Policy",
+    "parent_heading": null,
+    "section_path": "Password Policy | MFA | VPN | Device Encryption | USB Policy",
+    "sequence_number": 31,
+    "text": "Full-disk encryption mandatory on all company laptops.",
+    "metadata": {
+      "word_count": 8,
+      "token_estimate": 10,
+      "hierarchy_path": [
+        "b1_#/texts/26"
+      ],
+      "source_element_ids": [
+        "b1_#/texts/30"
+      ],
+      "bounding_boxes": [
+        {
+          "l": 50.4,
+          "t": 590.53,
+          "r": 284.91247999999996,
+          "b": 581.05,
+          "coord_origin": "BOTTOMLEFT"
+        }
+      ]
+    },
+    "relationships": {
+      "belongs_to": "a8619fd4ae194817a13dad90f43659f8_chunk_0027"
+    },
+    "embedding_status": "Pending",
+    "source_file": "20eb0c7e0de84aa48ddd91284014d85e_Vertexa_Mini_Company_Handbook.pdf",
+    "bounding_box": {
+      "l": 50.4,
+      "t": 590.53,
+      "r": 284.91247999999996,
+      "b": 581.05,
+      "coord_origin": "BOTTOMLEFT"
+    },
+    "created_time": "2026-07-21T06:00:39.453094Z",
+    "confidence": 1.0
+  },
+  {
+    "knowledge_id": "a8619fd4ae194817a13dad90f43659f8_chunk_0032",
+    "document_id": "a8619fd4ae194817a13dad90f43659f8",
+    "page_number": 2,
+    "chunk_type": "Bullet List",
+    "heading": "Password Policy | MFA | VPN | Device Encryption | USB Policy",
+    "parent_heading": null,
+    "section_path": "Password Policy | MFA | VPN | Device Encryption | USB Policy",
+    "sequence_number": 32,
+    "text": "Personal USB drives are prohibited unless approved by IT Security; see Appendix B for data-handling obligations on removable media.",
+    "metadata": {
+      "word_count": 20,
+      "token_estimate": 23,
+      "hierarchy_path": [
+        "b1_#/texts/26"
+      ],
+      "source_element_ids": [
+        "b1_#/texts/31"
+      ],
+      "bounding_boxes": [
+        {
+          "l": 50.4,
+          "t": 576.61,
+          "r": 556.8719199999997,
+          "b": 553.93,
+          "coord_origin": "BOTTOMLEFT"
+        }
+      ]
+    },
+    "relationships": {
+      "belongs_to": "a8619fd4ae194817a13dad90f43659f8_chunk_0027"
+    },
+    "embedding_status": "Pending",
+    "source_file": "20eb0c7e0de84aa48ddd91284014d85e_Vertexa_Mini_Company_Handbook.pdf",
+    "bounding_box": {
+      "l": 50.4,
+      "t": 576.61,
+      "r": 556.8719199999997,
+      "b": 553.93,
+      "coord_origin": "BOTTOMLEFT"
+    },
+    "created_time": "2026-07-21T06:00:39.453094Z",
+    "confidence": 1.0
+  },
+  {
+    "knowledge_id": "a8619fd4ae194817a13dad90f43659f8_chunk_0033",
+    "document_id": "a8619fd4ae194817a13dad90f43659f8",
+    "page_number": 2,
+    "chunk_type": "Image",
+    "heading": "Password Policy | MFA | VPN | Device Encryption | USB Policy",
+    "parent_heading": null,
+    "section_path": "Password Policy | MFA | VPN | Device Encryption | USB Policy",
+    "sequence_number": 33,
+    "text": "Image",
+    "metadata": {
+      "word_count": 1,
+      "token_estimate": 1,
+      "hierarchy_path": [
+        "b1_#/texts/26"
+      ],
+      "source_element_ids": [
+        "b1_#/pictures/1"
+      ],
+      "bounding_boxes": [
+        {
+          "l": 163.7975311279297,
+          "t": 548.2440795898438,
+          "r": 448.1711730957031,
+          "b": 350.2322082519531,
+          "coord_origin": "BOTTOMLEFT"
+        }
+      ]
+    },
+    "relationships": {
+      "belongs_to": "a8619fd4ae194817a13dad90f43659f8_chunk_0027"
+    },
+    "embedding_status": "Pending",
+    "source_file": "20eb0c7e0de84aa48ddd91284014d85e_Vertexa_Mini_Company_Handbook.pdf",
+    "bounding_box": {
+      "l": 163.7975311279297,
+      "t": 548.2440795898438,
+      "r": 448.1711730957031,
+      "b": 350.2322082519531,
+      "coord_origin": "BOTTOMLEFT"
+    },
+    "created_time": "2026-07-21T06:00:39.453094Z",
+    "confidence": 1.0
+  },
+  {
+    "knowledge_id": "a8619fd4ae194817a13dad90f43659f8_chunk_0034",
+    "document_id": "a8619fd4ae194817a13dad90f43659f8",
+    "page_number": 2,
+    "chunk_type": "Paragraph",
+    "heading": "Password Policy | MFA | VPN | Device Encryption | USB Policy",
+    "parent_heading": null,
+    "section_path": "Password Policy | MFA | VPN | Device Encryption | USB Policy",
+    "sequence_number": 34,
+    "text": "Fig 1 -Vertexa AI Platform architecture (referenced in Sections 7 & 11)",
+    "metadata": {
+      "word_count": 11,
+      "token_estimate": 20,
+      "hierarchy_path": [
+        "b1_#/texts/26"
+      ],
+      "source_element_ids": [
+        "b1_#/texts/32"
+      ],
+      "bounding_boxes": [
+        {
+          "l": 189.98,
+          "t": 301.15999999999997,
+          "r": 421.9526000000002,
+          "b": 293.12,
+          "coord_origin": "BOTTOMLEFT"
+        }
+      ]
+    },
+    "relationships": {
+      "belongs_to": "a8619fd4ae194817a13dad90f43659f8_chunk_0027",
+      "previous": "a8619fd4ae194817a13dad90f43659f8_chunk_0025"
+    },
+    "embedding_status": "Pending",
+    "source_file": "20eb0c7e0de84aa48ddd91284014d85e_Vertexa_Mini_Company_Handbook.pdf",
+    "bounding_box": {
+      "l": 189.98,
+      "t": 301.15999999999997,
+      "r": 421.9526000000002,
+      "b": 293.12,
+      "coord_origin": "BOTTOMLEFT"
+    },
+    "created_time": "2026-07-21T06:00:39.453094Z",
+    "confidence": 1.0
+  },
+  {
+    "knowledge_id": "a8619fd4ae194817a13dad90f43659f8_chunk_0035",
+    "document_id": "a8619fd4ae194817a13dad90f43659f8",
+    "page_number": 2,
+    "chunk_type": "Heading",
+    "heading": "6  Finance",
+    "parent_heading": null,
+    "section_path": "6  Finance",
+    "sequence_number": 35,
+    "text": "6  Finance",
+    "metadata": {
+      "word_count": 2,
+      "token_estimate": 3,
+      "hierarchy_path": [
+        "b1_#/texts/33"
+      ],
+      "source_element_ids": [
+        "b1_#/texts/33"
+      ],
+      "bounding_boxes": [
+        {
+          "l": 50.4,
+          "t": 282.38,
+          "r": 116.09,
+          "b": 267.38,
+          "coord_origin": "BOTTOMLEFT"
+        }
+      ]
+    },
+    "relationships": {
+      "belongs_to": "a8619fd4ae194817a13dad90f43659f8_chunk_0027",
+      "parent": "a8619fd4ae194817a13dad90f43659f8_chunk_0027"
+    },
+    "embedding_status": "Pending",
+    "source_file": "20eb0c7e0de84aa48ddd91284014d85e_Vertexa_Mini_Company_Handbook.pdf",
+    "bounding_box": {
+      "l": 50.4,
+      "t": 282.38,
+      "r": 116.09,
+      "b": 267.38,
+      "coord_origin": "BOTTOMLEFT"
+    },
+    "created_time": "2026-07-21T06:00:39.453094Z",
+    "confidence": 1.0
+  },
+  {
+    "knowledge_id": "a8619fd4ae194817a13dad90f43659f8_chunk_0036",
+    "document_id": "a8619fd4ae194817a13dad90f43659f8",
+    "page_number": 2,
+    "chunk_type": "Paragraph",
+    "heading": "6  Finance",
+    "parent_heading": null,
+    "section_path": "6  Finance",
+    "sequence_number": 36,
+    "text": "Quarterly revenue and YoY growth (FY24), as reported to the Board:",
+    "metadata": {
+      "word_count": 11,
+      "token_estimate": 17,
+      "hierarchy_path": [
+        "b1_#/texts/33"
+      ],
+      "source_element_ids": [
+        "b1_#/texts/34"
+      ],
+      "bounding_boxes": [
+        {
+          "l": 50.4,
+          "t": 260.36,
+          "r": 315.27248,
+          "b": 250.88,
+          "coord_origin": "BOTTOMLEFT"
+        }
+      ]
+    },
+    "relationships": {
+      "belongs_to": "a8619fd4ae194817a13dad90f43659f8_chunk_0035",
+      "previous": "a8619fd4ae194817a13dad90f43659f8_chunk_0034"
+    },
+    "embedding_status": "Pending",
+    "source_file": "20eb0c7e0de84aa48ddd91284014d85e_Vertexa_Mini_Company_Handbook.pdf",
+    "bounding_box": {
+      "l": 50.4,
+      "t": 260.36,
+      "r": 315.27248,
+      "b": 250.88,
+      "coord_origin": "BOTTOMLEFT"
+    },
+    "created_time": "2026-07-21T06:00:39.453094Z",
+    "confidence": 1.0
+  },
+  {
+    "knowledge_id": "a8619fd4ae194817a13dad90f43659f8_chunk_0037",
+    "document_id": "a8619fd4ae194817a13dad90f43659f8",
+    "page_number": 2,
+    "chunk_type": "Table",
+    "heading": "6  Finance",
+    "parent_heading": null,
+    "section_path": "6  Finance",
+    "sequence_number": 37,
+    "text": "Table 1 -Quarterly revenue, as published in the Q4 board deck.\n\n| Quarter   |   Revenue (₹ Cr) | YoY Growth   |\n|-----------|------------------|--------------|\n| Q1 FY24   |             42.6 | 18%          |\n| Q2 FY24   |             45.1 | 16%          |\n| Q3 FY24   |             48.9 | 17%          |\n| Q4 FY24   |             51.3 | 15%          |",
+    "metadata": {
+      "word_count": 36,
+      "token_estimate": 114,
+      "hierarchy_path": [
+        "b1_#/texts/33"
+      ],
+      "source_element_ids": [
+        "b1_#/tables/0"
+      ],
+      "bounding_boxes": [
+        {
+          "l": 49.22380065917969,
+          "t": 246.6392822265625,
+          "r": 562.3059692382812,
+          "b": 191.05572509765625,
+          "coord_origin": "BOTTOMLEFT"
+        }
+      ]
+    },
+    "relationships": {
+      "belongs_to": "a8619fd4ae194817a13dad90f43659f8_chunk_0035"
+    },
+    "embedding_status": "Pending",
+    "source_file": "20eb0c7e0de84aa48ddd91284014d85e_Vertexa_Mini_Company_Handbook.pdf",
+    "bounding_box": {
+      "l": 49.22380065917969,
+      "t": 246.6392822265625,
+      "r": 562.3059692382812,
+      "b": 191.05572509765625,
+      "coord_origin": "BOTTOMLEFT"
+    },
+    "created_time": "2026-07-21T06:00:39.453094Z",
+    "confidence": 1.0
+  },
+  {
+    "knowledge_id": "a8619fd4ae194817a13dad90f43659f8_chunk_0038",
+    "document_id": "a8619fd4ae194817a13dad90f43659f8",
+    "page_number": 2,
+    "chunk_type": "Caption",
+    "heading": "6  Finance",
+    "parent_heading": null,
+    "section_path": "6  Finance",
+    "sequence_number": 38,
+    "text": "Table 1 -Quarterly revenue, as published in the Q4 board deck.",
+    "metadata": {
+      "word_count": 11,
+      "token_estimate": 17,
+      "hierarchy_path": [
+        "b1_#/texts/33"
+      ],
+      "source_element_ids": [
+        "b1_#/texts/35"
+      ],
+      "bounding_boxes": [
+        {
+          "l": 50.4,
+          "t": 189.64999999999998,
+          "r": 258.65604000000013,
+          "b": 181.61,
+          "coord_origin": "BOTTOMLEFT"
+        }
+      ]
+    },
+    "relationships": {
+      "belongs_to": "a8619fd4ae194817a13dad90f43659f8_chunk_0035",
+      "related_to": null
+    },
+    "embedding_status": "Pending",
+    "source_file": "20eb0c7e0de84aa48ddd91284014d85e_Vertexa_Mini_Company_Handbook.pdf",
+    "bounding_box": {
+      "l": 50.4,
+      "t": 189.64999999999998,
+      "r": 258.65604000000013,
+      "b": 181.61,
+      "coord_origin": "BOTTOMLEFT"
+    },
+    "created_time": "2026-07-21T06:00:39.453094Z",
+    "confidence": 1.0
+  },
+  {
+    "knowledge_id": "a8619fd4ae194817a13dad90f43659f8_chunk_0039",
+    "document_id": "a8619fd4ae194817a13dad90f43659f8",
+    "page_number": 2,
+    "chunk_type": "Paragraph",
+    "heading": "6  Finance",
+    "parent_heading": null,
+    "section_path": "6  Finance",
+    "sequence_number": 39,
+    "text": "Elsewhere in the same board deck, Q1 FY24 YoY growth is separately reported as 15% rather than the 18% shown in Table 1 above -the discrepancy has not been reconciled in this edition.",
+    "metadata": {
+      "word_count": 33,
+      "token_estimate": 46,
+      "hierarchy_path": [
+        "b1_#/texts/33"
+      ],
+      "source_element_ids": [
+        "b1_#/texts/36"
+      ],
+      "bounding_boxes": [
+        {
+          "l": 50.4,
+          "t": 152.57000000000005,
+          "r": 556.04248,
+          "b": 129.76999999999998,
+          "coord_origin": "BOTTOMLEFT"
+        }
+      ]
+    },
+    "relationships": {
+      "belongs_to": "a8619fd4ae194817a13dad90f43659f8_chunk_0035",
+      "previous": "a8619fd4ae194817a13dad90f43659f8_chunk_0036"
+    },
+    "embedding_status": "Pending",
+    "source_file": "20eb0c7e0de84aa48ddd91284014d85e_Vertexa_Mini_Company_Handbook.pdf",
+    "bounding_box": {
+      "l": 50.4,
+      "t": 152.57000000000005,
+      "r": 556.04248,
+      "b": 129.76999999999998,
+      "coord_origin": "BOTTOMLEFT"
+    },
+    "created_time": "2026-07-21T06:00:39.453094Z",
+    "confidence": 1.0
+  },
+  {
+    "knowledge_id": "a8619fd4ae194817a13dad90f43659f8_chunk_0040",
+    "document_id": "a8619fd4ae194817a13dad90f43659f8",
+    "page_number": 3,
+    "chunk_type": "Heading",
+    "heading": "7  Product Documentation",
+    "parent_heading": null,
+    "section_path": "7  Product Documentation",
+    "sequence_number": 40,
+    "text": "7  Product Documentation",
+    "metadata": {
+      "word_count": 3,
+      "token_estimate": 4,
+      "hierarchy_path": [
+        "b1_#/texts/37"
+      ],
+      "source_element_ids": [
+        "b1_#/texts/37"
+      ],
+      "bounding_boxes": [
+        {
+          "l": 50.4,
+          "t": 745.77,
+          "r": 217.76,
+          "b": 730.77,
+          "coord_origin": "BOTTOMLEFT"
+        }
+      ]
+    },
+    "relationships": {
+      "belongs_to": "a8619fd4ae194817a13dad90f43659f8_chunk_0035",
+      "parent": "a8619fd4ae194817a13dad90f43659f8_chunk_0035"
+    },
+    "embedding_status": "Pending",
+    "source_file": "20eb0c7e0de84aa48ddd91284014d85e_Vertexa_Mini_Company_Handbook.pdf",
+    "bounding_box": {
+      "l": 50.4,
+      "t": 745.77,
+      "r": 217.76,
+      "b": 730.77,
+      "coord_origin": "BOTTOMLEFT"
+    },
+    "created_time": "2026-07-21T06:00:39.453094Z",
+    "confidence": 1.0
+  },
+  {
+    "knowledge_id": "a8619fd4ae194817a13dad90f43659f8_chunk_0041",
+    "document_id": "a8619fd4ae194817a13dad90f43659f8",
+    "page_number": 3,
+    "chunk_type": "Paragraph",
+    "heading": "7  Product Documentation",
+    "parent_heading": null,
+    "section_path": "7  Product Documentation",
+    "sequence_number": 41,
+    "text": "The platform (see Fig. 1) is organized into four layers: Presentation, AI Platform/API, Processing, and Data. Core modules:",
+    "metadata": {
+      "word_count": 19,
+      "token_estimate": 29,
+      "hierarchy_path": [
+        "b1_#/texts/37"
+      ],
+      "source_element_ids": [
+        "b1_#/texts/38"
+      ],
+      "bounding_boxes": [
+        {
+          "l": 50.4,
+          "t": 723.75,
+          "r": 519.6824799999999,
+          "b": 714.27,
+          "coord_origin": "BOTTOMLEFT"
+        }
+      ]
+    },
+    "relationships": {
+      "belongs_to": "a8619fd4ae194817a13dad90f43659f8_chunk_0040",
+      "previous": "a8619fd4ae194817a13dad90f43659f8_chunk_0039"
+    },
+    "embedding_status": "Pending",
+    "source_file": "20eb0c7e0de84aa48ddd91284014d85e_Vertexa_Mini_Company_Handbook.pdf",
+    "bounding_box": {
+      "l": 50.4,
+      "t": 723.75,
+      "r": 519.6824799999999,
+      "b": 714.27,
+      "coord_origin": "BOTTOMLEFT"
+    },
+    "created_time": "2026-07-21T06:00:39.453094Z",
+    "confidence": 1.0
+  },
+  {
+    "knowledge_id": "a8619fd4ae194817a13dad90f43659f8_chunk_0042",
+    "document_id": "a8619fd4ae194817a13dad90f43659f8",
+    "page_number": 3,
+    "chunk_type": "Table",
+    "heading": "7  Product Documentation",
+    "parent_heading": null,
+    "section_path": "7  Product Documentation",
+    "sequence_number": 42,
+    "text": "| Module            | Function                                                        |\n|-------------------|-----------------------------------------------------------------|\n| Docling Parser    | Extracts text, tables, and images with layout metadata          |\n| Chunking Engine   | Builds semantic chunks (heading+text, table+caption, image+OCR) |\n| Embedding Service | Generates vector embeddings for retrieval                       |\n| Vector Store      | ChromaDB collection per document                                |",
+    "metadata": {
+      "word_count": 36,
+      "token_estimate": 81,
+      "hierarchy_path": [
+        "b1_#/texts/37"
+      ],
+      "source_element_ids": [
+        "b1_#/tables/1"
+      ],
+      "bounding_boxes": [
+        {
+          "l": 49.36560821533203,
+          "t": 710.0551452636719,
+          "r": 562.3779907226562,
+          "b": 654.4656219482422,
+          "coord_origin": "BOTTOMLEFT"
+        }
+      ]
+    },
+    "relationships": {
+      "belongs_to": "a8619fd4ae194817a13dad90f43659f8_chunk_0040"
+    },
+    "embedding_status": "Pending",
+    "source_file": "20eb0c7e0de84aa48ddd91284014d85e_Vertexa_Mini_Company_Handbook.pdf",
+    "bounding_box": {
+      "l": 49.36560821533203,
+      "t": 710.0551452636719,
+      "r": 562.3779907226562,
+      "b": 654.4656219482422,
+      "coord_origin": "BOTTOMLEFT"
+    },
+    "created_time": "2026-07-21T06:00:39.453094Z",
+    "confidence": 1.0
+  },
+  {
+    "knowledge_id": "a8619fd4ae194817a13dad90f43659f8_chunk_0043",
+    "document_id": "a8619fd4ae194817a13dad90f43659f8",
+    "page_number": 3,
+    "chunk_type": "Paragraph",
+    "heading": "7  Product Documentation",
+    "parent_heading": null,
+    "section_path": "7  Product Documentation",
+    "sequence_number": 43,
+    "text": "Table 2 - Core platform modules.",
+    "metadata": {
+      "word_count": 5,
+      "token_estimate": 8,
+      "hierarchy_path": [
+        "b1_#/texts/37"
+      ],
+      "source_element_ids": [
+        "b1_#/texts/39"
+      ],
+      "bounding_boxes": [
+        {
+          "l": 50.4,
+          "t": 652.93,
+          "r": 161.163,
+          "b": 644.89,
+          "coord_origin": "BOTTOMLEFT"
+        }
+      ]
+    },
+    "relationships": {
+      "belongs_to": "a8619fd4ae194817a13dad90f43659f8_chunk_0040",
+      "previous": "a8619fd4ae194817a13dad90f43659f8_chunk_0041"
+    },
+    "embedding_status": "Pending",
+    "source_file": "20eb0c7e0de84aa48ddd91284014d85e_Vertexa_Mini_Company_Handbook.pdf",
+    "bounding_box": {
+      "l": 50.4,
+      "t": 652.93,
+      "r": 161.163,
+      "b": 644.89,
+      "coord_origin": "BOTTOMLEFT"
+    },
+    "created_time": "2026-07-21T06:00:39.453094Z",
+    "confidence": 1.0
+  },
+  {
+    "knowledge_id": "a8619fd4ae194817a13dad90f43659f8_chunk_0044",
+    "document_id": "a8619fd4ae194817a13dad90f43659f8",
+    "page_number": 3,
+    "chunk_type": "Heading",
+    "heading": "8  Customer Support",
+    "parent_heading": null,
+    "section_path": "8  Customer Support",
+    "sequence_number": 44,
+    "text": "8  Customer Support",
+    "metadata": {
+      "word_count": 3,
+      "token_estimate": 4,
+      "hierarchy_path": [
+        "b1_#/texts/40"
+      ],
+      "source_element_ids": [
+        "b1_#/texts/40"
+      ],
+      "bounding_boxes": [
+        {
+          "l": 50.4,
+          "t": 610.99,
+          "r": 181.73,
+          "b": 595.99,
+          "coord_origin": "BOTTOMLEFT"
+        }
+      ]
+    },
+    "relationships": {
+      "belongs_to": "a8619fd4ae194817a13dad90f43659f8_chunk_0040",
+      "parent": "a8619fd4ae194817a13dad90f43659f8_chunk_0040"
+    },
+    "embedding_status": "Pending",
+    "source_file": "20eb0c7e0de84aa48ddd91284014d85e_Vertexa_Mini_Company_Handbook.pdf",
+    "bounding_box": {
+      "l": 50.4,
+      "t": 610.99,
+      "r": 181.73,
+      "b": 595.99,
+      "coord_origin": "BOTTOMLEFT"
+    },
+    "created_time": "2026-07-21T06:00:39.453094Z",
+    "confidence": 1.0
+  },
+  {
+    "knowledge_id": "a8619fd4ae194817a13dad90f43659f8_chunk_0045",
+    "document_id": "a8619fd4ae194817a13dad90f43659f8",
+    "page_number": 3,
+    "chunk_type": "Image",
+    "heading": "8  Customer Support",
+    "parent_heading": null,
+    "section_path": "8  Customer Support",
+    "sequence_number": 45,
+    "text": "Image",
+    "metadata": {
+      "word_count": 1,
+      "token_estimate": 1,
+      "hierarchy_path": [
+        "b1_#/texts/40"
+      ],
+      "source_element_ids": [
+        "b1_#/pictures/2"
+      ],
+      "bounding_boxes": [
+        {
+          "l": 165.1762237548828,
+          "t": 552.8823394775391,
+          "r": 432.48504638671875,
+          "b": 448.98565673828125,
+          "coord_origin": "BOTTOMLEFT"
+        }
+      ]
+    },
+    "relationships": {
+      "belongs_to": "a8619fd4ae194817a13dad90f43659f8_chunk_0044"
+    },
+    "embedding_status": "Pending",
+    "source_file": "20eb0c7e0de84aa48ddd91284014d85e_Vertexa_Mini_Company_Handbook.pdf",
+    "bounding_box": {
+      "l": 165.1762237548828,
+      "t": 552.8823394775391,
+      "r": 432.48504638671875,
+      "b": 448.98565673828125,
+      "coord_origin": "BOTTOMLEFT"
+    },
+    "created_time": "2026-07-21T06:00:39.453094Z",
+    "confidence": 1.0
+  },
+  {
+    "knowledge_id": "a8619fd4ae194817a13dad90f43659f8_chunk_0046",
+    "document_id": "a8619fd4ae194817a13dad90f43659f8",
+    "page_number": 3,
+    "chunk_type": "Caption",
+    "heading": "8  Customer Support",
+    "parent_heading": null,
+    "section_path": "8  Customer Support",
+    "sequence_number": 46,
+    "text": "Fig 2 -Support escalation workflow",
+    "metadata": {
+      "word_count": 5,
+      "token_estimate": 7,
+      "hierarchy_path": [
+        "b1_#/texts/40"
+      ],
+      "source_element_ids": [
+        "b1_#/texts/41"
+      ],
+      "bounding_boxes": [
+        {
+          "l": 246.65,
+          "t": 384.32,
+          "r": 365.3974400000001,
+          "b": 376.28000000000003,
+          "coord_origin": "BOTTOMLEFT"
+        }
+      ]
+    },
+    "relationships": {
+      "belongs_to": "a8619fd4ae194817a13dad90f43659f8_chunk_0044",
+      "related_to": null
+    },
+    "embedding_status": "Pending",
+    "source_file": "20eb0c7e0de84aa48ddd91284014d85e_Vertexa_Mini_Company_Handbook.pdf",
+    "bounding_box": {
+      "l": 246.65,
+      "t": 384.32,
+      "r": 365.3974400000001,
+      "b": 376.28000000000003,
+      "coord_origin": "BOTTOMLEFT"
+    },
+    "created_time": "2026-07-21T06:00:39.453094Z",
+    "confidence": 1.0
+  },
+  {
+    "knowledge_id": "a8619fd4ae194817a13dad90f43659f8_chunk_0047",
+    "document_id": "a8619fd4ae194817a13dad90f43659f8",
+    "page_number": 3,
+    "chunk_type": "Paragraph",
+    "heading": "8  Customer Support",
+    "parent_heading": null,
+    "section_path": "8  Customer Support",
+    "sequence_number": 47,
+    "text": "Escalation note: Alex informed Jordan that he would contact the customer directly to confirm the resolution timeline before the ticket is closed.",
+    "metadata": {
+      "word_count": 22,
+      "token_estimate": 26,
+      "hierarchy_path": [
+        "b1_#/texts/40"
+      ],
+      "source_element_ids": [
+        "b1_#/texts/42"
+      ],
+      "bounding_boxes": [
+        {
+          "l": 50.4,
+          "t": 368.6,
+          "r": 546.43948,
+          "b": 345.8,
+          "coord_origin": "BOTTOMLEFT"
+        }
+      ]
+    },
+    "relationships": {
+      "belongs_to": "a8619fd4ae194817a13dad90f43659f8_chunk_0044",
+      "previous": "a8619fd4ae194817a13dad90f43659f8_chunk_0043"
+    },
+    "embedding_status": "Pending",
+    "source_file": "20eb0c7e0de84aa48ddd91284014d85e_Vertexa_Mini_Company_Handbook.pdf",
+    "bounding_box": {
+      "l": 50.4,
+      "t": 368.6,
+      "r": 546.43948,
+      "b": 345.8,
+      "coord_origin": "BOTTOMLEFT"
+    },
+    "created_time": "2026-07-21T06:00:39.453094Z",
+    "confidence": 1.0
+  },
+  {
+    "knowledge_id": "a8619fd4ae194817a13dad90f43659f8_chunk_0048",
+    "document_id": "a8619fd4ae194817a13dad90f43659f8",
+    "page_number": 3,
+    "chunk_type": "Paragraph",
+    "heading": "8  Customer Support",
+    "parent_heading": null,
+    "section_path": "8  Customer Support",
+    "sequence_number": 48,
+    "text": "Standard SLA is first response within 4 business hours for Tier 1 tickets.",
+    "metadata": {
+      "word_count": 13,
+      "token_estimate": 17,
+      "hierarchy_path": [
+        "b1_#/texts/40"
+      ],
+      "source_element_ids": [
+        "b1_#/texts/43"
+      ],
+      "bounding_boxes": [
+        {
+          "l": 50.4,
+          "t": 338.96000000000004,
+          "r": 326.45248,
+          "b": 329.48,
+          "coord_origin": "BOTTOMLEFT"
+        }
+      ]
+    },
+    "relationships": {
+      "belongs_to": "a8619fd4ae194817a13dad90f43659f8_chunk_0044",
+      "previous": "a8619fd4ae194817a13dad90f43659f8_chunk_0047"
+    },
+    "embedding_status": "Pending",
+    "source_file": "20eb0c7e0de84aa48ddd91284014d85e_Vertexa_Mini_Company_Handbook.pdf",
+    "bounding_box": {
+      "l": 50.4,
+      "t": 338.96000000000004,
+      "r": 326.45248,
+      "b": 329.48,
+      "coord_origin": "BOTTOMLEFT"
+    },
+    "created_time": "2026-07-21T06:00:39.453094Z",
+    "confidence": 1.0
+  },
+  {
+    "knowledge_id": "a8619fd4ae194817a13dad90f43659f8_chunk_0049",
+    "document_id": "a8619fd4ae194817a13dad90f43659f8",
+    "page_number": 3,
+    "chunk_type": "Heading",
+    "heading": "9  Compliance",
+    "parent_heading": null,
+    "section_path": "9  Compliance",
+    "sequence_number": 49,
+    "text": "9  Compliance",
+    "metadata": {
+      "word_count": 2,
+      "token_estimate": 3,
+      "hierarchy_path": [
+        "b1_#/texts/44"
+      ],
+      "source_element_ids": [
+        "b1_#/texts/44"
+      ],
+      "bounding_boxes": [
+        {
+          "l": 50.4,
+          "t": 318.62,
+          "r": 141.04999999999998,
+          "b": 303.62,
+          "coord_origin": "BOTTOMLEFT"
+        }
+      ]
+    },
+    "relationships": {
+      "belongs_to": "a8619fd4ae194817a13dad90f43659f8_chunk_0044",
+      "parent": "a8619fd4ae194817a13dad90f43659f8_chunk_0044"
+    },
+    "embedding_status": "Pending",
+    "source_file": "20eb0c7e0de84aa48ddd91284014d85e_Vertexa_Mini_Company_Handbook.pdf",
+    "bounding_box": {
+      "l": 50.4,
+      "t": 318.62,
+      "r": 141.04999999999998,
+      "b": 303.62,
+      "coord_origin": "BOTTOMLEFT"
+    },
+    "created_time": "2026-07-21T06:00:39.453094Z",
+    "confidence": 1.0
+  },
+  {
+    "knowledge_id": "a8619fd4ae194817a13dad90f43659f8_chunk_0050",
+    "document_id": "a8619fd4ae194817a13dad90f43659f8",
+    "page_number": 3,
+    "chunk_type": "Paragraph",
+    "heading": "9  Compliance",
+    "parent_heading": null,
+    "section_path": "9  Compliance",
+    "sequence_number": 50,
+    "text": "Vertexa's data protection obligations are summarized here; for the full clause list and retention schedule, see Appendix B. Audit findings are reviewed quarterly by the Compliance Committee.",
+    "metadata": {
+      "word_count": 28,
+      "token_estimate": 33,
+      "hierarchy_path": [
+        "b1_#/texts/44"
+      ],
+      "source_element_ids": [
+        "b1_#/texts/45"
+      ],
+      "bounding_boxes": [
+        {
+          "l": 50.4,
+          "t": 296.6,
+          "r": 545.2305999999999,
+          "b": 273.79999999999995,
+          "coord_origin": "BOTTOMLEFT"
+        }
+      ]
+    },
+    "relationships": {
+      "belongs_to": "a8619fd4ae194817a13dad90f43659f8_chunk_0049",
+      "previous": "a8619fd4ae194817a13dad90f43659f8_chunk_0048"
+    },
+    "embedding_status": "Pending",
+    "source_file": "20eb0c7e0de84aa48ddd91284014d85e_Vertexa_Mini_Company_Handbook.pdf",
+    "bounding_box": {
+      "l": 50.4,
+      "t": 296.6,
+      "r": 545.2305999999999,
+      "b": 273.79999999999995,
+      "coord_origin": "BOTTOMLEFT"
+    },
+    "created_time": "2026-07-21T06:00:39.453094Z",
+    "confidence": 1.0
+  },
+  {
+    "knowledge_id": "a8619fd4ae194817a13dad90f43659f8_chunk_0051",
+    "document_id": "a8619fd4ae194817a13dad90f43659f8",
+    "page_number": 3,
+    "chunk_type": "Heading",
+    "heading": "10  Disaster Recovery",
+    "parent_heading": null,
+    "section_path": "10  Disaster Recovery",
+    "sequence_number": 51,
+    "text": "10  Disaster Recovery",
+    "metadata": {
+      "word_count": 3,
+      "token_estimate": 4,
+      "hierarchy_path": [
+        "b1_#/texts/46"
+      ],
+      "source_element_ids": [
+        "b1_#/texts/46"
+      ],
+      "bounding_boxes": [
+        {
+          "l": 50.4,
+          "t": 262.94000000000005,
+          "r": 187.25,
+          "b": 247.94000000000005,
+          "coord_origin": "BOTTOMLEFT"
+        }
+      ]
+    },
+    "relationships": {
+      "belongs_to": "a8619fd4ae194817a13dad90f43659f8_chunk_0049",
+      "parent": "a8619fd4ae194817a13dad90f43659f8_chunk_0049"
+    },
+    "embedding_status": "Pending",
+    "source_file": "20eb0c7e0de84aa48ddd91284014d85e_Vertexa_Mini_Company_Handbook.pdf",
+    "bounding_box": {
+      "l": 50.4,
+      "t": 262.94000000000005,
+      "r": 187.25,
+      "b": 247.94000000000005,
+      "coord_origin": "BOTTOMLEFT"
+    },
+    "created_time": "2026-07-21T06:00:39.453094Z",
+    "confidence": 1.0
+  },
+  {
+    "knowledge_id": "a8619fd4ae194817a13dad90f43659f8_chunk_0052",
+    "document_id": "a8619fd4ae194817a13dad90f43659f8",
+    "page_number": 3,
+    "chunk_type": "Paragraph",
+    "heading": "10  Disaster Recovery",
+    "parent_heading": null,
+    "section_path": "10  Disaster Recovery",
+    "sequence_number": 52,
+    "text": "Recovery Time Objective (RTO), per the DR runbook summary: critical systems must be restored within 4 hours of a declared incident.",
+    "metadata": {
+      "word_count": 21,
+      "token_estimate": 29,
+      "hierarchy_path": [
+        "b1_#/texts/46"
+      ],
+      "source_element_ids": [
+        "b1_#/texts/47"
+      ],
+      "bounding_boxes": [
+        {
+          "l": 50.4,
+          "t": 240.79999999999995,
+          "r": 532.7708399999995,
+          "b": 218.0,
+          "coord_origin": "BOTTOMLEFT"
+        }
+      ]
+    },
+    "relationships": {
+      "belongs_to": "a8619fd4ae194817a13dad90f43659f8_chunk_0051",
+      "previous": "a8619fd4ae194817a13dad90f43659f8_chunk_0050"
+    },
+    "embedding_status": "Pending",
+    "source_file": "20eb0c7e0de84aa48ddd91284014d85e_Vertexa_Mini_Company_Handbook.pdf",
+    "bounding_box": {
+      "l": 50.4,
+      "t": 240.79999999999995,
+      "r": 532.7708399999995,
+      "b": 218.0,
+      "coord_origin": "BOTTOMLEFT"
+    },
+    "created_time": "2026-07-21T06:00:39.453094Z",
+    "confidence": 1.0
+  },
+  {
+    "knowledge_id": "a8619fd4ae194817a13dad90f43659f8_chunk_0053",
+    "document_id": "a8619fd4ae194817a13dad90f43659f8",
+    "page_number": 3,
+    "chunk_type": "Paragraph",
+    "heading": "10  Disaster Recovery",
+    "parent_heading": null,
+    "section_path": "10  Disaster Recovery",
+    "sequence_number": 53,
+    "text": "Later in the same runbook (Section 10.3, Extended Scenarios): recovery of the same critical systems is instead targeted within 12 hours for a 'major' incident -the threshold distinguishing a standard incident from a 'major' one is not defined.",
+    "metadata": {
+      "word_count": 39,
+      "token_estimate": 53,
+      "hierarchy_path": [
+        "b1_#/texts/46"
+      ],
+      "source_element_ids": [
+        "b1_#/texts/48"
+      ],
+      "bounding_boxes": [
+        {
+          "l": 50.4,
+          "t": 211.13,
+          "r": 548.71156,
+          "b": 188.32999999999993,
+          "coord_origin": "BOTTOMLEFT"
+        }
+      ]
+    },
+    "relationships": {
+      "belongs_to": "a8619fd4ae194817a13dad90f43659f8_chunk_0051",
+      "previous": "a8619fd4ae194817a13dad90f43659f8_chunk_0052"
+    },
+    "embedding_status": "Pending",
+    "source_file": "20eb0c7e0de84aa48ddd91284014d85e_Vertexa_Mini_Company_Handbook.pdf",
+    "bounding_box": {
+      "l": 50.4,
+      "t": 211.13,
+      "r": 548.71156,
+      "b": 188.32999999999993,
+      "coord_origin": "BOTTOMLEFT"
+    },
+    "created_time": "2026-07-21T06:00:39.453094Z",
+    "confidence": 1.0
+  },
+  {
+    "knowledge_id": "a8619fd4ae194817a13dad90f43659f8_chunk_0054",
+    "document_id": "a8619fd4ae194817a13dad90f43659f8",
+    "page_number": 3,
+    "chunk_type": "Heading",
+    "heading": "11  Technical Architecture",
+    "parent_heading": null,
+    "section_path": "11  Technical Architecture",
+    "sequence_number": 54,
+    "text": "11  Technical Architecture",
+    "metadata": {
+      "word_count": 3,
+      "token_estimate": 4,
+      "hierarchy_path": [
+        "b1_#/texts/49"
+      ],
+      "source_element_ids": [
+        "b1_#/texts/49"
+      ],
+      "bounding_boxes": [
+        {
+          "l": 50.4,
+          "t": 177.47000000000003,
+          "r": 215.23999999999998,
+          "b": 162.47000000000003,
+          "coord_origin": "BOTTOMLEFT"
+        }
+      ]
+    },
+    "relationships": {
+      "belongs_to": "a8619fd4ae194817a13dad90f43659f8_chunk_0051",
+      "parent": "a8619fd4ae194817a13dad90f43659f8_chunk_0051"
+    },
+    "embedding_status": "Pending",
+    "source_file": "20eb0c7e0de84aa48ddd91284014d85e_Vertexa_Mini_Company_Handbook.pdf",
+    "bounding_box": {
+      "l": 50.4,
+      "t": 177.47000000000003,
+      "r": 215.23999999999998,
+      "b": 162.47000000000003,
+      "coord_origin": "BOTTOMLEFT"
+    },
+    "created_time": "2026-07-21T06:00:39.453094Z",
+    "confidence": 1.0
+  },
+  {
+    "knowledge_id": "a8619fd4ae194817a13dad90f43659f8_chunk_0055",
+    "document_id": "a8619fd4ae194817a13dad90f43659f8",
+    "page_number": 3,
+    "chunk_type": "Paragraph",
+    "heading": "11  Technical Architecture",
+    "parent_heading": null,
+    "section_path": "11  Technical Architecture",
+    "sequence_number": 55,
+    "text": "Vertexa's AI Platform (also referred to elsewhere in this handbook as the AI Engine, the Artificial Intelligence Platform, and the AI Solution) underpins Document AI, RAG retrieval, and the Auth Gateway shown in Fig. 1.",
+    "metadata": {
+      "word_count": 36,
+      "token_estimate": 48,
+      "hierarchy_path": [
+        "b1_#/texts/49"
+      ],
+      "source_element_ids": [
+        "b1_#/texts/50"
+      ],
+      "bounding_boxes": [
+        {
+          "l": 50.4,
+          "t": 155.45000000000005,
+          "r": 550.0182399999999,
+          "b": 132.64999999999998,
+          "coord_origin": "BOTTOMLEFT"
+        }
+      ]
+    },
+    "relationships": {
+      "belongs_to": "a8619fd4ae194817a13dad90f43659f8_chunk_0054",
+      "previous": "a8619fd4ae194817a13dad90f43659f8_chunk_0053"
+    },
+    "embedding_status": "Pending",
+    "source_file": "20eb0c7e0de84aa48ddd91284014d85e_Vertexa_Mini_Company_Handbook.pdf",
+    "bounding_box": {
+      "l": 50.4,
+      "t": 155.45000000000005,
+      "r": 550.0182399999999,
+      "b": 132.64999999999998,
+      "coord_origin": "BOTTOMLEFT"
+    },
+    "created_time": "2026-07-21T06:00:39.453094Z",
+    "confidence": 1.0
+  },
+  {
+    "knowledge_id": "a8619fd4ae194817a13dad90f43659f8_chunk_0056",
+    "document_id": "a8619fd4ae194817a13dad90f43659f8",
+    "page_number": 4,
+    "chunk_type": "Image",
+    "heading": "11  Technical Architecture",
+    "parent_heading": null,
+    "section_path": "11  Technical Architecture",
+    "sequence_number": 56,
+    "text": "Image",
+    "metadata": {
+      "word_count": 1,
+      "token_estimate": 1,
+      "hierarchy_path": [
+        "b1_#/texts/49"
+      ],
+      "source_element_ids": [
+        "b1_#/pictures/3"
+      ],
+      "bounding_boxes": [
+        {
+          "l": 143.46627807617188,
+          "t": 746.693977355957,
+          "r": 450.5592956542969,
+          "b": 531.7311401367188,
+          "coord_origin": "BOTTOMLEFT"
+        }
+      ]
+    },
+    "relationships": {
+      "belongs_to": "a8619fd4ae194817a13dad90f43659f8_chunk_0054"
+    },
+    "embedding_status": "Pending",
+    "source_file": "20eb0c7e0de84aa48ddd91284014d85e_Vertexa_Mini_Company_Handbook.pdf",
+    "bounding_box": {
+      "l": 143.46627807617188,
+      "t": 746.693977355957,
+      "r": 450.5592956542969,
+      "b": 531.7311401367188,
+      "coord_origin": "BOTTOMLEFT"
+    },
+    "created_time": "2026-07-21T06:00:39.453094Z",
+    "confidence": 1.0
+  },
+  {
+    "knowledge_id": "a8619fd4ae194817a13dad90f43659f8_chunk_0057",
+    "document_id": "a8619fd4ae194817a13dad90f43659f8",
+    "page_number": 4,
+    "chunk_type": "Caption",
+    "heading": "11  Technical Architecture",
+    "parent_heading": null,
+    "section_path": "11  Technical Architecture",
+    "sequence_number": 57,
+    "text": "Fig 3 -Organization chart (Appendix A)",
+    "metadata": {
+      "word_count": 6,
+      "token_estimate": 11,
+      "hierarchy_path": [
+        "b1_#/texts/49"
+      ],
+      "source_element_ids": [
+        "b1_#/texts/51"
+      ],
+      "bounding_boxes": [
+        {
+          "l": 240.77,
+          "t": 496.41999999999996,
+          "r": 371.27996,
+          "b": 488.38,
+          "coord_origin": "BOTTOMLEFT"
+        }
+      ]
+    },
+    "relationships": {
+      "belongs_to": "a8619fd4ae194817a13dad90f43659f8_chunk_0054",
+      "related_to": null
+    },
+    "embedding_status": "Pending",
+    "source_file": "20eb0c7e0de84aa48ddd91284014d85e_Vertexa_Mini_Company_Handbook.pdf",
+    "bounding_box": {
+      "l": 240.77,
+      "t": 496.41999999999996,
+      "r": 371.27996,
+      "b": 488.38,
+      "coord_origin": "BOTTOMLEFT"
+    },
+    "created_time": "2026-07-21T06:00:39.453094Z",
+    "confidence": 1.0
+  },
+  {
+    "knowledge_id": "a8619fd4ae194817a13dad90f43659f8_chunk_0058",
+    "document_id": "a8619fd4ae194817a13dad90f43659f8",
+    "page_number": 4,
+    "chunk_type": "Heading",
+    "heading": "12  Procurement",
+    "parent_heading": null,
+    "section_path": "12  Procurement",
+    "sequence_number": 58,
+    "text": "12  Procurement",
+    "metadata": {
+      "word_count": 2,
+      "token_estimate": 4,
+      "hierarchy_path": [
+        "b1_#/texts/52"
+      ],
+      "source_element_ids": [
+        "b1_#/texts/52"
+      ],
+      "bounding_boxes": [
+        {
+          "l": 50.4,
+          "t": 477.64,
+          "r": 157.36999999999998,
+          "b": 462.64,
+          "coord_origin": "BOTTOMLEFT"
+        }
+      ]
+    },
+    "relationships": {
+      "belongs_to": "a8619fd4ae194817a13dad90f43659f8_chunk_0054",
+      "parent": "a8619fd4ae194817a13dad90f43659f8_chunk_0054"
+    },
+    "embedding_status": "Pending",
+    "source_file": "20eb0c7e0de84aa48ddd91284014d85e_Vertexa_Mini_Company_Handbook.pdf",
+    "bounding_box": {
+      "l": 50.4,
+      "t": 477.64,
+      "r": 157.36999999999998,
+      "b": 462.64,
+      "coord_origin": "BOTTOMLEFT"
+    },
+    "created_time": "2026-07-21T06:00:39.453094Z",
+    "confidence": 1.0
+  },
+  {
+    "knowledge_id": "a8619fd4ae194817a13dad90f43659f8_chunk_0059",
+    "document_id": "a8619fd4ae194817a13dad90f43659f8",
+    "page_number": 4,
+    "chunk_type": "Paragraph",
+    "heading": "12  Procurement",
+    "parent_heading": null,
+    "section_path": "12  Procurement",
+    "sequence_number": 59,
+    "text": "Purchase approval steps:",
+    "metadata": {
+      "word_count": 3,
+      "token_estimate": 4,
+      "hierarchy_path": [
+        "b1_#/texts/52"
+      ],
+      "source_element_ids": [
+        "b1_#/texts/53"
+      ],
+      "bounding_boxes": [
+        {
+          "l": 50.4,
+          "t": 455.62,
+          "r": 148.80248,
+          "b": 446.14,
+          "coord_origin": "BOTTOMLEFT"
+        }
+      ]
+    },
+    "relationships": {
+      "belongs_to": "a8619fd4ae194817a13dad90f43659f8_chunk_0058",
+      "previous": "a8619fd4ae194817a13dad90f43659f8_chunk_0055"
+    },
+    "embedding_status": "Pending",
+    "source_file": "20eb0c7e0de84aa48ddd91284014d85e_Vertexa_Mini_Company_Handbook.pdf",
+    "bounding_box": {
+      "l": 50.4,
+      "t": 455.62,
+      "r": 148.80248,
+      "b": 446.14,
+      "coord_origin": "BOTTOMLEFT"
+    },
+    "created_time": "2026-07-21T06:00:39.453094Z",
+    "confidence": 1.0
+  },
+  {
+    "knowledge_id": "a8619fd4ae194817a13dad90f43659f8_chunk_0060",
+    "document_id": "a8619fd4ae194817a13dad90f43659f8",
+    "page_number": 4,
+    "chunk_type": "List",
+    "heading": "12  Procurement",
+    "parent_heading": null,
+    "section_path": "12  Procurement",
+    "sequence_number": 60,
+    "text": "1. Raise a purchase requisition in the procurement portal.",
+    "metadata": {
+      "word_count": 9,
+      "token_estimate": 12,
+      "hierarchy_path": [
+        "b1_#/texts/52"
+      ],
+      "source_element_ids": [
+        "b1_#/texts/54"
+      ],
+      "bounding_boxes": [
+        {
+          "l": 50.4,
+          "t": 438.82,
+          "r": 293.19248,
+          "b": 429.34,
+          "coord_origin": "BOTTOMLEFT"
+        }
+      ]
+    },
+    "relationships": {
+      "belongs_to": "a8619fd4ae194817a13dad90f43659f8_chunk_0058"
+    },
+    "embedding_status": "Pending",
+    "source_file": "20eb0c7e0de84aa48ddd91284014d85e_Vertexa_Mini_Company_Handbook.pdf",
+    "bounding_box": {
+      "l": 50.4,
+      "t": 438.82,
+      "r": 293.19248,
+      "b": 429.34,
+      "coord_origin": "BOTTOMLEFT"
+    },
+    "created_time": "2026-07-21T06:00:39.453094Z",
+    "confidence": 1.0
+  },
+  {
+    "knowledge_id": "a8619fd4ae194817a13dad90f43659f8_chunk_0061",
+    "document_id": "a8619fd4ae194817a13dad90f43659f8",
+    "page_number": 4,
+    "chunk_type": "Bullet List",
+    "heading": "12  Procurement",
+    "parent_heading": null,
+    "section_path": "12  Procurement",
+    "sequence_number": 61,
+    "text": "2. Obtain budget sign-off from the department head.",
+    "metadata": {
+      "word_count": 9,
+      "token_estimate": 11,
+      "hierarchy_path": [
+        "b1_#/texts/52"
+      ],
+      "source_element_ids": [
+        "b1_#/texts/55"
+      ],
+      "bounding_boxes": [
+        {
+          "l": 50.4,
+          "t": 425.02000000000004,
+          "r": 275.07248,
+          "b": 415.54,
+          "coord_origin": "BOTTOMLEFT"
+        }
+      ]
+    },
+    "relationships": {
+      "belongs_to": "a8619fd4ae194817a13dad90f43659f8_chunk_0058"
+    },
+    "embedding_status": "Pending",
+    "source_file": "20eb0c7e0de84aa48ddd91284014d85e_Vertexa_Mini_Company_Handbook.pdf",
+    "bounding_box": {
+      "l": 50.4,
+      "t": 425.02000000000004,
+      "r": 275.07248,
+      "b": 415.54,
+      "coord_origin": "BOTTOMLEFT"
+    },
+    "created_time": "2026-07-21T06:00:39.453094Z",
+    "confidence": 1.0
+  },
+  {
+    "knowledge_id": "a8619fd4ae194817a13dad90f43659f8_chunk_0062",
+    "document_id": "a8619fd4ae194817a13dad90f43659f8",
+    "page_number": 4,
+    "chunk_type": "List",
+    "heading": "12  Procurement",
+    "parent_heading": null,
+    "section_path": "12  Procurement",
+    "sequence_number": 62,
+    "text": "3. Finance issues a purchase order to the approved vendor.",
+    "metadata": {
+      "word_count": 10,
+      "token_estimate": 12,
+      "hierarchy_path": [
+        "b1_#/texts/52"
+      ],
+      "source_element_ids": [
+        "b1_#/texts/56"
+      ],
+      "bounding_boxes": [
+        {
+          "l": 50.4,
+          "t": 411.22,
+          "r": 298.95248,
+          "b": 401.74,
+          "coord_origin": "BOTTOMLEFT"
+        }
+      ]
+    },
+    "relationships": {
+      "belongs_to": "a8619fd4ae194817a13dad90f43659f8_chunk_0058"
+    },
+    "embedding_status": "Pending",
+    "source_file": "20eb0c7e0de84aa48ddd91284014d85e_Vertexa_Mini_Company_Handbook.pdf",
+    "bounding_box": {
+      "l": 50.4,
+      "t": 411.22,
+      "r": 298.95248,
+      "b": 401.74,
+      "coord_origin": "BOTTOMLEFT"
+    },
+    "created_time": "2026-07-21T06:00:39.453094Z",
+    "confidence": 1.0
+  },
+  {
+    "knowledge_id": "a8619fd4ae194817a13dad90f43659f8_chunk_0063",
+    "document_id": "a8619fd4ae194817a13dad90f43659f8",
+    "page_number": 4,
+    "chunk_type": "List",
+    "heading": "12  Procurement",
+    "parent_heading": null,
+    "section_path": "12  Procurement",
+    "sequence_number": 63,
+    "text": "4. Goods/services are received and matched against the PO before payment.",
+    "metadata": {
+      "word_count": 12,
+      "token_estimate": 14,
+      "hierarchy_path": [
+        "b1_#/texts/52"
+      ],
+      "source_element_ids": [
+        "b1_#/texts/57"
+      ],
+      "bounding_boxes": [
+        {
+          "l": 50.4,
+          "t": 397.3,
+          "r": 366.77248,
+          "b": 387.82,
+          "coord_origin": "BOTTOMLEFT"
+        }
+      ]
+    },
+    "relationships": {
+      "belongs_to": "a8619fd4ae194817a13dad90f43659f8_chunk_0058"
+    },
+    "embedding_status": "Pending",
+    "source_file": "20eb0c7e0de84aa48ddd91284014d85e_Vertexa_Mini_Company_Handbook.pdf",
+    "bounding_box": {
+      "l": 50.4,
+      "t": 397.3,
+      "r": 366.77248,
+      "b": 387.82,
+      "coord_origin": "BOTTOMLEFT"
+    },
+    "created_time": "2026-07-21T06:00:39.453094Z",
+    "confidence": 1.0
+  },
+  {
+    "knowledge_id": "a8619fd4ae194817a13dad90f43659f8_chunk_0064",
+    "document_id": "a8619fd4ae194817a13dad90f43659f8",
+    "page_number": 4,
+    "chunk_type": "Table",
+    "heading": "12  Procurement",
+    "parent_heading": null,
+    "section_path": "12  Procurement",
+    "sequence_number": 64,
+    "text": "| Category              | Preferred Vendor   | Approval Limit (₹)   |\n|-----------------------|--------------------|----------------------|\n| Laptops & IT Hardware | See Appendix C     | 5,00,000             |\n| Office Supplies       | Local vendor panel | 50,000               |\n| Software Licenses     | See Appendix C     | 10,00,000            |",
+    "metadata": {
+      "word_count": 29,
+      "token_estimate": 79,
+      "hierarchy_path": [
+        "b1_#/texts/52"
+      ],
+      "source_element_ids": [
+        "b1_#/tables/2"
+      ],
+      "bounding_boxes": [
+        {
+          "l": 49.23304748535156,
+          "t": 386.0041198730469,
+          "r": 562.2182006835938,
+          "b": 340.512939453125,
+          "coord_origin": "BOTTOMLEFT"
+        }
+      ]
+    },
+    "relationships": {
+      "belongs_to": "a8619fd4ae194817a13dad90f43659f8_chunk_0058"
+    },
+    "embedding_status": "Pending",
+    "source_file": "20eb0c7e0de84aa48ddd91284014d85e_Vertexa_Mini_Company_Handbook.pdf",
+    "bounding_box": {
+      "l": 49.23304748535156,
+      "t": 386.0041198730469,
+      "r": 562.2182006835938,
+      "b": 340.512939453125,
+      "coord_origin": "BOTTOMLEFT"
+    },
+    "created_time": "2026-07-21T06:00:39.453094Z",
+    "confidence": 1.0
+  },
+  {
+    "knowledge_id": "a8619fd4ae194817a13dad90f43659f8_chunk_0065",
+    "document_id": "a8619fd4ae194817a13dad90f43659f8",
+    "page_number": 4,
+    "chunk_type": "Footnote",
+    "heading": "12  Procurement",
+    "parent_heading": null,
+    "section_path": "12  Procurement",
+    "sequence_number": 65,
+    "text": "Table 3 -Procurement categories and limits.",
+    "metadata": {
+      "word_count": 6,
+      "token_estimate": 10,
+      "hierarchy_path": [
+        "b1_#/texts/52"
+      ],
+      "source_element_ids": [
+        "b1_#/texts/58"
+      ],
+      "bounding_boxes": [
+        {
+          "l": 50.4,
+          "t": 339.44,
+          "r": 197.7369600000001,
+          "b": 331.40000000000003,
+          "coord_origin": "BOTTOMLEFT"
+        }
+      ]
+    },
+    "relationships": {
+      "belongs_to": "a8619fd4ae194817a13dad90f43659f8_chunk_0058"
+    },
+    "embedding_status": "Pending",
+    "source_file": "20eb0c7e0de84aa48ddd91284014d85e_Vertexa_Mini_Company_Handbook.pdf",
+    "bounding_box": {
+      "l": 50.4,
+      "t": 339.44,
+      "r": 197.7369600000001,
+      "b": 331.40000000000003,
+      "coord_origin": "BOTTOMLEFT"
+    },
+    "created_time": "2026-07-21T06:00:39.453094Z",
+    "confidence": 1.0
+  },
+  {
+    "knowledge_id": "a8619fd4ae194817a13dad90f43659f8_chunk_0066",
+    "document_id": "a8619fd4ae194817a13dad90f43659f8",
+    "page_number": 4,
+    "chunk_type": "Heading",
+    "heading": "13  Employee Benefits",
+    "parent_heading": null,
+    "section_path": "13  Employee Benefits",
+    "sequence_number": 66,
+    "text": "13  Employee Benefits",
+    "metadata": {
+      "word_count": 3,
+      "token_estimate": 4,
+      "hierarchy_path": [
+        "b1_#/texts/59"
+      ],
+      "source_element_ids": [
+        "b1_#/texts/59"
+      ],
+      "bounding_boxes": [
+        {
+          "l": 50.4,
+          "t": 297.38,
+          "r": 191.80999999999997,
+          "b": 282.38,
+          "coord_origin": "BOTTOMLEFT"
+        }
+      ]
+    },
+    "relationships": {
+      "belongs_to": "a8619fd4ae194817a13dad90f43659f8_chunk_0058",
+      "parent": "a8619fd4ae194817a13dad90f43659f8_chunk_0058"
+    },
+    "embedding_status": "Pending",
+    "source_file": "20eb0c7e0de84aa48ddd91284014d85e_Vertexa_Mini_Company_Handbook.pdf",
+    "bounding_box": {
+      "l": 50.4,
+      "t": 297.38,
+      "r": 191.80999999999997,
+      "b": 282.38,
+      "coord_origin": "BOTTOMLEFT"
+    },
+    "created_time": "2026-07-21T06:00:39.453094Z",
+    "confidence": 1.0
+  },
+  {
+    "knowledge_id": "a8619fd4ae194817a13dad90f43659f8_chunk_0067",
+    "document_id": "a8619fd4ae194817a13dad90f43659f8",
+    "page_number": 4,
+    "chunk_type": "Paragraph",
+    "heading": "13  Employee Benefits",
+    "parent_heading": null,
+    "section_path": "13  Employee Benefits",
+    "sequence_number": 67,
+    "text": "Per the Benefits Guide: Health insurance coverage begins after 30 days of continuous employment.",
+    "metadata": {
+      "word_count": 14,
+      "token_estimate": 17,
+      "hierarchy_path": [
+        "b1_#/texts/59"
+      ],
+      "source_element_ids": [
+        "b1_#/texts/60"
+      ],
+      "bounding_boxes": [
+        {
+          "l": 50.4,
+          "t": 275.36,
+          "r": 435.17247999999995,
+          "b": 265.88,
+          "coord_origin": "BOTTOMLEFT"
+        }
+      ]
+    },
+    "relationships": {
+      "belongs_to": "a8619fd4ae194817a13dad90f43659f8_chunk_0066",
+      "previous": "a8619fd4ae194817a13dad90f43659f8_chunk_0059"
+    },
+    "embedding_status": "Pending",
+    "source_file": "20eb0c7e0de84aa48ddd91284014d85e_Vertexa_Mini_Company_Handbook.pdf",
+    "bounding_box": {
+      "l": 50.4,
+      "t": 275.36,
+      "r": 435.17247999999995,
+      "b": 265.88,
+      "coord_origin": "BOTTOMLEFT"
+    },
+    "created_time": "2026-07-21T06:00:39.453094Z",
+    "confidence": 1.0
+  },
+  {
+    "knowledge_id": "a8619fd4ae194817a13dad90f43659f8_chunk_0068",
+    "document_id": "a8619fd4ae194817a13dad90f43659f8",
+    "page_number": 4,
+    "chunk_type": "Paragraph",
+    "heading": "13  Employee Benefits",
+    "parent_heading": null,
+    "section_path": "13  Employee Benefits",
+    "sequence_number": 68,
+    "text": "Per the updated Total Rewards page circulated separately: health insurance coverage begins after 90 days of continuous employment -the two documents have not been reconciled.",
+    "metadata": {
+      "word_count": 25,
+      "token_estimate": 30,
+      "hierarchy_path": [
+        "b1_#/texts/59"
+      ],
+      "source_element_ids": [
+        "b1_#/texts/61"
+      ],
+      "bounding_boxes": [
+        {
+          "l": 50.4,
+          "t": 258.9200000000001,
+          "r": 516.5979599999994,
+          "b": 236.12,
+          "coord_origin": "BOTTOMLEFT"
+        }
+      ]
+    },
+    "relationships": {
+      "belongs_to": "a8619fd4ae194817a13dad90f43659f8_chunk_0066",
+      "previous": "a8619fd4ae194817a13dad90f43659f8_chunk_0067"
+    },
+    "embedding_status": "Pending",
+    "source_file": "20eb0c7e0de84aa48ddd91284014d85e_Vertexa_Mini_Company_Handbook.pdf",
+    "bounding_box": {
+      "l": 50.4,
+      "t": 258.9200000000001,
+      "r": 516.5979599999994,
+      "b": 236.12,
+      "coord_origin": "BOTTOMLEFT"
+    },
+    "created_time": "2026-07-21T06:00:39.453094Z",
+    "confidence": 1.0
+  },
+  {
+    "knowledge_id": "a8619fd4ae194817a13dad90f43659f8_chunk_0069",
+    "document_id": "a8619fd4ae194817a13dad90f43659f8",
+    "page_number": 4,
+    "chunk_type": "Heading",
+    "heading": "14  Legal",
+    "parent_heading": null,
+    "section_path": "14  Legal",
+    "sequence_number": 69,
+    "text": "14  Legal",
+    "metadata": {
+      "word_count": 2,
+      "token_estimate": 3,
+      "hierarchy_path": [
+        "b1_#/texts/62"
+      ],
+      "source_element_ids": [
+        "b1_#/texts/62"
+      ],
+      "bounding_boxes": [
+        {
+          "l": 50.4,
+          "t": 225.26,
+          "r": 107.93,
+          "b": 210.26,
+          "coord_origin": "BOTTOMLEFT"
+        }
+      ]
+    },
+    "relationships": {
+      "belongs_to": "a8619fd4ae194817a13dad90f43659f8_chunk_0066",
+      "parent": "a8619fd4ae194817a13dad90f43659f8_chunk_0066"
+    },
+    "embedding_status": "Pending",
+    "source_file": "20eb0c7e0de84aa48ddd91284014d85e_Vertexa_Mini_Company_Handbook.pdf",
+    "bounding_box": {
+      "l": 50.4,
+      "t": 225.26,
+      "r": 107.93,
+      "b": 210.26,
+      "coord_origin": "BOTTOMLEFT"
+    },
+    "created_time": "2026-07-21T06:00:39.453094Z",
+    "confidence": 1.0
+  },
+  {
+    "knowledge_id": "a8619fd4ae194817a13dad90f43659f8_chunk_0070",
+    "document_id": "a8619fd4ae194817a13dad90f43659f8",
+    "page_number": 4,
+    "chunk_type": "Paragraph",
+    "heading": "14  Legal",
+    "parent_heading": null,
+    "section_path": "14  Legal",
+    "sequence_number": 70,
+    "text": "Definitions used across this handbook include 'Confidential Information', 'Business Day', and 'Force Majeure Event'; a formal definition of 'Business Day' is not provided in this edition and should be read as per the employment contract.",
+    "metadata": {
+      "word_count": 35,
+      "token_estimate": 47,
+      "hierarchy_path": [
+        "b1_#/texts/62"
+      ],
+      "source_element_ids": [
+        "b1_#/texts/63"
+      ],
+      "bounding_boxes": [
+        {
+          "l": 50.4,
+          "t": 203.21000000000004,
+          "r": 532.04248,
+          "b": 180.40999999999997,
+          "coord_origin": "BOTTOMLEFT"
+        }
+      ]
+    },
+    "relationships": {
+      "belongs_to": "a8619fd4ae194817a13dad90f43659f8_chunk_0069",
+      "previous": "a8619fd4ae194817a13dad90f43659f8_chunk_0068"
+    },
+    "embedding_status": "Pending",
+    "source_file": "20eb0c7e0de84aa48ddd91284014d85e_Vertexa_Mini_Company_Handbook.pdf",
+    "bounding_box": {
+      "l": 50.4,
+      "t": 203.21000000000004,
+      "r": 532.04248,
+      "b": 180.40999999999997,
+      "coord_origin": "BOTTOMLEFT"
+    },
+    "created_time": "2026-07-21T06:00:39.453094Z",
+    "confidence": 1.0
+  },
+  {
+    "knowledge_id": "a8619fd4ae194817a13dad90f43659f8_chunk_0071",
+    "document_id": "a8619fd4ae194817a13dad90f43659f8",
+    "page_number": 4,
+    "chunk_type": "Heading",
+    "heading": "15  Frequently Asked Questions",
+    "parent_heading": null,
+    "section_path": "15  Frequently Asked Questions",
+    "sequence_number": 71,
+    "text": "15  Frequently Asked Questions",
+    "metadata": {
+      "word_count": 4,
+      "token_estimate": 5,
+      "hierarchy_path": [
+        "b1_#/texts/64"
+      ],
+      "source_element_ids": [
+        "b1_#/texts/64"
+      ],
+      "bounding_boxes": [
+        {
+          "l": 50.4,
+          "t": 169.54999999999995,
+          "r": 250.76,
+          "b": 154.54999999999995,
+          "coord_origin": "BOTTOMLEFT"
+        }
+      ]
+    },
+    "relationships": {
+      "belongs_to": "a8619fd4ae194817a13dad90f43659f8_chunk_0069",
+      "parent": "a8619fd4ae194817a13dad90f43659f8_chunk_0069"
+    },
+    "embedding_status": "Pending",
+    "source_file": "20eb0c7e0de84aa48ddd91284014d85e_Vertexa_Mini_Company_Handbook.pdf",
+    "bounding_box": {
+      "l": 50.4,
+      "t": 169.54999999999995,
+      "r": 250.76,
+      "b": 154.54999999999995,
+      "coord_origin": "BOTTOMLEFT"
+    },
+    "created_time": "2026-07-21T06:00:39.453094Z",
+    "confidence": 1.0
+  },
+  {
+    "knowledge_id": "a8619fd4ae194817a13dad90f43659f8_chunk_0072",
+    "document_id": "a8619fd4ae194817a13dad90f43659f8",
+    "page_number": 4,
+    "chunk_type": "Table",
+    "heading": "15  Frequently Asked Questions",
+    "parent_heading": null,
+    "section_path": "15  Frequently Asked Questions",
+    "sequence_number": 72,
+    "text": "Table 4 -Department headcount and budget (from the FAQ appendix).\n\n| Department   |   Employees | Budget (₹)   |\n|--------------|-------------|--------------|\n| HR           |          32 | 8,00,000     |\n| IT           |          94 | 3,50,00,000  |\n| Finance      |          28 | 1,20,00,000  |\n| Support      |          61 | 95,00,000    |",
+    "metadata": {
+      "word_count": 35,
+      "token_estimate": 104,
+      "hierarchy_path": [
+        "b1_#/texts/64"
+      ],
+      "source_element_ids": [
+        "b1_#/tables/3"
+      ],
+      "bounding_boxes": [
+        {
+          "l": 49.12441635131836,
+          "t": 150.00555419921875,
+          "r": 562.18359375,
+          "b": 94.82269287109375,
+          "coord_origin": "BOTTOMLEFT"
+        }
+      ]
+    },
+    "relationships": {
+      "belongs_to": "a8619fd4ae194817a13dad90f43659f8_chunk_0071"
+    },
+    "embedding_status": "Pending",
+    "source_file": "20eb0c7e0de84aa48ddd91284014d85e_Vertexa_Mini_Company_Handbook.pdf",
+    "bounding_box": {
+      "l": 49.12441635131836,
+      "t": 150.00555419921875,
+      "r": 562.18359375,
+      "b": 94.82269287109375,
+      "coord_origin": "BOTTOMLEFT"
+    },
+    "created_time": "2026-07-21T06:00:39.453094Z",
+    "confidence": 1.0
+  },
+  {
+    "knowledge_id": "a8619fd4ae194817a13dad90f43659f8_chunk_0073",
+    "document_id": "a8619fd4ae194817a13dad90f43659f8",
+    "page_number": 4,
+    "chunk_type": "Caption",
+    "heading": "15  Frequently Asked Questions",
+    "parent_heading": null,
+    "section_path": "15  Frequently Asked Questions",
+    "sequence_number": 73,
+    "text": "Table 4 -Department headcount and budget (from the FAQ appendix).",
+    "metadata": {
+      "word_count": 10,
+      "token_estimate": 15,
+      "hierarchy_path": [
+        "b1_#/texts/64"
+      ],
+      "source_element_ids": [
+        "b1_#/texts/65"
+      ],
+      "bounding_boxes": [
+        {
+          "l": 50.4,
+          "t": 93.05399999999997,
+          "r": 285.06704,
+          "b": 85.01400000000001,
+          "coord_origin": "BOTTOMLEFT"
+        }
+      ]
+    },
+    "relationships": {
+      "belongs_to": "a8619fd4ae194817a13dad90f43659f8_chunk_0071",
+      "related_to": null
+    },
+    "embedding_status": "Pending",
+    "source_file": "20eb0c7e0de84aa48ddd91284014d85e_Vertexa_Mini_Company_Handbook.pdf",
+    "bounding_box": {
+      "l": 50.4,
+      "t": 93.05399999999997,
+      "r": 285.06704,
+      "b": 85.01400000000001,
+      "coord_origin": "BOTTOMLEFT"
+    },
+    "created_time": "2026-07-21T06:00:39.453094Z",
+    "confidence": 1.0
+  },
+  {
+    "knowledge_id": "a8619fd4ae194817a13dad90f43659f8_chunk_0074",
+    "document_id": "a8619fd4ae194817a13dad90f43659f8",
+    "page_number": 5,
+    "chunk_type": "Bullet List",
+    "heading": "15  Frequently Asked Questions",
+    "parent_heading": null,
+    "section_path": "15  Frequently Asked Questions",
+    "sequence_number": 74,
+    "text": "How many annual leaves do employees receive? -See Section 2.1 (18 vs. 20 -unresolved).",
+    "metadata": {
+      "word_count": 15,
+      "token_estimate": 25,
+      "hierarchy_path": [
+        "b1_#/texts/64"
+      ],
+      "source_element_ids": [
+        "b1_#/texts/66"
+      ],
+      "bounding_boxes": [
+        {
+          "l": 50.4,
+          "t": 730.95,
+          "r": 429.05248,
+          "b": 721.47,
+          "coord_origin": "BOTTOMLEFT"
+        }
+      ]
+    },
+    "relationships": {
+      "belongs_to": "a8619fd4ae194817a13dad90f43659f8_chunk_0071"
+    },
+    "embedding_status": "Pending",
+    "source_file": "20eb0c7e0de84aa48ddd91284014d85e_Vertexa_Mini_Company_Handbook.pdf",
+    "bounding_box": {
+      "l": 50.4,
+      "t": 730.95,
+      "r": 429.05248,
+      "b": 721.47,
+      "coord_origin": "BOTTOMLEFT"
+    },
+    "created_time": "2026-07-21T06:00:39.453094Z",
+    "confidence": 1.0
+  },
+  {
+    "knowledge_id": "a8619fd4ae194817a13dad90f43659f8_chunk_0075",
+    "document_id": "a8619fd4ae194817a13dad90f43659f8",
+    "page_number": 5,
+    "chunk_type": "Bullet List",
+    "heading": "15  Frequently Asked Questions",
+    "parent_heading": null,
+    "section_path": "15  Frequently Asked Questions",
+    "sequence_number": 75,
+    "text": "Is MFA mandatory? -Yes, for all employees (Section 5.2).",
+    "metadata": {
+      "word_count": 10,
+      "token_estimate": 18,
+      "hierarchy_path": [
+        "b1_#/texts/64"
+      ],
+      "source_element_ids": [
+        "b1_#/texts/67"
+      ],
+      "bounding_boxes": [
+        {
+          "l": 50.4,
+          "t": 717.13,
+          "r": 295.71247999999997,
+          "b": 707.65,
+          "coord_origin": "BOTTOMLEFT"
+        }
+      ]
+    },
+    "relationships": {
+      "belongs_to": "a8619fd4ae194817a13dad90f43659f8_chunk_0071"
+    },
+    "embedding_status": "Pending",
+    "source_file": "20eb0c7e0de84aa48ddd91284014d85e_Vertexa_Mini_Company_Handbook.pdf",
+    "bounding_box": {
+      "l": 50.4,
+      "t": 717.13,
+      "r": 295.71247999999997,
+      "b": 707.65,
+      "coord_origin": "BOTTOMLEFT"
+    },
+    "created_time": "2026-07-21T06:00:39.453094Z",
+    "confidence": 1.0
+  },
+  {
+    "knowledge_id": "a8619fd4ae194817a13dad90f43659f8_chunk_0076",
+    "document_id": "a8619fd4ae194817a13dad90f43659f8",
+    "page_number": 5,
+    "chunk_type": "Bullet List",
+    "heading": "15  Frequently Asked Questions",
+    "parent_heading": null,
+    "section_path": "15  Frequently Asked Questions",
+    "sequence_number": 76,
+    "text": "What was Q1 revenue growth? -Reported as both 18% and 15% (Section 6).",
+    "metadata": {
+      "word_count": 13,
+      "token_estimate": 24,
+      "hierarchy_path": [
+        "b1_#/texts/64"
+      ],
+      "source_element_ids": [
+        "b1_#/texts/68"
+      ],
+      "bounding_boxes": [
+        {
+          "l": 50.4,
+          "t": 703.33,
+          "r": 369.89248,
+          "b": 693.85,
+          "coord_origin": "BOTTOMLEFT"
+        }
+      ]
+    },
+    "relationships": {
+      "belongs_to": "a8619fd4ae194817a13dad90f43659f8_chunk_0071"
+    },
+    "embedding_status": "Pending",
+    "source_file": "20eb0c7e0de84aa48ddd91284014d85e_Vertexa_Mini_Company_Handbook.pdf",
+    "bounding_box": {
+      "l": 50.4,
+      "t": 703.33,
+      "r": 369.89248,
+      "b": 693.85,
+      "coord_origin": "BOTTOMLEFT"
+    },
+    "created_time": "2026-07-21T06:00:39.453094Z",
+    "confidence": 1.0
+  },
+  {
+    "knowledge_id": "a8619fd4ae194817a13dad90f43659f8_chunk_0077",
+    "document_id": "a8619fd4ae194817a13dad90f43659f8",
+    "page_number": 5,
+    "chunk_type": "Bullet List",
+    "heading": "15  Frequently Asked Questions",
+    "parent_heading": null,
+    "section_path": "15  Frequently Asked Questions",
+    "sequence_number": 77,
+    "text": "Which appendix is missing? -Appendix B is referenced in Sections 5 and 9 but does not appear in this edition.",
+    "metadata": {
+      "word_count": 20,
+      "token_estimate": 26,
+      "hierarchy_path": [
+        "b1_#/texts/64"
+      ],
+      "source_element_ids": [
+        "b1_#/texts/69"
+      ],
+      "bounding_boxes": [
+        {
+          "l": 50.4,
+          "t": 689.41,
+          "r": 497.72247999999996,
+          "b": 679.93,
+          "coord_origin": "BOTTOMLEFT"
+        }
+      ]
+    },
+    "relationships": {
+      "belongs_to": "a8619fd4ae194817a13dad90f43659f8_chunk_0071"
+    },
+    "embedding_status": "Pending",
+    "source_file": "20eb0c7e0de84aa48ddd91284014d85e_Vertexa_Mini_Company_Handbook.pdf",
+    "bounding_box": {
+      "l": 50.4,
+      "t": 689.41,
+      "r": 497.72247999999996,
+      "b": 679.93,
+      "coord_origin": "BOTTOMLEFT"
+    },
+    "created_time": "2026-07-21T06:00:39.453094Z",
+    "confidence": 1.0
+  },
+  {
+    "knowledge_id": "a8619fd4ae194817a13dad90f43659f8_chunk_0078",
+    "document_id": "a8619fd4ae194817a13dad90f43659f8",
+    "page_number": 6,
+    "chunk_type": "Heading",
+    "heading": "Appendices",
+    "parent_heading": null,
+    "section_path": "Appendices",
+    "sequence_number": 78,
+    "text": "Appendices",
+    "metadata": {
+      "word_count": 1,
+      "token_estimate": 2,
+      "hierarchy_path": [
+        "b1_#/texts/70"
+      ],
+      "source_element_ids": [
+        "b1_#/texts/70"
+      ],
+      "bounding_boxes": [
+        {
+          "l": 50.4,
+          "t": 745.77,
+          "r": 126.17,
+          "b": 730.77,
+          "coord_origin": "BOTTOMLEFT"
+        }
+      ]
+    },
+    "relationships": {
+      "belongs_to": "a8619fd4ae194817a13dad90f43659f8_chunk_0071",
+      "parent": "a8619fd4ae194817a13dad90f43659f8_chunk_0071"
+    },
+    "embedding_status": "Pending",
+    "source_file": "20eb0c7e0de84aa48ddd91284014d85e_Vertexa_Mini_Company_Handbook.pdf",
+    "bounding_box": {
+      "l": 50.4,
+      "t": 745.77,
+      "r": 126.17,
+      "b": 730.77,
+      "coord_origin": "BOTTOMLEFT"
+    },
+    "created_time": "2026-07-21T06:00:39.453094Z",
+    "confidence": 1.0
+  },
+  {
+    "knowledge_id": "a8619fd4ae194817a13dad90f43659f8_chunk_0079",
+    "document_id": "a8619fd4ae194817a13dad90f43659f8",
+    "page_number": 6,
+    "chunk_type": "Paragraph",
+    "heading": "Appendices",
+    "parent_heading": null,
+    "section_path": "Appendices",
+    "sequence_number": 79,
+    "text": "Appendix A -Organization Chart (see Fig. 3, Section 11). Appendix C -Approved Vendor List (referenced in Section 12; full vendor table maintained by Procurement separately).",
+    "metadata": {
+      "word_count": 25,
+      "token_estimate": 40,
+      "hierarchy_path": [
+        "b1_#/texts/70"
+      ],
+      "source_element_ids": [
+        "b1_#/texts/71"
+      ],
+      "bounding_boxes": [
+        {
+          "l": 50.4,
+          "t": 723.75,
+          "r": 518.36248,
+          "b": 697.93,
+          "coord_origin": "BOTTOMLEFT"
+        }
+      ]
+    },
+    "relationships": {
+      "belongs_to": "a8619fd4ae194817a13dad90f43659f8_chunk_0078",
+      "previous": "a8619fd4ae194817a13dad90f43659f8_chunk_0070"
+    },
+    "embedding_status": "Pending",
+    "source_file": "20eb0c7e0de84aa48ddd91284014d85e_Vertexa_Mini_Company_Handbook.pdf",
+    "bounding_box": {
+      "l": 50.4,
+      "t": 723.75,
+      "r": 518.36248,
+      "b": 697.93,
+      "coord_origin": "BOTTOMLEFT"
+    },
+    "created_time": "2026-07-21T06:00:39.453094Z",
+    "confidence": 1.0
+  },
+  {
+    "knowledge_id": "a8619fd4ae194817a13dad90f43659f8_chunk_0080",
+    "document_id": "a8619fd4ae194817a13dad90f43659f8",
+    "page_number": 6,
+    "chunk_type": "Paragraph",
+    "heading": "Appendices",
+    "parent_heading": null,
+    "section_path": "Appendices",
+    "sequence_number": 80,
+    "text": "Appendix B, referenced in Sections 5 and 9, is not included in this edition.",
+    "metadata": {
+      "word_count": 14,
+      "token_estimate": 20,
+      "hierarchy_path": [
+        "b1_#/texts/70"
+      ],
+      "source_element_ids": [
+        "b1_#/texts/72"
+      ],
+      "bounding_boxes": [
+        {
+          "l": 50.4,
+          "t": 691.09,
+          "r": 336.05248,
+          "b": 681.61,
+          "coord_origin": "BOTTOMLEFT"
+        }
+      ]
+    },
+    "relationships": {
+      "belongs_to": "a8619fd4ae194817a13dad90f43659f8_chunk_0078",
+      "previous": "a8619fd4ae194817a13dad90f43659f8_chunk_0079"
+    },
+    "embedding_status": "Pending",
+    "source_file": "20eb0c7e0de84aa48ddd91284014d85e_Vertexa_Mini_Company_Handbook.pdf",
+    "bounding_box": {
+      "l": 50.4,
+      "t": 691.09,
+      "r": 336.05248,
+      "b": 681.61,
+      "coord_origin": "BOTTOMLEFT"
+    },
+    "created_time": "2026-07-21T06:00:39.453094Z",
+    "confidence": 1.0
+  }
+]

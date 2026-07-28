@@ -1,0 +1,33 @@
+{
+  "image_id": "#/pictures/38",
+  "page": 9,
+  "caption": null,
+  "ocr_text": null,
+  "bounding_box": {
+    "l": 647.543212890625,
+    "t": 706.6685028076172,
+    "r": 977.4208984375,
+    "b": 554.5511474609375,
+    "coord_origin": "BOTTOMLEFT"
+  },
+  "image_path": "05_images/image_039.png",
+  "image_type": "Photo",
+  "objects": [
+    "Greenery (trees and vegetation)",
+    "Industrial structures (possibly power plants or related facilities)",
+    "Open land or construction areas",
+    "Railways or tracks"
+  ],
+  "keywords": [
+    "Construction",
+    "Environment",
+    "National Thermal Power Corporation (NTPC)",
+    "Pakri project",
+    "Power plant",
+    "Railways"
+  ],
+  "semantic_description": "The image shows a series of photographs related to the National Thermal Power Corporation (NTPC) Pakri project. It appears to depict various stages or aspects of the project, possibly including construction, infrastructure, and possibly the surrounding environment.",
+  "detected_entities": [
+    "National Thermal Power Corporation (NTPC)"
+  ]
+}

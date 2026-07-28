@@ -1,0 +1,18 @@
+{
+  "total_findings_audited": 40,
+  "total_findings_confirmed": 40,
+  "total_findings_rejected": 0,
+  "overall_document_risk": "High",
+  "severity_breakdown": {
+    "Critical": 0,
+    "High": 3,
+    "Medium": 20,
+    "Low": 17
+  },
+  "category_breakdown": {
+    "Undefined Term": 3,
+    "Writing Clarity": 24,
+    "Numerical Inconsistency": 3,
+    "Policy Conflict": 10
+  }
+}

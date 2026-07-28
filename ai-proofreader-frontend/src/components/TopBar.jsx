@@ -98,6 +98,8 @@ export default function TopBar({ userInitial = "S" }) {
 
   const isProofreadActive = activeTab === "proofreading" && location.pathname.includes("/documents");
   const isAssistantActive = activeTab === "assistant" && location.pathname.includes("/documents");
+  const isAnalysisActive = (activeTab === "analysis" || activeTab === "context") && location.pathname.includes("/documents");
+  const isComparativeActive = (activeTab === "comparative" || activeTab === "comparative-analysis") && location.pathname.includes("/documents");
   const isReportsActive = activeTab === "reports" && location.pathname.includes("/documents");
 
   let assessmentText = "Under Review";
@@ -276,6 +278,30 @@ export default function TopBar({ userInitial = "S" }) {
             </button>
 
             <button
+              onClick={() => handleNavTab("analysis")}
+              style={{
+                ...styles.navLink,
+                backgroundColor: isAnalysisActive ? "var(--brand-light)" : "transparent",
+                color: isAnalysisActive ? "var(--brand)" : "var(--text-secondary)",
+                fontWeight: isAnalysisActive ? 700 : 500
+              }}
+            >
+              Context Analysis
+            </button>
+
+            <button
+              onClick={() => handleNavTab("comparative")}
+              style={{
+                ...styles.navLink,
+                backgroundColor: isComparativeActive ? "var(--brand-light)" : "transparent",
+                color: isComparativeActive ? "var(--brand)" : "var(--text-secondary)",
+                fontWeight: isComparativeActive ? 700 : 500
+              }}
+            >
+              Comparative Analysis
+            </button>
+
+            <button
               onClick={() => handleNavTab("reports")}
               style={{
                 ...styles.navLink,
@@ -286,8 +312,6 @@ export default function TopBar({ userInitial = "S" }) {
             >
               Reports
             </button>
-
-            <span style={{ height: 16, width: 1, backgroundColor: "var(--border)", margin: "0 4px" }} />
 
             <button
               onClick={handleTriggerExport}

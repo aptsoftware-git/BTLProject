@@ -1,0 +1,551 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <title>Chunk Reasoning Inspector</title>
+  <style>
+    :root {
+      --primary: #4f46e5;
+      --primary-light: #e0e7ff;
+      --bg: #f8fafc;
+      --card-bg: #ffffff;
+      --text: #1e293b;
+      --text-muted: #64748b;
+      --border: #e2e8f0;
+      --shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1);
+    }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      background: var(--bg);
+      margin: 0;
+      padding: 0;
+      display: flex;
+      height: 100vh;
+      color: var(--text);
+      overflow: hidden;
+    }
+    .sidebar {
+      width: 250px;
+      background: var(--card-bg);
+      border-right: 1px solid var(--border);
+      display: flex;
+      flex-direction: column;
+      height: 100%;
+      box-sizing: border-box;
+    }
+    .sidebar-header {
+      padding: 24px 20px;
+      border-bottom: 1px solid var(--border);
+      text-align: center;
+    }
+    .sidebar-header h2 {
+      margin: 0;
+      font-size: 15px;
+      font-weight: 700;
+      color: var(--primary);
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+    }
+    .nav-list {
+      flex: 1;
+      padding: 15px 10px;
+      overflow-y: auto;
+      list-style: none;
+      margin: 0;
+    }
+    .nav-item {
+      padding: 12px 16px;
+      border-radius: 8px;
+      cursor: pointer;
+      margin-bottom: 6px;
+      font-size: 13.5px;
+      font-weight: 500;
+      color: var(--text-muted);
+      transition: all 0.2s;
+    }
+    .nav-item:hover {
+      background: #f1f5f9;
+      color: var(--text);
+    }
+    .nav-item.active {
+      background: var(--primary-light);
+      color: var(--primary);
+      font-weight: 600;
+    }
+    .main-content {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      height: 100%;
+      overflow: hidden;
+    }
+    .content-tab {
+      display: none;
+      flex-direction: column;
+      height: 100%;
+      box-sizing: border-box;
+      overflow-y: auto;
+      padding: 30px;
+    }
+    .content-tab.active {
+      display: flex;
+    }
+    
+    /* Overview Stats Dashboard */
+    .dashboard-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+      gap: 20px;
+      margin-bottom: 30px;
+    }
+    .stat-card {
+      background: var(--card-bg);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 20px;
+      box-shadow: var(--shadow);
+    }
+    .stat-title {
+      font-size: 12px;
+      font-weight: 600;
+      color: var(--text-muted);
+      text-transform: uppercase;
+      margin-bottom: 8px;
+    }
+    .stat-value {
+      font-size: 26px;
+      font-weight: 800;
+      color: var(--primary);
+    }
+    
+    /* Browser layouts */
+    .browser-container {
+      display: flex;
+      gap: 20px;
+      height: 100%;
+      overflow: hidden;
+      min-height: 500px;
+    }
+    .browser-list {
+      width: 300px;
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      background: var(--card-bg);
+      overflow-y: auto;
+      padding: 10px;
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+    .browser-item {
+      padding: 12px;
+      border-radius: 6px;
+      border: 1px solid var(--border);
+      cursor: pointer;
+      font-size: 13px;
+    }
+    .browser-item:hover {
+      background: #f8fafc;
+    }
+    .browser-item.active {
+      border-color: var(--primary);
+      background: var(--primary-light);
+      color: var(--primary);
+      font-weight: 600;
+    }
+    .browser-detail {
+      flex: 1;
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      background: var(--card-bg);
+      overflow-y: auto;
+      padding: 25px;
+    }
+    
+    /* Tables */
+    .index-table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 15px;
+      background: #fff;
+    }
+    .index-table th, .index-table td {
+      border: 1px solid var(--border);
+      padding: 10px 14px;
+      text-align: left;
+      font-size: 13px;
+    }
+    .index-table th {
+      background: #f8fafc;
+      font-weight: 600;
+    }
+    
+    /* Inputs */
+    .controls-panel {
+      background: var(--card-bg);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 20px;
+      margin-bottom: 20px;
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+      gap: 15px;
+    }
+    .control-input {
+      padding: 8px 12px;
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      font-size: 13px;
+      outline: none;
+      width: 100%;
+      box-sizing: border-box;
+    }
+    
+    /* Cards styling */
+    .detail-card {
+      background: #fafafa;
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 15px;
+      margin-bottom: 15px;
+    }
+    .text-box {
+      font-family: monospace;
+      font-size: 12px;
+      background: #ffffff;
+      padding: 12px;
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      white-space: pre-wrap;
+      overflow-x: auto;
+    }
+    .badge {
+      background: var(--primary-light);
+      color: var(--primary);
+      padding: 2px 6px;
+      border-radius: 4px;
+      font-size: 10px;
+      font-weight: bold;
+      text-transform: uppercase;
+    }
+    .badge-risk-high { background: #fee2e2; color: #ef4444; }
+    .badge-risk-medium { background: #fef3c7; color: #d97706; }
+    .badge-risk-low { background: #d1fae5; color: #10b981; }
+  </style>
+</head>
+<body>
+  <div class="sidebar">
+    <div class="sidebar-header">
+      <h2>Reasoning Inspector</h2>
+    </div>
+    <ul class="nav-list">
+      <li class="nav-item active" onclick="switchTab('tab-overview')">🏠 Overview Dashboard</li>
+      <li class="nav-item" onclick="switchTab('tab-chunks')">📦 Chunk Browser</li>
+      <li class="nav-item" onclick="switchTab('tab-claims')">📄 Claim Validation</li>
+      <li class="nav-item" onclick="switchTab('tab-ambiguities')">⚠️ Ambiguity Browser</li>
+      <li class="nav-item" onclick="switchTab('tab-rewrites')">✏️ Rewrite Suggestions</li>
+      <li class="nav-item" onclick="switchTab('tab-search')">🔎 Search & Filters</li>
+    </ul>
+  </div>
+  
+  <div class="main-content">
+    
+    <!-- 1. Overview Dashboard -->
+    <div id="tab-overview" class="content-tab active">
+      <h1 style="margin-top:0;">Chunk reasoning dashboard</h1>
+      <div class="dashboard-grid">
+        <div class="stat-card">
+          <div class="stat-title">Chunks Analyzed</div>
+          <div class="stat-value" id="d-total-chunks">0</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-title">Claims Validated</div>
+          <div class="stat-value" id="d-total-claims">0</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-title">Ambiguities Identified</div>
+          <div class="stat-value" id="d-total-ambs">0</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-title">High Risk Chunks</div>
+          <div class="stat-value" style="color:#ef4444;" id="d-high-risk">0</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-title">Medium Risk Chunks</div>
+          <div class="stat-value" style="color:#d97706;" id="d-med-risk">0</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-title">Average Confidence</div>
+          <div class="stat-value" id="d-avg-conf">0%</div>
+        </div>
+      </div>
+    </div>
+    
+    <!-- 2. Chunk Browser -->
+    <div id="tab-chunks" class="content-tab">
+      <h1 style="margin-top:0;">Chunk Browser</h1>
+      <div class="browser-container">
+        <div class="browser-list" id="chunks-list-element"></div>
+        <div class="browser-detail" id="chunks-detail-element">
+          <div style="color:var(--text-muted); text-align:center; margin:auto;">Select a chunk on the left to inspect its reasoning details</div>
+        </div>
+      </div>
+    </div>
+    
+    <!-- 3. Claim Validation Browser -->
+    <div id="tab-claims" class="content-tab">
+      <h1 style="margin-top:0;">Claim Validation Results</h1>
+      <table class="index-table">
+        <thead>
+          <tr>
+            <th>Claim ID</th>
+            <th>Chunk ID</th>
+            <th>Status</th>
+            <th>Reason</th>
+            <th>Suggested Rewrite</th>
+          </tr>
+        </thead>
+        <tbody id="claims-table-body"></tbody>
+      </table>
+    </div>
+    
+    <!-- 4. Ambiguity Browser -->
+    <div id="tab-ambiguities" class="content-tab">
+      <h1 style="margin-top:0;">Identified Ambiguities</h1>
+      <table class="index-table">
+        <thead>
+          <tr>
+            <th>Issue ID</th>
+            <th>Chunk ID</th>
+            <th>Type</th>
+            <th>Severity</th>
+            <th>Quote</th>
+            <th>Reason</th>
+            <th>Rewrite</th>
+          </tr>
+        </thead>
+        <tbody id="ambs-table-body"></tbody>
+      </table>
+    </div>
+    
+    <!-- 5. Rewrite Suggestions -->
+    <div id="tab-rewrites" class="content-tab">
+      <h1 style="margin-top:0;">Rewrite Suggestions</h1>
+      <table class="index-table">
+        <thead>
+          <tr>
+            <th>ID</th>
+            <th>Type</th>
+            <th>Original Quote / Statement</th>
+            <th>Suggested Rewrite</th>
+          </tr>
+        </thead>
+        <tbody id="rewrites-table-body"></tbody>
+      </table>
+    </div>
+    
+    <!-- 6. Search & Filters -->
+    <div id="tab-search" class="content-tab">
+      <h1 style="margin-top:0;">Search & Filters</h1>
+      <div class="controls-panel">
+        <div>
+          <label style="font-size:12px; font-weight:600; color:var(--text-muted);">Text Search (Claims, Quotes, Types)</label>
+          <input type="text" id="search-input" class="control-input" placeholder="Type query..." oninput="applySearch()"/>
+        </div>
+      </div>
+      <div id="search-results-container" style="display:flex; flex-direction:column; gap:15px;"></div>
+    </div>
+    
+  </div>
+
+  <script>
+    // Injected Data
+    var chunkReasonings = [{"chunk_id": "9b580a49750843d68ba1ae78c6a67538_chunk_0000", "claim_validation": [], "ambiguities": [{"issue_id": "9b580a49750843d68ba1ae78c6a67538_chunk_0000_amb_000", "type": "undefined terminology", "severity": "Low", "quote": "COMPANY PROFILE", "reason": "The text 'COMPANY PROFILE' is a label and does not provide any specific information or claims that can be validated.", "supporting_evidence": "No additional context or claims are provided in the given text to validate or challenge.", "suggested_rewrite": "Provide more details about the company profile such as mission, vision, values, or key activities to make it informative and verifiable.", "affected_claims": [], "confidence": 0.95}], "overall_chunk_risk": "Low", "overall_confidence": 0.92}, {"chunk_id": "9b580a49750843d68ba1ae78c6a67538_chunk_0001", "claim_validation": [], "ambiguities": [{"issue_id": "9b580a49750843d68ba1ae78c6a67538_chunk_0001_amb_000", "type": "vague wording", "severity": "Medium", "quote": "LARSEN & TOUBRO", "reason": "The text only mentions the name of an organization without any specific claims or information.", "supporting_evidence": "Document Section: LARSEN & TOUBRO\nContent:\nLARSEN & TOUBRO", "suggested_rewrite": "LARSEN & TOUBRO is a multinational engineering and construction company.", "affected_claims": [], "confidence": 0.9}], "overall_chunk_risk": "Medium", "overall_confidence": 0.85}, {"chunk_id": "9b580a49750843d68ba1ae78c6a67538_chunk_0002", "claim_validation": [{"claim_id": "9b580a49750843d68ba1ae78c6a67538_chunk_0002_claim_000", "status": "partial", "reason": "The claim is partially supported by the original text as it mentions 'Engineering the Nation's Growth Since 1938', but it does not provide specific details about what engineering projects or growth they have been involved in.", "improved_claim": "Larsen & Toubro has been engineering projects for the nation's growth since 1938", "confidence": 0.85}], "ambiguities": [{"issue_id": "9b580a49750843d68ba1ae78c6a67538_chunk_0002_amb_000", "type": "vague wording", "severity": "Medium", "quote": "Engineering the Nation's Growth Since 1938", "reason": "The phrase is vague as it does not specify what kind of engineering projects or what aspects of national growth are being referred to.", "supporting_evidence": "Document Section: LARSEN & TOUBRO\nContent:\nEngineering the Nation's Growth Since 1938\nWebsite\nwww.larsentoubro.com", "suggested_rewrite": "Larsen & Toubro has been engineering projects for the nation's growth since 1938", "affected_claims": ["9b580a49750843d68ba1ae78c6a67538_chunk_0002_claim_000"], "confidence": 0.9}], "overall_chunk_risk": "Medium", "overall_confidence": 0.85}, {"chunk_id": "9b580a49750843d68ba1ae78c6a67538_chunk_0003", "claim_validation": [], "ambiguities": [{"issue_id": "9b580a49750843d68ba1ae78c6a67538_chunk_0003_amb_000", "type": "vague wording", "severity": "High", "quote": "Headquarters", "reason": "The text only mentions 'Headquarters' without providing any specific information about its location, size, or other details.", "supporting_evidence": "Document Section: Headquarters\nContent:\nHeadquarters", "suggested_rewrite": "The company's main headquarters is located at [address], covering an area of [size].", "affected_claims": [], "confidence": 0.9}], "overall_chunk_risk": "High", "overall_confidence": 0.5}, {"chunk_id": "9b580a49750843d68ba1ae78c6a67538_chunk_0004", "claim_validation": [{"claim_id": "9b580a49750843d68ba1ae78c6a67538_chunk_0004_claim_000", "status": "partial", "reason": "The original text only states the location but does not explicitly state that this is the headquarters.", "improved_claim": "L&T House, Ballard Estate, Mumbai, Maharashtra, India is the location mentioned as headquarters.", "confidence": 0.95}], "ambiguities": [{"issue_id": "9b580a49750843d68ba1ae78c6a67538_chunk_0004_amb_000", "type": "vague wording", "severity": "Medium", "quote": "L&T House, Ballard Estate, Mumbai, Maharashtra, India", "reason": "The original text does not explicitly state that this is the headquarters, only mentions a location.", "supporting_evidence": "Document Section: Headquarters\nContent:\nL&T House, Ballard Estate, Mumbai, Maharashtra, India", "suggested_rewrite": "L&T House, Ballard Estate, Mumbai, Maharashtra, India is identified as the headquarters.", "affected_claims": ["9b580a49750843d68ba1ae78c6a67538_chunk_0004_claim_000"], "confidence": 0.9}], "overall_chunk_risk": "Medium", "overall_confidence": 0.92}, {"chunk_id": "9b580a49750843d68ba1ae78c6a67538_chunk_0005", "claim_validation": [], "ambiguities": [{"issue_id": "9b580a49750843d68ba1ae78c6a67538_chunk_0005_amb_000", "type": "vague wording", "severity": "High", "quote": "Industry", "reason": "The term 'Industry' is too broad and does not provide any specific information or context.", "supporting_evidence": "The original chunk text only contains the word 'Industry' without any additional details or context about which industry or what aspects of an industry are being discussed.", "suggested_rewrite": "A more detailed description of the specific industry or relevant aspects should be provided to avoid ambiguity.", "affected_claims": [], "confidence": 0.95}], "overall_chunk_risk": "High", "overall_confidence": 0.8}, {"chunk_id": "9b580a49750843d68ba1ae78c6a67538_chunk_0006", "claim_validation": [{"claim_id": "9b580a49750843d68ba1ae78c6a67538_chunk_0006_claim_000", "status": "valid", "reason": "The original text fully supports the claim that this brochure is an independently compiled profile based on public information and is not an official L&T publication.", "improved_claim": "This brochure is an independently compiled profile based on public information and is not an official L&T publication.", "confidence": 0.95}], "ambiguities": [{"issue_id": "9b580a49750843d68ba1ae78c6a67538_chunk_0006_amb_000", "type": "undefined terminology", "severity": "Medium", "quote": "Engineering, Construction, Manufacturing, Technology & Financial Services Conglomerate", "reason": "The organization is described but not specifically named or defined within the text.", "supporting_evidence": "This description is given in the context of defining an industry section but does not specify if L&T falls under this description.", "suggested_rewrite": "L&T: Engineering, Construction, Manufacturing, Technology & Financial Services Conglomerate", "affected_claims": [], "confidence": 0.95}], "overall_chunk_risk": "Medium", "overall_confidence": 0.92}, {"chunk_id": "9b580a49750843d68ba1ae78c6a67538_chunk_0007", "claim_validation": [{"claim_id": "string", "status": "incorrect", "reason": "No claims are present in the provided text to validate.", "improved_claim": null, "confidence": 1.0}], "ambiguities": [{"issue_id": "9b580a49750843d68ba1ae78c6a67538_chunk_0007_amb_000", "type": "vague wording", "severity": "Low", "quote": "COMPANY SNAPSHOT", "reason": "The text is a section header and lacks substantive content to provide meaningful information.", "supporting_evidence": "Document Section: COMPANY SNAPSHOT\nContent:\nCOMPANY SNAPSHOT", "suggested_rewrite": null, "affected_claims": [], "confidence": 0.95}], "overall_chunk_risk": "Low", "overall_confidence": 0.92}, {"chunk_id": "9b580a49750843d68ba1ae78c6a67538_chunk_0008", "claim_validation": [{"claim_id": "9b580a49750843d68ba1ae78c6a67538_chunk_0008_claim_000", "status": "valid", "reason": "The original text fully supports the claim.", "improved_claim": "Larsen & Toubro Limited (L&T) is an Indian multinational conglomerate headquartered in Mumbai, founded in 1938 by Danish engineers Henning Holck-Larsen and Søren Kristian Toubro and incorporated in 1946.", "confidence": 0.95}, {"claim_id": "9b580a49750843d68ba1ae78c6a67538_chunk_0008_claim_001", "status": "valid", "reason": "The original text fully supports the claim.", "improved_claim": "Today the group operates in more than 50 countries and is listed on the NSE and BSE (ticker: LT), with no single majority shareholder.", "confidence": 0.95}], "ambiguities": [{"issue_id": "9b580a49750843d68ba1ae78c6a67538_chunk_0008_amb_000", "type": "numerical ambiguity", "severity": "Low", "quote": "more than 50 countries", "reason": "The exact number of countries is not specified.", "supporting_evidence": "Today the group operates in more than 50 countries and is listed on the NSE and BSE (ticker: LT), with no single majority shareholder.", "suggested_rewrite": "Today the group operates in over 50 countries and is listed on the NSE and BSE (ticker: LT), with no single majority shareholder.", "affected_claims": ["9b580a49750843d68ba1ae78c6a67538_chunk_0008_claim_001"], "confidence": 0.9}], "overall_chunk_risk": "Low", "overall_confidence": 0.92}, {"chunk_id": "9b580a49750843d68ba1ae78c6a67538_chunk_0009", "claim_validation": [], "ambiguities": [{"issue_id": "9b580a49750843d68ba1ae78c6a67538_chunk_0009_amb_000", "type": "vague wording", "severity": "Medium", "quote": "BOARD & KEY LEADERSHIP", "reason": "The phrase is a title or heading and does not provide any specific information or claims about the board and key leadership.", "supporting_evidence": "Original Chunk Text: BOARD & KEY LEADERSHIP\nStructured Extraction from Phase 2A: The text is extracted as an entity without any associated claims or details.", "suggested_rewrite": "The document section titled 'BOARD & KEY LEADERSHIP' contains information about the board members and key leadership positions within the organization.", "affected_claims": [], "confidence": 0.9}], "overall_chunk_risk": "Medium", "overall_confidence": 0.85}, {"chunk_id": "9b580a49750843d68ba1ae78c6a67538_chunk_0010", "claim_validation": [{"claim_id": "9b580a49750843d68ba1ae78c6a67538_chunk_0010_claim_000", "status": "valid", "reason": "The original text fully supports this claim.", "improved_claim": "S N Subrahmanyan is the Chairman & Managing Director.", "confidence": 0.95}, {"claim_id": "9b580a49750843d68ba1ae78c6a67538_chunk_0010_claim_001", "status": "valid", "reason": "The original text fully supports this claim.", "improved_claim": "R Shankar Raman is a Whole-time Director, President & CFO.", "confidence": 0.95}, {"claim_id": "9b580a49750843d68ba1ae78c6a67538_chunk_0010_claim_002", "status": "valid", "reason": "The original text fully supports this claim.", "improved_claim": "Subramanian Sarma is the Deputy Managing Director & President.", "confidence": 0.95}, {"claim_id": "9b580a49750843d68ba1ae78c6a67538_chunk_0010_claim_003", "status": "valid", "reason": "The original text fully supports this claim.", "improved_claim": "S V Desai is a Whole-time Director.", "confidence": 0.95}, {"claim_id": "9b580a49750843d68ba1ae78c6a67538_chunk_0010_claim_004", "status": "valid", "reason": "The original text fully supports this claim.", "improved_claim": "T Madhava Das is a Whole-time Director & Senior EVP, Utilities.", "confidence": 0.95}], "ambiguities": [{"issue_id": "9b580a49750843d68ba1ae78c6a67538_chunk_0010_amb_000", "type": "vague wording", "severity": "Low", "quote": "Chairman &amp; Managing Director", "reason": "The use of 'Chairman' might be ambiguous in contexts where the organization may have a different title or structure.", "supporting_evidence": "S N Subrahmanyan is the Chairman &amp; Managing Director", "suggested_rewrite": "Chairman and Chief Executive Officer (CEO)", "affected_claims": ["9b580a49750843d68ba1ae78c6a67538_chunk_0010_claim_000"], "confidence": 0.9}], "overall_chunk_risk": "Low", "overall_confidence": 0.92}, {"chunk_id": "9b580a49750843d68ba1ae78c6a67538_chunk_0011", "claim_validation": [{"claim_id": "9b580a49750843d68ba1ae78c6a67538_chunk_0011_claim_000", "status": "valid", "reason": "The original text fully supports this claim.", "improved_claim": "S N Subrahmanyan is the Chairman & Managing Director.", "confidence": 0.95}, {"claim_id": "9b580a49750843d68ba1ae78c6a67538_chunk_0011_claim_001", "status": "valid", "reason": "The original text fully supports this claim.", "improved_claim": "R Shankar Raman is the Whole-time Director, President & CFO.", "confidence": 0.95}, {"claim_id": "9b580a49750843d68ba1ae78c6a67538_chunk_0011_claim_002", "status": "valid", "reason": "The original text fully supports this claim.", "improved_claim": "Subramanian Sarma is the Deputy Managing Director & President.", "confidence": 0.95}, {"claim_id": "9b580a49750843d68ba1ae78c6a67538_chunk_0011_claim_003", "status": "valid", "reason": "The original text fully supports this claim.", "improved_claim": "S V Desai is the Whole-time Director.", "confidence": 0.95}, {"claim_id": "9b580a49750843d68ba1ae78c6a67538_chunk_0011_claim_004", "status": "valid", "reason": "The original text fully supports this claim.", "improved_claim": "T Madhava Das is the Whole-time Director & Senior EVP, Utilities.", "confidence": 0.95}], "ambiguities": [], "overall_chunk_risk": "Low", "overall_confidence": 0.95}, {"chunk_id": "9b580a49750843d68ba1ae78c6a67538_chunk_0012", "claim_validation": [], "ambiguities": [{"issue_id": "9b580a49750843d68ba1ae78c6a67538_chunk_0012_amb_000", "type": "vague wording", "severity": "Medium", "quote": "MARQUEE PROJECTS", "reason": "The text only contains a heading and no further details or context about what constitutes Marquee Projects, making the term vague without additional information.", "supporting_evidence": "Document Section: MARQUEE PROJECTS\nContent:\nMARQUEE PROJECTS", "suggested_rewrite": "MARQUEE PROJECTS\nDetails: [Please provide description of marquee projects]", "affected_claims": [], "confidence": 0.95}], "overall_chunk_risk": "Medium", "overall_confidence": 0.88}, {"chunk_id": "9b580a49750843d68ba1ae78c6a67538_chunk_0013", "claim_validation": [{"claim_id": "9b580a49750843d68ba1ae78c6a67538_chunk_0013_claim_000", "status": "valid", "reason": "The original text fully supports this claim.", "improved_claim": "Statue of Unity, Gujarat is the world's tallest statue including its access infrastructure.", "confidence": 0.95}, {"claim_id": "9b580a49750843d68ba1ae78c6a67538_chunk_0013_claim_001", "status": "valid", "reason": "The original text fully supports this claim.", "improved_claim": "Mumbai Trans Harbour Link (MTHL) is India's longest sea bridge.", "confidence": 0.95}, {"claim_id": "9b580a49750843d68ba1ae78c6a67538_chunk_0013_claim_002", "status": "valid", "reason": "The original text fully supports this claim.", "improved_claim": "Mumbai-Ahmedabad High-Speed Rail (MAHSR) includes civil works such as viaducts, stations and river bridges on the C4 package.", "confidence": 0.95}, {"claim_id": "9b580a49750843d68ba1ae78c6a67538_chunk_0013_claim_003", "status": "valid", "reason": "The original text fully supports this claim.", "improved_claim": "Navi Mumbai International Airport (NMIA) is mentioned.", "confidence": 0.95}, {"claim_id": "9b580a49750843d68ba1ae78c6a67538_chunk_0013_claim_004", "status": "valid", "reason": "The original text fully supports this claim.", "improved_claim": "Dhubri-Phulbari Bridge, Assam-Meghalaya is India's longest river bridge over the Brahmaputra.", "confidence": 0.95}, {"claim_id": "9b580a49750843d68ba1ae78c6a67538_chunk_0013_claim_005", "status": "valid", "reason": "The original text fully supports this claim.", "improved_claim": "Hyderabad Metro Rail is one of the world's largest metro rail projects executed on a PPP basis.", "confidence": 0.95}, {"claim_id": "9b580a49750843d68ba1ae78c6a67538_chunk_0013_claim_006", "status": "valid", "reason": "The original text fully supports this claim.", "improved_claim": "Riyadh Metro, Saudi Arabia includes systems and integration works.", "confidence": 0.95}], "ambiguities": [{"issue_id": "9b580a49750843d68ba1ae78c6a67538_chunk_0013_amb_000", "type": "numerical ambiguity", "severity": "Medium", "quote": "world's tallest statue including its access infrastructure", "reason": "The claim specifies 'including its access infrastructure' which is not explicitly detailed in the original text.", "supporting_evidence": "* Statue of Unity, Gujarat -the world's tallest statue, including its access infrastructure", "suggested_rewrite": "Statue of Unity, Gujarat is the world's tallest statue, with mention of access infrastructure.", "affected_claims": ["9b580a49750843d68ba1ae78c6a67538_chunk_0013_claim_000"], "confidence": 0.9}], "overall_chunk_risk": "Medium", "overall_confidence": 0.92}, {"chunk_id": "9b580a49750843d68ba1ae78c6a67538_chunk_0014", "claim_validation": [], "ambiguities": [{"issue_id": "9b580a49750843d68ba1ae78c6a67538_chunk_0014_amb_000", "type": "vague wording", "severity": "Medium", "quote": "BUSINESS SEGMENTS / SERVICE LINES", "reason": "The text only states a heading or title without providing any details about the business segments or service lines.", "supporting_evidence": "", "suggested_rewrite": "This section outlines various business segments and service lines offered by the company. [Add details about each segment/service line]", "affected_claims": [], "confidence": 0.95}], "overall_chunk_risk": "Medium", "overall_confidence": 0.85}, {"chunk_id": "9b580a49750843d68ba1ae78c6a67538_chunk_0015", "claim_validation": [], "ambiguities": [{"issue_id": "9b580a49750843d68ba1ae78c6a67538_chunk_0015_amb_000", "type": "vague wording", "severity": "Medium", "quote": "Infrastructure (EPC)", "reason": "The phrase 'Infrastructure (EPC)' is vague and does not provide specific details about the infrastructure or EPC.", "supporting_evidence": "No additional context is provided in the chunk to clarify what aspect of the infrastructure or EPC is being referred to.", "suggested_rewrite": "Specific aspects of the infrastructure related to EPC should be detailed, e.g., 'EPC-related transportation infrastructure' or 'Communication infrastructure for EPC projects'.", "affected_claims": [], "confidence": 0.95}], "overall_chunk_risk": "Medium", "overall_confidence": 0.85}, {"chunk_id": "9b580a49750843d68ba1ae78c6a67538_chunk_0016", "claim_validation": [{"claim_id": "9b580a49750843d68ba1ae78c6a67538_chunk_0016_claim_000", "status": "valid", "reason": "The original text fully supports the claim without any missing context.", "improved_claim": "Engineering, procurement and construction of buildings & factories, transportation infrastructure, heavy civil works, power transmission & distribution, and water & renewable energy projects.", "confidence": 0.95}], "ambiguities": [{"issue_id": "9b580a49750843d68ba1ae78c6a67538_chunk_0016_amb_000", "type": "vague wording", "severity": "Low", "quote": "Engineering, procurement and construction", "reason": "The term 'Engineering, procurement and construction' is a broad phrase that could encompass various specific activities without clear boundaries.", "supporting_evidence": "The text lists several types of projects under EPC but does not specify the scope or details of what constitutes engineering, procurement, and construction within this context.", "suggested_rewrite": "Engineering, procurement, and construction services for buildings & factories, transportation infrastructure, heavy civil works, power transmission & distribution, and water & renewable energy projects.", "affected_claims": ["9b580a49750843d68ba1ae78c6a67538_chunk_0016_claim_000"], "confidence": 0.9}], "overall_chunk_risk": "Low", "overall_confidence": 0.92}, {"chunk_id": "9b580a49750843d68ba1ae78c6a67538_chunk_0017", "claim_validation": [], "ambiguities": [{"issue_id": "9b580a49750843d68ba1ae78c6a67538_chunk_0017_amb_000", "type": "vague wording", "severity": "Low", "quote": "Energy -Hydrocarbon & Power", "reason": "The phrase is vague as it does not provide specific information or claims about energy, hydrocarbons, or power.", "supporting_evidence": "The text only contains a label and no additional content or claims.", "suggested_rewrite": "Energy - Hydrocarbon & Power department focuses on managing and optimizing the production and distribution of energy resources including hydrocarbons and power generation facilities.", "affected_claims": [], "confidence": 0.95}], "overall_chunk_risk": "Low", "overall_confidence": 0.85}, {"chunk_id": "9b580a49750843d68ba1ae78c6a67538_chunk_0018", "claim_validation": [{"claim_id": "9b580a49750843d68ba1ae78c6a67538_chunk_0018_claim_000", "status": "valid", "reason": "The original text fully supports the claim without any contradictions or missing context.", "improved_claim": "End-to-end EPC for upstream, midstream and downstream oil & gas, and power generation infrastructure.", "confidence": 0.95}], "ambiguities": [{"issue_id": "9b580a49750843d68ba1ae78c6a67538_chunk_0018_amb_000", "type": "undefined terminology", "severity": "Medium", "quote": "EPC", "reason": "The acronym 'EPC' is not defined within the text, which could lead to confusion for readers unfamiliar with this term.", "supporting_evidence": "End-to-end EPC for upstream, midstream and downstream oil & gas, and power generation infrastructure.", "suggested_rewrite": "End-to-end Engineering, Procurement, and Construction (EPC) services for upstream, midstream and downstream oil & gas, and power generation infrastructure.", "affected_claims": ["9b580a49750843d68ba1ae78c6a67538_chunk_0018_claim_000"], "confidence": 0.9}], "overall_chunk_risk": "Medium", "overall_confidence": 0.92}, {"chunk_id": "9b580a49750843d68ba1ae78c6a67538_chunk_0019", "claim_validation": [], "ambiguities": [{"issue_id": "9b580a49750843d68ba1ae78c6a67538_chunk_0019_amb_000", "type": "vague wording", "severity": "Low", "quote": "Hi-Tech Manufacturing & Defence Engineering", "reason": "The phrase is a title or department name without any context about its functions, responsibilities, or scope.", "supporting_evidence": "No additional information provided to clarify the role or activities of Hi-Tech Manufacturing & Defence Engineering.", "suggested_rewrite": "Hi-Tech Manufacturing & Defence Engineering: Department responsible for [specific functions/activities].", "affected_claims": [], "confidence": 0.85}], "overall_chunk_risk": "Low", "overall_confidence": 0.92}, {"chunk_id": "9b580a49750843d68ba1ae78c6a67538_chunk_0020", "claim_validation": [{"claim_id": "9b580a49750843d68ba1ae78c6a67538_chunk_0020_claim_000", "status": "valid", "reason": "The original text fully supports the claim by explicitly stating the services provided.", "improved_claim": "Design, manufacture and supply of engineered equipment for process plants, nuclear and green-hydrogen facilities, marine and land defence platforms, aerospace systems, and precision electronics for defence, security and space.", "confidence": 0.95}], "ambiguities": [{"issue_id": "9b580a49750843d68ba1ae78c6a67538_chunk_0020_amb_000", "type": "vague wording", "severity": "Medium", "quote": "engineered equipment", "reason": "The term 'engineered equipment' is broad and could refer to a wide range of products without specific detail.", "supporting_evidence": "Design, manufacture and supply of engineered equipment for process plants, nuclear and green-hydrogen facilities...", "suggested_rewrite": "Design, manufacture and supply of specialized equipment for process plants, nuclear and green-hydrogen facilities...", "affected_claims": ["9b580a49750843d68ba1ae78c6a67538_chunk_0020_claim_000"], "confidence": 0.9}], "overall_chunk_risk": "Medium", "overall_confidence": 0.92}, {"chunk_id": "9b580a49750843d68ba1ae78c6a67538_chunk_0021", "claim_validation": [], "ambiguities": [{"issue_id": "9b580a49750843d68ba1ae78c6a67538_chunk_0021_amb_000", "type": "vague wording", "severity": "Low", "quote": "IT & Technology Services", "reason": "The phrase is vague as it does not provide any specific information or services offered under IT & Technology Services.", "supporting_evidence": "Document Section: IT & Technology Services\nContent:\nIT & Technology Services", "suggested_rewrite": "Specify the services provided under IT & Technology Services, e.g., 'IT & Technology Services includes network management and software development.'", "affected_claims": [], "confidence": 0.95}], "overall_chunk_risk": "Low", "overall_confidence": 0.85}, {"chunk_id": "9b580a49750843d68ba1ae78c6a67538_chunk_0022", "claim_validation": [{"claim_id": "9b580a49750843d68ba1ae78c6a67538_chunk_0022_claim_000", "status": "valid", "reason": "The original text fully supports the claim as it lists the same services and specifies the group entities involved.", "improved_claim": "Global IT services, digital solutions, engineering R&D, e-commerce/digital platforms, data centres and semiconductor chip-design solutions are delivered through group entities such as LTIMindtree and L&T Technology Services.", "confidence": 0.95}], "ambiguities": [{"issue_id": "9b580a49750843d68ba1ae78c6a67538_chunk_0022_amb_000", "type": "vague wording", "severity": "Low", "quote": "Global IT services, digital solutions, engineering R&D, e-commerce/digital platforms, data centres and semiconductor chip-design solutions", "reason": "The terms are broad and could be interpreted in various ways without specific definitions.", "supporting_evidence": "These terms are listed as the services provided but no further details or scope are given.", "suggested_rewrite": "Specific global IT services, digital solutions, engineering R&D services, e-commerce/digital platforms, data centre operations and semiconductor chip-design solutions", "affected_claims": ["9b580a49750843d68ba1ae78c6a67538_chunk_0022_claim_000"], "confidence": 0.9}], "overall_chunk_risk": "Low", "overall_confidence": 0.92}, {"chunk_id": "9b580a49750843d68ba1ae78c6a67538_chunk_0023", "claim_validation": [], "ambiguities": [{"issue_id": "9b580a49750843d68ba1ae78c6a67538_chunk_0023_amb_000", "type": "vague wording", "severity": "Medium", "quote": "Financial Services", "reason": "The phrase 'Financial Services' is a broad term and does not provide specific information or claims about the services offered, financial performance, or any other related details.", "supporting_evidence": "Document Section: Financial Services\nContent:\nFinancial Services", "suggested_rewrite": "Please specify what aspects of Financial Services are being discussed, such as banking services, investment management, insurance products, etc.", "affected_claims": [], "confidence": 0.9}], "overall_chunk_risk": "Medium", "overall_confidence": 0.85}, {"chunk_id": "9b580a49750843d68ba1ae78c6a67538_chunk_0024", "claim_validation": [{"claim_id": "9b580a49750843d68ba1ae78c6a67538_chunk_0024_claim_000", "status": "valid", "reason": "The original text fully supports the claim that retail finance, wholesale finance and investment management are delivered through L&T Finance Holdings.", "improved_claim": "Retail finance, wholesale finance and investment management, delivered through L&T Finance Holdings.", "confidence": 0.95}], "ambiguities": [], "overall_chunk_risk": "Low", "overall_confidence": 0.95}, {"chunk_id": "9b580a49750843d68ba1ae78c6a67538_chunk_0025", "claim_validation": [], "ambiguities": [{"issue_id": "9b580a49750843d68ba1ae78c6a67538_chunk_0025_amb_000", "type": "vague wording", "severity": "Low", "quote": "Development Projects & Realty", "reason": "The text is a title or heading without additional context, making it vague.", "supporting_evidence": "Document Section: Development Projects & Realty\nContent:\nDevelopment Projects & Realty", "suggested_rewrite": "This section covers various development projects and realty-related activities within the organization.", "affected_claims": [], "confidence": 0.9}], "overall_chunk_risk": "Low", "overall_confidence": 0.85}, {"chunk_id": "9b580a49750843d68ba1ae78c6a67538_chunk_0026", "claim_validation": [{"claim_id": "9b580a49750843d68ba1ae78c6a67538_chunk_0026_claim_000", "status": "valid", "reason": "The original text fully supports the claim as it explicitly mentions roads and transmission assets, the Hyderabad Metro Rail project, power development projects, and premium residential & commercial real estate through L&T Realty.", "improved_claim": "Roads and transmission assets, the Hyderabad Metro Rail project, power development projects, and premium residential & commercial real estate through L&T Realty.", "confidence": 0.95}], "ambiguities": [{"issue_id": "9b580a49750843d68ba1ae78c6a67538_chunk_0026_amb_000", "type": "vague wording", "severity": "Low", "quote": "Roads and transmission assets, the Hyderabad Metro Rail project, power development projects, and premium residential & commercial real estate through L&T Realty.", "reason": "The claim is broad and does not specify what kind of roads or transmission assets are being referred to. It also does not provide details about the scale or scope of these projects or the specific areas where they are located.", "supporting_evidence": "The text mentions various types of development projects but lacks specificity in detail.", "suggested_rewrite": "Includes a mix of road infrastructure and transmission asset development, including the Hyderabad Metro Rail project, along with power development initiatives and premium residential & commercial real estate projects managed by L&T Realty.", "affected_claims": ["9b580a49750843d68ba1ae78c6a67538_chunk_0026_claim_000"], "confidence": 0.9}], "overall_chunk_risk": "Low", "overall_confidence": 0.92}, {"chunk_id": "9b580a49750843d68ba1ae78c6a67538_chunk_0027", "claim_validation": [], "ambiguities": [{"issue_id": "9b580a49750843d68ba1ae78c6a67538_chunk_0027_amb_000", "type": "vague wording", "severity": "Medium", "quote": "INDUSTRY", "reason": "The text only consists of the word 'INDUSTRY' and does not provide any specific details, claims, or context about what is being referred to in the industry.", "supporting_evidence": "No additional information or description provided in the chunk.", "suggested_rewrite": "Provide a detailed description or claim about the industry content.", "affected_claims": [], "confidence": 0.95}], "overall_chunk_risk": "Medium", "overall_confidence": 0.85}, {"chunk_id": "9b580a49750843d68ba1ae78c6a67538_chunk_0028", "claim_validation": [{"claim_id": "9b580a49750843d68ba1ae78c6a67538_chunk_0028_claim_000", "status": "valid", "reason": "The original text directly supports this claim.", "improved_claim": "L&T operates at the intersection of engineering, construction, heavy manufacturing, information technology, defence and financial services.", "confidence": 0.95}, {"claim_id": "9b580a49750843d68ba1ae78c6a67538_chunk_0028_claim_001", "status": "valid", "reason": "The original text directly supports this claim.", "improved_claim": "L&T is commonly classified under the capital goods / infrastructure & engineering sector in India.", "confidence": 0.95}, {"claim_id": "9b580a49750843d68ba1ae78c6a67538_chunk_0028_claim_002", "status": "valid", "reason": "The original text directly supports this claim.", "improved_claim": "L&T serves customers across more than 50 countries.", "confidence": 0.95}], "ambiguities": [{"issue_id": "9b580a49750843d68ba1ae78c6a67538_chunk_0028_amb_000", "type": "numerical ambiguity", "severity": "Low", "quote": "more than 50", "reason": "The phrase 'more than 50' is vague as it does not specify the exact number of countries.", "supporting_evidence": "L&T serves customers across more than 50 countries.", "suggested_rewrite": "L&T serves customers across over 50 countries.", "affected_claims": ["9b580a49750843d68ba1ae78c6a67538_chunk_0028_claim_002"], "confidence": 0.9}], "overall_chunk_risk": "Low", "overall_confidence": 0.92}, {"chunk_id": "9b580a49750843d68ba1ae78c6a67538_chunk_0029", "claim_validation": [], "ambiguities": [{"issue_id": "9b580a49750843d68ba1ae78c6a67538_chunk_0029_amb_000", "type": "vague wording", "severity": "Low", "quote": "CONTACT", "reason": "The term 'CONTACT' is too vague and does not provide any specific information about what kind of contact or section it refers to.", "supporting_evidence": "Document Section: CONTACT\nContent:\nCONTACT", "suggested_rewrite": "Please specify the type of contact information or details provided in this section, such as 'Customer Contact Information' or 'Contact Details'.", "affected_claims": [], "confidence": 0.85}], "overall_chunk_risk": "Low", "overall_confidence": 0.92}, {"chunk_id": "9b580a49750843d68ba1ae78c6a67538_chunk_0030", "claim_validation": [], "ambiguities": [{"issue_id": "9b580a49750843d68ba1ae78c6a67538_chunk_0030_amb_000", "type": "vague wording", "severity": "Low", "quote": "Larsen & Toubro Limited", "reason": "The text only mentions the company name without any context or claims about its activities, status, or other details.", "supporting_evidence": "No additional information is provided except for the company name.", "suggested_rewrite": "Larsen & Toubro Limited [is a description of the organization, e.g., engineering and construction company]", "affected_claims": [], "confidence": 0.85}], "overall_chunk_risk": "Low", "overall_confidence": 0.9}, {"chunk_id": "9b580a49750843d68ba1ae78c6a67538_chunk_0031", "claim_validation": [{"claim_id": "9b580a49750843d68ba1ae78c6a67538_chunk_0031_claim_000", "status": "valid", "reason": "The original text provides the full address for Larsen & Toubro Limited.", "improved_claim": "L&T House, N.M. Marg, Ballard Estate, Mumbai, Maharashtra -400 001, India is the address for Larsen & Toubro Limited.", "confidence": 0.95}, {"claim_id": "9b580a49750843d68ba1ae78c6a67538_chunk_0031_claim_001", "status": "valid", "reason": "The original text provides the telephone number for Larsen & Toubro Limited.", "improved_claim": "+91 22 6752 5656 is the telephone number for Larsen & Toubro Limited.", "confidence": 0.95}, {"claim_id": "9b580a49750843d68ba1ae78c6a67538_chunk_0031_claim_002", "status": "valid", "reason": "The original text provides the email for Larsen & Toubro Limited.", "improved_claim": "infodesk@larsentoubro.com is the email for Larsen & Toubro Limited.", "confidence": 0.95}, {"claim_id": "9b580a49750843d68ba1ae78c6a67538_chunk_0031_claim_003", "status": "valid", "reason": "The original text provides the website for Larsen & Toubro Limited.", "improved_claim": "www.larsentoubro.com is the website for Larsen & Toubro Limited.", "confidence": 0.95}], "ambiguities": [{"issue_id": "9b580a49750843d68ba1ae78c6a67538_chunk_0031_amb_000", "type": "vague wording", "severity": "Low", "quote": "L&T House, N.M. Marg, Ballard Estate, Mumbai, Maharashtra -400 001, India", "reason": "The address does not specify if it is the headquarters or another location.", "supporting_evidence": "No additional context provided about the type of location this address represents.", "suggested_rewrite": "L&T House, N.M. Marg, Ballard Estate, Mumbai, Maharashtra -400 001, India is the registered office for Larsen & Toubro Limited.", "affected_claims": ["9b580a49750843d68ba1ae78c6a67538_chunk_0031_claim_000"], "confidence": 0.9}], "overall_chunk_risk": "Low", "overall_confidence": 0.92}];
+    var stats = {"total_chunks_analyzed": 32, "total_claims_validated": 36, "total_ambiguities_identified": 30, "risk_breakdown": {"Low": 17, "Medium": 13, "High": 2}, "average_confidence": 0.8813};
+    var validatedClaims = [{"claim_id": "9b580a49750843d68ba1ae78c6a67538_chunk_0002_claim_000", "chunk_id": "9b580a49750843d68ba1ae78c6a67538_chunk_0002", "original_text": "Engineering the Nation's Growth Since 1938", "status": "partial", "reason": "The claim is partially supported by the original text as it mentions 'Engineering the Nation's Growth Since 1938', but it does not provide specific details about what engineering projects or growth they have been involved in.", "improved_claim": "Larsen & Toubro has been engineering projects for the nation's growth since 1938", "confidence": 0.85}, {"claim_id": "9b580a49750843d68ba1ae78c6a67538_chunk_0004_claim_000", "chunk_id": "9b580a49750843d68ba1ae78c6a67538_chunk_0004", "original_text": "L&T House, Ballard Estate, Mumbai, Maharashtra, India is the headquarters.", "status": "partial", "reason": "The original text only states the location but does not explicitly state that this is the headquarters.", "improved_claim": "L&T House, Ballard Estate, Mumbai, Maharashtra, India is the location mentioned as headquarters.", "confidence": 0.95}, {"claim_id": "9b580a49750843d68ba1ae78c6a67538_chunk_0006_claim_000", "chunk_id": "9b580a49750843d68ba1ae78c6a67538_chunk_0006", "original_text": "This brochure is an independently compiled profile based on public information and is not an official L&T publication.", "status": "valid", "reason": "The original text fully supports the claim that this brochure is an independently compiled profile based on public information and is not an official L&T publication.", "improved_claim": "This brochure is an independently compiled profile based on public information and is not an official L&T publication.", "confidence": 0.95}, {"claim_id": "string", "chunk_id": "9b580a49750843d68ba1ae78c6a67538_chunk_0007", "original_text": "N/A", "status": "incorrect", "reason": "No claims are present in the provided text to validate.", "improved_claim": null, "confidence": 1.0}, {"claim_id": "9b580a49750843d68ba1ae78c6a67538_chunk_0008_claim_000", "chunk_id": "9b580a49750843d68ba1ae78c6a67538_chunk_0008", "original_text": "Larsen & Toubro Limited (L&T) is an Indian multinational conglomerate headquartered in Mumbai, founded in 1938 by Danish engineers Henning Holck-Larsen and Søren Kristian Toubro and incorporated in 1946.", "status": "valid", "reason": "The original text fully supports the claim.", "improved_claim": "Larsen & Toubro Limited (L&T) is an Indian multinational conglomerate headquartered in Mumbai, founded in 1938 by Danish engineers Henning Holck-Larsen and Søren Kristian Toubro and incorporated in 1946.", "confidence": 0.95}, {"claim_id": "9b580a49750843d68ba1ae78c6a67538_chunk_0008_claim_001", "chunk_id": "9b580a49750843d68ba1ae78c6a67538_chunk_0008", "original_text": "Today the group operates in more than 50 countries and is listed on the NSE and BSE (ticker: LT), with no single majority shareholder.", "status": "valid", "reason": "The original text fully supports the claim.", "improved_claim": "Today the group operates in more than 50 countries and is listed on the NSE and BSE (ticker: LT), with no single majority shareholder.", "confidence": 0.95}, {"claim_id": "9b580a49750843d68ba1ae78c6a67538_chunk_0010_claim_000", "chunk_id": "9b580a49750843d68ba1ae78c6a67538_chunk_0010", "original_text": "S N Subrahmanyan is the Chairman & Managing Director.", "status": "valid", "reason": "The original text fully supports this claim.", "improved_claim": "S N Subrahmanyan is the Chairman & Managing Director.", "confidence": 0.95}, {"claim_id": "9b580a49750843d68ba1ae78c6a67538_chunk_0010_claim_001", "chunk_id": "9b580a49750843d68ba1ae78c6a67538_chunk_0010", "original_text": "R Shankar Raman is a Whole-time Director, President & CFO.", "status": "valid", "reason": "The original text fully supports this claim.", "improved_claim": "R Shankar Raman is a Whole-time Director, President & CFO.", "confidence": 0.95}, {"claim_id": "9b580a49750843d68ba1ae78c6a67538_chunk_0010_claim_002", "chunk_id": "9b580a49750843d68ba1ae78c6a67538_chunk_0010", "original_text": "Subramanian Sarma is the Deputy Managing Director & President.", "status": "valid", "reason": "The original text fully supports this claim.", "improved_claim": "Subramanian Sarma is the Deputy Managing Director & President.", "confidence": 0.95}, {"claim_id": "9b580a49750843d68ba1ae78c6a67538_chunk_0010_claim_003", "chunk_id": "9b580a49750843d68ba1ae78c6a67538_chunk_0010", "original_text": "S V Desai is a Whole-time Director.", "status": "valid", "reason": "The original text fully supports this claim.", "improved_claim": "S V Desai is a Whole-time Director.", "confidence": 0.95}, {"claim_id": "9b580a49750843d68ba1ae78c6a67538_chunk_0010_claim_004", "chunk_id": "9b580a49750843d68ba1ae78c6a67538_chunk_0010", "original_text": "T Madhava Das is a Whole-time Director & Senior EVP, Utilities.", "status": "valid", "reason": "The original text fully supports this claim.", "improved_claim": "T Madhava Das is a Whole-time Director & Senior EVP, Utilities.", "confidence": 0.95}, {"claim_id": "9b580a49750843d68ba1ae78c6a67538_chunk_0011_claim_000", "chunk_id": "9b580a49750843d68ba1ae78c6a67538_chunk_0011", "original_text": "S N Subrahmanyan is the Chairman & Managing Director.", "status": "valid", "reason": "The original text fully supports this claim.", "improved_claim": "S N Subrahmanyan is the Chairman & Managing Director.", "confidence": 0.95}, {"claim_id": "9b580a49750843d68ba1ae78c6a67538_chunk_0011_claim_001", "chunk_id": "9b580a49750843d68ba1ae78c6a67538_chunk_0011", "original_text": "R Shankar Raman is the Whole-time Director, President & CFO.", "status": "valid", "reason": "The original text fully supports this claim.", "improved_claim": "R Shankar Raman is the Whole-time Director, President & CFO.", "confidence": 0.95}, {"claim_id": "9b580a49750843d68ba1ae78c6a67538_chunk_0011_claim_002", "chunk_id": "9b580a49750843d68ba1ae78c6a67538_chunk_0011", "original_text": "Subramanian Sarma is the Deputy Managing Director & President.", "status": "valid", "reason": "The original text fully supports this claim.", "improved_claim": "Subramanian Sarma is the Deputy Managing Director & President.", "confidence": 0.95}, {"claim_id": "9b580a49750843d68ba1ae78c6a67538_chunk_0011_claim_003", "chunk_id": "9b580a49750843d68ba1ae78c6a67538_chunk_0011", "original_text": "S V Desai is the Whole-time Director.", "status": "valid", "reason": "The original text fully supports this claim.", "improved_claim": "S V Desai is the Whole-time Director.", "confidence": 0.95}, {"claim_id": "9b580a49750843d68ba1ae78c6a67538_chunk_0011_claim_004", "chunk_id": "9b580a49750843d68ba1ae78c6a67538_chunk_0011", "original_text": "T Madhava Das is the Whole-time Director & Senior EVP, Utilities.", "status": "valid", "reason": "The original text fully supports this claim.", "improved_claim": "T Madhava Das is the Whole-time Director & Senior EVP, Utilities.", "confidence": 0.95}, {"claim_id": "9b580a49750843d68ba1ae78c6a67538_chunk_0013_claim_000", "chunk_id": "9b580a49750843d68ba1ae78c6a67538_chunk_0013", "original_text": "Statue of Unity, Gujarat is the world's tallest statue including its access infrastructure.", "status": "valid", "reason": "The original text fully supports this claim.", "improved_claim": "Statue of Unity, Gujarat is the world's tallest statue including its access infrastructure.", "confidence": 0.95}, {"claim_id": "9b580a49750843d68ba1ae78c6a67538_chunk_0013_claim_001", "chunk_id": "9b580a49750843d68ba1ae78c6a67538_chunk_0013", "original_text": "Mumbai Trans Harbour Link (MTHL) is India's longest sea bridge.", "status": "valid", "reason": "The original text fully supports this claim.", "improved_claim": "Mumbai Trans Harbour Link (MTHL) is India's longest sea bridge.", "confidence": 0.95}, {"claim_id": "9b580a49750843d68ba1ae78c6a67538_chunk_0013_claim_002", "chunk_id": "9b580a49750843d68ba1ae78c6a67538_chunk_0013", "original_text": "Mumbai-Ahmedabad High-Speed Rail (MAHSR) includes civil works such as viaducts, stations and river bridges on the C4 package.", "status": "valid", "reason": "The original text fully supports this claim.", "improved_claim": "Mumbai-Ahmedabad High-Speed Rail (MAHSR) includes civil works such as viaducts, stations and river bridges on the C4 package.", "confidence": 0.95}, {"claim_id": "9b580a49750843d68ba1ae78c6a67538_chunk_0013_claim_003", "chunk_id": "9b580a49750843d68ba1ae78c6a67538_chunk_0013", "original_text": "Navi Mumbai International Airport (NMIA) is mentioned.", "status": "valid", "reason": "The original text fully supports this claim.", "improved_claim": "Navi Mumbai International Airport (NMIA) is mentioned.", "confidence": 0.95}, {"claim_id": "9b580a49750843d68ba1ae78c6a67538_chunk_0013_claim_004", "chunk_id": "9b580a49750843d68ba1ae78c6a67538_chunk_0013", "original_text": "Dhubri-Phulbari Bridge, Assam-Meghalaya is India's longest river bridge over the Brahmaputra.", "status": "valid", "reason": "The original text fully supports this claim.", "improved_claim": "Dhubri-Phulbari Bridge, Assam-Meghalaya is India's longest river bridge over the Brahmaputra.", "confidence": 0.95}, {"claim_id": "9b580a49750843d68ba1ae78c6a67538_chunk_0013_claim_005", "chunk_id": "9b580a49750843d68ba1ae78c6a67538_chunk_0013", "original_text": "Hyderabad Metro Rail is one of the world's largest metro rail projects executed on a PPP basis.", "status": "valid", "reason": "The original text fully supports this claim.", "improved_claim": "Hyderabad Metro Rail is one of the world's largest metro rail projects executed on a PPP basis.", "confidence": 0.95}, {"claim_id": "9b580a49750843d68ba1ae78c6a67538_chunk_0013_claim_006", "chunk_id": "9b580a49750843d68ba1ae78c6a67538_chunk_0013", "original_text": "Riyadh Metro, Saudi Arabia includes systems and integration works.", "status": "valid", "reason": "The original text fully supports this claim.", "improved_claim": "Riyadh Metro, Saudi Arabia includes systems and integration works.", "confidence": 0.95}, {"claim_id": "9b580a49750843d68ba1ae78c6a67538_chunk_0016_claim_000", "chunk_id": "9b580a49750843d68ba1ae78c6a67538_chunk_0016", "original_text": "Engineering, procurement and construction of buildings & factories, transportation infrastructure, heavy civil works, power transmission & distribution, and water & renewable energy projects.", "status": "valid", "reason": "The original text fully supports the claim without any missing context.", "improved_claim": "Engineering, procurement and construction of buildings & factories, transportation infrastructure, heavy civil works, power transmission & distribution, and water & renewable energy projects.", "confidence": 0.95}, {"claim_id": "9b580a49750843d68ba1ae78c6a67538_chunk_0018_claim_000", "chunk_id": "9b580a49750843d68ba1ae78c6a67538_chunk_0018", "original_text": "End-to-end EPC for upstream, midstream and downstream oil & gas, and power generation infrastructure.", "status": "valid", "reason": "The original text fully supports the claim without any contradictions or missing context.", "improved_claim": "End-to-end EPC for upstream, midstream and downstream oil & gas, and power generation infrastructure.", "confidence": 0.95}, {"claim_id": "9b580a49750843d68ba1ae78c6a67538_chunk_0020_claim_000", "chunk_id": "9b580a49750843d68ba1ae78c6a67538_chunk_0020", "original_text": "Design, manufacture and supply of engineered equipment for process plants, nuclear and green-hydrogen facilities, marine and land defence platforms, aerospace systems, and precision electronics for defence, security and space.", "status": "valid", "reason": "The original text fully supports the claim by explicitly stating the services provided.", "improved_claim": "Design, manufacture and supply of engineered equipment for process plants, nuclear and green-hydrogen facilities, marine and land defence platforms, aerospace systems, and precision electronics for defence, security and space.", "confidence": 0.95}, {"claim_id": "9b580a49750843d68ba1ae78c6a67538_chunk_0022_claim_000", "chunk_id": "9b580a49750843d68ba1ae78c6a67538_chunk_0022", "original_text": "Global IT services, digital solutions, engineering R&D, e-commerce/digital platforms, data centres and semiconductor chip-design solutions are delivered through group entities such as LTIMindtree and L&T Technology Services.", "status": "valid", "reason": "The original text fully supports the claim as it lists the same services and specifies the group entities involved.", "improved_claim": "Global IT services, digital solutions, engineering R&D, e-commerce/digital platforms, data centres and semiconductor chip-design solutions are delivered through group entities such as LTIMindtree and L&T Technology Services.", "confidence": 0.95}, {"claim_id": "9b580a49750843d68ba1ae78c6a67538_chunk_0024_claim_000", "chunk_id": "9b580a49750843d68ba1ae78c6a67538_chunk_0024", "original_text": "Retail finance, wholesale finance and investment management are delivered through L&T Finance Holdings.", "status": "valid", "reason": "The original text fully supports the claim that retail finance, wholesale finance and investment management are delivered through L&T Finance Holdings.", "improved_claim": "Retail finance, wholesale finance and investment management, delivered through L&T Finance Holdings.", "confidence": 0.95}, {"claim_id": "9b580a49750843d68ba1ae78c6a67538_chunk_0026_claim_000", "chunk_id": "9b580a49750843d68ba1ae78c6a67538_chunk_0026", "original_text": "Roads and transmission assets, the Hyderabad Metro Rail project, power development projects, and premium residential & commercial real estate through L&T Realty.", "status": "valid", "reason": "The original text fully supports the claim as it explicitly mentions roads and transmission assets, the Hyderabad Metro Rail project, power development projects, and premium residential & commercial real estate through L&T Realty.", "improved_claim": "Roads and transmission assets, the Hyderabad Metro Rail project, power development projects, and premium residential & commercial real estate through L&T Realty.", "confidence": 0.95}, {"claim_id": "9b580a49750843d68ba1ae78c6a67538_chunk_0028_claim_000", "chunk_id": "9b580a49750843d68ba1ae78c6a67538_chunk_0028", "original_text": "L&T operates at the intersection of engineering, construction, heavy manufacturing, information technology, defence and financial services.", "status": "valid", "reason": "The original text directly supports this claim.", "improved_claim": "L&T operates at the intersection of engineering, construction, heavy manufacturing, information technology, defence and financial services.", "confidence": 0.95}, {"claim_id": "9b580a49750843d68ba1ae78c6a67538_chunk_0028_claim_001", "chunk_id": "9b580a49750843d68ba1ae78c6a67538_chunk_0028", "original_text": "L&T is commonly classified under the capital goods / infrastructure & engineering sector in India.", "status": "valid", "reason": "The original text directly supports this claim.", "improved_claim": "L&T is commonly classified under the capital goods / infrastructure & engineering sector in India.", "confidence": 0.95}, {"claim_id": "9b580a49750843d68ba1ae78c6a67538_chunk_0028_claim_002", "chunk_id": "9b580a49750843d68ba1ae78c6a67538_chunk_0028", "original_text": "L&T serves customers across more than 50 countries.", "status": "valid", "reason": "The original text directly supports this claim.", "improved_claim": "L&T serves customers across more than 50 countries.", "confidence": 0.95}, {"claim_id": "9b580a49750843d68ba1ae78c6a67538_chunk_0031_claim_000", "chunk_id": "9b580a49750843d68ba1ae78c6a67538_chunk_0031", "original_text": "L&T House, N.M. Marg, Ballard Estate, Mumbai, Maharashtra -400 001, India is the address for Larsen & Toubro Limited.", "status": "valid", "reason": "The original text provides the full address for Larsen & Toubro Limited.", "improved_claim": "L&T House, N.M. Marg, Ballard Estate, Mumbai, Maharashtra -400 001, India is the address for Larsen & Toubro Limited.", "confidence": 0.95}, {"claim_id": "9b580a49750843d68ba1ae78c6a67538_chunk_0031_claim_001", "chunk_id": "9b580a49750843d68ba1ae78c6a67538_chunk_0031", "original_text": "+91 22 6752 5656 is the telephone number for Larsen & Toubro Limited.", "status": "valid", "reason": "The original text provides the telephone number for Larsen & Toubro Limited.", "improved_claim": "+91 22 6752 5656 is the telephone number for Larsen & Toubro Limited.", "confidence": 0.95}, {"claim_id": "9b580a49750843d68ba1ae78c6a67538_chunk_0031_claim_002", "chunk_id": "9b580a49750843d68ba1ae78c6a67538_chunk_0031", "original_text": "infodesk@larsentoubro.com is the email for Larsen & Toubro Limited.", "status": "valid", "reason": "The original text provides the email for Larsen & Toubro Limited.", "improved_claim": "infodesk@larsentoubro.com is the email for Larsen & Toubro Limited.", "confidence": 0.95}, {"claim_id": "9b580a49750843d68ba1ae78c6a67538_chunk_0031_claim_003", "chunk_id": "9b580a49750843d68ba1ae78c6a67538_chunk_0031", "original_text": "www.larsentoubro.com is the website for Larsen & Toubro Limited.", "status": "valid", "reason": "The original text provides the website for Larsen & Toubro Limited.", "improved_claim": "www.larsentoubro.com is the website for Larsen & Toubro Limited.", "confidence": 0.95}];
+    var ambiguities = [{"issue_id": "9b580a49750843d68ba1ae78c6a67538_chunk_0000_amb_000", "chunk_id": "9b580a49750843d68ba1ae78c6a67538_chunk_0000", "type": "undefined terminology", "severity": "Low", "quote": "COMPANY PROFILE", "reason": "The text 'COMPANY PROFILE' is a label and does not provide any specific information or claims that can be validated.", "supporting_evidence": "No additional context or claims are provided in the given text to validate or challenge.", "suggested_rewrite": "Provide more details about the company profile such as mission, vision, values, or key activities to make it informative and verifiable.", "affected_claims": []}, {"issue_id": "9b580a49750843d68ba1ae78c6a67538_chunk_0001_amb_000", "chunk_id": "9b580a49750843d68ba1ae78c6a67538_chunk_0001", "type": "vague wording", "severity": "Medium", "quote": "LARSEN & TOUBRO", "reason": "The text only mentions the name of an organization without any specific claims or information.", "supporting_evidence": "Document Section: LARSEN & TOUBRO\nContent:\nLARSEN & TOUBRO", "suggested_rewrite": "LARSEN & TOUBRO is a multinational engineering and construction company.", "affected_claims": []}, {"issue_id": "9b580a49750843d68ba1ae78c6a67538_chunk_0002_amb_000", "chunk_id": "9b580a49750843d68ba1ae78c6a67538_chunk_0002", "type": "vague wording", "severity": "Medium", "quote": "Engineering the Nation's Growth Since 1938", "reason": "The phrase is vague as it does not specify what kind of engineering projects or what aspects of national growth are being referred to.", "supporting_evidence": "Document Section: LARSEN & TOUBRO\nContent:\nEngineering the Nation's Growth Since 1938\nWebsite\nwww.larsentoubro.com", "suggested_rewrite": "Larsen & Toubro has been engineering projects for the nation's growth since 1938", "affected_claims": ["9b580a49750843d68ba1ae78c6a67538_chunk_0002_claim_000"]}, {"issue_id": "9b580a49750843d68ba1ae78c6a67538_chunk_0003_amb_000", "chunk_id": "9b580a49750843d68ba1ae78c6a67538_chunk_0003", "type": "vague wording", "severity": "High", "quote": "Headquarters", "reason": "The text only mentions 'Headquarters' without providing any specific information about its location, size, or other details.", "supporting_evidence": "Document Section: Headquarters\nContent:\nHeadquarters", "suggested_rewrite": "The company's main headquarters is located at [address], covering an area of [size].", "affected_claims": []}, {"issue_id": "9b580a49750843d68ba1ae78c6a67538_chunk_0004_amb_000", "chunk_id": "9b580a49750843d68ba1ae78c6a67538_chunk_0004", "type": "vague wording", "severity": "Medium", "quote": "L&T House, Ballard Estate, Mumbai, Maharashtra, India", "reason": "The original text does not explicitly state that this is the headquarters, only mentions a location.", "supporting_evidence": "Document Section: Headquarters\nContent:\nL&T House, Ballard Estate, Mumbai, Maharashtra, India", "suggested_rewrite": "L&T House, Ballard Estate, Mumbai, Maharashtra, India is identified as the headquarters.", "affected_claims": ["9b580a49750843d68ba1ae78c6a67538_chunk_0004_claim_000"]}, {"issue_id": "9b580a49750843d68ba1ae78c6a67538_chunk_0005_amb_000", "chunk_id": "9b580a49750843d68ba1ae78c6a67538_chunk_0005", "type": "vague wording", "severity": "High", "quote": "Industry", "reason": "The term 'Industry' is too broad and does not provide any specific information or context.", "supporting_evidence": "The original chunk text only contains the word 'Industry' without any additional details or context about which industry or what aspects of an industry are being discussed.", "suggested_rewrite": "A more detailed description of the specific industry or relevant aspects should be provided to avoid ambiguity.", "affected_claims": []}, {"issue_id": "9b580a49750843d68ba1ae78c6a67538_chunk_0006_amb_000", "chunk_id": "9b580a49750843d68ba1ae78c6a67538_chunk_0006", "type": "undefined terminology", "severity": "Medium", "quote": "Engineering, Construction, Manufacturing, Technology & Financial Services Conglomerate", "reason": "The organization is described but not specifically named or defined within the text.", "supporting_evidence": "This description is given in the context of defining an industry section but does not specify if L&T falls under this description.", "suggested_rewrite": "L&T: Engineering, Construction, Manufacturing, Technology & Financial Services Conglomerate", "affected_claims": []}, {"issue_id": "9b580a49750843d68ba1ae78c6a67538_chunk_0007_amb_000", "chunk_id": "9b580a49750843d68ba1ae78c6a67538_chunk_0007", "type": "vague wording", "severity": "Low", "quote": "COMPANY SNAPSHOT", "reason": "The text is a section header and lacks substantive content to provide meaningful information.", "supporting_evidence": "Document Section: COMPANY SNAPSHOT\nContent:\nCOMPANY SNAPSHOT", "suggested_rewrite": null, "affected_claims": []}, {"issue_id": "9b580a49750843d68ba1ae78c6a67538_chunk_0008_amb_000", "chunk_id": "9b580a49750843d68ba1ae78c6a67538_chunk_0008", "type": "numerical ambiguity", "severity": "Low", "quote": "more than 50 countries", "reason": "The exact number of countries is not specified.", "supporting_evidence": "Today the group operates in more than 50 countries and is listed on the NSE and BSE (ticker: LT), with no single majority shareholder.", "suggested_rewrite": "Today the group operates in over 50 countries and is listed on the NSE and BSE (ticker: LT), with no single majority shareholder.", "affected_claims": ["9b580a49750843d68ba1ae78c6a67538_chunk_0008_claim_001"]}, {"issue_id": "9b580a49750843d68ba1ae78c6a67538_chunk_0009_amb_000", "chunk_id": "9b580a49750843d68ba1ae78c6a67538_chunk_0009", "type": "vague wording", "severity": "Medium", "quote": "BOARD & KEY LEADERSHIP", "reason": "The phrase is a title or heading and does not provide any specific information or claims about the board and key leadership.", "supporting_evidence": "Original Chunk Text: BOARD & KEY LEADERSHIP\nStructured Extraction from Phase 2A: The text is extracted as an entity without any associated claims or details.", "suggested_rewrite": "The document section titled 'BOARD & KEY LEADERSHIP' contains information about the board members and key leadership positions within the organization.", "affected_claims": []}, {"issue_id": "9b580a49750843d68ba1ae78c6a67538_chunk_0010_amb_000", "chunk_id": "9b580a49750843d68ba1ae78c6a67538_chunk_0010", "type": "vague wording", "severity": "Low", "quote": "Chairman &amp; Managing Director", "reason": "The use of 'Chairman' might be ambiguous in contexts where the organization may have a different title or structure.", "supporting_evidence": "S N Subrahmanyan is the Chairman &amp; Managing Director", "suggested_rewrite": "Chairman and Chief Executive Officer (CEO)", "affected_claims": ["9b580a49750843d68ba1ae78c6a67538_chunk_0010_claim_000"]}, {"issue_id": "9b580a49750843d68ba1ae78c6a67538_chunk_0012_amb_000", "chunk_id": "9b580a49750843d68ba1ae78c6a67538_chunk_0012", "type": "vague wording", "severity": "Medium", "quote": "MARQUEE PROJECTS", "reason": "The text only contains a heading and no further details or context about what constitutes Marquee Projects, making the term vague without additional information.", "supporting_evidence": "Document Section: MARQUEE PROJECTS\nContent:\nMARQUEE PROJECTS", "suggested_rewrite": "MARQUEE PROJECTS\nDetails: [Please provide description of marquee projects]", "affected_claims": []}, {"issue_id": "9b580a49750843d68ba1ae78c6a67538_chunk_0013_amb_000", "chunk_id": "9b580a49750843d68ba1ae78c6a67538_chunk_0013", "type": "numerical ambiguity", "severity": "Medium", "quote": "world's tallest statue including its access infrastructure", "reason": "The claim specifies 'including its access infrastructure' which is not explicitly detailed in the original text.", "supporting_evidence": "* Statue of Unity, Gujarat -the world's tallest statue, including its access infrastructure", "suggested_rewrite": "Statue of Unity, Gujarat is the world's tallest statue, with mention of access infrastructure.", "affected_claims": ["9b580a49750843d68ba1ae78c6a67538_chunk_0013_claim_000"]}, {"issue_id": "9b580a49750843d68ba1ae78c6a67538_chunk_0014_amb_000", "chunk_id": "9b580a49750843d68ba1ae78c6a67538_chunk_0014", "type": "vague wording", "severity": "Medium", "quote": "BUSINESS SEGMENTS / SERVICE LINES", "reason": "The text only states a heading or title without providing any details about the business segments or service lines.", "supporting_evidence": "", "suggested_rewrite": "This section outlines various business segments and service lines offered by the company. [Add details about each segment/service line]", "affected_claims": []}, {"issue_id": "9b580a49750843d68ba1ae78c6a67538_chunk_0015_amb_000", "chunk_id": "9b580a49750843d68ba1ae78c6a67538_chunk_0015", "type": "vague wording", "severity": "Medium", "quote": "Infrastructure (EPC)", "reason": "The phrase 'Infrastructure (EPC)' is vague and does not provide specific details about the infrastructure or EPC.", "supporting_evidence": "No additional context is provided in the chunk to clarify what aspect of the infrastructure or EPC is being referred to.", "suggested_rewrite": "Specific aspects of the infrastructure related to EPC should be detailed, e.g., 'EPC-related transportation infrastructure' or 'Communication infrastructure for EPC projects'.", "affected_claims": []}, {"issue_id": "9b580a49750843d68ba1ae78c6a67538_chunk_0016_amb_000", "chunk_id": "9b580a49750843d68ba1ae78c6a67538_chunk_0016", "type": "vague wording", "severity": "Low", "quote": "Engineering, procurement and construction", "reason": "The term 'Engineering, procurement and construction' is a broad phrase that could encompass various specific activities without clear boundaries.", "supporting_evidence": "The text lists several types of projects under EPC but does not specify the scope or details of what constitutes engineering, procurement, and construction within this context.", "suggested_rewrite": "Engineering, procurement, and construction services for buildings & factories, transportation infrastructure, heavy civil works, power transmission & distribution, and water & renewable energy projects.", "affected_claims": ["9b580a49750843d68ba1ae78c6a67538_chunk_0016_claim_000"]}, {"issue_id": "9b580a49750843d68ba1ae78c6a67538_chunk_0017_amb_000", "chunk_id": "9b580a49750843d68ba1ae78c6a67538_chunk_0017", "type": "vague wording", "severity": "Low", "quote": "Energy -Hydrocarbon & Power", "reason": "The phrase is vague as it does not provide specific information or claims about energy, hydrocarbons, or power.", "supporting_evidence": "The text only contains a label and no additional content or claims.", "suggested_rewrite": "Energy - Hydrocarbon & Power department focuses on managing and optimizing the production and distribution of energy resources including hydrocarbons and power generation facilities.", "affected_claims": []}, {"issue_id": "9b580a49750843d68ba1ae78c6a67538_chunk_0018_amb_000", "chunk_id": "9b580a49750843d68ba1ae78c6a67538_chunk_0018", "type": "undefined terminology", "severity": "Medium", "quote": "EPC", "reason": "The acronym 'EPC' is not defined within the text, which could lead to confusion for readers unfamiliar with this term.", "supporting_evidence": "End-to-end EPC for upstream, midstream and downstream oil & gas, and power generation infrastructure.", "suggested_rewrite": "End-to-end Engineering, Procurement, and Construction (EPC) services for upstream, midstream and downstream oil & gas, and power generation infrastructure.", "affected_claims": ["9b580a49750843d68ba1ae78c6a67538_chunk_0018_claim_000"]}, {"issue_id": "9b580a49750843d68ba1ae78c6a67538_chunk_0019_amb_000", "chunk_id": "9b580a49750843d68ba1ae78c6a67538_chunk_0019", "type": "vague wording", "severity": "Low", "quote": "Hi-Tech Manufacturing & Defence Engineering", "reason": "The phrase is a title or department name without any context about its functions, responsibilities, or scope.", "supporting_evidence": "No additional information provided to clarify the role or activities of Hi-Tech Manufacturing & Defence Engineering.", "suggested_rewrite": "Hi-Tech Manufacturing & Defence Engineering: Department responsible for [specific functions/activities].", "affected_claims": []}, {"issue_id": "9b580a49750843d68ba1ae78c6a67538_chunk_0020_amb_000", "chunk_id": "9b580a49750843d68ba1ae78c6a67538_chunk_0020", "type": "vague wording", "severity": "Medium", "quote": "engineered equipment", "reason": "The term 'engineered equipment' is broad and could refer to a wide range of products without specific detail.", "supporting_evidence": "Design, manufacture and supply of engineered equipment for process plants, nuclear and green-hydrogen facilities...", "suggested_rewrite": "Design, manufacture and supply of specialized equipment for process plants, nuclear and green-hydrogen facilities...", "affected_claims": ["9b580a49750843d68ba1ae78c6a67538_chunk_0020_claim_000"]}, {"issue_id": "9b580a49750843d68ba1ae78c6a67538_chunk_0021_amb_000", "chunk_id": "9b580a49750843d68ba1ae78c6a67538_chunk_0021", "type": "vague wording", "severity": "Low", "quote": "IT & Technology Services", "reason": "The phrase is vague as it does not provide any specific information or services offered under IT & Technology Services.", "supporting_evidence": "Document Section: IT & Technology Services\nContent:\nIT & Technology Services", "suggested_rewrite": "Specify the services provided under IT & Technology Services, e.g., 'IT & Technology Services includes network management and software development.'", "affected_claims": []}, {"issue_id": "9b580a49750843d68ba1ae78c6a67538_chunk_0022_amb_000", "chunk_id": "9b580a49750843d68ba1ae78c6a67538_chunk_0022", "type": "vague wording", "severity": "Low", "quote": "Global IT services, digital solutions, engineering R&D, e-commerce/digital platforms, data centres and semiconductor chip-design solutions", "reason": "The terms are broad and could be interpreted in various ways without specific definitions.", "supporting_evidence": "These terms are listed as the services provided but no further details or scope are given.", "suggested_rewrite": "Specific global IT services, digital solutions, engineering R&D services, e-commerce/digital platforms, data centre operations and semiconductor chip-design solutions", "affected_claims": ["9b580a49750843d68ba1ae78c6a67538_chunk_0022_claim_000"]}, {"issue_id": "9b580a49750843d68ba1ae78c6a67538_chunk_0023_amb_000", "chunk_id": "9b580a49750843d68ba1ae78c6a67538_chunk_0023", "type": "vague wording", "severity": "Medium", "quote": "Financial Services", "reason": "The phrase 'Financial Services' is a broad term and does not provide specific information or claims about the services offered, financial performance, or any other related details.", "supporting_evidence": "Document Section: Financial Services\nContent:\nFinancial Services", "suggested_rewrite": "Please specify what aspects of Financial Services are being discussed, such as banking services, investment management, insurance products, etc.", "affected_claims": []}, {"issue_id": "9b580a49750843d68ba1ae78c6a67538_chunk_0025_amb_000", "chunk_id": "9b580a49750843d68ba1ae78c6a67538_chunk_0025", "type": "vague wording", "severity": "Low", "quote": "Development Projects & Realty", "reason": "The text is a title or heading without additional context, making it vague.", "supporting_evidence": "Document Section: Development Projects & Realty\nContent:\nDevelopment Projects & Realty", "suggested_rewrite": "This section covers various development projects and realty-related activities within the organization.", "affected_claims": []}, {"issue_id": "9b580a49750843d68ba1ae78c6a67538_chunk_0026_amb_000", "chunk_id": "9b580a49750843d68ba1ae78c6a67538_chunk_0026", "type": "vague wording", "severity": "Low", "quote": "Roads and transmission assets, the Hyderabad Metro Rail project, power development projects, and premium residential & commercial real estate through L&T Realty.", "reason": "The claim is broad and does not specify what kind of roads or transmission assets are being referred to. It also does not provide details about the scale or scope of these projects or the specific areas where they are located.", "supporting_evidence": "The text mentions various types of development projects but lacks specificity in detail.", "suggested_rewrite": "Includes a mix of road infrastructure and transmission asset development, including the Hyderabad Metro Rail project, along with power development initiatives and premium residential & commercial real estate projects managed by L&T Realty.", "affected_claims": ["9b580a49750843d68ba1ae78c6a67538_chunk_0026_claim_000"]}, {"issue_id": "9b580a49750843d68ba1ae78c6a67538_chunk_0027_amb_000", "chunk_id": "9b580a49750843d68ba1ae78c6a67538_chunk_0027", "type": "vague wording", "severity": "Medium", "quote": "INDUSTRY", "reason": "The text only consists of the word 'INDUSTRY' and does not provide any specific details, claims, or context about what is being referred to in the industry.", "supporting_evidence": "No additional information or description provided in the chunk.", "suggested_rewrite": "Provide a detailed description or claim about the industry content.", "affected_claims": []}, {"issue_id": "9b580a49750843d68ba1ae78c6a67538_chunk_0028_amb_000", "chunk_id": "9b580a49750843d68ba1ae78c6a67538_chunk_0028", "type": "numerical ambiguity", "severity": "Low", "quote": "more than 50", "reason": "The phrase 'more than 50' is vague as it does not specify the exact number of countries.", "supporting_evidence": "L&T serves customers across more than 50 countries.", "suggested_rewrite": "L&T serves customers across over 50 countries.", "affected_claims": ["9b580a49750843d68ba1ae78c6a67538_chunk_0028_claim_002"]}, {"issue_id": "9b580a49750843d68ba1ae78c6a67538_chunk_0029_amb_000", "chunk_id": "9b580a49750843d68ba1ae78c6a67538_chunk_0029", "type": "vague wording", "severity": "Low", "quote": "CONTACT", "reason": "The term 'CONTACT' is too vague and does not provide any specific information about what kind of contact or section it refers to.", "supporting_evidence": "Document Section: CONTACT\nContent:\nCONTACT", "suggested_rewrite": "Please specify the type of contact information or details provided in this section, such as 'Customer Contact Information' or 'Contact Details'.", "affected_claims": []}, {"issue_id": "9b580a49750843d68ba1ae78c6a67538_chunk_0030_amb_000", "chunk_id": "9b580a49750843d68ba1ae78c6a67538_chunk_0030", "type": "vague wording", "severity": "Low", "quote": "Larsen & Toubro Limited", "reason": "The text only mentions the company name without any context or claims about its activities, status, or other details.", "supporting_evidence": "No additional information is provided except for the company name.", "suggested_rewrite": "Larsen & Toubro Limited [is a description of the organization, e.g., engineering and construction company]", "affected_claims": []}, {"issue_id": "9b580a49750843d68ba1ae78c6a67538_chunk_0031_amb_000", "chunk_id": "9b580a49750843d68ba1ae78c6a67538_chunk_0031", "type": "vague wording", "severity": "Low", "quote": "L&T House, N.M. Marg, Ballard Estate, Mumbai, Maharashtra -400 001, India", "reason": "The address does not specify if it is the headquarters or another location.", "supporting_evidence": "No additional context provided about the type of location this address represents.", "suggested_rewrite": "L&T House, N.M. Marg, Ballard Estate, Mumbai, Maharashtra -400 001, India is the registered office for Larsen & Toubro Limited.", "affected_claims": ["9b580a49750843d68ba1ae78c6a67538_chunk_0031_claim_000"]}];
+    var rewrites = [{"id": "9b580a49750843d68ba1ae78c6a67538_chunk_0002_claim_000", "chunk_id": "9b580a49750843d68ba1ae78c6a67538_chunk_0002", "original_text": "Engineering the Nation's Growth Since 1938", "suggested_text": "Larsen & Toubro has been engineering projects for the nation's growth since 1938", "type": "claim"}, {"id": "9b580a49750843d68ba1ae78c6a67538_chunk_0004_claim_000", "chunk_id": "9b580a49750843d68ba1ae78c6a67538_chunk_0004", "original_text": "L&T House, Ballard Estate, Mumbai, Maharashtra, India is the headquarters.", "suggested_text": "L&T House, Ballard Estate, Mumbai, Maharashtra, India is the location mentioned as headquarters.", "type": "claim"}, {"id": "string", "chunk_id": "9b580a49750843d68ba1ae78c6a67538_chunk_0007", "original_text": "N/A", "suggested_text": null, "type": "claim"}, {"id": "9b580a49750843d68ba1ae78c6a67538_chunk_0000_amb_000", "chunk_id": "9b580a49750843d68ba1ae78c6a67538_chunk_0000", "original_text": "COMPANY PROFILE", "suggested_text": "Provide more details about the company profile such as mission, vision, values, or key activities to make it informative and verifiable.", "type": "ambiguity"}, {"id": "9b580a49750843d68ba1ae78c6a67538_chunk_0001_amb_000", "chunk_id": "9b580a49750843d68ba1ae78c6a67538_chunk_0001", "original_text": "LARSEN & TOUBRO", "suggested_text": "LARSEN & TOUBRO is a multinational engineering and construction company.", "type": "ambiguity"}, {"id": "9b580a49750843d68ba1ae78c6a67538_chunk_0002_amb_000", "chunk_id": "9b580a49750843d68ba1ae78c6a67538_chunk_0002", "original_text": "Engineering the Nation's Growth Since 1938", "suggested_text": "Larsen & Toubro has been engineering projects for the nation's growth since 1938", "type": "ambiguity"}, {"id": "9b580a49750843d68ba1ae78c6a67538_chunk_0003_amb_000", "chunk_id": "9b580a49750843d68ba1ae78c6a67538_chunk_0003", "original_text": "Headquarters", "suggested_text": "The company's main headquarters is located at [address], covering an area of [size].", "type": "ambiguity"}, {"id": "9b580a49750843d68ba1ae78c6a67538_chunk_0004_amb_000", "chunk_id": "9b580a49750843d68ba1ae78c6a67538_chunk_0004", "original_text": "L&T House, Ballard Estate, Mumbai, Maharashtra, India", "suggested_text": "L&T House, Ballard Estate, Mumbai, Maharashtra, India is identified as the headquarters.", "type": "ambiguity"}, {"id": "9b580a49750843d68ba1ae78c6a67538_chunk_0005_amb_000", "chunk_id": "9b580a49750843d68ba1ae78c6a67538_chunk_0005", "original_text": "Industry", "suggested_text": "A more detailed description of the specific industry or relevant aspects should be provided to avoid ambiguity.", "type": "ambiguity"}, {"id": "9b580a49750843d68ba1ae78c6a67538_chunk_0006_amb_000", "chunk_id": "9b580a49750843d68ba1ae78c6a67538_chunk_0006", "original_text": "Engineering, Construction, Manufacturing, Technology & Financial Services Conglomerate", "suggested_text": "L&T: Engineering, Construction, Manufacturing, Technology & Financial Services Conglomerate", "type": "ambiguity"}, {"id": "9b580a49750843d68ba1ae78c6a67538_chunk_0007_amb_000", "chunk_id": "9b580a49750843d68ba1ae78c6a67538_chunk_0007", "original_text": "COMPANY SNAPSHOT", "suggested_text": null, "type": "ambiguity"}, {"id": "9b580a49750843d68ba1ae78c6a67538_chunk_0008_amb_000", "chunk_id": "9b580a49750843d68ba1ae78c6a67538_chunk_0008", "original_text": "more than 50 countries", "suggested_text": "Today the group operates in over 50 countries and is listed on the NSE and BSE (ticker: LT), with no single majority shareholder.", "type": "ambiguity"}, {"id": "9b580a49750843d68ba1ae78c6a67538_chunk_0009_amb_000", "chunk_id": "9b580a49750843d68ba1ae78c6a67538_chunk_0009", "original_text": "BOARD & KEY LEADERSHIP", "suggested_text": "The document section titled 'BOARD & KEY LEADERSHIP' contains information about the board members and key leadership positions within the organization.", "type": "ambiguity"}, {"id": "9b580a49750843d68ba1ae78c6a67538_chunk_0010_amb_000", "chunk_id": "9b580a49750843d68ba1ae78c6a67538_chunk_0010", "original_text": "Chairman &amp; Managing Director", "suggested_text": "Chairman and Chief Executive Officer (CEO)", "type": "ambiguity"}, {"id": "9b580a49750843d68ba1ae78c6a67538_chunk_0012_amb_000", "chunk_id": "9b580a49750843d68ba1ae78c6a67538_chunk_0012", "original_text": "MARQUEE PROJECTS", "suggested_text": "MARQUEE PROJECTS\nDetails: [Please provide description of marquee projects]", "type": "ambiguity"}, {"id": "9b580a49750843d68ba1ae78c6a67538_chunk_0013_amb_000", "chunk_id": "9b580a49750843d68ba1ae78c6a67538_chunk_0013", "original_text": "world's tallest statue including its access infrastructure", "suggested_text": "Statue of Unity, Gujarat is the world's tallest statue, with mention of access infrastructure.", "type": "ambiguity"}, {"id": "9b580a49750843d68ba1ae78c6a67538_chunk_0014_amb_000", "chunk_id": "9b580a49750843d68ba1ae78c6a67538_chunk_0014", "original_text": "BUSINESS SEGMENTS / SERVICE LINES", "suggested_text": "This section outlines various business segments and service lines offered by the company. [Add details about each segment/service line]", "type": "ambiguity"}, {"id": "9b580a49750843d68ba1ae78c6a67538_chunk_0015_amb_000", "chunk_id": "9b580a49750843d68ba1ae78c6a67538_chunk_0015", "original_text": "Infrastructure (EPC)", "suggested_text": "Specific aspects of the infrastructure related to EPC should be detailed, e.g., 'EPC-related transportation infrastructure' or 'Communication infrastructure for EPC projects'.", "type": "ambiguity"}, {"id": "9b580a49750843d68ba1ae78c6a67538_chunk_0016_amb_000", "chunk_id": "9b580a49750843d68ba1ae78c6a67538_chunk_0016", "original_text": "Engineering, procurement and construction", "suggested_text": "Engineering, procurement, and construction services for buildings & factories, transportation infrastructure, heavy civil works, power transmission & distribution, and water & renewable energy projects.", "type": "ambiguity"}, {"id": "9b580a49750843d68ba1ae78c6a67538_chunk_0017_amb_000", "chunk_id": "9b580a49750843d68ba1ae78c6a67538_chunk_0017", "original_text": "Energy -Hydrocarbon & Power", "suggested_text": "Energy - Hydrocarbon & Power department focuses on managing and optimizing the production and distribution of energy resources including hydrocarbons and power generation facilities.", "type": "ambiguity"}, {"id": "9b580a49750843d68ba1ae78c6a67538_chunk_0018_amb_000", "chunk_id": "9b580a49750843d68ba1ae78c6a67538_chunk_0018", "original_text": "EPC", "suggested_text": "End-to-end Engineering, Procurement, and Construction (EPC) services for upstream, midstream and downstream oil & gas, and power generation infrastructure.", "type": "ambiguity"}, {"id": "9b580a49750843d68ba1ae78c6a67538_chunk_0019_amb_000", "chunk_id": "9b580a49750843d68ba1ae78c6a67538_chunk_0019", "original_text": "Hi-Tech Manufacturing & Defence Engineering", "suggested_text": "Hi-Tech Manufacturing & Defence Engineering: Department responsible for [specific functions/activities].", "type": "ambiguity"}, {"id": "9b580a49750843d68ba1ae78c6a67538_chunk_0020_amb_000", "chunk_id": "9b580a49750843d68ba1ae78c6a67538_chunk_0020", "original_text": "engineered equipment", "suggested_text": "Design, manufacture and supply of specialized equipment for process plants, nuclear and green-hydrogen facilities...", "type": "ambiguity"}, {"id": "9b580a49750843d68ba1ae78c6a67538_chunk_0021_amb_000", "chunk_id": "9b580a49750843d68ba1ae78c6a67538_chunk_0021", "original_text": "IT & Technology Services", "suggested_text": "Specify the services provided under IT & Technology Services, e.g., 'IT & Technology Services includes network management and software development.'", "type": "ambiguity"}, {"id": "9b580a49750843d68ba1ae78c6a67538_chunk_0022_amb_000", "chunk_id": "9b580a49750843d68ba1ae78c6a67538_chunk_0022", "original_text": "Global IT services, digital solutions, engineering R&D, e-commerce/digital platforms, data centres and semiconductor chip-design solutions", "suggested_text": "Specific global IT services, digital solutions, engineering R&D services, e-commerce/digital platforms, data centre operations and semiconductor chip-design solutions", "type": "ambiguity"}, {"id": "9b580a49750843d68ba1ae78c6a67538_chunk_0023_amb_000", "chunk_id": "9b580a49750843d68ba1ae78c6a67538_chunk_0023", "original_text": "Financial Services", "suggested_text": "Please specify what aspects of Financial Services are being discussed, such as banking services, investment management, insurance products, etc.", "type": "ambiguity"}, {"id": "9b580a49750843d68ba1ae78c6a67538_chunk_0025_amb_000", "chunk_id": "9b580a49750843d68ba1ae78c6a67538_chunk_0025", "original_text": "Development Projects & Realty", "suggested_text": "This section covers various development projects and realty-related activities within the organization.", "type": "ambiguity"}, {"id": "9b580a49750843d68ba1ae78c6a67538_chunk_0026_amb_000", "chunk_id": "9b580a49750843d68ba1ae78c6a67538_chunk_0026", "original_text": "Roads and transmission assets, the Hyderabad Metro Rail project, power development projects, and premium residential & commercial real estate through L&T Realty.", "suggested_text": "Includes a mix of road infrastructure and transmission asset development, including the Hyderabad Metro Rail project, along with power development initiatives and premium residential & commercial real estate projects managed by L&T Realty.", "type": "ambiguity"}, {"id": "9b580a49750843d68ba1ae78c6a67538_chunk_0027_amb_000", "chunk_id": "9b580a49750843d68ba1ae78c6a67538_chunk_0027", "original_text": "INDUSTRY", "suggested_text": "Provide a detailed description or claim about the industry content.", "type": "ambiguity"}, {"id": "9b580a49750843d68ba1ae78c6a67538_chunk_0028_amb_000", "chunk_id": "9b580a49750843d68ba1ae78c6a67538_chunk_0028", "original_text": "more than 50", "suggested_text": "L&T serves customers across over 50 countries.", "type": "ambiguity"}, {"id": "9b580a49750843d68ba1ae78c6a67538_chunk_0029_amb_000", "chunk_id": "9b580a49750843d68ba1ae78c6a67538_chunk_0029", "original_text": "CONTACT", "suggested_text": "Please specify the type of contact information or details provided in this section, such as 'Customer Contact Information' or 'Contact Details'.", "type": "ambiguity"}, {"id": "9b580a49750843d68ba1ae78c6a67538_chunk_0030_amb_000", "chunk_id": "9b580a49750843d68ba1ae78c6a67538_chunk_0030", "original_text": "Larsen & Toubro Limited", "suggested_text": "Larsen & Toubro Limited [is a description of the organization, e.g., engineering and construction company]", "type": "ambiguity"}, {"id": "9b580a49750843d68ba1ae78c6a67538_chunk_0031_amb_000", "chunk_id": "9b580a49750843d68ba1ae78c6a67538_chunk_0031", "original_text": "L&T House, N.M. Marg, Ballard Estate, Mumbai, Maharashtra -400 001, India", "suggested_text": "L&T House, N.M. Marg, Ballard Estate, Mumbai, Maharashtra -400 001, India is the registered office for Larsen & Toubro Limited.", "type": "ambiguity"}];
+    
+    // Tab switching
+    window.switchTab = function(tabId) {
+      var tabs = document.getElementsByClassName("content-tab");
+      for (var i = 0; i < tabs.length; i++) {
+        tabs[i].classList.remove("active");
+      }
+      var navItems = document.getElementsByClassName("nav-item");
+      for (var i = 0; i < navItems.length; i++) {
+        navItems[i].classList.remove("active");
+      }
+      document.getElementById(tabId).classList.add("active");
+      
+      // Highlight active nav item
+      var targetIdx = 0;
+      if (tabId === "tab-overview") targetIdx = 0;
+      else if (tabId === "tab-chunks") targetIdx = 1;
+      else if (tabId === "tab-claims") targetIdx = 2;
+      else if (tabId === "tab-ambiguities") targetIdx = 3;
+      else if (tabId === "tab-rewrites") targetIdx = 4;
+      else if (tabId === "tab-search") targetIdx = 5;
+      navItems[targetIdx].classList.add("active");
+    };
+    
+    // 1. Render Dashboard
+    document.getElementById("d-total-chunks").innerText = stats.total_chunks_analyzed;
+    document.getElementById("d-total-claims").innerText = stats.total_claims_validated;
+    document.getElementById("d-total-ambs").innerText = stats.total_ambiguities_identified;
+    document.getElementById("d-high-risk").innerText = stats.risk_breakdown.High;
+    document.getElementById("d-med-risk").innerText = stats.risk_breakdown.Medium;
+    document.getElementById("d-avg-conf").innerText = (stats.average_confidence * 100).toFixed(1) + "%";
+    
+    // 2. Render Chunks Browser
+    var chunksListDiv = document.getElementById("chunks-list-element");
+    chunksListDiv.innerHTML = "";
+    chunkReasonings.forEach(function(ch, idx) {
+      var item = document.createElement("div");
+      item.className = "browser-item";
+      item.onclick = function() { selectChunk(idx); };
+      item.innerHTML = `
+        <div style="font-weight:bold; font-family:monospace;">${ch.chunk_id}</div>
+        <div style="font-size:11px; color:var(--text-muted); margin-top:4px;">Risk: ${ch.overall_chunk_risk} | Issues: ${ch.ambiguities ? ch.ambiguities.length : 0}</div>
+      `;
+      chunksListDiv.appendChild(item);
+    });
+    
+    function selectChunk(idx) {
+      var items = document.getElementsByClassName("browser-item");
+      for (var i = 0; i < items.length; i++) {
+        items[i].classList.remove("active");
+      }
+      items[idx].classList.add("active");
+      
+      var ch = chunkReasonings[idx];
+      var detailDiv = document.getElementById("chunks-detail-element");
+      
+      var valHtml = "";
+      (ch.claim_validation || []).forEach(function(c) {
+        valHtml += `<li><strong>${c.claim_id}</strong> (${c.status.toUpperCase()}): ${c.reason} <br/><span style="font-size:11px; color:var(--text-muted);">Suggested revision: "${c.improved_claim}"</span></li>`;
+      });
+      
+      var ambsHtml = "";
+      (ch.ambiguities || []).forEach(function(a) {
+        var badgeSeverityClass = "badge-risk-" + a.severity.toLowerCase();
+        ambsHtml += `
+          <div style="border-bottom: 1px solid var(--border); padding-bottom:10px; margin-bottom:10px;">
+            <div style="display:flex; justify-content:space-between; align-items:center;">
+              <strong>${a.issue_id} (${a.type})</strong>
+              <span class="badge ${badgeSeverityClass}">${a.severity}</span>
+            </div>
+            <div style="font-size:12.5px; margin-top:5px;"><strong>Quote:</strong> "${a.quote}"</div>
+            <div style="font-size:12.5px;"><strong>Reason:</strong> ${a.reason}</div>
+            <div style="font-size:12.5px;"><strong>Evidence:</strong> ${a.supporting_evidence}</div>
+            <div style="font-size:12.5px; color:var(--primary);"><strong>Suggested Rewrite:</strong> ${a.suggested_rewrite}</div>
+          </div>
+        `;
+      });
+      
+      detailDiv.innerHTML = `
+        <h2 style="margin-top:0; color:var(--primary);">${ch.chunk_id}</h2>
+        <div style="font-size:13px; color:var(--text-muted); margin-bottom:12px;">
+          <strong>Risk Level:</strong> <span class="badge badge-risk-${ch.overall_chunk_risk.toLowerCase()}">${ch.overall_chunk_risk}</span> | <strong>Reasoning Confidence:</strong> ${(ch.overall_confidence * 100).toFixed(1)}%
+        </div>
+        
+        <div class="detail-card">
+          <h3>Claim Validation</h3>
+          <ul>${valHtml || '<li><em>No claims validated</em></li>'}</ul>
+        </div>
+        
+        <div class="detail-card">
+          <h3>Ambiguities & Issues</h3>
+          <div>${ambsHtml || '<em>No issues identified</em>'}</div>
+        </div>
+      `;
+    }
+    
+    // 3. Render Claims Table
+    var claimsTableBody = document.getElementById("claims-table-body");
+    claimsTableBody.innerHTML = "";
+    validatedClaims.forEach(function(c) {
+      var badgeClass = c.status === "valid" ? "badge-risk-low" : "badge-risk-medium";
+      claimsTableBody.innerHTML += `
+        <tr>
+          <td style="font-family:monospace; font-weight:bold;">${c.claim_id}</td>
+          <td style="font-family:monospace;">${c.chunk_id}</td>
+          <td><span class="badge ${badgeClass}">${c.status.toUpperCase()}</span></td>
+          <td>${c.reason}</td>
+          <td>${c.improved_claim}</td>
+        </tr>
+      `;
+    });
+    
+    // 4. Render Ambiguities Table
+    var ambsTableBody = document.getElementById("ambs-table-body");
+    ambsTableBody.innerHTML = "";
+    ambiguities.forEach(function(a) {
+      var badgeSeverityClass = "badge-risk-" + a.severity.toLowerCase();
+      ambsTableBody.innerHTML += `
+        <tr>
+          <td style="font-family:monospace; font-weight:bold;">${a.issue_id}</td>
+          <td style="font-family:monospace;">${a.chunk_id}</td>
+          <td>${a.type}</td>
+          <td><span class="badge ${badgeSeverityClass}">${a.severity}</span></td>
+          <td>"${a.quote}"</td>
+          <td>${a.reason}</td>
+          <td style="color:var(--primary); font-weight:500;">${a.suggested_rewrite}</td>
+        </tr>
+      `;
+    });
+    
+    // 5. Render Rewrites Table
+    var rewritesTableBody = document.getElementById("rewrites-table-body");
+    rewritesTableBody.innerHTML = "";
+    rewrites.forEach(function(r) {
+      rewritesTableBody.innerHTML += `
+        <tr>
+          <td style="font-family:monospace; font-weight:bold;">${r.id}</td>
+          <td><span class="badge">${r.type}</span></td>
+          <td><em>"${r.original_text.strip ? r.original_text.strip() : r.original_text}"</em></td>
+          <td style="color:var(--primary); font-weight:600;">${r.suggested_text}</td>
+        </tr>
+      `;
+    });
+    
+    // 6. Render Search Results
+    window.applySearch = function() {
+      var query = document.getElementById("search-input").value.toLowerCase();
+      var resultsContainer = document.getElementById("search-results-container");
+      resultsContainer.innerHTML = "";
+      
+      if (!query) {
+        resultsContainer.innerHTML = '<div style="color:var(--text-muted); text-align:center; padding:20px;">Type a query to search across chunks, claims, or issue types</div>';
+        return;
+      }
+      
+      var matched = [];
+      chunkReasonings.forEach(function(ch) {
+        var idMatch = ch.chunk_id.toLowerCase().indexOf(query) > -1;
+        var claimMatch = (ch.claim_validation || []).some(function(c) { return c.reason.toLowerCase().indexOf(query) > -1 || c.improved_claim.toLowerCase().indexOf(query) > -1; });
+        var ambMatch = (ch.ambiguities || []).some(function(a) { return a.type.toLowerCase().indexOf(query) > -1 || a.reason.toLowerCase().indexOf(query) > -1 || a.quote.toLowerCase().indexOf(query) > -1; });
+        
+        if (idMatch || claimMatch || ambMatch) {
+          matched.push(ch);
+        }
+      });
+      
+      matched.forEach(function(ch) {
+        resultsContainer.innerHTML += `
+          <div class="detail-card">
+            <h4 style="margin:0; color:var(--primary); font-family:monospace;">${ch.chunk_id}</h4>
+            <div style="font-size:12px; margin-top:5px;">Risk level: ${ch.overall_chunk_risk} | Confidence: ${(ch.overall_confidence * 100).toFixed(1)}%</div>
+          </div>
+        `;
+      });
+      
+      if (matched.length === 0) {
+        resultsContainer.innerHTML = '<div style="color:var(--text-muted); text-align:center; padding:20px;">No matching semantic chunks found.</div>';
+      }
+    };
+    
+    applySearch();
+  </script>
+</body>
+</html>

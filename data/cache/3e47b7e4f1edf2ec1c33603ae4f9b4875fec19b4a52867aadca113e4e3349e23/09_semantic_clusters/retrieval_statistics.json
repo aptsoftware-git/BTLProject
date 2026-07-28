@@ -1,0 +1,17 @@
+{
+  "total_chunks": 32,
+  "total_clusters": 3,
+  "average_cluster_size": 10.33,
+  "largest_cluster": 17,
+  "smallest_cluster": 5,
+  "isolated_chunks": 1,
+  "average_neighbors": 6.91,
+  "similarity_threshold": 0.72,
+  "retrieval_top_k": 10,
+  "total_similarity_edges": 132,
+  "average_similarity": 0.7883,
+  "total_pages": 3,
+  "total_headings": 16,
+  "total_tables": 1,
+  "total_images": 0
+}

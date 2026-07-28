@@ -1,0 +1,32 @@
+{
+  "image_id": "#/pictures/6",
+  "page": 6,
+  "caption": null,
+  "ocr_text": null,
+  "bounding_box": {
+    "l": 649.989990234375,
+    "t": 329.13134765625,
+    "r": 716.2584838867188,
+    "b": 277.56463623046875,
+    "coord_origin": "BOTTOMLEFT"
+  },
+  "image_path": "05_images/image_007.png",
+  "image_type": "Logo",
+  "objects": [
+    "The logo itself",
+    "which is a stylized design."
+  ],
+  "keywords": [
+    "ThyssenKrupp",
+    "company",
+    "engineering",
+    "global",
+    "industrial",
+    "interconnected",
+    "logo"
+  ],
+  "semantic_description": "This image is a logo for ThyssenKrupp, a multinational engineering and industrial company. The logo consists of a stylized, interconnected design with a central circular element and four smaller circular shapes surrounding it, symbolizing the company's global presence and interconnectedness.",
+  "detected_entities": [
+    "ThyssenKrupp"
+  ]
+}

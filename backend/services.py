@@ -293,16 +293,43 @@ def run_context_analysis_inline(job_id: str, job_dir: Path) -> None:
     verification_service.run_verification(job_dir, job_id)
     backend_logger.info("Generated Claude verification report for job %s", job_id)
 
-    # Stage 8: Executive Report Generation
+    # Stage 9: Executive Compliance Report Generation
     if job:
-        job["current_stage"] = "Stage 8: Executive Report Generation"
-        job["progress_percentage"] = 92.0
+        job["current_stage"] = "Stage 9: Executive Compliance Report Generation"
+        job["progress_percentage"] = 90.0
         save_job_metadata(job_id)
 
     from src.rag.final_report_generator import FinalReportGenerator
     report_generator = FinalReportGenerator()
     report_generator.run_generation(job_dir, job_id)
-    backend_logger.info("Generated final business report for job %s", job_id)
+    backend_logger.info("Generated final business compliance report for job %s", job_id)
+
+    # Stage 10 & 11: Comparative Analysis & Executive Comparative Report Generation
+    if job:
+        job["current_stage"] = "Stage 10: Comparative Analysis"
+        job["progress_percentage"] = 94.0
+        job["comparative_analysis_status"] = "running"
+        save_job_metadata(job_id)
+
+    try:
+        from src.comparative_analysis.service import ComparativeAnalysisService
+        from src.comparative_analysis.models import ComparativeAnalysisRequest
+
+        comp_service = ComparativeAnalysisService()
+        comp_req = ComparativeAnalysisRequest(document_id=job_id)
+        comp_resp = comp_service.run_analysis(comp_req)
+
+        backend_logger.info("Generated Comparative Analysis and Executive Report for job %s (status: %s)", job_id, comp_resp.status)
+        if job:
+            job["comparative_analysis_status"] = comp_resp.status
+            job["comparative_analysis_progress"] = 100.0
+            job["current_stage"] = "Stage 11: Executive Comparative Analysis Report Generation"
+            job["progress_percentage"] = 98.0
+            save_job_metadata(job_id)
+    except Exception as comp_err:
+        backend_logger.error("Comparative Analysis execution failed for job %s: %s", job_id, comp_err, exc_info=True)
+        if job:
+            job["comparative_analysis_status"] = "failed"
 
     # Copy reports to 09_reports/
     try:
@@ -313,6 +340,9 @@ def run_context_analysis_inline(job_id: str, job_dir: Path) -> None:
             shutil.copy2(job_dir / "report.json", reports_dir / "consistency_report.json")
         if (job_dir / "business_report.html").exists():
             shutil.copy2(job_dir / "business_report.html", reports_dir / "consistency_report.html")
+        comp_report_src = job_dir / "comparative_analysis" / "comparative_report.html"
+        if comp_report_src.exists():
+            shutil.copy2(comp_report_src, reports_dir / "comparative_report.html")
     except Exception as copy_err:
         backend_logger.error("Failed to copy consistency reports to 09_reports: %s", copy_err)
 
@@ -364,7 +394,13 @@ def background_worker() -> None:
             
             # Reset pipeline log handlers before run to prevent sharing file outputs across runs
             pipeline_logger = logging.getLogger("pipeline")
-            pipeline_logger.handlers = [h for h in pipeline_logger.handlers if not isinstance(h, logging.FileHandler)]
+            for h in list(pipeline_logger.handlers):
+                if isinstance(h, logging.FileHandler):
+                    try:
+                        h.close()
+                    except Exception:
+                        pass
+                    pipeline_logger.removeHandler(h)
             # Re-attach progress tracking handler
             if progress_handler not in pipeline_logger.handlers:
                 pipeline_logger.addHandler(progress_handler)

@@ -1,0 +1,10 @@
+page,paragraph,sentence,issue_type,original,replacement,confidence,agreement_count,source_agents,reason,protected_reason
+1,26,27,grammar,-the,the,0.80,1,llm,Incorrect spacing before 'the',None
+1,38,39,spelling,Defence,Defense,0.78,1,languagetool,Possible spelling mistake. ‘Defence’ is British English.,None
+1,39,40,spelling,defence,defense,0.78,1,languagetool,Possible spelling mistake. ‘defence’ is British English.,None
+1,39,40,spelling,defence,defense,0.78,1,languagetool,Possible spelling mistake. ‘defence’ is British English.,None
+1,41,42,spelling,centres,centers,0.78,1,languagetool,Possible spelling mistake. ‘centres’ is British English.,None
+1,45,46,grammar,premium residential & commercial real estate,premium residential and commercial real estate,0.80,1,llm,The ampersand (&) should be replaced with 'and' in formal writing.,None
+1,47,48,spelling,defence,defense,0.78,1,languagetool,Possible spelling mistake. ‘defence’ is British English.,None
+1,47,48,grammar,-commonly,- commonly,0.80,1,llm,Missing space after hyphen,None
+1,50,52,spelling,Marg,Mary,0.78,1,languagetool,Possible spelling mistake found.,None

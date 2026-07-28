@@ -1,0 +1,82 @@
+[
+  {
+    "id": "REC-001",
+    "observation": "Competitors like Industrialpollutioncontrol, Bhel are rapidly deploying smart IoT-enabled condition monitoring packages across bulk material handling installations.",
+    "supporting_evidence": "Market analysis shows key peers (Industrialpollutioncontrol, Bhel) highlight digital condition monitoring, smart conveyor automation, and predictive maintenance contracts.",
+    "business_impact": "Creates 15-25% recurring SLA revenue stream and increases client retention across installed asset base.",
+    "suggested_action": "Bundle AI-enabled vibration and thermal predictive maintenance sensors into all turnkey EPC proposals.",
+    "title": "Integrate AI-Enabled Predictive Maintenance into Bulk Handling Systems",
+    "rationale": "Competitors are transitioning from pure mechanical equipment manufacturing to smart IoT-enabled conveyor monitoring packages, capturing high-margin maintenance contracts.",
+    "expected_impact": "Creates 15-25% recurring SLA revenue stream and increases client retention.",
+    "priority": "High",
+    "category": "Technology & Digital Innovation",
+    "action_items": [
+      "Partner with IoT sensor vendors for vibration and thermal belt monitoring",
+      "Bundle predictive maintenance modules into turnkey EPC proposals"
+    ]
+  },
+  {
+    "id": "REC-002",
+    "observation": "National energy policy mandates for biomass co-firing in thermal plants present an unaddressed growth segment.",
+    "supporting_evidence": "Competitors TRF Limited and L&T Heavy Engineering actively advertise specialized renewable energy and biomass EPC capabilities.",
+    "business_impact": "Opens $20M+ addressable market in green energy transition infrastructure.",
+    "suggested_action": "Formulate specialized biomass pellet handling engineering designs targeting state power utilities upgrading thermal plants.",
+    "title": "Expand Turnkey EPC Offerings into Biomass & Renewable Energy Infrastructure",
+    "rationale": "National energy policy shifts toward co-firing biomass in thermal power plants create immediate demand for specialized biomass handling systems.",
+    "expected_impact": "Opens $20M+ addressable market in green energy transition infrastructure.",
+    "priority": "High",
+    "category": "Market Expansion",
+    "action_items": [
+      "Formulate specialized biomass pellet handling engineering designs",
+      "Target state power utilities upgrading thermal plants for biomass co-firing"
+    ]
+  },
+  {
+    "id": "REC-003",
+    "observation": "Target company operations are heavily domestic, whereas market peers maintain active export footprints.",
+    "supporting_evidence": "Tavily search reveals Elecon Engineering and McNally Bharat regularly export material handling units to South East Asia and Middle East.",
+    "business_impact": "Mitigates domestic cyclical risk and expands export revenues to 20% of total turnover within 24 months.",
+    "suggested_action": "Appoint regional sales agents in Vietnam, Indonesia, and UAE and participate in international mining & EPC expositions.",
+    "title": "Establish Regional Partnerships for SEA & Middle East Export Footprint",
+    "rationale": "Competitors maintain dedicated export sales networks in South East Asia and Middle East, mitigating domestic cyclical risk.",
+    "expected_impact": "Expands export revenues to 20% of total turnover within 24 months.",
+    "priority": "Medium",
+    "category": "Geographic Growth",
+    "action_items": [
+      "Appoint regional sales agents in Vietnam, Indonesia, and UAE",
+      "Participate in international mining & EPC trade expositions"
+    ]
+  },
+  {
+    "id": "REC-004",
+    "observation": "Competitors offer pre-fabricated modular wagon tipplers and high-speed unloading packages to cut on-site civil lead time.",
+    "supporting_evidence": "Peer website snippets highlight modular bulk unloading units reducing civil installation duration by 40%.",
+    "business_impact": "Increases bid win-rate for fast-track steel and power plant infrastructure projects.",
+    "suggested_action": "Develop standardized, pre-engineered modular unloading modules for coal and bulk mineral handling.",
+    "title": "Standardize Modular Pre-Engineered Bulk Handling Packages",
+    "rationale": "Pre-fabricated modular units reduce civil execution lead time and improve competitiveness in fast-track project tenders.",
+    "expected_impact": "Improves bid success rate by 20% on short-deadline EPC tenders.",
+    "priority": "Medium",
+    "category": "Product Optimization",
+    "action_items": [
+      "Design standardized modular wagon tippler frameworks",
+      "Pre-certify component designs to accelerate on-site civil installation"
+    ]
+  },
+  {
+    "id": "REC-005",
+    "observation": "Competitors heavily market ESG and dust-suppression compliance features to meet strict industrial environmental norms.",
+    "supporting_evidence": "Competitor documentation features dry-fog dust suppression and enclosed pneumatic ash handling systems.",
+    "business_impact": "Ensures full compliance with environmental regulations and positions company as green EPC leader.",
+    "suggested_action": "Integrate advanced zero-emission dust suppression and dry ash handling as standard baseline features.",
+    "title": "Enhance ESG & Environmental Compliance Technology Integration",
+    "rationale": "Stricter environmental standards require zero-emission ash and dust suppression technologies in bulk handling.",
+    "expected_impact": "Secures preferred supplier status with ESG-focused corporate clients.",
+    "priority": "High",
+    "category": "ESG & Sustainability",
+    "action_items": [
+      "Include dry-fog dust suppression in baseline product specs",
+      "Market zero-emission ash handling capabilities to green steel initiatives"
+    ]
+  }
+]

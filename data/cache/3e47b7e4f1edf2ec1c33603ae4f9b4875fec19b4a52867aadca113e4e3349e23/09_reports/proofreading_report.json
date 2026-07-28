@@ -1,0 +1,180 @@
+{
+  "total_issues": 9,
+  "by_type": {
+    "grammar": 3,
+    "spelling": 6
+  },
+  "issues": [
+    {
+      "sentence_id": 27,
+      "char_start": 1114,
+      "char_end": 1118,
+      "original_text": "-the",
+      "suggested_text": "the",
+      "issue_type": "grammar",
+      "source": "llm",
+      "reason": "Incorrect spacing before 'the'",
+      "confidence": 0.7,
+      "is_protected": false,
+      "protected_reason": null,
+      "agreement_count": 1,
+      "final_confidence": 0.8,
+      "contributing_sources": [
+        "llm"
+      ],
+      "severity": "high"
+    },
+    {
+      "sentence_id": 39,
+      "char_start": 2059,
+      "char_end": 2066,
+      "original_text": "Defence",
+      "suggested_text": "Defense",
+      "issue_type": "spelling",
+      "source": "languagetool",
+      "reason": "Possible spelling mistake. ‘Defence’ is British English.",
+      "confidence": 0.75,
+      "is_protected": false,
+      "protected_reason": null,
+      "agreement_count": 1,
+      "final_confidence": 0.78,
+      "contributing_sources": [
+        "languagetool"
+      ],
+      "severity": "medium"
+    },
+    {
+      "sentence_id": 40,
+      "char_start": 2210,
+      "char_end": 2217,
+      "original_text": "defence",
+      "suggested_text": "defense",
+      "issue_type": "spelling",
+      "source": "languagetool",
+      "reason": "Possible spelling mistake. ‘defence’ is British English.",
+      "confidence": 0.75,
+      "is_protected": false,
+      "protected_reason": null,
+      "agreement_count": 1,
+      "final_confidence": 0.78,
+      "contributing_sources": [
+        "languagetool"
+      ],
+      "severity": "medium"
+    },
+    {
+      "sentence_id": 40,
+      "char_start": 2278,
+      "char_end": 2285,
+      "original_text": "defence",
+      "suggested_text": "defense",
+      "issue_type": "spelling",
+      "source": "languagetool",
+      "reason": "Possible spelling mistake. ‘defence’ is British English.",
+      "confidence": 0.75,
+      "is_protected": false,
+      "protected_reason": null,
+      "agreement_count": 1,
+      "final_confidence": 0.78,
+      "contributing_sources": [
+        "languagetool"
+      ],
+      "severity": "medium"
+    },
+    {
+      "sentence_id": 42,
+      "char_start": 2425,
+      "char_end": 2432,
+      "original_text": "centres",
+      "suggested_text": "centers",
+      "issue_type": "spelling",
+      "source": "languagetool",
+      "reason": "Possible spelling mistake. ‘centres’ is British English.",
+      "confidence": 0.75,
+      "is_protected": false,
+      "protected_reason": null,
+      "agreement_count": 1,
+      "final_confidence": 0.78,
+      "contributing_sources": [
+        "languagetool"
+      ],
+      "severity": "medium"
+    },
+    {
+      "sentence_id": 46,
+      "char_start": 2807,
+      "char_end": 2851,
+      "original_text": "premium residential & commercial real estate",
+      "suggested_text": "premium residential and commercial real estate",
+      "issue_type": "grammar",
+      "source": "llm",
+      "reason": "The ampersand (&) should be replaced with 'and' in formal writing.",
+      "confidence": 0.7,
+      "is_protected": false,
+      "protected_reason": null,
+      "agreement_count": 1,
+      "final_confidence": 0.8,
+      "contributing_sources": [
+        "llm"
+      ],
+      "severity": "high"
+    },
+    {
+      "sentence_id": 48,
+      "char_start": 2991,
+      "char_end": 2998,
+      "original_text": "defence",
+      "suggested_text": "defense",
+      "issue_type": "spelling",
+      "source": "languagetool",
+      "reason": "Possible spelling mistake. ‘defence’ is British English.",
+      "confidence": 0.75,
+      "is_protected": false,
+      "protected_reason": null,
+      "agreement_count": 1,
+      "final_confidence": 0.78,
+      "contributing_sources": [
+        "languagetool"
+      ],
+      "severity": "medium"
+    },
+    {
+      "sentence_id": 48,
+      "char_start": 3022,
+      "char_end": 3031,
+      "original_text": "-commonly",
+      "suggested_text": "- commonly",
+      "issue_type": "grammar",
+      "source": "llm",
+      "reason": "Missing space after hyphen",
+      "confidence": 0.7,
+      "is_protected": false,
+      "protected_reason": null,
+      "agreement_count": 1,
+      "final_confidence": 0.8,
+      "contributing_sources": [
+        "llm"
+      ],
+      "severity": "high"
+    },
+    {
+      "sentence_id": 52,
+      "char_start": 3215,
+      "char_end": 3219,
+      "original_text": "Marg",
+      "suggested_text": "Mary",
+      "issue_type": "spelling",
+      "source": "languagetool",
+      "reason": "Possible spelling mistake found.",
+      "confidence": 0.75,
+      "is_protected": false,
+      "protected_reason": null,
+      "agreement_count": 1,
+      "final_confidence": 0.78,
+      "contributing_sources": [
+        "languagetool"
+      ],
+      "severity": "medium"
+    }
+  ]
+}

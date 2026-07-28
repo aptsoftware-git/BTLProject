@@ -1,9 +1,10 @@
 import React, { useState, useEffect, useRef, useMemo } from "react";
 import { useParams, useNavigate, useLocation } from "react-router-dom";
-import { fetchDocument, fetchPreferences } from "../api";
+import { fetchDocument, fetchPreferences, fetchComparativeAnalysis } from "../api";
 import Assistant from "./Assistant";
 import ContextAnalysis from "./ContextAnalysis";
 import Reports from "./Reports";
+import ComparativeAnalysisView from "./ComparativeAnalysisView";
 
 
 const buildDecidedText = (rawText, issues, decisions) => {
@@ -118,6 +119,8 @@ export default function Workspace() {
   const [isActionsDropdownOpen, setIsActionsDropdownOpen] = useState(false);
   const [statusDetailsExpanded, setStatusDetailsExpanded] = useState(false);
   const [proofSubTab, setProofSubTab] = useState("annotated");
+  const [comparativeData, setComparativeData] = useState(null);
+  const [comparativeLoading, setComparativeLoading] = useState(false);
   const actionsRef = useRef(null);
 
   useEffect(() => {
@@ -363,6 +366,41 @@ export default function Workspace() {
     const tabVal = params.get("tab") || "overview";
     setActiveTab(tabVal);
   }, [location.search]);
+
+  useEffect(() => {
+    if ((activeTab === "comparative" || activeTab === "comparative-analysis") && id) {
+      let isMounted = true;
+      let timerId = null;
+
+      const loadCompData = async () => {
+        setComparativeLoading(true);
+        try {
+          const res = await fetchComparativeAnalysis(id);
+          if (!isMounted) return;
+
+          const payload = res?.data || res;
+          if (payload?.company_profile || payload?.data?.company_profile || payload?.comparative_analysis) {
+            setComparativeData(payload);
+            setComparativeLoading(false);
+          } else {
+            setComparativeData(res);
+            setComparativeLoading(false);
+            timerId = setTimeout(loadCompData, 3000);
+          }
+        } catch (err) {
+          console.error("Error loading comparative analysis:", err);
+          if (isMounted) setComparativeLoading(false);
+        }
+      };
+
+      loadCompData();
+
+      return () => {
+        isMounted = false;
+        if (timerId) clearTimeout(timerId);
+      };
+    }
+  }, [activeTab, id]);
 
   // Helper to extract paragraph body from HTML
   const getParagraphBody = (htmlStr) => {
@@ -1620,6 +1658,18 @@ export default function Workspace() {
           /* Context Analysis Report Dashboard */
           <div style={{ background: "var(--bg-card)", border: "1px solid var(--border)", borderRadius: 12, padding: 20, minHeight: 500 }}>
             <ContextAnalysis id={id} onShowInDocument={handleShowInDocument} />
+          </div>
+        ) : activeTab === "comparative" || activeTab === "comparative-analysis" ? (
+          /* Executive Comparative Analysis Workspace */
+          <div style={{ background: "var(--bg-card)", border: "1px solid var(--border)", borderRadius: 12, padding: 20, minHeight: 500 }}>
+            <ComparativeAnalysisView
+              data={comparativeData}
+              isRunning={
+                !(comparativeData?.company_profile || comparativeData?.data?.company_profile || comparativeData?.comparative_analysis) &&
+                (comparativeLoading || doc?.comparative_analysis_status === "running")
+              }
+              currentStage={doc?.current_stage || "Stage 10: Comparative Analysis"}
+            />
           </div>
         ) : (
           /* Executive Reports Page */

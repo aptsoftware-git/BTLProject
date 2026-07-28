@@ -1,0 +1,39 @@
+{
+  "image_id": "#/pictures/2",
+  "page": 3,
+  "caption": null,
+  "ocr_text": null,
+  "bounding_box": {
+    "l": 165.1762237548828,
+    "t": 552.8823394775391,
+    "r": 432.48504638671875,
+    "b": 448.98565673828125,
+    "coord_origin": "BOTTOMLEFT"
+  },
+  "image_path": "05_images/image_003.png",
+  "image_type": "Flowchart",
+  "objects": [
+    "Closed & Surveyed",
+    "Engineering Review",
+    "Escalated",
+    "Output",
+    "Ticket Escalated",
+    "Ticket Received",
+    "Time 1"
+  ],
+  "keywords": [
+    "Closed",
+    "Decision",
+    "Engineering",
+    "Escalated",
+    "Process",
+    "Received",
+    "Review",
+    "Surveyed",
+    "Ticket"
+  ],
+  "semantic_description": "This flowchart illustrates a process for handling ticket submissions and escalations. It outlines the steps and decision points involved in determining whether a ticket should be escalated to a higher level of support or reviewed by engineering. The flowchart includes decision points, actions, and outcomes related to ticket handling.",
+  "detected_entities": [
+    "None"
+  ]
+}

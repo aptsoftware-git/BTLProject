@@ -1,0 +1,33 @@
+{
+  "image_id": "#/pictures/33",
+  "page": 7,
+  "caption": null,
+  "ocr_text": null,
+  "bounding_box": {
+    "l": 906.0049438476562,
+    "t": 282.81591796875,
+    "r": 1149.5904541015625,
+    "b": 86.404541015625,
+    "coord_origin": "BOTTOMLEFT"
+  },
+  "image_path": "05_images/image_034.png",
+  "image_type": "Photo",
+  "objects": [
+    "Circular clarifier tank",
+    "Greenery (trees and grass)",
+    "Mechanical arm/structure",
+    "Other circular tanks"
+  ],
+  "keywords": [
+    "Wastewater treatment",
+    "circular tanks",
+    "clarifier tank",
+    "mechanical arm",
+    "outdoor setting",
+    "water treatment facility"
+  ],
+  "semantic_description": "The image depicts an aerial view of a wastewater treatment facility, specifically a clarifier tank, which is part of the wastewater treatment process. The tank is circular and filled with water, and there is a mechanical arm or structure extending into the tank, likely used for stirring or skimming the water. The surrounding area includes other circular tanks and some greenery, indicating an outdoor setting.",
+  "detected_entities": [
+    "None"
+  ]
+}

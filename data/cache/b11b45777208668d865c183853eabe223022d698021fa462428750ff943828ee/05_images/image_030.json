@@ -1,0 +1,35 @@
+{
+  "image_id": "#/pictures/29",
+  "page": 7,
+  "caption": null,
+  "ocr_text": null,
+  "bounding_box": {
+    "l": 647.9724731445312,
+    "t": 520.5693969726562,
+    "r": 891.4666137695312,
+    "b": 324.51361083984375,
+    "coord_origin": "BOTTOMLEFT"
+  },
+  "image_path": "05_images/image_030.png",
+  "image_type": "Photo",
+  "objects": [
+    "Dirt/gravel surface",
+    "Military-style truck with a cylindrical cargo container",
+    "Palm trees",
+    "Person (wearing a uniform, possibly military)",
+    "Trees in the background"
+  ],
+  "keywords": [
+    "Cargo container",
+    "Military truck",
+    "Outdoor setting",
+    "Palm trees",
+    "Tropical/subtropical environment",
+    "Uniformed person",
+    "Unloading/loading"
+  ],
+  "semantic_description": "The image depicts a large military-style truck with a cylindrical cargo container being unloaded or loaded by a person. The setting appears to be an outdoor area with palm trees in the background, suggesting a tropical or subtropical environment. The truck is parked on a dirt or gravel surface.",
+  "detected_entities": [
+    "Person (uniformed, possibly military)"
+  ]
+}

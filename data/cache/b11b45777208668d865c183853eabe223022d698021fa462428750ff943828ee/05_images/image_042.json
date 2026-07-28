@@ -1,0 +1,37 @@
+{
+  "image_id": "#/pictures/41",
+  "page": 10,
+  "caption": null,
+  "ocr_text": null,
+  "bounding_box": {
+    "l": 212.9207000732422,
+    "t": 755.9633331298828,
+    "r": 541.5748291015625,
+    "b": 527.1776733398438,
+    "coord_origin": "BOTTOMLEFT"
+  },
+  "image_path": "05_images/image_042.png",
+  "image_type": "Photo",
+  "objects": [
+    "Cranes",
+    "and construction workers.",
+    "construction materials",
+    "partially completed structures",
+    "trucks"
+  ],
+  "keywords": [
+    "AHP projects",
+    "Adani-Raigarh CHP",
+    "Construction",
+    "Cranes",
+    "Development",
+    "Industrial",
+    "Infrastructure",
+    "Materials",
+    "Workers."
+  ],
+  "semantic_description": "The image is a collage of construction scenes, likely depicting industrial or infrastructure development projects. It shows large cranes, construction materials, and partially completed structures, suggesting ongoing work on significant projects.",
+  "detected_entities": [
+    "Adani-Raigarh CHP and AHP projects (mentioned in the OCR text)."
+  ]
+}

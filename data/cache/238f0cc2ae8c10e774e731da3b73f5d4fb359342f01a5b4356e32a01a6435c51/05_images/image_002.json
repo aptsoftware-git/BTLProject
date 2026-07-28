@@ -1,0 +1,56 @@
+{
+  "image_id": "#/pictures/1",
+  "page": 2,
+  "caption": null,
+  "ocr_text": null,
+  "bounding_box": {
+    "l": 163.7975311279297,
+    "t": 548.2440795898438,
+    "r": 448.1711730957031,
+    "b": 350.2322082519531,
+    "coord_origin": "BOTTOMLEFT"
+  },
+  "image_path": "05_images/image_002.png",
+  "image_type": "Diagram",
+  "objects": [
+    "AI Platform / API Layer",
+    "Admin Console",
+    "Auth Gateway",
+    "Chinking Engine",
+    "Data Layer",
+    "Decting Parser",
+    "Document AI Service",
+    "Embedding",
+    "Mobile App.",
+    "Object Storage",
+    "Presentation Layer",
+    "Processing Layer",
+    "RAG Retrieval API",
+    "Relational DB",
+    "Vector Store (ChromaDB)",
+    "Web Portal"
+  ],
+  "keywords": [
+    "AI",
+    "Admin Console",
+    "Auth Gateway",
+    "Chinking Engine",
+    "ChromaDB",
+    "Data Layer",
+    "Decting Parser",
+    "Document AI Service",
+    "Embedding",
+    "High-Level Architecture",
+    "Mobile App.",
+    "Object Storage",
+    "Processing Layer",
+    "RAG Retrieval API",
+    "Relational DB",
+    "Vector Store",
+    "Vertexa AI Platform"
+  ],
+  "semantic_description": "This diagram illustrates the high-level architecture of Vertexa AI Platform, showcasing its various layers and components. It is a conceptual representation of how the platform is structured, with different layers and services that interact to provide AI capabilities.",
+  "detected_entities": [
+    "None"
+  ]
+}

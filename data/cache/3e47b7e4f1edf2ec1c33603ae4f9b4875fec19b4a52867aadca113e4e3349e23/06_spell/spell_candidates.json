@@ -1,0 +1,222 @@
+[
+  {
+    "sentence_id": 2,
+    "char_start": 77,
+    "char_end": 83,
+    "original_text": "TOUBRO",
+    "suggested_text": "TOUR",
+    "issue_type": "spelling",
+    "source": "languagetool",
+    "reason": "Possible spelling mistake found.",
+    "confidence": 0.75
+  },
+  {
+    "sentence_id": 11,
+    "char_start": 452,
+    "char_end": 458,
+    "original_text": "Toubro",
+    "suggested_text": "Tour",
+    "issue_type": "spelling",
+    "source": "languagetool",
+    "reason": "Possible spelling mistake found.",
+    "confidence": 0.75
+  },
+  {
+    "sentence_id": 11,
+    "char_start": 582,
+    "char_end": 594,
+    "original_text": "Holck-Larsen",
+    "suggested_text": "Hock-Larsen",
+    "issue_type": "spelling",
+    "source": "languagetool",
+    "reason": "Possible spelling mistake found.",
+    "confidence": 0.75
+  },
+  {
+    "sentence_id": 11,
+    "char_start": 614,
+    "char_end": 620,
+    "original_text": "Toubro",
+    "suggested_text": "Tour",
+    "issue_type": "spelling",
+    "source": "languagetool",
+    "reason": "Possible spelling mistake found.",
+    "confidence": 0.75
+  },
+  {
+    "sentence_id": 12,
+    "char_start": 719,
+    "char_end": 722,
+    "original_text": "NSE",
+    "suggested_text": "USE",
+    "issue_type": "spelling",
+    "source": "languagetool",
+    "reason": "Possible spelling mistake found.",
+    "confidence": 0.75
+  },
+  {
+    "sentence_id": 18,
+    "char_start": 877,
+    "char_end": 882,
+    "original_text": "Raman",
+    "suggested_text": "Roman",
+    "issue_type": "spelling",
+    "source": "languagetool",
+    "reason": "Possible spelling mistake found.",
+    "confidence": 0.75
+  },
+  {
+    "sentence_id": 20,
+    "char_start": 934,
+    "char_end": 939,
+    "original_text": "Sarma",
+    "suggested_text": "Sara",
+    "issue_type": "spelling",
+    "source": "languagetool",
+    "reason": "Possible spelling mistake found.",
+    "confidence": 0.75
+  },
+  {
+    "sentence_id": 24,
+    "char_start": 1013,
+    "char_end": 1020,
+    "original_text": "Madhava",
+    "suggested_text": "Madhavan",
+    "issue_type": "spelling",
+    "source": "languagetool",
+    "reason": "Possible spelling mistake found.",
+    "confidence": 0.75
+  },
+  {
+    "sentence_id": 24,
+    "char_start": 1021,
+    "char_end": 1024,
+    "original_text": "Das",
+    "suggested_text": "Was",
+    "issue_type": "spelling",
+    "source": "languagetool",
+    "reason": "Possible spelling mistake found.",
+    "confidence": 0.75
+  },
+  {
+    "sentence_id": 29,
+    "char_start": 1277,
+    "char_end": 1282,
+    "original_text": "MAHSR",
+    "suggested_text": "MAJOR",
+    "issue_type": "spelling",
+    "source": "languagetool",
+    "reason": "Possible spelling mistake found.",
+    "confidence": 0.75
+  },
+  {
+    "sentence_id": 30,
+    "char_start": 1398,
+    "char_end": 1402,
+    "original_text": "NMIA",
+    "suggested_text": "MIA",
+    "issue_type": "spelling",
+    "source": "languagetool",
+    "reason": "Possible spelling mistake found.",
+    "confidence": 0.75
+  },
+  {
+    "sentence_id": 31,
+    "char_start": 1405,
+    "char_end": 1411,
+    "original_text": "Dhubri",
+    "suggested_text": "Dubai",
+    "issue_type": "spelling",
+    "source": "languagetool",
+    "reason": "Possible spelling mistake found.",
+    "confidence": 0.75
+  },
+  {
+    "sentence_id": 31,
+    "char_start": 1413,
+    "char_end": 1421,
+    "original_text": "Phulbari",
+    "suggested_text": "Hubbard",
+    "issue_type": "spelling",
+    "source": "languagetool",
+    "reason": "Possible spelling mistake found.",
+    "confidence": 0.75
+  },
+  {
+    "sentence_id": 39,
+    "char_start": 2059,
+    "char_end": 2066,
+    "original_text": "Defence",
+    "suggested_text": "Defense",
+    "issue_type": "spelling",
+    "source": "languagetool",
+    "reason": "Possible spelling mistake. ‘Defence’ is British English.",
+    "confidence": 0.75
+  },
+  {
+    "sentence_id": 40,
+    "char_start": 2210,
+    "char_end": 2217,
+    "original_text": "defence",
+    "suggested_text": "defense",
+    "issue_type": "spelling",
+    "source": "languagetool",
+    "reason": "Possible spelling mistake. ‘defence’ is British English.",
+    "confidence": 0.75
+  },
+  {
+    "sentence_id": 40,
+    "char_start": 2278,
+    "char_end": 2285,
+    "original_text": "defence",
+    "suggested_text": "defense",
+    "issue_type": "spelling",
+    "source": "languagetool",
+    "reason": "Possible spelling mistake. ‘defence’ is British English.",
+    "confidence": 0.75
+  },
+  {
+    "sentence_id": 42,
+    "char_start": 2425,
+    "char_end": 2432,
+    "original_text": "centres",
+    "suggested_text": "centers",
+    "issue_type": "spelling",
+    "source": "languagetool",
+    "reason": "Possible spelling mistake. ‘centres’ is British English.",
+    "confidence": 0.75
+  },
+  {
+    "sentence_id": 48,
+    "char_start": 2991,
+    "char_end": 2998,
+    "original_text": "defence",
+    "suggested_text": "defense",
+    "issue_type": "spelling",
+    "source": "languagetool",
+    "reason": "Possible spelling mistake. ‘defence’ is British English.",
+    "confidence": 0.75
+  },
+  {
+    "sentence_id": 50,
+    "char_start": 3183,
+    "char_end": 3189,
+    "original_text": "Toubro",
+    "suggested_text": "Tour",
+    "issue_type": "spelling",
+    "source": "languagetool",
+    "reason": "Possible spelling mistake found.",
+    "confidence": 0.75
+  },
+  {
+    "sentence_id": 52,
+    "char_start": 3215,
+    "char_end": 3219,
+    "original_text": "Marg",
+    "suggested_text": "Mary",
+    "issue_type": "spelling",
+    "source": "languagetool",
+    "reason": "Possible spelling mistake found.",
+    "confidence": 0.75
+  }
+]

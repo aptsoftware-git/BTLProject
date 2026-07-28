@@ -1,0 +1,536 @@
+{
+  "entities": [
+    {
+      "entity_id": "a8619fd4ae194817a13dad90f43659f8_chunk_0033_ent_001",
+      "text": "AI Engine",
+      "type": "Product",
+      "chunk_id": "a8619fd4ae194817a13dad90f43659f8_chunk_0033",
+      "claim_id": "a8619fd4ae194817a13dad90f43659f8_chunk_0033_claim_000"
+    },
+    {
+      "entity_id": "a8619fd4ae194817a13dad90f43659f8_chunk_0023_ent_001",
+      "text": "AI Platform/API",
+      "type": "System",
+      "chunk_id": "a8619fd4ae194817a13dad90f43659f8_chunk_0023",
+      "claim_id": "a8619fd4ae194817a13dad90f43659f8_chunk_0023_claim_000"
+    },
+    {
+      "entity_id": "a8619fd4ae194817a13dad90f43659f8_chunk_0033_ent_003",
+      "text": "AI Solution",
+      "type": "Product",
+      "chunk_id": "a8619fd4ae194817a13dad90f43659f8_chunk_0033",
+      "claim_id": "a8619fd4ae194817a13dad90f43659f8_chunk_0033_claim_000"
+    },
+    {
+      "entity_id": "a8619fd4ae194817a13dad90f43659f8_chunk_0027_ent_000",
+      "text": "Alex",
+      "type": "Person",
+      "chunk_id": "a8619fd4ae194817a13dad90f43659f8_chunk_0027",
+      "claim_id": "a8619fd4ae194817a13dad90f43659f8_chunk_0027_claim_000"
+    },
+    {
+      "entity_id": "a8619fd4ae194817a13dad90f43659f8_chunk_0048_ent_000",
+      "text": "Appendices",
+      "type": "System",
+      "chunk_id": "a8619fd4ae194817a13dad90f43659f8_chunk_0048",
+      "claim_id": null
+    },
+    {
+      "entity_id": "a8619fd4ae194817a13dad90f43659f8_chunk_0047_ent_002",
+      "text": "Appendix B",
+      "type": "Appendix",
+      "chunk_id": "a8619fd4ae194817a13dad90f43659f8_chunk_0047",
+      "claim_id": "a8619fd4ae194817a13dad90f43659f8_chunk_0047_claim_003"
+    },
+    {
+      "entity_id": "a8619fd4ae194817a13dad90f43659f8_chunk_0038_ent_003",
+      "text": "Appendix C",
+      "type": "section",
+      "chunk_id": "a8619fd4ae194817a13dad90f43659f8_chunk_0038",
+      "claim_id": "a8619fd4ae194817a13dad90f43659f8_chunk_0038_claim_000"
+    },
+    {
+      "entity_id": "a8619fd4ae194817a13dad90f43659f8_chunk_0033_ent_002",
+      "text": "Artificial Intelligence Platform",
+      "type": "Product",
+      "chunk_id": "a8619fd4ae194817a13dad90f43659f8_chunk_0033",
+      "claim_id": "a8619fd4ae194817a13dad90f43659f8_chunk_0033_claim_000"
+    },
+    {
+      "entity_id": "a8619fd4ae194817a13dad90f43659f8_chunk_0008_ent_001",
+      "text": "Attendance",
+      "type": "Policy",
+      "chunk_id": "a8619fd4ae194817a13dad90f43659f8_chunk_0008",
+      "claim_id": null
+    },
+    {
+      "entity_id": "a8619fd4ae194817a13dad90f43659f8_chunk_0033_ent_006",
+      "text": "Auth Gateway",
+      "type": "System",
+      "chunk_id": "a8619fd4ae194817a13dad90f43659f8_chunk_0033",
+      "claim_id": "a8619fd4ae194817a13dad90f43659f8_chunk_0033_claim_000"
+    },
+    {
+      "entity_id": "a8619fd4ae194817a13dad90f43659f8_chunk_0041_ent_000",
+      "text": "Benefits Guide",
+      "type": "System",
+      "chunk_id": "a8619fd4ae194817a13dad90f43659f8_chunk_0041",
+      "claim_id": "a8619fd4ae194817a13dad90f43659f8_chunk_0041_claim_000"
+    },
+    {
+      "entity_id": "a8619fd4ae194817a13dad90f43659f8_chunk_0004_ent_001",
+      "text": "Bengaluru",
+      "type": "Location",
+      "chunk_id": "a8619fd4ae194817a13dad90f43659f8_chunk_0004",
+      "claim_id": "a8619fd4ae194817a13dad90f43659f8_chunk_0004_claim_001"
+    },
+    {
+      "entity_id": "a8619fd4ae194817a13dad90f43659f8_chunk_0019_ent_000",
+      "text": "Board",
+      "type": "Team",
+      "chunk_id": "a8619fd4ae194817a13dad90f43659f8_chunk_0019",
+      "claim_id": "a8619fd4ae194817a13dad90f43659f8_chunk_0019_claim_000"
+    },
+    {
+      "entity_id": "a8619fd4ae194817a13dad90f43659f8_chunk_0024_ent_004",
+      "text": "ChromaDB",
+      "type": "Application",
+      "chunk_id": "a8619fd4ae194817a13dad90f43659f8_chunk_0024",
+      "claim_id": "a8619fd4ae194817a13dad90f43659f8_chunk_0024_claim_003"
+    },
+    {
+      "entity_id": "a8619fd4ae194817a13dad90f43659f8_chunk_0024_ent_001",
+      "text": "Chunking Engine",
+      "type": "System",
+      "chunk_id": "a8619fd4ae194817a13dad90f43659f8_chunk_0024",
+      "claim_id": "a8619fd4ae194817a13dad90f43659f8_chunk_0024_claim_001"
+    },
+    {
+      "entity_id": "a8619fd4ae194817a13dad90f43659f8_chunk_0008_ent_002",
+      "text": "Code of Conduct",
+      "type": "Policy",
+      "chunk_id": "a8619fd4ae194817a13dad90f43659f8_chunk_0008",
+      "claim_id": null
+    },
+    {
+      "entity_id": "a8619fd4ae194817a13dad90f43659f8_chunk_0009_ent_000",
+      "text": "Code of Conduct",
+      "type": "Policy",
+      "chunk_id": "a8619fd4ae194817a13dad90f43659f8_chunk_0009",
+      "claim_id": "a8619fd4ae194817a13dad90f43659f8_chunk_0009_claim_004"
+    },
+    {
+      "entity_id": "a8619fd4ae194817a13dad90f43659f8_chunk_0002_ent_000",
+      "text": "Company Overview",
+      "type": "Department",
+      "chunk_id": "a8619fd4ae194817a13dad90f43659f8_chunk_0002",
+      "claim_id": null
+    },
+    {
+      "entity_id": "a8619fd4ae194817a13dad90f43659f8_chunk_0028_ent_000",
+      "text": "Compliance",
+      "type": "Policy",
+      "chunk_id": "a8619fd4ae194817a13dad90f43659f8_chunk_0028",
+      "claim_id": null
+    },
+    {
+      "entity_id": "a8619fd4ae194817a13dad90f43659f8_chunk_0029_ent_001",
+      "text": "Compliance Committee",
+      "type": "Team",
+      "chunk_id": "a8619fd4ae194817a13dad90f43659f8_chunk_0029",
+      "claim_id": "a8619fd4ae194817a13dad90f43659f8_chunk_0029_claim_000"
+    },
+    {
+      "entity_id": "a8619fd4ae194817a13dad90f43659f8_chunk_0025_ent_000",
+      "text": "Core platform modules",
+      "type": "System",
+      "chunk_id": "a8619fd4ae194817a13dad90f43659f8_chunk_0025",
+      "claim_id": null
+    },
+    {
+      "entity_id": "a8619fd4ae194817a13dad90f43659f8_chunk_0026_ent_000",
+      "text": "Customer Support",
+      "type": "Department",
+      "chunk_id": "a8619fd4ae194817a13dad90f43659f8_chunk_0026",
+      "claim_id": null
+    },
+    {
+      "entity_id": "a8619fd4ae194817a13dad90f43659f8_chunk_0031_ent_000",
+      "text": "DR runbook",
+      "type": "Document",
+      "chunk_id": "a8619fd4ae194817a13dad90f43659f8_chunk_0031",
+      "claim_id": "a8619fd4ae194817a13dad90f43659f8_chunk_0031_claim_000"
+    },
+    {
+      "entity_id": "a8619fd4ae194817a13dad90f43659f8_chunk_0023_ent_003",
+      "text": "Data",
+      "type": "System",
+      "chunk_id": "a8619fd4ae194817a13dad90f43659f8_chunk_0023",
+      "claim_id": "a8619fd4ae194817a13dad90f43659f8_chunk_0023_claim_000"
+    },
+    {
+      "entity_id": "a8619fd4ae194817a13dad90f43659f8_chunk_0046_ent_000",
+      "text": "Department headcount and budget",
+      "type": "Team",
+      "chunk_id": "a8619fd4ae194817a13dad90f43659f8_chunk_0046",
+      "claim_id": null
+    },
+    {
+      "entity_id": "a8619fd4ae194817a13dad90f43659f8_chunk_0015_ent_003",
+      "text": "Device Encryption",
+      "type": "Policy",
+      "chunk_id": "a8619fd4ae194817a13dad90f43659f8_chunk_0015",
+      "claim_id": null
+    },
+    {
+      "entity_id": "a8619fd4ae194817a13dad90f43659f8_chunk_0030_ent_000",
+      "text": "Disaster Recovery",
+      "type": "System",
+      "chunk_id": "a8619fd4ae194817a13dad90f43659f8_chunk_0030",
+      "claim_id": null
+    },
+    {
+      "entity_id": "a8619fd4ae194817a13dad90f43659f8_chunk_0024_ent_000",
+      "text": "Docling Parser",
+      "type": "System",
+      "chunk_id": "a8619fd4ae194817a13dad90f43659f8_chunk_0024",
+      "claim_id": "a8619fd4ae194817a13dad90f43659f8_chunk_0024_claim_000"
+    },
+    {
+      "entity_id": "a8619fd4ae194817a13dad90f43659f8_chunk_0033_ent_004",
+      "text": "Document AI",
+      "type": "System",
+      "chunk_id": "a8619fd4ae194817a13dad90f43659f8_chunk_0033",
+      "claim_id": "a8619fd4ae194817a13dad90f43659f8_chunk_0033_claim_000"
+    },
+    {
+      "entity_id": "a8619fd4ae194817a13dad90f43659f8_chunk_0024_ent_002",
+      "text": "Embedding Service",
+      "type": "System",
+      "chunk_id": "a8619fd4ae194817a13dad90f43659f8_chunk_0024",
+      "claim_id": "a8619fd4ae194817a13dad90f43659f8_chunk_0024_claim_002"
+    },
+    {
+      "entity_id": "a8619fd4ae194817a13dad90f43659f8_chunk_0040_ent_000",
+      "text": "Employee Benefits",
+      "type": "Policy",
+      "chunk_id": "a8619fd4ae194817a13dad90f43659f8_chunk_0040",
+      "claim_id": null
+    },
+    {
+      "entity_id": "a8619fd4ae194817a13dad90f43659f8_chunk_0011_ent_000",
+      "text": "Employees",
+      "type": "Person",
+      "chunk_id": "a8619fd4ae194817a13dad90f43659f8_chunk_0011",
+      "claim_id": "a8619fd4ae194817a13dad90f43659f8_chunk_0011_claim_000"
+    },
+    {
+      "entity_id": "a8619fd4ae194817a13dad90f43659f8_chunk_0018_ent_000",
+      "text": "Finance",
+      "type": "Department",
+      "chunk_id": "a8619fd4ae194817a13dad90f43659f8_chunk_0018",
+      "claim_id": null
+    },
+    {
+      "entity_id": "a8619fd4ae194817a13dad90f43659f8_chunk_0037_ent_001",
+      "text": "Finance",
+      "type": "Organization",
+      "chunk_id": "a8619fd4ae194817a13dad90f43659f8_chunk_0037",
+      "claim_id": "a8619fd4ae194817a13dad90f43659f8_chunk_0037_claim_002"
+    },
+    {
+      "entity_id": "a8619fd4ae194817a13dad90f43659f8_chunk_0045_ent_002",
+      "text": "Finance",
+      "type": "Department",
+      "chunk_id": "a8619fd4ae194817a13dad90f43659f8_chunk_0045",
+      "claim_id": null
+    },
+    {
+      "entity_id": "a8619fd4ae194817a13dad90f43659f8_chunk_0006_ent_000",
+      "text": "HR",
+      "type": "Department",
+      "chunk_id": "a8619fd4ae194817a13dad90f43659f8_chunk_0006",
+      "claim_id": "a8619fd4ae194817a13dad90f43659f8_chunk_0006_claim_002"
+    },
+    {
+      "entity_id": "a8619fd4ae194817a13dad90f43659f8_chunk_0045_ent_000",
+      "text": "HR",
+      "type": "Department",
+      "chunk_id": "a8619fd4ae194817a13dad90f43659f8_chunk_0045",
+      "claim_id": null
+    },
+    {
+      "entity_id": "a8619fd4ae194817a13dad90f43659f8_chunk_0007_ent_000",
+      "text": "Human Resources Policies",
+      "type": "Policy",
+      "chunk_id": "a8619fd4ae194817a13dad90f43659f8_chunk_0007",
+      "claim_id": null
+    },
+    {
+      "entity_id": "a8619fd4ae194817a13dad90f43659f8_chunk_0045_ent_001",
+      "text": "IT",
+      "type": "Department",
+      "chunk_id": "a8619fd4ae194817a13dad90f43659f8_chunk_0045",
+      "claim_id": null
+    },
+    {
+      "entity_id": "a8619fd4ae194817a13dad90f43659f8_chunk_0014_ent_000",
+      "text": "IT Security",
+      "type": "Department",
+      "chunk_id": "a8619fd4ae194817a13dad90f43659f8_chunk_0014",
+      "claim_id": null
+    },
+    {
+      "entity_id": "a8619fd4ae194817a13dad90f43659f8_chunk_0016_ent_000",
+      "text": "IT Security",
+      "type": "Team",
+      "chunk_id": "a8619fd4ae194817a13dad90f43659f8_chunk_0016",
+      "claim_id": "a8619fd4ae194817a13dad90f43659f8_chunk_0016_claim_004"
+    },
+    {
+      "entity_id": "a8619fd4ae194817a13dad90f43659f8_chunk_0027_ent_001",
+      "text": "Jordan",
+      "type": "Person",
+      "chunk_id": "a8619fd4ae194817a13dad90f43659f8_chunk_0027",
+      "claim_id": "a8619fd4ae194817a13dad90f43659f8_chunk_0027_claim_000"
+    },
+    {
+      "entity_id": "a8619fd4ae194817a13dad90f43659f8_chunk_0038_ent_000",
+      "text": "Laptops & IT Hardware",
+      "type": "Product",
+      "chunk_id": "a8619fd4ae194817a13dad90f43659f8_chunk_0038",
+      "claim_id": "a8619fd4ae194817a13dad90f43659f8_chunk_0038_claim_000"
+    },
+    {
+      "entity_id": "a8619fd4ae194817a13dad90f43659f8_chunk_0008_ent_000",
+      "text": "Leave Policy",
+      "type": "Policy",
+      "chunk_id": "a8619fd4ae194817a13dad90f43659f8_chunk_0008",
+      "claim_id": null
+    },
+    {
+      "entity_id": "a8619fd4ae194817a13dad90f43659f8_chunk_0042_ent_000",
+      "text": "Legal",
+      "type": "Policy",
+      "chunk_id": "a8619fd4ae194817a13dad90f43659f8_chunk_0042",
+      "claim_id": null
+    },
+    {
+      "entity_id": "a8619fd4ae194817a13dad90f43659f8_chunk_0038_ent_004",
+      "text": "Local vendor panel",
+      "type": "Organization",
+      "chunk_id": "a8619fd4ae194817a13dad90f43659f8_chunk_0038",
+      "claim_id": "a8619fd4ae194817a13dad90f43659f8_chunk_0038_claim_000"
+    },
+    {
+      "entity_id": "a8619fd4ae194817a13dad90f43659f8_chunk_0015_ent_001",
+      "text": "MFA",
+      "type": "Policy",
+      "chunk_id": "a8619fd4ae194817a13dad90f43659f8_chunk_0015",
+      "claim_id": null
+    },
+    {
+      "entity_id": "a8619fd4ae194817a13dad90f43659f8_chunk_0047_ent_001",
+      "text": "MFA",
+      "type": "System",
+      "chunk_id": "a8619fd4ae194817a13dad90f43659f8_chunk_0047",
+      "claim_id": "a8619fd4ae194817a13dad90f43659f8_chunk_0047_claim_001"
+    },
+    {
+      "entity_id": "a8619fd4ae194817a13dad90f43659f8_chunk_0038_ent_001",
+      "text": "Office Supplies",
+      "type": "Product",
+      "chunk_id": "a8619fd4ae194817a13dad90f43659f8_chunk_0038",
+      "claim_id": "a8619fd4ae194817a13dad90f43659f8_chunk_0038_claim_001"
+    },
+    {
+      "entity_id": "a8619fd4ae194817a13dad90f43659f8_chunk_0015_ent_000",
+      "text": "Password Policy",
+      "type": "Policy",
+      "chunk_id": "a8619fd4ae194817a13dad90f43659f8_chunk_0015",
+      "claim_id": null
+    },
+    {
+      "entity_id": "a8619fd4ae194817a13dad90f43659f8_chunk_0023_ent_000",
+      "text": "Presentation",
+      "type": "System",
+      "chunk_id": "a8619fd4ae194817a13dad90f43659f8_chunk_0023",
+      "claim_id": "a8619fd4ae194817a13dad90f43659f8_chunk_0023_claim_000"
+    },
+    {
+      "entity_id": "a8619fd4ae194817a13dad90f43659f8_chunk_0023_ent_002",
+      "text": "Processing",
+      "type": "System",
+      "chunk_id": "a8619fd4ae194817a13dad90f43659f8_chunk_0023",
+      "claim_id": "a8619fd4ae194817a13dad90f43659f8_chunk_0023_claim_000"
+    },
+    {
+      "entity_id": "a8619fd4ae194817a13dad90f43659f8_chunk_0035_ent_000",
+      "text": "Procurement",
+      "type": "Department",
+      "chunk_id": "a8619fd4ae194817a13dad90f43659f8_chunk_0035",
+      "claim_id": null
+    },
+    {
+      "entity_id": "a8619fd4ae194817a13dad90f43659f8_chunk_0049_ent_000",
+      "text": "Procurement",
+      "type": "Department",
+      "chunk_id": "a8619fd4ae194817a13dad90f43659f8_chunk_0049",
+      "claim_id": "a8619fd4ae194817a13dad90f43659f8_chunk_0049_claim_000"
+    },
+    {
+      "entity_id": "a8619fd4ae194817a13dad90f43659f8_chunk_0039_ent_000",
+      "text": "Procurement categories and limits",
+      "type": "Policy",
+      "chunk_id": "a8619fd4ae194817a13dad90f43659f8_chunk_0039",
+      "claim_id": null
+    },
+    {
+      "entity_id": "a8619fd4ae194817a13dad90f43659f8_chunk_0022_ent_000",
+      "text": "Product Documentation",
+      "type": "System",
+      "chunk_id": "a8619fd4ae194817a13dad90f43659f8_chunk_0022",
+      "claim_id": null
+    },
+    {
+      "entity_id": "a8619fd4ae194817a13dad90f43659f8_chunk_0033_ent_005",
+      "text": "RAG retrieval",
+      "type": "System",
+      "chunk_id": "a8619fd4ae194817a13dad90f43659f8_chunk_0033",
+      "claim_id": "a8619fd4ae194817a13dad90f43659f8_chunk_0033_claim_000"
+    },
+    {
+      "entity_id": "a8619fd4ae194817a13dad90f43659f8_chunk_0038_ent_002",
+      "text": "Software Licenses",
+      "type": "Product",
+      "chunk_id": "a8619fd4ae194817a13dad90f43659f8_chunk_0038",
+      "claim_id": "a8619fd4ae194817a13dad90f43659f8_chunk_0038_claim_002"
+    },
+    {
+      "entity_id": "a8619fd4ae194817a13dad90f43659f8_chunk_0045_ent_003",
+      "text": "Support",
+      "type": "Department",
+      "chunk_id": "a8619fd4ae194817a13dad90f43659f8_chunk_0045",
+      "claim_id": null
+    },
+    {
+      "entity_id": "a8619fd4ae194817a13dad90f43659f8_chunk_0032_ent_000",
+      "text": "Technical Architecture",
+      "type": "System",
+      "chunk_id": "a8619fd4ae194817a13dad90f43659f8_chunk_0032",
+      "claim_id": null
+    },
+    {
+      "entity_id": "a8619fd4ae194817a13dad90f43659f8_chunk_0041_ent_001",
+      "text": "Total Rewards page",
+      "type": "System",
+      "chunk_id": "a8619fd4ae194817a13dad90f43659f8_chunk_0041",
+      "claim_id": "a8619fd4ae194817a13dad90f43659f8_chunk_0041_claim_001"
+    },
+    {
+      "entity_id": "a8619fd4ae194817a13dad90f43659f8_chunk_0012_ent_000",
+      "text": "Travel Policy",
+      "type": "Policy",
+      "chunk_id": "a8619fd4ae194817a13dad90f43659f8_chunk_0012",
+      "claim_id": null
+    },
+    {
+      "entity_id": "a8619fd4ae194817a13dad90f43659f8_chunk_0013_ent_000",
+      "text": "Travel Policy",
+      "type": "Policy",
+      "chunk_id": "a8619fd4ae194817a13dad90f43659f8_chunk_0013",
+      "claim_id": "a8619fd4ae194817a13dad90f43659f8_chunk_0013_claim_000"
+    },
+    {
+      "entity_id": "a8619fd4ae194817a13dad90f43659f8_chunk_0015_ent_004",
+      "text": "USB Policy",
+      "type": "Policy",
+      "chunk_id": "a8619fd4ae194817a13dad90f43659f8_chunk_0015",
+      "claim_id": null
+    },
+    {
+      "entity_id": "a8619fd4ae194817a13dad90f43659f8_chunk_0015_ent_002",
+      "text": "VPN",
+      "type": "Policy",
+      "chunk_id": "a8619fd4ae194817a13dad90f43659f8_chunk_0015",
+      "claim_id": null
+    },
+    {
+      "entity_id": "a8619fd4ae194817a13dad90f43659f8_chunk_0024_ent_003",
+      "text": "Vector Store",
+      "type": "System",
+      "chunk_id": "a8619fd4ae194817a13dad90f43659f8_chunk_0024",
+      "claim_id": "a8619fd4ae194817a13dad90f43659f8_chunk_0024_claim_003"
+    },
+    {
+      "entity_id": "a8619fd4ae194817a13dad90f43659f8_chunk_0029_ent_000",
+      "text": "Vertexa",
+      "type": "Organization",
+      "chunk_id": "a8619fd4ae194817a13dad90f43659f8_chunk_0029",
+      "claim_id": "a8619fd4ae194817a13dad90f43659f8_chunk_0029_claim_000"
+    },
+    {
+      "entity_id": "a8619fd4ae194817a13dad90f43659f8_chunk_0017_ent_000",
+      "text": "Vertexa AI Platform",
+      "type": "System",
+      "chunk_id": "a8619fd4ae194817a13dad90f43659f8_chunk_0017",
+      "claim_id": null
+    },
+    {
+      "entity_id": "a8619fd4ae194817a13dad90f43659f8_chunk_0000_ent_000",
+      "text": "Vertexa Solutions Pvt. Ltd.",
+      "type": "Organization",
+      "chunk_id": "a8619fd4ae194817a13dad90f43659f8_chunk_0000",
+      "claim_id": null
+    },
+    {
+      "entity_id": "a8619fd4ae194817a13dad90f43659f8_chunk_0001_ent_000",
+      "text": "Vertexa Solutions Pvt. Ltd.",
+      "type": "Organization",
+      "chunk_id": "a8619fd4ae194817a13dad90f43659f8_chunk_0001",
+      "claim_id": "a8619fd4ae194817a13dad90f43659f8_chunk_0001_claim_000"
+    },
+    {
+      "entity_id": "a8619fd4ae194817a13dad90f43659f8_chunk_0004_ent_000",
+      "text": "Vertexa Solutions Pvt. Ltd.",
+      "type": "Organization",
+      "chunk_id": "a8619fd4ae194817a13dad90f43659f8_chunk_0004",
+      "claim_id": "a8619fd4ae194817a13dad90f43659f8_chunk_0004_claim_000"
+    },
+    {
+      "entity_id": "a8619fd4ae194817a13dad90f43659f8_chunk_0033_ent_000",
+      "text": "Vertexa's AI Platform",
+      "type": "Product",
+      "chunk_id": "a8619fd4ae194817a13dad90f43659f8_chunk_0033",
+      "claim_id": "a8619fd4ae194817a13dad90f43659f8_chunk_0033_claim_000"
+    },
+    {
+      "entity_id": "a8619fd4ae194817a13dad90f43659f8_chunk_0010_ent_000",
+      "text": "Work From Home",
+      "type": "Policy",
+      "chunk_id": "a8619fd4ae194817a13dad90f43659f8_chunk_0010",
+      "claim_id": null
+    },
+    {
+      "entity_id": "a8619fd4ae194817a13dad90f43659f8_chunk_0037_ent_000",
+      "text": "department head",
+      "type": "Person",
+      "chunk_id": "a8619fd4ae194817a13dad90f43659f8_chunk_0037",
+      "claim_id": "a8619fd4ae194817a13dad90f43659f8_chunk_0037_claim_001"
+    },
+    {
+      "entity_id": "a8619fd4ae194817a13dad90f43659f8_chunk_0011_ent_001",
+      "text": "department heads",
+      "type": "Person",
+      "chunk_id": "a8619fd4ae194817a13dad90f43659f8_chunk_0011",
+      "claim_id": "a8619fd4ae194817a13dad90f43659f8_chunk_0011_claim_001"
+    },
+    {
+      "entity_id": "a8619fd4ae194817a13dad90f43659f8_chunk_0047_ent_000",
+      "text": "employees",
+      "type": "Team",
+      "chunk_id": "a8619fd4ae194817a13dad90f43659f8_chunk_0047",
+      "claim_id": "a8619fd4ae194817a13dad90f43659f8_chunk_0047_claim_000"
+    }
+  ]
+}

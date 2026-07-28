@@ -1,0 +1,40 @@
+{
+  "image_id": "#/pictures/36",
+  "page": 8,
+  "caption": null,
+  "ocr_text": null,
+  "bounding_box": {
+    "l": 648.0838623046875,
+    "t": 409.28228759765625,
+    "r": 1149.2314453125,
+    "b": 56.50616455078125,
+    "coord_origin": "BOTTOMLEFT"
+  },
+  "image_path": "05_images/image_037.png",
+  "image_type": "Photo",
+  "objects": [
+    "Electrical conduits",
+    "Floor",
+    "HCSD pump (blue and yellow)",
+    "Industrial machinery",
+    "Walls",
+    "Windows"
+  ],
+  "keywords": [
+    "HCSD pump",
+    "YADADRI",
+    "concentration",
+    "control",
+    "disposal",
+    "facility",
+    "industrial equipment",
+    "machinery",
+    "mining",
+    "slurry disposal",
+    "solids"
+  ],
+  "semantic_description": "The image shows a high concentration slurry disposal (HCSD) pump system, specifically at a location named YADADRI. The image captures industrial equipment, likely used for handling and disposing of slurry in a controlled manner, possibly in a mining or industrial setting. The HCSD pump is a critical piece of machinery for managing and transporting slurry with high concentrations of solids.",
+  "detected_entities": [
+    "None"
+  ]
+}

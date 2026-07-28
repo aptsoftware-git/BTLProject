@@ -1,0 +1,53 @@
+{
+  "image_id": "#/pictures/4",
+  "page": 5,
+  "caption": null,
+  "ocr_text": null,
+  "bounding_box": {
+    "l": 38.82040786743164,
+    "t": 352.68634033203125,
+    "r": 338.3725280761719,
+    "b": 103.05413818359375,
+    "coord_origin": "BOTTOMLEFT"
+  },
+  "image_path": "05_images/image_005.png",
+  "image_type": "Logo Grid",
+  "objects": [
+    "Logos of various Indian companies."
+  ],
+  "keywords": [
+    "Adani",
+    "Aditya Birla",
+    "BCPL",
+    "DVC",
+    "IICDPL",
+    "Indian companies",
+    "IndianOil",
+    "Indu.",
+    "Kribhco",
+    "NINL",
+    "NTPC",
+    "ONGC",
+    "Tata Steel",
+    "Tather Fertilizers",
+    "grid",
+    "logos"
+  ],
+  "semantic_description": "This image is a grid of logos representing various Indian companies. Each logo is placed in a separate cell, suggesting a collection of different entities, likely for comparison or categorization purposes.",
+  "detected_entities": [
+    "Adani Power",
+    "Aditya Birla",
+    "BCPL",
+    "DVC",
+    "IICDPL",
+    "IndianOil",
+    "Indu",
+    "Kribhco",
+    "NINL",
+    "NTPC",
+    "ONGC",
+    "Tata Steel",
+    "Tather Fertilizers",
+    "and others."
+  ]
+}

@@ -1,0 +1,7 @@
+{
+  "packaged_clusters": 3,
+  "packaged_chunks": 32,
+  "packaged_claims": 35,
+  "packaged_chunk_ambiguities": 30,
+  "packaged_cluster_findings": 10
+}

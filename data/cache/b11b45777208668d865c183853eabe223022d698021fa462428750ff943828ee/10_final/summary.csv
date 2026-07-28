@@ -1,0 +1,61 @@
+page,paragraph,sentence,issue_type,original,replacement,confidence,agreement_count,source_agents,reason,protected_reason
+1,5,6,grammar,the Company ',the Company',0.80,1,llm,Extra space before closing single quote,None
+1,5,9,spelling,forward- looking,forward-looking,0.78,1,languagetool,This word is normally spelled with a hyphen.,None
+1,19,25,spelling,catalysing,catalyzing,0.95,2,languagetool|llm,Incorrect spelling,None
+1,29,42,grammar,highquality,high-quality,0.95,2,languagetool|llm,missing hyphen in compound adjective,None
+1,31,45,punctuation,vendor,Vendor,0.75,1,languagetool,This sentence does not start with an uppercase letter.,None
+1,37,56,spelling,cuttingedge,cutting-edge,0.78,1,languagetool,Possible spelling mistake found.,None
+1,46,69,grammar,mid 2025,mid-2025,0.80,1,llm,Missing hyphen in date format,None
+1,54,87,spelling,optimisation,optimization,0.95,2,languagetool|llm,Incorrect spelling,None
+1,58,97,spelling,aluminum,aluminium,0.80,1,llm,Incorrect spelling for the British English variant.,None
+1,59,100,spelling,hydel,Hyde,0.78,1,languagetool,Possible spelling mistake found.,None
+1,62,105,spelling,specialises,specializes,0.78,1,languagetool,Possible spelling mistake. ‘specialises’ is British English.,None
+1,62,105,grammar,deployed of,deployed,0.80,1,llm,Incorrect usage of preposition,None
+1,68,115,grammar,governmentowned,government-owned,0.80,1,languagetool|llm,Missing hyphen between compound adjective,None
+1,77,128,spelling,Technip,Technic,0.78,1,languagetool,Possible spelling mistake found.,None
+1,83,136,spelling,Fitchner,Fichtner,0.80,1,languagetool|llm,Incorrect spelling of the company name.,None
+1,84,139,spelling,customised,customized,0.95,2,languagetool|llm,Incorrect spelling,None
+1,93,152,grammar, Experienced,Experienced,0.80,1,llm,Invalid character at the beginning of the sentence.,None
+1,95,154,grammar,,,0.80,1,llm,Invalid character at the beginning of the sentence.,None
+1,96,155,grammar,,,0.80,1,llm,Unnecessary symbol,None
+1,96,155,spelling,cost effectiveness,cost-effectiveness,0.78,1,languagetool,This word is normally spelled with a hyphen.,None
+1,99,160,spelling,ashbased,ash based,0.78,1,languagetool,Possible spelling mistake found.,None
+1,105,167,spelling,,,0.80,1,llm,Invalid character,None
+1,106,168,grammar,,,0.80,1,llm,Unnecessary symbol,None
+1,108,170,grammar,thermal,Thermal,0.80,1,llm,Capitalization error,None
+1,109,171,grammar,/ consortium,and consortium,0.80,1,llm,Incorrect use of slash; should be 'and' to connect the two types of partners.,None
+1,111,173,grammar," ,",", ",0.73,1,languagetool,"Put a space after the comma, but not before the comma.",None
+1,116,178,grammar,entered in,entered into,0.80,1,llm,Incorrect preposition usage,None
+1,120,183,grammar,,,0.80,1,llm,Invalid character at the beginning of the sentence.,None
+1,121,184,grammar,,,0.80,1,llm,Invalid character at the beginning of the paragraph.,None
+1,122,185,grammar,,,0.80,1,llm,Invalid character at the beginning of the sentence.,None
+1,125,188,grammar,,,0.80,1,llm,Invalid character at the beginning of the sentence.,None
+1,126,189,grammar,,,0.80,1,llm,Invalid character at the beginning of the sentence.,None
+1,128,191,grammar,,,0.80,1,llm,Invalid character at the beginning of the sentence.,None
+1,130,193,grammar,,,0.80,1,llm,Invalid character at the beginning of the sentence.,None
+1,131,194,grammar,,,0.80,1,llm,Unnecessary symbol,None
+1,131,194,grammar," ,",",",0.73,1,languagetool,"Put a space after the comma, but not before the comma.",None
+1,132,195,grammar,,,0.80,1,llm,Invalid character at the beginning,None
+1,134,197,spelling,,,0.80,1,llm,Invalid character,None
+1,135,198,spelling,,,0.80,1,llm,Invalid character,None
+1,138,201,spelling,,,0.80,1,llm,Invalid character,None
+1,140,203,grammar,,,0.80,1,llm,Invalid character at the beginning of the sentence.,None
+1,147,210,grammar,,,0.80,1,llm,Invalid character at the beginning of the sentence.,None
+1,149,212,grammar,Reality:,Reality,0.80,1,llm,Unnecessary colon after the word 'Reality',None
+1,150,215,grammar,Reality:,Reality,0.80,1,llm,Unnecessary colon after the word 'Reality',None
+1,150,215,spelling,Rampal,Ramal,0.78,1,languagetool,Possible spelling mistake found.,None
+1,151,221,spelling,milestoned,milestone,0.95,2,languagetool|llm,Incorrect spelling,None
+1,152,224,punctuation,political,Political,0.75,1,languagetool,This sentence does not start with an uppercase letter.,None
+1,153,226,grammar,fullscale,full-scale,0.95,2,languagetool|llm,The compound adjective should be hyphenated.,None
+1,158,239,grammar,fastpaced,fast-paced,0.95,2,languagetool|llm,hyphenation required for compound adjective,None
+1,161,242,spelling,specialised,specialized,0.78,1,languagetool,Possible spelling mistake. ‘specialised’ is British English.,None
+1,161,243,spelling,benzol,benzene,0.80,1,languagetool|llm,Incorrect spelling of the chemical compound.,None
+1,162,245,spelling,carbonisation,carbonization,0.78,1,languagetool,Possible spelling mistake. ‘carbonisation’ is British English.,None
+1,162,246,spelling,utilise,utilize,0.78,1,languagetool,Possible spelling mistake. ‘utilise’ is British English.,None
+1,164,248,grammar,,,0.80,1,llm,Invalid character at the beginning of the sentence.,None
+1,166,250,spelling,sulphate,sulfate,0.95,2,languagetool|llm,Incorrect spelling of 'sulfate',None
+1,166,250,spelling,exhauster,exhausted,0.78,1,languagetool,Possible spelling mistake found.,None
+1,167,251,grammar,,,0.80,1,llm,Invalid character at the beginning of the sentence.,None
+1,167,251,spelling,benzol,benzole,0.78,1,languagetool,Possible spelling mistake found.,None
+1,168,252,grammar,,,0.80,1,llm,Invalid character at the beginning of the sentence.,None
+1,170,254,grammar,,,0.80,1,llm,Invalid character at the beginning of the sentence.,None

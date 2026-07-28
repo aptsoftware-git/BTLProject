@@ -1,113 +1,128 @@
-// Central place for every call to the backend (app.py / routes.py).
-// In dev, Vite proxies "/api" to http://localhost:8000 (see vite.config.js).
-// In production, set VITE_API_BASE_URL to your deployed backend URL.
+const API_BASE = "http://localhost:8000/api";
 
-const BASE_URL = import.meta.env.VITE_API_BASE_URL || "/api";
-
-async function request(path, options = {}) {
-  const res = await fetch(`${BASE_URL}${path}`, {
-    headers: options.body instanceof FormData ? {} : { "Content-Type": "application/json" },
+async function request(endpoint, options = {}) {
+  const url = `${API_BASE}${endpoint}`;
+  const response = await fetch(url, {
+    headers: {
+      "Content-Type": "application/json",
+      ...options.headers,
+    },
     ...options,
   });
 
-  if (!res.ok) {
-    const text = await res.text().catch(() => "");
-    throw new Error(`${res.status} ${res.statusText}: ${text}`);
+  if (!response.ok) {
+    const errorBody = await response.text();
+    let errorMessage = `HTTP ${response.status} ${response.statusText}`;
+    try {
+      const parsed = JSON.parse(errorBody);
+      if (parsed.detail) {
+        errorMessage = typeof parsed.detail === "string" ? parsed.detail : JSON.stringify(parsed.detail);
+      }
+    } catch (e) {
+      if (errorBody) errorMessage = errorBody;
+    }
+    throw new Error(errorMessage);
   }
-  return res.json();
+
+  return response.json();
 }
 
-// GET /api/documents -> list of recent documents + summary stats.
-// Adjust the path to whatever routes.py actually exposes.
 export function fetchDocuments() {
   return request("/documents");
 }
 
-// GET /api/stats -> { totalDocuments, grammarAccuracy, issuesResolvedToday, documentsToday }
-export function fetchStats() {
-  return request("/stats");
-}
-
-// GET /api/system-status -> [{ name, online }]
-export function fetchSystemStatus() {
-  return request("/system-status");
-}
-
-// POST /api/documents (multipart) -> kicks off a proofreading job.
-export function uploadDocument(file, onProgress, xhrRef) {
-  const formData = new FormData();
-  formData.append("file", file);
-
-  // Using XHR instead of fetch here so we can report upload progress,
-  // which fetch doesn't support natively.
-  return new Promise((resolve, reject) => {
-    const xhr = new XMLHttpRequest();
-    if (xhrRef) {
-      xhrRef.current = xhr;
-    }
-    xhr.open("POST", `${BASE_URL}/documents`);
-    xhr.upload.onprogress = (e) => {
-      if (onProgress && e.lengthComputable) {
-        onProgress(Math.round((e.loaded / e.total) * 100));
-      }
-    };
-    xhr.onload = () => {
-      if (xhr.status >= 200 && xhr.status < 300) {
-        resolve(JSON.parse(xhr.responseText));
-      } else {
-        reject(new Error(`Upload failed: ${xhr.status}`));
-      }
-    };
-    xhr.onerror = () => reject(new Error("Upload failed: network error"));
-    xhr.onabort = () => reject(new Error("Upload cancelled by user"));
-    xhr.send(formData);
-  });
-}
-
-// GET /api/documents/:id -> full proofreading result for the workspace page.
 export function fetchDocument(id) {
   return request(`/documents/${id}`);
 }
 
-// DELETE /api/documents/:id -> delete a document and its data
 export function deleteDocument(id) {
-  return request(`/documents/${id}`, { method: "DELETE" });
+  return request(`/documents/${id}`, {
+    method: "DELETE",
+  });
 }
 
-// GET /api/notifications -> list of notifications
+export function uploadDocument(file) {
+  const formData = new FormData();
+  formData.append("file", file);
+  return fetch(`${API_BASE}/documents/upload`, {
+    method: "POST",
+    body: formData,
+  }).then(async (res) => {
+    if (!res.ok) {
+      const txt = await res.text();
+      throw new Error(txt || `Upload failed with status ${res.status}`);
+    }
+    return res.json();
+  });
+}
+
+export function fetchProofreadIssues(id) {
+  return request(`/documents/${id}/issues`);
+}
+
+export function updateIssueStatus(id, issueId, status) {
+  return request(`/documents/${id}/issues/${issueId}`, {
+    method: "PATCH",
+    body: JSON.stringify({ status }),
+  });
+}
+
+export function fetchStats() {
+  return request("/stats");
+}
+
+export function exportDocument(id, format) {
+  return fetch(`${API_BASE}/documents/${id}/export?format=${format}`, {
+    method: "GET",
+  }).then(async (res) => {
+    if (!res.ok) {
+      throw new Error(`Export failed with status ${res.status}`);
+    }
+    return res.blob();
+  });
+}
+
 export function fetchNotifications() {
-  return request("/notifications");
+  return request("/notifications").catch(() => [
+    { id: 1, title: "System Ready", time: "Just now", read: false }
+  ]);
 }
 
-// GET /api/settings/protected-terms -> list of whitelisted terms
 export function fetchProtectedTerms() {
-  return request("/settings/protected-terms");
+  return request("/settings/protected-terms").catch(() => []);
 }
 
-// POST /api/settings/protected-terms -> updates whitelisted terms
 export function saveProtectedTerms(terms) {
   return request("/settings/protected-terms", {
     method: "POST",
-    body: JSON.stringify({ terms }),
+    body: JSON.stringify({ terms })
   });
 }
 
-// GET /api/settings/preferences -> user preferences
 export function fetchPreferences() {
-  return request("/settings/preferences");
+  return request("/settings/preferences").catch(() => ({
+    auto_save: true,
+    dark_mode: true,
+    ollama_host: "",
+    ollama_model: "",
+    languagetool_language: "en-US",
+    confidence_threshold: 40
+  }));
 }
 
-// POST /api/settings/preferences -> updates preferences
 export function savePreferences(preferences) {
   return request("/settings/preferences", {
     method: "POST",
-    body: JSON.stringify({ preferences }),
+    body: JSON.stringify(preferences)
   });
 }
 
-// GET /api/settings/system-info -> system info
 export function fetchSystemInfo() {
   return request("/settings/system-info");
+}
+
+export function fetchSystemStatus() {
+  return fetchSystemInfo();
 }
 
 // Phase 6: RAG API methods
@@ -158,9 +173,46 @@ export function runContextAnalysis(jobId) {
   });
 }
 
-export const API_BASE_URL = BASE_URL;
+// Dedicated Backend Reports Endpoints
+export function fetchFinalReport(jobId) {
+  return request(`/reports/${jobId}/final-report`);
+}
 
+export function fetchClaudeVerificationReport(jobId) {
+  return request(`/reports/${jobId}/claude-verification`);
+}
 
+export function fetchChunkReasoningReport(jobId) {
+  return request(`/reports/${jobId}/chunk-reasoning`);
+}
 
+export function fetchClusterReasoningReport(jobId) {
+  return request(`/reports/${jobId}/cluster-reasoning`);
+}
 
+// Comparative Analysis REST Endpoints
+export function fetchComparativeAnalysis(jobId) {
+  return request(`/reports/${jobId}/comparative-analysis`);
+}
 
+export function fetchCompanyProfile(jobId) {
+  return request(`/reports/${jobId}/company-profile`);
+}
+
+export function fetchCompetitorProfiles(jobId) {
+  return request(`/reports/${jobId}/competitor-profiles`);
+}
+
+export function fetchComparisonMatrix(jobId) {
+  return request(`/reports/${jobId}/comparison-matrix`);
+}
+
+export function fetchSwotAnalysis(jobId) {
+  return request(`/reports/${jobId}/swot`);
+}
+
+export function fetchRecommendations(jobId) {
+  return request(`/reports/${jobId}/recommendations`);
+}
+
+export { API_BASE as API_BASE_URL };

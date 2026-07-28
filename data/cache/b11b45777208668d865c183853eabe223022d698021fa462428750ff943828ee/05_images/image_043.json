@@ -1,0 +1,38 @@
+{
+  "image_id": "#/pictures/42",
+  "page": 10,
+  "caption": null,
+  "ocr_text": null,
+  "bounding_box": {
+    "l": 0.5398368835449219,
+    "t": 419.908203125,
+    "r": 596.3952026367188,
+    "b": 56.77142333984375,
+    "coord_origin": "BOTTOMLEFT"
+  },
+  "image_path": "05_images/image_043.png",
+  "image_type": "Photo",
+  "objects": [
+    "Tall red and white striped chimney",
+    "construction debris.",
+    "conveyor belt system",
+    "large blue and white building",
+    "open land"
+  ],
+  "keywords": [
+    "BHEL",
+    "Coal handling plant",
+    "Telangana",
+    "Yadadri",
+    "chimney.",
+    "construction",
+    "conveyor belt",
+    "industrial"
+  ],
+  "semantic_description": "The image depicts a coal handling plant for BHEL (Bharat Heavy Electricals Limited) located in Yadadri, Telangana. The facility includes industrial structures such as a tall red and white striped chimney, a large blue and white building, and a long conveyor belt system. The surrounding area appears to be under development or maintenance, with open land and some construction debris visible.",
+  "detected_entities": [
+    "BHEL (Bharat Heavy Electricals Limited)",
+    "Telangana.",
+    "Yadadri"
+  ]
+}

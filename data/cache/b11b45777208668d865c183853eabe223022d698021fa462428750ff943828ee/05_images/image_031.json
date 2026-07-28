@@ -1,0 +1,40 @@
+{
+  "image_id": "#/pictures/30",
+  "page": 7,
+  "caption": null,
+  "ocr_text": null,
+  "bounding_box": {
+    "l": 648.1835327148438,
+    "t": 282.926025390625,
+    "r": 889.7075805664062,
+    "b": 86.21075439453125,
+    "coord_origin": "BOTTOMLEFT"
+  },
+  "image_path": "05_images/image_031.png",
+  "image_type": "Photo",
+  "objects": [
+    "Red cylindrical machinery",
+    "and various mechanical components.",
+    "ceiling",
+    "floor",
+    "industrial setting",
+    "mechanical parts",
+    "pipes",
+    "walls"
+  ],
+  "keywords": [
+    "Industrial",
+    "equipment",
+    "facility.",
+    "factory",
+    "machinery",
+    "mechanical parts",
+    "pipes",
+    "red cylinder",
+    "workshop"
+  ],
+  "semantic_description": "The image depicts a piece of industrial machinery, likely used for manufacturing or processing, with a red cylindrical component at the top and various pipes and mechanical parts surrounding it. The setting appears to be an industrial facility, possibly a factory or a workshop.",
+  "detected_entities": [
+    "None"
+  ]
+}
