@@ -204,15 +204,18 @@ class AmbiguityExtractor:
             "Your response must be parseable directly by `json.loads` in Python."
         )
         
-        for ch in chunks_master:
+        def _process_single_chunk(ch):
             meta = ch.get("metadata", {})
             chunk_id = meta.get("chunk_id")
             text = ch.get("content", "")
             if not chunk_id:
-                continue
+                return None, None
             
-            if ollama_active:
-                prompt = f"""Extract structural metadata from this document chunk.
+            # Fast-path fallback for short / structural chunks (< 20 words) or when Ollama is inactive
+            if len(text.split()) < 20 or not ollama_active:
+                return chunk_id, self._extract_fallback_knowledge(chunk_id, text)
+            
+            prompt = f"""Extract structural metadata from this document chunk.
 Chunk ID: {chunk_id}
 Text:
 {text}
@@ -292,20 +295,27 @@ Requested JSON Schema:
     "confidence": 0.95
 }}
 """
-                try:
-                    logger.info(f"Running LLM Claim Extraction for chunk: {chunk_id}")
-                    resp = self.ollama_client.generate(
-                        model=self.model_name,
-                        prompt=prompt,
-                        system=system_prompt
-                    )
-                    parsed = self._clean_and_parse_json(resp)
-                    extractions[chunk_id] = parsed
-                except Exception as e:
-                    logger.error(f"Failed LLM extraction for {chunk_id}: {e}. Falling back to regex.")
-                    extractions[chunk_id] = self._extract_fallback_knowledge(chunk_id, text)
-            else:
-                extractions[chunk_id] = self._extract_fallback_knowledge(chunk_id, text)
+            try:
+                logger.info(f"Running LLM Claim Extraction for chunk: {chunk_id}")
+                resp = self.ollama_client.generate(
+                    model=self.model_name,
+                    prompt=prompt,
+                    system=system_prompt
+                )
+                parsed = self._clean_and_parse_json(resp)
+                return chunk_id, parsed
+            except Exception as e:
+                logger.error(f"Failed LLM extraction for {chunk_id}: {e}. Falling back to regex.")
+                return chunk_id, self._extract_fallback_knowledge(chunk_id, text)
+
+        from concurrent.futures import ThreadPoolExecutor, as_completed
+        max_workers = 4 if ollama_active else 8
+        with ThreadPoolExecutor(max_workers=max_workers) as executor:
+            future_to_chunk = {executor.submit(_process_single_chunk, ch): ch for ch in chunks_master}
+            for future in as_completed(future_to_chunk):
+                cid, ext = future.result()
+                if cid:
+                    extractions[cid] = ext
 
         # Ensure directory exists
         claim_dir = job_dir / "10_claim_extraction"

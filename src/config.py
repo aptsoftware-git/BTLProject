@@ -54,7 +54,7 @@ class OllamaConfig:
     # isn't hardcoded/committed:
     #   export OLLAMA_HOST="http://192.168.19.21:11434"
     host: str = field(default_factory=lambda: os.environ.get("OLLAMA_HOST", "http://192.168.19.21:11434"))
-    model: str = field(default_factory=lambda: os.environ.get("OLLAMA_MODEL", "qwen2.5-coder:32b"))
+    model: str = field(default_factory=lambda: os.environ.get("OLLAMA_MODEL", os.environ.get("TEXT_MODEL", "qwen2.5-coder:7b")))
     timeout_seconds: int = 180
     temperature: float = 0.0
     max_retries: int = 2
