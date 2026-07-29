@@ -18,21 +18,21 @@ JOBS: Dict[str, Dict[str, Any]] = {}
 CURRENT_JOB_ID: Optional[str] = None
 job_queue: queue.Queue[str] = queue.Queue()
 
-# Map of stage log markers to UI progress stages & percentages
+# Map of stage log markers to UI progress stages & percentages (Proofreading Sub-steps: 5% - 48%)
 STAGE_PROGRESS_MAP = {
-    "Extracting document": (5.0, "Extracting Text"),
-    "Analyzing layout": (12.0, "Analyzing Document Layout"),
-    "Filtering": (18.0, "Filtering Content"),
-    "Preprocessing": (25.0, "Preprocessing Text"),
-    "Building paragraphs": (32.0, "Building Paragraphs"),
-    "Sentence splitting": (40.0, "Splitting Sentences"),
-    "Building protected terms": (48.0, "Building Protected Terms"),
-    "Spell / grammar detection (LanguageTool + SymSpell)": (55.0, "Running Spell & Grammar Checks"),
-    "Grammar review (local LLM)": (70.0, "Running LLM Grammar Review"),
-    "Validation (protected-terms gate)": (80.0, "Validating Candidates"),
-    "Semantic validation": (88.0, "Running Semantic Validation"),
-    "Generating annotated HTML": (92.0, "Generating Annotated Documents"),
-    "Generating reports": (97.0, "Generating Reports"),
+    "Extracting document": (5.0, "Stage 1: Extracting Text"),
+    "Analyzing layout": (10.0, "Stage 1: Analyzing Document Layout"),
+    "Filtering": (15.0, "Stage 2: Filtering Content"),
+    "Preprocessing": (20.0, "Stage 2: Preprocessing Text"),
+    "Building paragraphs": (25.0, "Stage 2: Building Paragraphs"),
+    "Sentence splitting": (30.0, "Stage 2: Splitting Sentences"),
+    "Building protected terms": (35.0, "Stage 3: Building Protected Terms"),
+    "Spell / grammar detection (LanguageTool + SymSpell)": (40.0, "Stage 4: Running Spell & Grammar Checks"),
+    "Grammar review (local LLM)": (44.0, "Stage 4: Running LLM Grammar Review"),
+    "Validation (protected-terms gate)": (46.0, "Stage 4: Validating Candidates"),
+    "Semantic validation": (47.0, "Stage 4: Running Semantic Validation"),
+    "Generating annotated HTML": (48.0, "Stage 4: Proofreading Ready"),
+    "Generating reports": (49.0, "Stage 4: Proofreading Complete"),
     "Completed": (100.0, "Completed"),
 }
 

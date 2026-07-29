@@ -65,14 +65,15 @@ const getTimelineStages = (doc) => {
   const stageStr = (doc.current_stage || "").toLowerCase();
 
   const stages = [
-    { id: 1, label: "Stage 1: Extraction", minPct: 0 },
-    { id: 2, label: "Stage 2: Chunking", minPct: 15 },
-    { id: 3, label: "Stage 3: Embeddings", minPct: 30 },
-    { id: 4, label: "Stage 4: Proofreading", minPct: 45 },
-    { id: 5, label: "Stage 5: RAG", minPct: 60 },
-    { id: 6, label: "Stage 6: Local LLM Ambiguity Detection", minPct: 70 },
+    { id: 1, label: "Stage 1: Document Extraction", minPct: 0 },
+    { id: 2, label: "Stage 2: Text Preprocessing & Paragraphing", minPct: 15 },
+    { id: 3, label: "Stage 3: Protected Terms & Lexicons", minPct: 35 },
+    { id: 4, label: "Stage 4: Spell & Grammar Review", minPct: 40 },
+    { id: 5, label: "Stage 5: RAG & Vector Indexing", minPct: 55 },
+    { id: 6, label: "Stage 6: Local LLM Ambiguity Detection", minPct: 68 },
     { id: 7, label: "Stage 7: Claude Verification", minPct: 82 },
-    { id: 8, label: "Stage 8: Executive Report Generation", minPct: 92 }
+    { id: 8, label: "Stage 8: Executive Compliance Report", minPct: 90 },
+    { id: 9, label: "Stage 9: Comparative Analysis", minPct: 94 }
   ];
 
   return stages.map((stage) => {
@@ -922,8 +923,10 @@ export default function Workspace() {
     );
   }
 
-  // Processing stages
-  if (doc.status === "processing" || doc.status === "pending" || doc.status === "uploaded") {
+  // Processing stages (show full screen scanner ONLY if proofreading is not yet ready)
+  const isProofreadingReady = doc.proofreading_ready || doc.proofreading_status === "completed" || (doc.annotated_html && doc.annotated_html.length > 0) || doc.status === "completed";
+
+  if (!isProofreadingReady && (doc.status === "processing" || doc.status === "pending" || doc.status === "uploaded")) {
     const percent = doc.progress_percentage || 0;
     const curPage = doc.current_page || 0;
     const totPages = doc.total_pages || 0;

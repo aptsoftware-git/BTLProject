@@ -197,6 +197,19 @@ class AmbiguityExtractor:
             
         extractions = {}
         
+        # Check existing cached extractions on disk to resume instantly
+        claim_dir = job_dir / "10_claim_extraction"
+        claim_dir.mkdir(parents=True, exist_ok=True)
+        cached_claims_path = claim_dir / "ambiguity_claims.json"
+        
+        if cached_claims_path.exists():
+            try:
+                with open(cached_claims_path, "r", encoding="utf-8") as f:
+                    extractions = json.load(f)
+                logger.info(f"[CACHE HIT] Loaded {len(extractions)} pre-extracted claim objects from {cached_claims_path}")
+            except Exception:
+                extractions = {}
+
         system_prompt = (
             "You are a precise semantic knowledge extraction engine.\n"
             "You extract structural elements from document chunks and return ONLY a valid JSON object matching the requested schema.\n"
@@ -211,8 +224,15 @@ class AmbiguityExtractor:
             if not chunk_id:
                 return None, None
             
-            # Fast-path fallback for short / structural chunks (< 20 words) or when Ollama is inactive
-            if len(text.split()) < 20 or not ollama_active:
+            # Skip if already cached
+            if chunk_id in extractions:
+                return chunk_id, extractions[chunk_id]
+            
+            chunk_type = meta.get("chunk_type", "text")
+            words = text.split()
+
+            # Fast-path fallback for short / table / structural chunks (< 35 words) or when Ollama is inactive
+            if len(words) < 35 or chunk_type == "table" or not ollama_active:
                 return chunk_id, self._extract_fallback_knowledge(chunk_id, text)
             
             prompt = f"""Extract structural metadata from this document chunk.
@@ -309,7 +329,7 @@ Requested JSON Schema:
                 return chunk_id, self._extract_fallback_knowledge(chunk_id, text)
 
         from concurrent.futures import ThreadPoolExecutor, as_completed
-        max_workers = 4 if ollama_active else 8
+        max_workers = 8 if ollama_active else 12
         with ThreadPoolExecutor(max_workers=max_workers) as executor:
             future_to_chunk = {executor.submit(_process_single_chunk, ch): ch for ch in chunks_master}
             for future in as_completed(future_to_chunk):

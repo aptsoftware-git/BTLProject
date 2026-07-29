@@ -245,9 +245,22 @@ class ProofreadingPipeline:
                     return []
 
             if document.paragraphs:
-                max_para_workers = min(4, len(document.paragraphs))
+                # Filter paragraphs to avoid sending short headings, numbers, or empty lines to LLM
+                reviewable_paragraphs = []
+                for p in document.paragraphs:
+                    txt = (p.text or "").strip()
+                    if len(txt) < 25:
+                        continue
+                    p_start = p.doc_char_start or 0
+                    p_end = p_start + len(txt)
+                    has_flagged = any(p_start <= c.char_start < p_end for c in all_candidates)
+                    if has_flagged or len(txt.split()) >= 15:
+                        reviewable_paragraphs.append(p)
+
+                self.logger.info("Filtered %d paragraphs down to %d candidate paragraphs for LLM review", len(document.paragraphs), len(reviewable_paragraphs))
+                max_para_workers = min(8, len(reviewable_paragraphs)) if reviewable_paragraphs else 1
                 with ThreadPoolExecutor(max_workers=max_para_workers) as executor:
-                    para_candidates_list = list(executor.map(process_paragraph, document.paragraphs))
+                    para_candidates_list = list(executor.map(process_paragraph, reviewable_paragraphs))
 
                 for candidates in para_candidates_list:
                     all_candidates.extend(candidates)
