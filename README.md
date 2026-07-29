@@ -1,6 +1,6 @@
 # AI Document Intelligence & Proofreading Platform
 
-An enterprise-grade AI-powered Document Intelligence platform that combines document proofreading, semantic understanding, contextual consistency analysis, retrieval-augmented generation (RAG), and comparative business intelligence into a unified workflow.
+An enterprise-grade AI-powered Document Intelligence platform that combines document proofreading, semantic understanding, contextual consistency analysis, Retrieval-Augmented Generation (RAG), and comparative business intelligence into a unified workflow.
 
 The platform is designed to analyze business documents such as company brochures, annual reports, policy documents, handbooks, and technical documentation while generating executive-quality reports and actionable business insights.
 
@@ -22,7 +22,7 @@ The platform is designed to analyze business documents such as company brochures
 
 A multi-stage proofreading engine combining deterministic NLP techniques with Large Language Models.
 
-Features include:
+### Features
 
 - Grammar correction
 - Spelling correction
@@ -32,7 +32,7 @@ Features include:
 - Duplicate correction removal
 - Intelligent merge strategy
 
-Proofreading engines:
+### Proofreading Engines
 
 - LanguageTool
 - SymSpell
@@ -62,11 +62,11 @@ Each finding is validated through Claude before appearing in the final executive
 
 The platform builds a semantic knowledge base for every uploaded document.
 
-Capabilities include:
+### Capabilities
 
 - Semantic chunking
 - ChromaDB vector indexing
-- Hybrid BM25 + vector retrieval
+- Hybrid BM25 + Vector Retrieval
 - Context-aware document Q&A
 - Citation-grounded responses
 
@@ -76,7 +76,7 @@ Capabilities include:
 
 Automatically analyzes company documents and performs market benchmarking.
 
-Workflow includes:
+### Workflow
 
 - Company understanding
 - Industry identification
@@ -93,45 +93,45 @@ Outputs a single executive-grade comparative analysis report.
 
 # Architecture Overview
 
-```
-Upload Document
-        │
-        ▼
-Layout-Aware Extraction (Docling)
-        │
-        ▼
-Document Preprocessing
-        │
-        ▼
-Paragraph & Sentence Segmentation
-        │
-        ▼
-Protected Terms Detection
-        │
-        ▼
-Grammar & Spell Checking
-(LanguageTool + SymSpell + Local LLM)
-        │
-        ▼
-Semantic Validation
-        │
-        ▼
-Proofreading Report Generation
-        │
-        ▼
-Semantic Chunking
-        │
-        ▼
-Embedding Generation
-        │
-        ▼
-ChromaDB Vector Store
-        │
-        ├──────────────► AI Document Assistant (RAG)
-        │
-        ├──────────────► Contextual Consistency Analysis
-        │
-        └──────────────► Comparative Analysis
+```text
+                           Upload Document
+                                  │
+                                  ▼
+                 Layout-Aware Extraction (Docling)
+                                  │
+                                  ▼
+                    Document Preprocessing Pipeline
+                                  │
+                                  ▼
+              Paragraph & Sentence Segmentation
+                                  │
+                                  ▼
+                 Protected Terms Identification
+                                  │
+                                  ▼
+           Grammar & Spell Checking Pipeline
+      (LanguageTool + SymSpell + Local LLM)
+                                  │
+                                  ▼
+                    Semantic Validation Layer
+                                  │
+                                  ▼
+                 Proofreading Report Generation
+                                  │
+                                  ▼
+                      Semantic Chunking
+                                  │
+                                  ▼
+                    Embedding Generation
+                                  │
+                                  ▼
+                      ChromaDB Vector Store
+                                  │
+          ┌───────────────────────┼────────────────────────┐
+          │                       │                        │
+          ▼                       ▼                        ▼
+ AI Document Assistant    Context Analysis     Comparative Analysis
+         (RAG)
 ```
 
 ---
@@ -176,9 +176,22 @@ ChromaDB Vector Store
 
 ---
 
-# Installation
+# Prerequisites
 
-## Clone the repository
+Before running the project, ensure the following software is installed:
+
+- Python 3.11 or newer
+- Node.js (v18 or newer recommended)
+- npm
+- Git
+- Java Runtime Environment (JRE 17 or newer)
+- Ollama (for local LLM inference)
+
+---
+
+# Getting Started
+
+## 1. Clone the Repository
 
 ```bash
 git clone <repository-url>
@@ -187,27 +200,27 @@ cd BTLProject
 
 ---
 
-## Create a virtual environment
-
-```bash
-python -m venv .venv
-```
+## 2. Create a Virtual Environment
 
 ### Windows
 
 ```bash
+python -m venv .venv
+
 .venv\Scripts\activate
 ```
 
 ### Linux / macOS
 
 ```bash
+python3 -m venv .venv
+
 source .venv/bin/activate
 ```
 
 ---
 
-## Install dependencies
+## 3. Install Python Dependencies
 
 ```bash
 pip install -r requirements.txt
@@ -215,7 +228,19 @@ pip install -r requirements.txt
 
 ---
 
-## Download the spaCy model
+## 4. Install Frontend Dependencies
+
+```bash
+cd ai-proofreader-frontend
+
+npm install
+
+cd ..
+```
+
+---
+
+## 5. Download the spaCy Language Model
 
 ```bash
 python -m spacy download en_core_web_sm
@@ -223,70 +248,93 @@ python -m spacy download en_core_web_sm
 
 ---
 
+# Environment Configuration
+
+Create a `.env` file in the project root.
+
+You can either create it manually or copy an existing template:
+
+```bash
+cp .env.example .env
+```
+
+Example configuration:
+
+```env
+# Claude API
+CLAUDE_API_KEY=your_claude_api_key
+
+# Tavily Search API
+TAVILY_API_KEY=your_tavily_api_key
+
+# Ollama Configuration
+OLLAMA_HOST=http://localhost:11434
+OLLAMA_MODEL=qwen2.5-coder:32b
+```
+
+### Environment Variables
+
+| Variable | Description |
+|-----------|-------------|
+| `CLAUDE_API_KEY` | API key used for Claude-powered business understanding and verification |
+| `TAVILY_API_KEY` | API key used for web search during Comparative Analysis |
+| `OLLAMA_HOST` | URL of your local or remote Ollama server |
+| `OLLAMA_MODEL` | Name of the Ollama model to use |
+
+> **Note:** Never commit your `.env` file to version control.
+
+---
+
 # Additional Requirements
 
 ## Java Runtime
 
-LanguageTool requires Java.
+LanguageTool requires Java Runtime Environment (JRE 17 or newer).
 
-Install:
+Verify installation:
 
-- Java Runtime Environment (JRE 17 or newer)
+```bash
+java -version
+```
 
 ---
 
 ## SymSpell Dictionary
 
-Download the English frequency dictionary from the SymSpell repository.
+Download the English frequency dictionary from the official SymSpell repository.
 
-Place it here:
+Place the file at:
 
-```
+```text
 models/
-    frequency_dictionary_en_82_765.txt
+└── frequency_dictionary_en_82_765.txt
 ```
 
 ---
 
-## Ollama
+## Ollama Setup
 
-Install Ollama and start the server.
+Install Ollama by following the official installation instructions for your operating system.
 
-Default configuration:
+Pull the model you intend to use:
 
-```
-OLLAMA_HOST=http://192.168.19.21:11434
-
-OLLAMA_MODEL=qwen2.5-coder:32b
+```bash
+ollama pull <model-name>
 ```
 
----
+Start the Ollama server:
 
-## Claude API
-
-Set your API key inside the project `.env` file.
-
-```
-CLAUDE_API_KEY=xxxxxxxxxxxxxxxx
-
-
+```bash
+ollama serve
 ```
 
----
-
-## Tavily Search API
-
-Used for Comparative Analysis.
-
-```
-TAVILY_API_KEY=xxxxxxxxxxxxxxxx
-```
+Ensure that the model specified in your `.env` file is available.
 
 ---
 
 # Running the Application
 
-## Backend
+## Start the Backend
 
 ```bash
 python -m uvicorn backend.app:app --reload
@@ -294,36 +342,51 @@ python -m uvicorn backend.app:app --reload
 
 ---
 
-## Frontend
+## Start the Frontend
+
+Open a new terminal:
 
 ```bash
 cd ai-proofreader-frontend
-
-npm install
 
 npm run dev
 ```
 
 ---
 
+# Verifying the Installation
+
+Once both services are running:
+
+1. Open the frontend in your browser.
+2. Upload a sample document.
+3. Verify that:
+   - Proofreading completes successfully.
+   - Reports are generated.
+   - AI Document Assistant answers document-related questions.
+   - Context Analysis generates an executive report.
+   - Comparative Analysis completes successfully (if API keys are configured).
+
+---
+
 # Project Structure
 
-```
+```text
 BTLProject/
-
-backend/
-src/
-tests/
-models/
-data/
-
-    input/
-    output/
-
-ai-proofreader-frontend/
-
-requirements.txt
-README.md
+│
+├── backend/
+├── src/
+├── tests/
+├── models/
+├── data/
+│   ├── input/
+│   └── output/
+│
+├── ai-proofreader-frontend/
+│
+├── requirements.txt
+├── README.md
+└── .env
 ```
 
 ---
@@ -332,20 +395,20 @@ README.md
 
 Each uploaded document creates a dedicated output directory.
 
-```
+```text
 data/output/
 
-    <document_id>/
+<document_id>/
 
-        01_raw/
-        02_layout/
-        03_preprocessed/
-        04_proofreading/
-        05_rag/
-        06_context_analysis/
-        07_claude_verification/
-        08_reports/
-        09_comparative_analysis/
+├── 01_raw/
+├── 02_layout/
+├── 03_preprocessed/
+├── 04_proofreading/
+├── 05_rag/
+├── 06_context_analysis/
+├── 07_claude_verification/
+├── 08_reports/
+└── 09_comparative_analysis/
 ```
 
 Generated artifacts include:
@@ -362,7 +425,7 @@ Generated artifacts include:
 
 # Comparative Analysis Workflow
 
-```
+```text
 Company Brochure
         │
         ▼
@@ -404,29 +467,29 @@ Executive Comparative Analysis Report
 
 ---
 
-# Major Reports Generated
+# Reports Generated
 
 The platform automatically generates:
 
-### Proofreading Report
+## Proofreading Report
 
 Grammar, spelling, and writing quality improvements.
 
 ---
 
-### Executive Audit Report
+## Executive Audit Report
 
 Claude-verified ambiguity and consistency findings.
 
 ---
 
-### Context Analysis Report
+## Context Analysis Report
 
 Cross-document reasoning and semantic consistency analysis.
 
 ---
 
-### Comparative Analysis Report
+## Comparative Analysis Report
 
 Business benchmarking, SWOT analysis, gap analysis, and strategic recommendations.
 
@@ -434,13 +497,13 @@ Business benchmarking, SWOT analysis, gap analysis, and strategic recommendation
 
 # Testing
 
-Run all tests:
+Run the complete test suite:
 
 ```bash
 pytest tests/
 ```
 
-Run a specific suite:
+Run specific test suites:
 
 ```bash
 python -m unittest tests/test_backend_integration.py
@@ -459,7 +522,7 @@ The platform follows several core engineering principles:
 - Modular architecture
 - Dependency injection
 - Pipeline-based execution
-- Retrieval-augmented generation
+- Retrieval-Augmented Generation (RAG)
 - Explainable AI outputs
 - Grounded LLM responses
 - Enterprise-grade reporting
@@ -475,17 +538,59 @@ The project has been significantly refactored to improve maintainability, modula
 Major improvements include:
 
 - Introduced dependency injection across all pipeline components using a centralized configuration object.
-- Fixed configuration inconsistencies by replacing obsolete global constants with structured configuration models.
+- Replaced obsolete global constants with structured configuration models.
 - Added document-level sentence offset indexing for accurate highlighting and traceability.
 - Replaced invalid `.dict()` usage on dataclasses with proper serialization utilities.
-- Refactored the pipeline to use the actual class-based APIs for extraction, layout analysis, filtering, preprocessing, paragraph building, and sentence segmentation.
-- Unified logging through the centralized pipeline logger.
-- Eliminated duplicated HTML generation logic by reusing shared HTML templates.
-- Added missing report artifacts, including CSV summaries and richer metadata.
-- Performed end-to-end validation of all pipeline stages using lightweight test doubles for external dependencies such as spaCy, LanguageTool, SymSpell, and Ollama to ensure reliable data flow independent of runtime services.
+- Refactored the pipeline to use class-based APIs for extraction, layout analysis, preprocessing, paragraph building, and sentence segmentation.
+- Unified logging through a centralized pipeline logger.
+- Eliminated duplicated HTML generation logic by reusing shared templates.
+- Added richer report artifacts, including CSV summaries and metadata.
+- Performed end-to-end validation using lightweight test doubles for external dependencies such as spaCy, LanguageTool, SymSpell, and Ollama, ensuring reliable execution independent of runtime services.
+
+---
+
+# Recommended Repository Files
+
+## `.env.example`
+
+```env
+# Claude API
+CLAUDE_API_KEY=
+
+# Tavily Search API
+TAVILY_API_KEY=
+
+# Ollama Configuration
+OLLAMA_HOST=http://localhost:11434
+OLLAMA_MODEL=
+```
+
+---
+
+## `.gitignore`
+
+```gitignore
+# Python
+.venv/
+__pycache__/
+*.pyc
+
+# Environment
+.env
+
+# Node
+node_modules/
+
+# Generated Outputs
+data/output/
+
+# IDE
+.vscode/
+.idea/
+```
 
 ---
 
 # License
 
-This project was developed as part of an AI-powered Document Intelligence internship project for enterprise document analysis and business intelligence workflows.
+This project was developed as part of an AI-powered Document Intelligence internship project focused on enterprise document analysis, proofreading, semantic reasoning, and business intelligence workflows.
