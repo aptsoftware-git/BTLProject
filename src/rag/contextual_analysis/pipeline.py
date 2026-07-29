@@ -25,7 +25,7 @@ class ContextAnalysisPipeline:
     verification agents, evidence collection, and final report generation.
     """
 
-    def __init__(self, model_name: str = "qwen2.5-coder:32b"):
+    def __init__(self, model_name: str = "qwen2.5-coder:7b"):
         from src.rag.config import RagConfig
         from src.rag.contextual_analysis.semantic_retrieval_agent import SemanticRetrievalAgent
         

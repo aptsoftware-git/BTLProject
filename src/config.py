@@ -130,7 +130,7 @@ def load_preferences() -> dict:
             pass
     return {
         "ollama": {
-            "model": "qwen2.5-coder:32b",
+            "model": "qwen2.5-coder:7b",
             "host": "http://192.168.19.21:11434"
         }
     }

@@ -13,15 +13,30 @@ class ProofreadRequest(BaseModel):
     job_id: str
 
 
+class StageStatusModel(BaseModel):
+    stage_id: str
+    name: str
+    unlocked_feature: Optional[str] = None
+    status: str  # Pending, Running, Completed, Failed, Skipped
+    start_time: Optional[str] = None
+    end_time: Optional[str] = None
+    duration: Optional[float] = None
+    errors: Optional[str] = None
+    output_location: Optional[str] = None
+
+
 class JobStatusResponse(BaseModel):
     job_id: str
     filename: str
-    status: str  # pending, processing, completed, failed
+    status: str  # uploaded, pending, processing, completed, failed
     current_stage: str
     progress_percentage: float
+    overall_progress: Optional[int] = 0
     created_at: str
     completed_at: Optional[str] = None
     error: Optional[str] = None
+    upload_ready: Optional[bool] = True
+    document_viewer_ready: Optional[bool] = False
     extraction_ready: Optional[bool] = False
     spell_ready: Optional[bool] = False
     grammar_ready: Optional[bool] = False
@@ -30,6 +45,7 @@ class JobStatusResponse(BaseModel):
     context_analysis_ready: Optional[bool] = False
     comparative_analysis_ready: Optional[bool] = False
     reports_ready: Optional[bool] = False
+    stages: Optional[List[StageStatusModel]] = []
 
 
 class ResultsResponse(BaseModel):

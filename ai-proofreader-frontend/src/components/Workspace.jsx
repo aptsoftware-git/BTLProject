@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef, useMemo } from "react";
 import { useParams, useNavigate, useLocation } from "react-router-dom";
-import { fetchDocument, fetchPreferences, fetchComparativeAnalysis } from "../api";
+import { fetchDocument, fetchPreferences, fetchComparativeAnalysis, retryJobStage } from "../api";
 import Assistant from "./Assistant";
 import ContextAnalysis from "./ContextAnalysis";
 import Reports from "./Reports";
@@ -58,48 +58,166 @@ const getCategory = (reason) => {
   return "Technical Terms";
 };
 
+const REQUIRED_8_STAGES = [
+  { id: 1, name: "Upload Complete", feature: "Document Uploaded", flag: "upload_ready" },
+  { id: 2, name: "Document Extraction", feature: "Document Viewer", flag: "document_viewer_ready" },
+  { id: 3, name: "Spell Checking", feature: "Proofreading", flag: "spell_ready" },
+  { id: 4, name: "Grammar Checking", feature: "Grammar Results", flag: "grammar_ready" },
+  { id: 5, name: "RAG Index Construction", feature: "AI Assistant", flag: "rag_ready" },
+  { id: 6, name: "Contextual Consistency Analysis", feature: "Context Analysis", flag: "context_analysis_ready" },
+  { id: 7, name: "Comparative Analysis", feature: "Comparative Analysis", flag: "comparative_analysis_ready" },
+  { id: 8, name: "Executive Report Generation", feature: "Reports", flag: "reports_ready" }
+];
+
 const getTimelineStages = (doc) => {
   if (!doc) return [];
+
+  if (Array.isArray(doc.stages) && doc.stages.length > 0) {
+    return doc.stages.map((st, idx) => ({
+      id: idx + 1,
+      stage_id: st.stage_id,
+      label: st.name,
+      feature: st.unlocked_feature || REQUIRED_8_STAGES[idx]?.feature || "Feature",
+      status: st.status || "Pending",
+      duration: st.duration,
+      errors: st.errors,
+      output_location: st.output_location,
+      state: st.status === "Completed" ? "completed" : st.status === "Running" ? "active" : st.status === "Failed" ? "failed" : "pending"
+    }));
+  }
+
   const percent = doc.progress_percentage || 0;
   const isCompleted = doc.status === "completed";
-  const stageStr = (doc.current_stage || "").toLowerCase();
 
-  const stages = [
-    { id: 1, label: "Stage 1: Document Extraction", minPct: 0 },
-    { id: 2, label: "Stage 2: Text Preprocessing & Paragraphing", minPct: 15 },
-    { id: 3, label: "Stage 3: Protected Terms & Lexicons", minPct: 35 },
-    { id: 4, label: "Stage 4: Spell & Grammar Review", minPct: 40 },
-    { id: 5, label: "Stage 5: RAG & Vector Indexing", minPct: 55 },
-    { id: 6, label: "Stage 6: Local LLM Ambiguity Detection", minPct: 68 },
-    { id: 7, label: "Stage 7: Claude Verification", minPct: 82 },
-    { id: 8, label: "Stage 8: Executive Compliance Report", minPct: 90 },
-    { id: 9, label: "Stage 9: Comparative Analysis", minPct: 94 }
-  ];
-
-  return stages.map((stage) => {
-    let state = "pending";
-    
-    if (isCompleted) {
-      state = "completed";
+  return REQUIRED_8_STAGES.map((st) => {
+    let status = "Pending";
+    if (isCompleted || doc[st.flag]) {
+      status = "Completed";
+    } else if (doc.current_stage && doc.current_stage.toLowerCase().includes(st.name.toLowerCase())) {
+      status = "Running";
     } else if (doc.status === "failed") {
-      state = "pending";
-    } else {
-      if (percent >= stage.minPct) {
-        const isLast = stage.id === stages.length;
-        const nextStage = isLast ? null : stages[stage.id];
-        if (isLast || percent < nextStage.minPct) {
-          state = "active";
-        } else {
-          state = "completed";
-        }
-      }
+      status = "Failed";
     }
-
     return {
-      ...stage,
-      state
+      id: st.id,
+      stage_id: `stage_${st.id}`,
+      label: st.name,
+      feature: st.feature,
+      status: status,
+      duration: null,
+      errors: null,
+      state: status === "Completed" ? "completed" : status === "Running" ? "active" : status === "Failed" ? "failed" : "pending"
     };
   });
+};
+
+const StagePipelineCard = ({ doc, onRetryStage }) => {
+  if (!doc) return null;
+  const stages = getTimelineStages(doc);
+  const overallProgress = doc.overall_progress !== undefined ? doc.overall_progress : Math.round(doc.progress_percentage || 0);
+
+  return (
+    <div style={{
+      background: "var(--bg-card)",
+      border: "1px solid var(--border)",
+      borderRadius: 12,
+      padding: "16px 20px",
+      marginBottom: 20,
+      boxShadow: "var(--shadow-card)"
+    }}>
+      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 12 }}>
+        <div>
+          <h3 style={{ margin: 0, fontSize: 15, fontWeight: 700, color: "var(--text-primary)" }}>
+            Execution Architecture & Stage Pipeline
+          </h3>
+          <p style={{ margin: "2px 0 0", fontSize: 12, color: "var(--text-secondary)" }}>
+            Asynchronous Stage Orchestration • Incremental Feature Unlocking
+          </p>
+        </div>
+        <div style={{
+          background: "var(--brand-light)", color: "var(--brand)",
+          padding: "4px 12px", borderRadius: 999, fontSize: 12, fontWeight: 700
+        }}>
+          {overallProgress}% Complete
+        </div>
+      </div>
+
+      {/* Progress Bar */}
+      <div style={{ width: "100%", height: 6, background: "var(--border)", borderRadius: 3, overflow: "hidden", marginBottom: 16 }}>
+        <div style={{ width: `${overallProgress}%`, height: "100%", background: "var(--brand)", transition: "width 0.4s ease" }} />
+      </div>
+
+      {/* Grid of 8 Stage Cards */}
+      <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(220px, 1fr))", gap: 10 }}>
+        {stages.map((st, idx) => {
+          const isCompleted = st.status === "Completed";
+          const isRunning = st.status === "Running";
+          const isFailed = st.status === "Failed";
+
+          return (
+            <div key={st.stage_id || idx} style={{
+              border: "1px solid var(--border)",
+              borderColor: isRunning ? "var(--brand)" : isCompleted ? "var(--green)" : isFailed ? "var(--red)" : "var(--border)",
+              background: isRunning ? "rgba(138, 92, 246, 0.05)" : isCompleted ? "rgba(34, 197, 94, 0.04)" : "var(--bg-card)",
+              borderRadius: 8,
+              padding: "10px 12px",
+              display: "flex",
+              flexDirection: "column",
+              justifyContent: "space-between"
+            }}>
+              <div>
+                <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 4 }}>
+                  <div style={{ display: "flex", alignItems: "center", gap: 6 }}>
+                    <span style={{
+                      width: 18, height: 18, borderRadius: "50%",
+                      background: isCompleted ? "var(--green-light)" : isRunning ? "var(--brand-light)" : isFailed ? "var(--red-light)" : "var(--border)",
+                      color: isCompleted ? "var(--green)" : isRunning ? "var(--brand)" : isFailed ? "var(--red)" : "var(--text-muted)",
+                      display: "flex", alignItems: "center", justifyContent: "center",
+                      fontSize: 10, fontWeight: 700
+                    }}>
+                      {isCompleted ? "✓" : isRunning ? "⟳" : isFailed ? "✕" : (idx + 1)}
+                    </span>
+                    <span style={{ fontSize: 12, fontWeight: 700, color: "var(--text-primary)" }}>
+                      {st.label}
+                    </span>
+                  </div>
+                  <span style={{
+                    fontSize: 9.5, fontWeight: 700, padding: "1px 6px", borderRadius: 4,
+                    background: isCompleted ? "var(--green-light)" : isRunning ? "var(--brand-light)" : isFailed ? "var(--red-light)" : "var(--border)",
+                    color: isCompleted ? "var(--green)" : isRunning ? "var(--brand)" : isFailed ? "var(--red)" : "var(--text-muted)"
+                  }}>
+                    {st.status}
+                  </span>
+                </div>
+                <div style={{ fontSize: 11, color: "var(--text-secondary)", marginTop: 4 }}>
+                  Unlocks: <strong style={{ color: "var(--text-primary)" }}>{st.feature}</strong>
+                </div>
+              </div>
+
+              <div style={{ marginTop: 8, display: "flex", justifyContent: "space-between", alignItems: "center", fontSize: 10.5, color: "var(--text-muted)" }}>
+                <span>{isCompleted ? "✓ Unlocked" : isRunning ? "Running..." : isFailed ? "Failed" : "Queued"}</span>
+                {st.duration !== null && st.duration !== undefined && (
+                  <span>{st.duration}s</span>
+                )}
+              </div>
+
+              {isFailed && onRetryStage && (
+                <button
+                  style={{
+                    marginTop: 6, background: "var(--red)", color: "white", border: "none",
+                    borderRadius: 4, padding: "3px 8px", fontSize: 10.5, fontWeight: 700, cursor: "pointer"
+                  }}
+                  onClick={() => onRetryStage(st.stage_id)}
+                >
+                  Retry Stage
+                </button>
+              )}
+            </div>
+          );
+        })}
+      </div>
+    </div>
+  );
 };
 
 export default function Workspace() {
@@ -240,6 +358,13 @@ export default function Workspace() {
   };
 
 
+  // Load preferences once on mount
+  useEffect(() => {
+    fetchPreferences()
+      .then((prefs) => setPreferences(prefs || { confidence_threshold: 40 }))
+      .catch(() => setPreferences({ confidence_threshold: 40 }));
+  }, []);
+
   // Dynamic status check polling
   useEffect(() => {
     let active = true;
@@ -247,13 +372,9 @@ export default function Workspace() {
 
     async function load() {
       try {
-        const [data, prefs] = await Promise.all([
-          fetchDocument(id),
-          fetchPreferences().catch(() => ({ confidence_threshold: 40 }))
-        ]);
+        const data = await fetchDocument(id);
         
         if (!active) return;
-        setPreferences(prefs || { confidence_threshold: 40 });
         setDoc(data);
         if (data) {
           localStorage.setItem("currentlyOpenDocId", data.id);
@@ -274,8 +395,7 @@ export default function Workspace() {
         );
 
         if (isProofreadingAvailable) {
-          const threshold = ((prefs && prefs.confidence_threshold !== undefined) ? prefs.confidence_threshold : 40) / 100;
-          const initialStatus = {};
+          const threshold = ((preferences && preferences.confidence_threshold !== undefined) ? preferences.confidence_threshold : 40) / 100;
 
           if (data.raw_text) {
             setIssueDecisions({});
@@ -310,9 +430,9 @@ export default function Workspace() {
 
         setLoading(false);
         
-        // If still processing or pending, poll every 2 seconds
+        // If still processing or pending, poll every 2.5 seconds
         if (data.status === "processing" || data.status === "pending") {
-          timerId = setTimeout(load, 2000);
+          timerId = setTimeout(load, 2500);
         }
       } catch (err) {
         if (active) {
@@ -328,7 +448,7 @@ export default function Workspace() {
       active = false;
       if (timerId) clearTimeout(timerId);
     };
-  }, [id]);
+  }, [id, preferences?.confidence_threshold]);
 
   // Select an issue and scroll suggestions sidebar and/or markup
   const handleSelectIssue = (idx) => {
@@ -923,106 +1043,34 @@ export default function Workspace() {
     );
   }
 
-  // Processing stages (show full screen scanner ONLY if extraction/proofreading is not yet ready)
-  const isProofreadingReady = doc.extraction_ready || doc.proofreading_ready || doc.proofreading_status === "completed" || (doc.annotated_html && doc.annotated_html.length > 0) || doc.status === "completed";
+  // Processing stages (show full screen scanner ONLY if extraction/document viewer is not yet ready)
+  const isDocumentExtractionReady = doc.document_viewer_ready || doc.extraction_ready || doc.proofreading_ready || doc.proofreading_status === "completed" || (doc.annotated_html && doc.annotated_html.length > 0) || doc.status === "completed";
 
-  if (!isProofreadingReady && (doc.status === "processing" || doc.status === "pending" || doc.status === "uploaded")) {
-    const percent = doc.progress_percentage || 0;
+  if (!isDocumentExtractionReady && (doc.status === "processing" || doc.status === "pending" || doc.status === "uploaded")) {
+    const percent = doc.progress_percentage || doc.overall_progress || 0;
     const curPage = doc.current_page || 0;
     const totPages = doc.total_pages || 0;
     const estTime = doc.estimated_remaining_time || "Estimating...";
-    const timeline = getTimelineStages(doc);
-    const completedCount = timeline.filter(s => s.state === "completed").length;
 
     return (
       <div style={styles.centerContainer}>
-        <div style={styles.processingGrid}>
-          {/* Left Column: Animated Scanning Icon */}
-          <div style={styles.processingLeft}>
-            <div className="pulse-animation" style={styles.processingIconCircle}>
-              <svg width="44" height="44" viewBox="0 0 24 24" fill="none" stroke="var(--brand)" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
-                <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" />
-                <polyline points="14 2 14 8 20 8" />
-                <line x1="16" y1="13" x2="8" y2="13" />
-                <line x1="16" y1="17" x2="8" y2="17" />
-                <line x1="10" y1="9" x2="8" y2="9" />
-              </svg>
-            </div>
-            <p style={{ margin: "16px 0 0", fontSize: 13.5, fontWeight: 700, color: "var(--brand)" }}>AI Scanning Active</p>
-            <p style={{ margin: "6px 0 0", fontSize: 11.5, color: "var(--text-muted)", maxWidth: 150, textAlign: "center", lineHeight: 1.4 }}>
-              Extracting structural layout and cross-referencing policy statements.
+        <div style={{ maxWidth: 700, width: "100%" }}>
+          <div style={{ textAlign: "center", marginBottom: 20 }}>
+            <h2 style={{ fontSize: 20, fontWeight: 700, margin: 0, color: "var(--text-primary)" }}>Initializing Document Intelligence...</h2>
+            <p style={{ fontSize: 13, color: "var(--text-secondary)", margin: "4px 0 0" }}>
+              Extracting document structure & metadata. Document Viewer will unlock momentarily.
             </p>
           </div>
-          
-          {/* Right Column: Processing Details & Collapsed Timeline */}
-          <div style={styles.processingRight}>
-            <div style={{ marginBottom: 16 }}>
-              <h3 style={{ fontSize: 15.5, fontWeight: 700, color: "var(--text-primary)", margin: 0 }}>
-                Analyzing Document Intelligence...
-              </h3>
-              <p style={{ margin: "2px 0 0", fontSize: 12.5, color: "var(--text-secondary)" }}>
-                We are reviewing consistency, grammar, and statements. This may take a few minutes.
-              </p>
-            </div>
-
-            {/* Progress bar */}
-            <div style={{ width: "100%", height: 6, background: "var(--border)", borderRadius: 3, overflow: "hidden", marginBottom: 16 }}>
-              <div style={{ width: `${percent}%`, height: "100%", background: "var(--brand)", transition: "width 0.3s ease" }} />
-            </div>
-
-            {/* Timeline Checklist */}
-            <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
-              {/* Collapsed completed stages */}
-              {completedCount > 0 && (
-                <div style={{ display: "flex", alignItems: "center", gap: 8, color: "var(--green)" }}>
-                  <span style={{ display: "inline-flex", alignItems: "center", justifyContent: "center", width: 18, height: 18, borderRadius: "50%", background: "var(--green-light)" }}>
-                    <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round">
-                      <polyline points="20 6 9 17 4 12" />
-                    </svg>
-                  </span>
-                  <span style={{ fontSize: 12.5, fontWeight: 650 }}>
-                    {completedCount} stages completed
-                  </span>
-                </div>
-              )}
-
-              {/* Active and pending stages */}
-              {timeline.filter(s => s.state !== "completed").map((s) => {
-                const isActive = s.state === "active";
-                return (
-                  <div key={s.id} style={{ display: "flex", alignItems: "center", gap: 8, opacity: s.state === "pending" ? 0.45 : 1 }}>
-                    {isActive ? (
-                      <span className="pulse-animation" style={{ display: "inline-flex", alignItems: "center", justifyContent: "center", width: 18, height: 18, borderRadius: "50%", background: "var(--brand-light)", color: "var(--brand)" }}>
-                        <span style={{ width: 6, height: 6, borderRadius: "50%", background: "var(--brand)" }} />
-                      </span>
-                    ) : (
-                      <span style={{ display: "inline-flex", alignItems: "center", justifyContent: "center", width: 18, height: 18, borderRadius: "50%", border: "1.5px solid var(--text-muted)", color: "var(--text-muted)", fontSize: 9, fontWeight: 700 }}>
-                        {s.id}
-                      </span>
-                    )}
-                    <span style={{ fontSize: 12.5, fontWeight: isActive ? 700 : 550, color: isActive ? "var(--brand)" : "var(--text-primary)" }}>
-                      {s.label}
-                    </span>
-                  </div>
-                );
-              })}
-            </div>
-
-            <div style={{ marginTop: 20, paddingTop: 12, borderTop: "1px solid var(--border)", display: "flex", justifyContent: "space-between", fontSize: 11.5, color: "var(--text-secondary)" }}>
-              <span>Page Scope: Page {curPage} of {totPages || 1}</span>
-              <span>Est. Remaining: {estTime}</span>
-            </div>
-          </div>
+          <StagePipelineCard doc={doc} onRetryStage={handleRetryStage} />
         </div>
       </div>
     );
   }
 
-
-  if (doc.status === "failed") {
+  if (doc.status === "failed" && (!doc.stages || doc.stages.every(s => s.status === "Failed"))) {
     return (
       <div style={styles.centerContainer}>
-        <p style={{ color: "var(--red)", fontSize: 14.5, fontWeight: 700 }}>Proofreading Failed</p>
+        <p style={{ color: "var(--red)", fontSize: 14.5, fontWeight: 700 }}>Processing Failed</p>
         <div style={styles.errorLogs}>
           <pre style={{ margin: 0 }}>{doc.error}</pre>
         </div>
@@ -1319,7 +1367,10 @@ export default function Workspace() {
 
         {/* 3. Main editor split pane */}
         {activeTab === "overview" ? (
-          renderResultsOverview()
+          <div>
+            <StagePipelineCard doc={doc} onRetryStage={handleRetryStage} />
+            {renderResultsOverview()}
+          </div>
         ) : activeTab === "proofreading" || activeTab === "annotated" || activeTab === "corrected" ? (
           <div style={{ display: "flex", flexDirection: "column", gap: 16 }}>
             {/* Sub-selector toggle */}

@@ -110,24 +110,27 @@ def save_job_metadata(job_id: str) -> None:
         "filename": job["filename"],
         "status": job["status"],
         "current_stage": job["current_stage"],
-        "progress_percentage": job["progress_percentage"],
+        "progress_percentage": job.get("progress_percentage", 0.0),
+        "overall_progress": job.get("overall_progress", 0),
         "created_at": job["created_at"],
-        "completed_at": job["completed_at"],
-        "error": job["error"],
-        "file_path": job["file_path"],
-        "result": job["result"],
+        "completed_at": job.get("completed_at"),
+        "error": job.get("error"),
+        "file_path": job.get("file_path"),
+        "result": job.get("result"),
+        "stages": job.get("stages", []),
     }
     
     # Preserve context analysis and granular progress fields in serialized metadata
     for key in [
-        "proofreading_ready", "rag_ready", "context_analysis_ready", "comparative_analysis_ready",
+        "upload_ready", "document_viewer_ready", "extraction_ready", "spell_ready", "grammar_ready",
+        "proofreading_ready", "rag_ready", "context_analysis_ready", "comparative_analysis_ready", "reports_ready",
         "context_analysis_status", "context_analysis_stage", "context_analysis_progress",
         "comparative_analysis_status", "comparative_analysis_stage", "comparative_analysis_progress",
         "context_analysis_issues_count", "context_analysis_est_time",
         "knowledge_objects_generated", "embeddings_completed", "index_progress",
         "memory_usage", "cpu_usage", "current_page", "total_pages",
         "current_batch", "total_batches", "estimated_remaining_time", "memory_safe_mode",
-        "cache_info"
+        "cache_info", "doc_hash"
     ]:
         if key in job:
             metadata[key] = job[key]
@@ -149,30 +152,53 @@ def load_job_metadata(job_id: str) -> Optional[Dict[str, Any]]:
         with open(metadata_path, "r", encoding="utf-8") as f:
             job = json.load(f)
 
-            # 1. Check if full end-to-end report artifacts exist on disk
-            reports_dir = job_dir / "09_reports"
-            consistency_path = reports_dir / "consistency_report.html"
-            comparative_path = reports_dir / "comparative_report.html"
-            final_report_path = job_dir / "10_final" / "report.json"
-            annotated_path = reports_dir / "annotated.html"
+            # Ensure stages list is present
+            from src.stage_orchestrator import initialize_job_stages
+            if "stages" not in job or not job["stages"]:
+                job["stages"] = initialize_job_stages(job.get("created_at"))
 
-            if (final_report_path.exists() or annotated_path.exists()):
+            # Infer stage completion from artifacts if metadata lacks explicit status
+            doc_json = job_dir / "structured_document.json"
+            sentences_path = job_dir / "04_sentences" / "sentences.json"
+            spell_path = job_dir / "06_spell" / "spell_candidates.json"
+            report_path = job_dir / "10_final" / "report.json"
+            ko_path = job_dir / "03_knowledge_objects" / "knowledge_objects.json"
+            consistency_path = job_dir / "09_reports" / "consistency_report.html"
+            comparative_path = job_dir / "09_reports" / "comparative_report.html"
+            business_path = job_dir / "business_report.html"
+
+            if doc_json.exists() and sentences_path.exists():
+                job["extraction_ready"] = True
+                job["document_viewer_ready"] = True
+
+            if spell_path.exists():
+                job["spell_ready"] = True
+
+            if report_path.exists():
+                job["grammar_ready"] = True
                 job["proofreading_ready"] = True
                 job["proofreading_status"] = "completed"
 
-            if consistency_path.exists() or comparative_path.exists():
+            if ko_path.exists():
+                job["rag_ready"] = True
+                job["rag_status"] = "completed"
+
+            if consistency_path.exists():
+                job["context_analysis_ready"] = True
+                job["context_analysis_status"] = "completed"
+
+            if comparative_path.exists():
+                job["comparative_analysis_ready"] = True
+                job["comparative_analysis_status"] = "completed"
+
+            if business_path.exists():
+                job["reports_ready"] = True
+
+            if (consistency_path.exists() or business_path.exists()) and job.get("status") in ("processing", "uploaded", "pending"):
                 job["status"] = "completed"
                 job["current_stage"] = "Completed"
+                job["overall_progress"] = 100
                 job["progress_percentage"] = 100.0
-                job["proofreading_ready"] = True
-                job["rag_ready"] = True
-                job["context_analysis_ready"] = True
-                job["comparative_analysis_ready"] = True
-            elif job.get("status") == "processing" and (final_report_path.exists() or annotated_path.exists()):
-                # Proofreading is done, but server restarted mid-RAG: auto-resume context analysis background thread
-                if not job.get("_bg_resumed"):
-                    job["_bg_resumed"] = True
-                    run_context_analysis_bg(job_id, job_dir)
 
             JOBS[job_id] = job
             return job
@@ -189,6 +215,7 @@ def get_job(job_id: str) -> Optional[Dict[str, Any]]:
 
 
 from src.rag.cache_manager import DocumentCacheManager, compute_file_hash
+from src.stage_orchestrator import initialize_job_stages, StageOrchestrator
 
 
 def create_job(filename: str, original_file_path: Path, job_id: Optional[str] = None) -> Dict[str, Any]:
@@ -211,19 +238,34 @@ def create_job(filename: str, original_file_path: Path, job_id: Optional[str] = 
         "estimated_time_saved_min": 0
     }
 
+    created_at_iso = datetime.now().isoformat()
+    stages = initialize_job_stages(created_at_iso)
+
     job = {
         "job_id": job_id,
         "doc_hash": doc_hash,
         "filename": filename,
         "status": "uploaded",
-        "current_stage": "Stage 1: Extraction",
-        "progress_percentage": 0.0,
-        "created_at": datetime.now().isoformat(),
+        "current_stage": "Stage 1: Upload Complete",
+        "progress_percentage": 12.5,
+        "overall_progress": 12,
+        "created_at": created_at_iso,
         "completed_at": None,
         "error": None,
         "file_path": str(original_file_path),
         "result": None,
         "cache_info": cache_info,
+        "stages": stages,
+        "upload_ready": True,
+        "document_viewer_ready": False,
+        "extraction_ready": False,
+        "spell_ready": False,
+        "grammar_ready": False,
+        "proofreading_ready": False,
+        "rag_ready": False,
+        "context_analysis_ready": False,
+        "comparative_analysis_ready": False,
+        "reports_ready": False,
     }
 
     # Check for full cache hit (Requirement 1 & Primary Objective)
@@ -236,11 +278,25 @@ def create_job(filename: str, original_file_path: Path, job_id: Optional[str] = 
         job["status"] = "completed"
         job["current_stage"] = "Completed"
         job["progress_percentage"] = 100.0
+        job["overall_progress"] = 100
         job["context_analysis_status"] = "completed"
         job["context_analysis_stage"] = "Completed"
         job["context_analysis_progress"] = 100.0
         job["completed_at"] = datetime.now().isoformat()
         job["result"] = proof_res or {"total_issues": 0, "status": "completed"}
+        job["document_viewer_ready"] = True
+        job["extraction_ready"] = True
+        job["spell_ready"] = True
+        job["grammar_ready"] = True
+        job["proofreading_ready"] = True
+        job["rag_ready"] = True
+        job["context_analysis_ready"] = True
+        job["comparative_analysis_ready"] = True
+        job["reports_ready"] = True
+
+        for s in job["stages"]:
+            s["status"] = "Completed"
+
         job["cache_info"] = {
             "cached": True,
             "reused_embeddings": True,
@@ -262,7 +318,7 @@ def create_job(filename: str, original_file_path: Path, job_id: Optional[str] = 
 
 
 def queue_job(job_id: str) -> Dict[str, Any]:
-    """Queues a job for background processing if it is not already running or completed."""
+    """Queues a job for background stage orchestration if it is not already running or completed."""
     job = get_job(job_id)
     if not job:
         raise ValueError("Job not found")
@@ -271,8 +327,7 @@ def queue_job(job_id: str) -> Dict[str, Any]:
         return job
 
     job["status"] = "pending"
-    job["current_stage"] = "Stage 1: Extraction"
-    job["progress_percentage"] = 0.0
+    job["current_stage"] = "Document Extraction"
     job["error"] = None
     job["completed_at"] = None
     save_job_metadata(job_id)
@@ -281,151 +336,41 @@ def queue_job(job_id: str) -> Dict[str, Any]:
     return job
 
 
-def run_context_analysis_inline(job_id: str, job_dir: Path) -> None:
-    """Executes Context Analysis, Ambiguity Pipeline, Claude Verification, and Final Report synchronously."""
+def retry_job_stage(job_id: str, stage_id: str = "all") -> Dict[str, Any]:
+    """Resets a failed or specific stage to pending and triggers background re-execution."""
     job = get_job(job_id)
-    if job:
-        job["context_analysis_status"] = "running"
-        job["context_analysis_stage"] = "Stage 5: RAG"
-        job["context_analysis_progress"] = 55.0
-        job["current_stage"] = "Stage 5: RAG"
-        job["progress_percentage"] = 55.0
-        save_job_metadata(job_id)
+    if not job:
+        raise ValueError(f"Job '{job_id}' not found.")
 
-    from src.rag.contextual_analysis.pipeline import ContextAnalysisPipeline
-    from src.config import load_preferences
+    if "stages" not in job or not job["stages"]:
+        job["stages"] = initialize_job_stages(job.get("created_at"))
 
-    prefs = load_preferences()
-    model_name = prefs.get("ollama", {}).get("model", "qwen2.5-coder:32b")
+    for s in job["stages"]:
+        if stage_id == "all" or s["stage_id"] == stage_id or s["name"].lower() == stage_id.lower():
+            s["status"] = "Pending"
+            s["errors"] = None
 
-    consistency_pipeline = ContextAnalysisPipeline(model_name=model_name)
-    consistency_pipeline.run_analysis(job_dir, job_id)
+    job["status"] = "pending"
+    job["error"] = None
+    save_job_metadata(job_id)
 
-    if job:
-        job["rag_ready"] = True
-        job["rag_status"] = "completed"
-        save_job_metadata(job_id)
+    job_queue.put(job_id)
+    return job
 
-    # Stage 6: Local LLM Ambiguity Detection
-    if job:
-        job["current_stage"] = "Stage 6: Local LLM Ambiguity Detection"
-        job["progress_percentage"] = 68.0
-        save_job_metadata(job_id)
 
-    from src.rag.ambiguity_pipeline import AmbiguityPipeline
-    ambiguity_pipeline = AmbiguityPipeline()
-    ambiguity_pipeline.run_clustering(job_dir, job_id)
-    backend_logger.info("Generated ambiguity semantic clusters for job %s", job_id)
-
-    from src.rag.ambiguity_extractor import AmbiguityExtractor
-    ambiguity_extractor = AmbiguityExtractor()
-    ambiguity_extractor.run_extraction(job_dir, job_id)
-    backend_logger.info("Generated ambiguity claims extraction index for job %s", job_id)
-
-    from src.rag.ambiguity_chunk_analyzer import AmbiguityChunkAnalyzer
-    chunk_analyzer = AmbiguityChunkAnalyzer()
-    chunk_analyzer.run_analysis(job_dir, job_id)
-    backend_logger.info("Generated ambiguity chunk-level analysis for job %s", job_id)
-
-    from src.rag.ambiguity_cluster_analyzer import AmbiguityClusterAnalyzer
-    cluster_analyzer = AmbiguityClusterAnalyzer()
-    cluster_analyzer.run_analysis(job_dir, job_id)
-    backend_logger.info("Generated ambiguity cluster-level analysis for job %s", job_id)
-
-    # Stage 7: Claude Verification
-    if job:
-        job["current_stage"] = "Stage 7: Claude Verification"
-        job["progress_percentage"] = 82.0
-        save_job_metadata(job_id)
-
-    from src.rag.claude_input_builder import ClaudeInputBuilder
-    input_builder = ClaudeInputBuilder()
-    input_builder.run_packaging(job_dir, job_id)
-
-    from src.rag.claude.verification_service import ClaudeVerificationService
-    verification_service = ClaudeVerificationService()
-    verification_service.run_verification(job_dir, job_id)
-    backend_logger.info("Generated Claude verification report for job %s", job_id)
-
-    # Stage 9: Executive Compliance Report Generation
-    if job:
-        job["current_stage"] = "Stage 9: Executive Compliance Report Generation"
-        job["progress_percentage"] = 90.0
-        job["context_analysis_ready"] = True
-        save_job_metadata(job_id)
-
-    from src.rag.final_report_generator import FinalReportGenerator
-    report_generator = FinalReportGenerator()
-    report_generator.run_generation(job_dir, job_id)
-    backend_logger.info("Generated final business compliance report for job %s", job_id)
-
-    # Stage 10 & 11: Comparative Analysis & Executive Comparative Report Generation
-    if job:
-        job["current_stage"] = "Stage 10: Comparative Analysis"
-        job["progress_percentage"] = 94.0
-        job["comparative_analysis_status"] = "running"
-        save_job_metadata(job_id)
-
-    try:
-        from src.comparative_analysis.service import ComparativeAnalysisService
-        from src.comparative_analysis.models import ComparativeAnalysisRequest
-
-        comp_service = ComparativeAnalysisService()
-        comp_req = ComparativeAnalysisRequest(document_id=job_id)
-        comp_resp = comp_service.run_analysis(comp_req)
-
-        backend_logger.info("Generated Comparative Analysis and Executive Report for job %s (status: %s)", job_id, comp_resp.status)
-        if job:
-            job["comparative_analysis_status"] = comp_resp.status
-            job["comparative_analysis_progress"] = 100.0
-            job["comparative_analysis_ready"] = True
-            job["current_stage"] = "Stage 11: Executive Comparative Analysis Report Generation"
-            job["progress_percentage"] = 98.0
-            save_job_metadata(job_id)
-    except Exception as comp_err:
-        backend_logger.error("Comparative Analysis execution failed for job %s: %s", job_id, comp_err, exc_info=True)
-        if job:
-            job["comparative_analysis_status"] = "failed"
-
-    # Copy reports to 09_reports/
-    try:
-        import shutil
-        reports_dir = job_dir / "09_reports"
-        reports_dir.mkdir(parents=True, exist_ok=True)
-        if (job_dir / "report.json").exists():
-            shutil.copy2(job_dir / "report.json", reports_dir / "consistency_report.json")
-        if (job_dir / "business_report.html").exists():
-            shutil.copy2(job_dir / "business_report.html", reports_dir / "consistency_report.html")
-        comp_report_src = job_dir / "comparative_analysis" / "comparative_report.html"
-        if comp_report_src.exists():
-            shutil.copy2(comp_report_src, reports_dir / "comparative_report.html")
-    except Exception as copy_err:
-        backend_logger.error("Failed to copy consistency reports to 09_reports: %s", copy_err)
-
-    # Count issues
-    issues_count = 0
-    report_file = job_dir / "report.json"
-    if report_file.exists():
-        with open(report_file, "r", encoding="utf-8") as f:
-            data = json.load(f)
-            issues_count = len(data.get("issues", []))
-
-    if job:
-        job["context_analysis_status"] = "completed"
-        job["context_analysis_stage"] = "Completed"
-        job["context_analysis_progress"] = 100.0
-        job["context_analysis_issues_count"] = issues_count
-
-    if job and "doc_hash" in job:
-        cache_mgr = DocumentCacheManager(job["doc_hash"], job["filename"])
-        cache_mgr.sync_from_job_dir(job_dir)
+def run_context_analysis_inline(job_id: str, job_dir: Path) -> None:
+    """Legacy helper for backward compatibility."""
+    orchestrator = StageOrchestrator(job_id, job_dir, Path(get_job(job_id)["file_path"]))
+    orchestrator.run_stage_6_context()
+    orchestrator.run_stage_7_comparative()
+    orchestrator.run_stage_8_reports()
 
 
 def background_worker() -> None:
-    """Thread function that processes jobs sequentially to avoid resource contention."""
+    """Thread function that processes jobs sequentially stage by stage via StageOrchestrator."""
     global CURRENT_JOB_ID
     backend_logger = logging.getLogger("backend")
-    backend_logger.info("Background proofreading worker thread started.")
+    backend_logger.info("Background stage orchestration worker thread started.")
     
     while True:
         try:
@@ -438,74 +383,21 @@ def background_worker() -> None:
                 job_queue.task_done()
                 continue
                 
-            backend_logger.info("Processing job %s (%s)", job_id, job["filename"])
-            job["status"] = "processing"
-            job["current_stage"] = "Stage 1: Extraction"
-            job["progress_percentage"] = 5.0
-            save_job_metadata(job_id)
-            
+            backend_logger.info("Processing job stage pipeline for %s (%s)", job_id, job["filename"])
             CURRENT_JOB_ID = job_id
+            job_dir = get_job_dir(job_id)
             input_path = Path(job["file_path"])
-            config = PipelineConfig()
-            
-            # Reset pipeline log handlers before run to prevent sharing file outputs across runs
-            pipeline_logger = logging.getLogger("pipeline")
-            for h in list(pipeline_logger.handlers):
-                if isinstance(h, logging.FileHandler):
-                    try:
-                        h.close()
-                    except Exception:
-                        pass
-                    pipeline_logger.removeHandler(h)
-            # Re-attach progress tracking handler
-            if progress_handler not in pipeline_logger.handlers:
-                pipeline_logger.addHandler(progress_handler)
 
             try:
-                with ProofreadingPipeline(config) as pipeline:
-                    result = pipeline.run(input_path, run_id=job_id)
-                    job["result"] = result
-                    job["proofreading_ready"] = True
-                    job["proofreading_status"] = "completed"
-                    job["current_stage"] = "Proofreading Ready (Running RAG & Contextual Analysis in Background)"
-                    job["progress_percentage"] = 50.0
-                    save_job_metadata(job_id)
-                    backend_logger.info("Proofreading phase finished for job %s. Results unlocked on UI. Proceeding to RAG & Ambiguity Pipeline...", job_id)
-                    
-                    try:
-                        import shutil
-                        job_dir = get_job_dir(job_id)
-                        reports_dir = job_dir / "09_reports"
-                        reports_dir.mkdir(parents=True, exist_ok=True)
-                        
-                        final_dir = job_dir / "10_final"
-                        if (final_dir / "report.json").exists():
-                            shutil.copy2(final_dir / "report.json", reports_dir / "proofreading_report.json")
-                        if (final_dir / "annotated_original.html").exists():
-                            shutil.copy2(final_dir / "annotated_original.html", reports_dir / "annotated.html")
-                        if (final_dir / "corrected_document.html").exists():
-                            shutil.copy2(final_dir / "corrected_document.html", reports_dir / "corrected.html")
-                    except Exception as copy_err:
-                        backend_logger.error("Failed to copy proofreading reports to 09_reports: %s", copy_err)
-
-                # Run RAG -> Ambiguity Detection -> Claude Verification -> Final Report Generation
-                job_dir = get_job_dir(job_id)
-                run_context_analysis_inline(job_id, job_dir)
-
-                # Mark Job Complete ONLY after all report files are successfully written
-                job["status"] = "completed"
-                job["current_stage"] = "Completed"
-                job["progress_percentage"] = 100.0
-                backend_logger.info("Job %s fully completed end-to-end successfully.", job_id)
-
+                orchestrator = StageOrchestrator(job_id, job_dir, input_path)
+                orchestrator.execute_all_stages()
             except Exception as e:
                 import traceback
                 error_trace = traceback.format_exc()
                 job["status"] = "failed"
                 job["current_stage"] = "Failed"
                 job["error"] = f"{str(e)}\n{error_trace}"
-                job["progress_percentage"] = 0.0
-                backend_logger.error("Job %s failed: %s", job_id, e)
+                backend_logger.error("Job %s failed in background worker: %s", job_id, e)
             finally:
                 job["completed_at"] = datetime.now().isoformat()
                 save_job_metadata(job_id)
@@ -554,5 +446,6 @@ def run_context_analysis_bg(job_id: str, job_dir: Path) -> None:
                 save_job_metadata(job_id)
             
     threading.Thread(target=worker, daemon=True).start()
+
 
 

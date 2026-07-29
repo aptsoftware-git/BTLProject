@@ -16,7 +16,7 @@ class InferenceService:
     Supports both Ollama (local) and Anthropic Claude (cloud API) backends.
     """
 
-    def __init__(self, model_name: str = "qwen2.5-coder:32b"):
+    def __init__(self, model_name: str = "qwen2.5-coder:7b"):
         self.model_name = model_name
         self.ollama_client = OllamaClient()
         self.prompts_dir = Path(__file__).parent / "prompts"

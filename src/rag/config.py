@@ -20,7 +20,7 @@ class RagConfig:
     collection_prefix: str = "doc_"
     
     # Ollama LLM Settings
-    ollama_model: str = os.environ.get("OLLAMA_MODEL", "qwen2.5-coder:32b")
+    ollama_model: str = os.environ.get("OLLAMA_MODEL", "qwen2.5-coder:7b")
     ollama_host: str = os.environ.get("OLLAMA_HOST", "http://192.168.19.21:11434")
     
     # Semantic Consistency Settings (Clustering & Retrieval)

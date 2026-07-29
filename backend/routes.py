@@ -154,6 +154,38 @@ async def get_status(job_id: str) -> JobStatusResponse:
 
 
 @router.get(
+    "/jobs/{job_id}",
+    response_model=JobStatusResponse,
+    summary="Get processing status and stage progress of a document job",
+)
+async def get_job_status(job_id: str) -> JobStatusResponse:
+    job = get_job(job_id)
+    if not job:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail=f"Job with ID '{job_id}' not found.",
+        )
+    return JobStatusResponse(**job)
+
+
+@router.post(
+    "/jobs/{job_id}/retry",
+    response_model=JobStatusResponse,
+    summary="Retry a failed stage or restart processing",
+)
+async def retry_job(job_id: str, stage_id: str = "all") -> JobStatusResponse:
+    from backend.services import retry_job_stage
+    try:
+        job = retry_job_stage(job_id, stage_id=stage_id)
+        return JobStatusResponse(**job)
+    except Exception as exc:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail=str(exc)
+        )
+
+
+@router.get(
     "/results/{job_id}",
     response_model=ResultsResponse,
     summary="Get full proofreading results for a completed job",
@@ -565,6 +597,8 @@ async def get_document(job_id: str):
         "uploadedLabel": uploaded_label,
         "size": size_str,
         "status": job["status"],
+        "upload_ready": job.get("upload_ready", True),
+        "document_viewer_ready": job.get("document_viewer_ready", False),
         "extraction_ready": job.get("extraction_ready", False),
         "spell_ready": job.get("spell_ready", False),
         "grammar_ready": job.get("grammar_ready", False),
@@ -576,6 +610,8 @@ async def get_document(job_id: str):
         "reports_ready": job.get("reports_ready", False),
         "current_stage": job.get("current_stage"),
         "progress_percentage": job.get("progress_percentage"),
+        "overall_progress": job.get("overall_progress", 0),
+        "stages": job.get("stages", []),
         "error": job.get("error"),
         "issues": [],
         "protected_terms": [],

@@ -35,6 +35,16 @@ export function fetchDocument(id) {
   return request(`/documents/${id}`);
 }
 
+export function fetchJobStatus(id) {
+  return request(`/jobs/${id}`);
+}
+
+export function retryJobStage(id, stageId = "all") {
+  return request(`/jobs/${id}/retry?stage_id=${stageId}`, {
+    method: "POST"
+  });
+}
+
 export function deleteDocument(id) {
   return request(`/documents/${id}`, {
     method: "DELETE",

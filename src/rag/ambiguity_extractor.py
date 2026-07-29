@@ -20,7 +20,7 @@ class AmbiguityExtractor:
 
     def __init__(self, config: Optional[RagConfig] = None):
         self.config = config or RagConfig()
-        self.model_name = getattr(self.config, "ollama_model", os.environ.get("OLLAMA_MODEL", "qwen2.5-coder:32b"))
+        self.model_name = getattr(self.config, "ollama_model", os.environ.get("OLLAMA_MODEL", "qwen2.5-coder:7b"))
         
         # Instantiate OllamaClient using host from configuration
         ollama_host = "http://192.168.19.21:11434"

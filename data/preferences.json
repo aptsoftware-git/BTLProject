@@ -1,0 +1,8 @@
+{
+  "auto_save": true,
+  "dark_mode": true,
+  "ollama_host": "http://192.168.19.21:11434",
+  "ollama_model": "qwen2.5-coder:7b",
+  "languagetool_language": "en-US",
+  "confidence_threshold": 40
+}
