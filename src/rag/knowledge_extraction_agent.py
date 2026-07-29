@@ -283,6 +283,27 @@ class KnowledgeExtractionAgent:
                     t_obj_id = f"{doc_id}_chunk_{seq_num:04d}"
                     last_table_id = t_obj_id
                     seq_num += 1
+
+                    if tables_dir:
+                        tables_dir.mkdir(parents=True, exist_ok=True)
+                        t_count = len(list(tables_dir.glob("table_*.json"))) + 1
+                        t_json_path = tables_dir / f"table_{t_count:03d}.json"
+                        t_md_path = tables_dir / f"table_{t_count:03d}.md"
+                        try:
+                            with open(t_json_path, "w", encoding="utf-8") as tf:
+                                json.dump({
+                                    "table_id": self_ref,
+                                    "page_number": page,
+                                    "rows_count": table_struct.rows_count,
+                                    "cols_count": table_struct.cols_count,
+                                    "caption": table_struct.caption,
+                                    "markdown": md_str or text_content
+                                }, tf, indent=2, ensure_ascii=False)
+                            if md_str:
+                                with open(t_md_path, "w", encoding="utf-8") as mf:
+                                    mf.write(md_str)
+                        except Exception as t_err:
+                            logger.error(f"Failed to write table output file: {t_err}")
                     
                     yield KnowledgeObject(
                         knowledge_id=t_obj_id,
