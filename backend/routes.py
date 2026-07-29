@@ -565,6 +565,8 @@ async def get_document(job_id: str):
         "uploadedLabel": uploaded_label,
         "size": size_str,
         "status": job["status"],
+        "proofreading_ready": job.get("proofreading_ready", False),
+        "proofreading_status": job.get("proofreading_status", "pending"),
         "current_stage": job.get("current_stage"),
         "progress_percentage": job.get("progress_percentage"),
         "error": job.get("error"),
@@ -593,7 +595,8 @@ async def get_document(job_id: str):
         "memory_safe_mode": job.get("memory_safe_mode", True),
     }
 
-    if job["status"] == "completed":
+    is_proofreading_ready = job.get("status") == "completed" or job.get("proofreading_ready") or job.get("proofreading_status") == "completed"
+    if is_proofreading_ready:
         job_dir = get_job_dir(job_id)
         
         # Load Issues
