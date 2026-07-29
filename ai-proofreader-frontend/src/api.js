@@ -41,18 +41,110 @@ export function deleteDocument(id) {
   });
 }
 
-export function uploadDocument(file) {
-  const formData = new FormData();
-  formData.append("file", file);
-  return fetch(`${API_BASE}/documents/upload`, {
-    method: "POST",
-    body: formData,
-  }).then(async (res) => {
-    if (!res.ok) {
-      const txt = await res.text();
-      throw new Error(txt || `Upload failed with status ${res.status}`);
+export function uploadDocument(file, onProgress, xhrRef) {
+  return new Promise((resolve, reject) => {
+    if (!file) {
+      const err = new Error("No file selected for upload.");
+      if (import.meta.env?.DEV) console.error("[Upload] Error:", err);
+      return reject(err);
     }
-    return res.json();
+
+    const name = file.name || "";
+    const ext = name.slice(name.lastIndexOf(".")).toLowerCase();
+    const allowed = [".pdf", ".docx", ".txt"];
+    if (!allowed.includes(ext)) {
+      const err = new Error(`Unsupported file format "${ext}". Please upload a PDF, DOCX, or TXT document.`);
+      if (import.meta.env?.DEV) console.error("[Upload] Error:", err);
+      return reject(err);
+    }
+
+    const maxMB = 50;
+    if (file.size > maxMB * 1024 * 1024) {
+      const err = new Error(`File size exceeds maximum limit of ${maxMB}MB.`);
+      if (import.meta.env?.DEV) console.error("[Upload] Error:", err);
+      return reject(err);
+    }
+
+    const baseUrl = (import.meta.env && import.meta.env.VITE_API_BASE_URL) ? import.meta.env.VITE_API_BASE_URL.replace(/\/+$/, "") : "http://localhost:8000/api";
+    const url = `${baseUrl}/documents/upload`;
+
+    if (import.meta.env?.DEV) {
+      console.debug("Uploading file:", file.name);
+      console.debug("POST", url);
+    }
+
+    const xhr = new XMLHttpRequest();
+    if (xhrRef) {
+      xhrRef.current = xhr;
+    }
+
+    const formData = new FormData();
+    formData.append("file", file);
+
+    xhr.upload.onprogress = (event) => {
+      if (event.lengthComputable && typeof onProgress === "function") {
+        const percent = Math.round((event.loaded / event.total) * 100);
+        onProgress(percent);
+      }
+    };
+
+    xhr.onload = () => {
+      if (import.meta.env?.DEV) {
+        console.debug("Upload response status:", xhr.status);
+      }
+      if (xhr.status >= 200 && xhr.status < 300) {
+        try {
+          const responseJson = JSON.parse(xhr.responseText);
+          if (import.meta.env?.DEV) {
+            console.debug("Upload completed", responseJson);
+          }
+          resolve(responseJson);
+        } catch (e) {
+          reject(new Error("Invalid JSON response from server."));
+        }
+      } else {
+        let errorMsg = `Upload failed with status ${xhr.status}`;
+        try {
+          const errData = JSON.parse(xhr.responseText);
+          if (errData.detail) {
+            errorMsg = typeof errData.detail === "string" ? errData.detail : JSON.stringify(errData.detail);
+          }
+        } catch (e) {
+          if (xhr.responseText) errorMsg = xhr.responseText;
+        }
+        if (import.meta.env?.DEV) {
+          console.error("Upload error:", errorMsg);
+        }
+        reject(new Error(errorMsg));
+      }
+    };
+
+    xhr.onerror = () => {
+      const err = new Error(`Network failure: Unable to connect to backend server at ${url}. Please check if the backend service is running.`);
+      if (import.meta.env?.DEV) {
+        console.error(err);
+      }
+      reject(err);
+    };
+
+    xhr.onabort = () => {
+      const err = new Error("Upload cancelled by user.");
+      if (import.meta.env?.DEV) {
+        console.debug("Upload cancelled");
+      }
+      reject(err);
+    };
+
+    xhr.ontimeout = () => {
+      const err = new Error("Upload timed out. Please try again.");
+      if (import.meta.env?.DEV) {
+        console.error(err);
+      }
+      reject(err);
+    };
+
+    xhr.open("POST", url, true);
+    xhr.send(formData);
   });
 }
 

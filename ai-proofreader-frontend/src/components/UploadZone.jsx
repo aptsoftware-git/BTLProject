@@ -17,6 +17,11 @@ export default function UploadZone({ onUploaded }) {
       const file = files?.[0];
       if (!file) return;
 
+      // Reset file input value so re-selecting the exact same file fires onChange
+      if (inputRef.current) {
+        inputRef.current.value = "";
+      }
+
       setLastFile(file);
       setError(null);
       setSuccess(null);
@@ -27,7 +32,9 @@ export default function UploadZone({ onUploaded }) {
         setSuccess(`Document "${file.name}" uploaded successfully — proofreading started!`);
         onUploaded?.(result);
       } catch (err) {
-        setError(err.message || "Upload failed. Please try again.");
+        if (err.message !== "Upload cancelled by user.") {
+          setError(err.message || "Upload failed. Please try again.");
+        }
       } finally {
         setProgress(null);
         xhrRef.current = null;
