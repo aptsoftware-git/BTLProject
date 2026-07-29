@@ -422,8 +422,10 @@ class KnowledgeExtractionAgent:
                                     "5. Keywords (a list of comma-separated keywords)\n"
                                     "\nAnswer clearly and directly."
                                 )
+                                from src.model_router import MODEL_ROUTER
+                                vlm_model = os.environ.get("MODEL_VISION_ANALYSIS", MODEL_ROUTER.get_model("vision_analysis"))
                                 vlm_text = self.ollama_client.generate_vision(
-                                    model="qwen2.5vl:latest",
+                                    model=vlm_model,
                                     prompt=prompt,
                                     image_bytes_b64=img_b64
                                 )

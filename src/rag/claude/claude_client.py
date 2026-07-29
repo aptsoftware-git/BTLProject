@@ -16,8 +16,8 @@ class ClaudeClient:
 
     def __init__(self, api_key: Optional[str] = None, model: Optional[str] = None):
         self.api_key = api_key or os.getenv("CLAUDE_API_KEY") or os.getenv("ANTHROPIC_API_KEY")
-        # Check CLAUDE_MODEL as well as ANTHROPIC_MODEL
-        self.model = model or os.getenv("ANTHROPIC_MODEL") or os.getenv("CLAUDE_MODEL") or "claude-3-5-sonnet-20241022"
+        from src.model_router import MODEL_ROUTER
+        self.model = model or os.getenv("MODEL_EXECUTIVE_REPORT", os.getenv("ANTHROPIC_MODEL", os.getenv("CLAUDE_MODEL", MODEL_ROUTER.get_model("executive_report"))))
         self.url = "https://api.anthropic.com/v1/messages"
         self.timeout = 120
         self.max_retries = 3

@@ -1,10 +1,5 @@
-from __future__ import annotations
-
-import logging
-import time
-import uuid
-from typing import Optional
-
+import os
+from src.model_router import MODEL_ROUTER
 from src.comparative_analysis.models import (
     ComparativeAnalysisRequest,
     ComparativeAnalysisResponse,
@@ -55,6 +50,12 @@ class ComparativeAnalysisService:
     Output: ONE Executive Comparative Analysis Report (ComparativeReportGenerator).
     """
 
+
+class ComparativeAnalysisService:
+    """
+    Main orchestration service for Executive Comparative Analysis System.
+    """
+
     def __init__(
         self,
         claude_api_key: Optional[str] = None,
@@ -64,6 +65,7 @@ class ComparativeAnalysisService:
         """
         Initialize ComparativeAnalysisService with all 10 specialized agents.
         """
+        self.model_name = llm_model_name or os.environ.get("MODEL_COMPARATIVE_ANALYSIS", MODEL_ROUTER.get_model("comparative_analysis"))
         self.retriever = CompanyProfileRetriever()
         self.company_summary_agent = CompanySummaryAgent(
             api_key=claude_api_key,

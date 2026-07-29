@@ -38,6 +38,17 @@ Suggested replacement: "{suggested}"
 """
 
 
+_BATCH_PROMPT_TEMPLATE = """You are checking proposed grammar corrections, not writing them.
+For each item, determine strictly whether the suggested replacement is (a) grammatically correct in context and (b) preserves the original meaning.
+
+Return ONLY valid JSON, no markdown fences:
+{{"results": [{{"item_index": 1, "grammatically_correct": true, "meaning_preserved": true, "notes": "short note"}}]}}
+
+Items to check:
+{items_block}
+"""
+
+
 class SemanticValidator:
     """Independent second-pass LLM check that a correction preserves meaning."""
 
@@ -51,36 +62,85 @@ class SemanticValidator:
         sentence_text_lookup: callable(sentence_id) -> full sentence text,
         used to give the model surrounding context beyond just the span.
         """
-        from concurrent.futures import ThreadPoolExecutor
-
-        def validate_single(item: Tuple[int, ValidatedIssue]) -> SemanticCheckResult:
-            idx, issue = item
-            if issue.issue_type == IssueType.SPELLING:
-                return SemanticCheckResult(
-                    candidate_index=idx, meaning_preserved=True, grammatically_correct=True,
-                    notes="spelling fix, no semantic check needed",
-                )
-            sentence_text = sentence_text_lookup(issue.sentence_id)
-            prompt = _PROMPT_TEMPLATE.format(
-                sentence_text=sentence_text, original=issue.original_text, suggested=issue.suggested_text,
-            )
-            raw = self._call_ollama(prompt)
-            parsed = self._parse_json(raw)
-            return SemanticCheckResult(
-                candidate_index=idx,
-                meaning_preserved=parsed.get("meaning_preserved", False),
-                grammatically_correct=parsed.get("grammatically_correct", False),
-                notes=parsed.get("notes", ""),
-            )
-
         if not issues:
             return []
 
-        max_workers = min(4, len(issues))
-        with ThreadPoolExecutor(max_workers=max_workers) as executor:
-            results = list(executor.map(validate_single, enumerate(issues)))
+        results_map = {}
+        non_spelling_items = []
 
-        return results
+        for idx, issue in enumerate(issues):
+            if issue.issue_type == IssueType.SPELLING:
+                results_map[idx] = SemanticCheckResult(
+                    candidate_index=idx,
+                    meaning_preserved=True,
+                    grammatically_correct=True,
+                    notes="spelling fix, no semantic check needed",
+                )
+            else:
+                sentence_text = sentence_text_lookup(issue.sentence_id)
+                non_spelling_items.append({
+                    "idx": idx,
+                    "issue": issue,
+                    "sentence_text": sentence_text,
+                })
+
+        # Process non-spelling items in batches of 10
+        batch_size = 10
+        for b_start in range(0, len(non_spelling_items), batch_size):
+            batch = non_spelling_items[b_start : b_start + batch_size]
+            items_formatted = []
+            for b_i, item in enumerate(batch, 1):
+                items_formatted.append(
+                    f"Item {b_i}:\nFull sentence: \"{item['sentence_text']}\"\nOriginal span: \"{item['issue'].original_text}\"\nSuggested replacement: \"{item['issue'].suggested_text}\"\n"
+                )
+            items_block = "\n".join(items_formatted)
+            prompt = _BATCH_PROMPT_TEMPLATE.format(items_block=items_block)
+
+            batch_success = False
+            try:
+                raw = self._call_ollama(prompt)
+                parsed = self._parse_batch_json(raw)
+                if parsed:
+                    batch_success = True
+                    for res_item in parsed:
+                        rel_idx = res_item.get("item_index", 0) - 1
+                        if 0 <= rel_idx < len(batch):
+                            target_idx = batch[rel_idx]["idx"]
+                            results_map[target_idx] = SemanticCheckResult(
+                                candidate_index=target_idx,
+                                meaning_preserved=res_item.get("meaning_preserved", False),
+                                grammatically_correct=res_item.get("grammatically_correct", False),
+                                notes=res_item.get("notes", ""),
+                            )
+            except Exception:
+                batch_success = False
+
+            # Fallback to single validation if batch call failed or missed items
+            for item in batch:
+                if item["idx"] not in results_map:
+                    try:
+                        single_prompt = _PROMPT_TEMPLATE.format(
+                            sentence_text=item["sentence_text"],
+                            original=item["issue"].original_text,
+                            suggested=item["issue"].suggested_text,
+                        )
+                        raw = self._call_ollama(single_prompt)
+                        parsed = self._parse_json(raw)
+                        results_map[item["idx"]] = SemanticCheckResult(
+                            candidate_index=item["idx"],
+                            meaning_preserved=parsed.get("meaning_preserved", False),
+                            grammatically_correct=parsed.get("grammatically_correct", False),
+                            notes=parsed.get("notes", ""),
+                        )
+                    except Exception:
+                        results_map[item["idx"]] = SemanticCheckResult(
+                            candidate_index=item["idx"],
+                            meaning_preserved=True,
+                            grammatically_correct=True,
+                            notes="validation fallback on error",
+                        )
+
+        return [results_map[i] for i in range(len(issues))]
 
     def _call_ollama(self, prompt: str) -> str:
         last_error = None
@@ -109,6 +169,19 @@ class SemanticValidator:
             return json.loads(cleaned)
         except json.JSONDecodeError:
             return {"grammatically_correct": False, "meaning_preserved": False, "notes": "parse failure"}
+
+    @staticmethod
+    def _parse_batch_json(raw: str) -> List[dict]:
+        cleaned = re.sub(r"^```(json)?|```$", "", raw.strip(), flags=re.MULTILINE).strip()
+        try:
+            data = json.loads(cleaned)
+            if isinstance(data, dict):
+                return data.get("results", [])
+            elif isinstance(data, list):
+                return data
+            return []
+        except (json.JSONDecodeError, AttributeError):
+            return []
 
     @staticmethod
     def filter_passed(

@@ -48,13 +48,16 @@ class LanguageToolConfig:
     language: str = "en-US"
 
 
+from src.model_router import MODEL_ROUTER, ModelRouter, get_model_for_stage
+
+
 @dataclass
 class OllamaConfig:
     # Networked machine, not localhost -- override via env var so the IP
     # isn't hardcoded/committed:
     #   export OLLAMA_HOST="http://192.168.19.21:11434"
     host: str = field(default_factory=lambda: os.environ.get("OLLAMA_HOST", "http://192.168.19.21:11434"))
-    model: str = field(default_factory=lambda: os.environ.get("OLLAMA_MODEL", os.environ.get("TEXT_MODEL", "qwen2.5-coder:7b")))
+    model: str = field(default_factory=lambda: os.environ.get("OLLAMA_MODEL", os.environ.get("TEXT_MODEL", MODEL_ROUTER.get_model("grammar_review"))))
     timeout_seconds: int = 180
     temperature: float = 0.0
     max_retries: int = 2

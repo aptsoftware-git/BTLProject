@@ -35,31 +35,33 @@ class LanguageToolAgent:
             self.tool.close()
 
     def run(self, sentence: Sentence) -> List[Candidate]:
-        if not self.available:
+        return self.run_batch([sentence])
+
+    def run_batch(self, sentences: List[Sentence]) -> List[Candidate]:
+        """Process a list of sentences, returning all detected candidates."""
+        if not self.available or not sentences:
             return []
-        if sentence.doc_char_start is None:
-            raise ValueError(
-                "Sentence.doc_char_start is not set -- call "
-                "models.index_sentence_doc_offsets(document) before running "
-                "the LanguageTool agent."
-            )
-        matches = self.tool.check(sentence.text)
-        candidates = []
-        for m in matches:
-            if not m.replacements:
-                continue  # no suggestion, nothing to render as a fix
-            issue_type = self._classify(m.rule_id, m.rule_issue_type)
-            candidates.append(Candidate(
-                sentence_id=sentence.sentence_id,
-                char_start=sentence.doc_char_start + m.offset,
-                char_end=sentence.doc_char_start + m.offset + m.error_length,
-                original_text=sentence.text[m.offset:m.offset + m.error_length],
-                suggested_text=m.replacements[0],
-                issue_type=issue_type,
-                source=SourceAgent.LANGUAGETOOL,
-                reason=m.message,
-                confidence=0.75,
-            ))
+        
+        candidates: List[Candidate] = []
+        for sentence in sentences:
+            if sentence.doc_char_start is None:
+                continue
+            matches = self.tool.check(sentence.text)
+            for m in matches:
+                if not m.replacements:
+                    continue
+                issue_type = self._classify(m.rule_id, m.rule_issue_type)
+                candidates.append(Candidate(
+                    sentence_id=sentence.sentence_id,
+                    char_start=sentence.doc_char_start + m.offset,
+                    char_end=sentence.doc_char_start + m.offset + m.error_length,
+                    original_text=sentence.text[m.offset:m.offset + m.error_length],
+                    suggested_text=m.replacements[0],
+                    issue_type=issue_type,
+                    source=SourceAgent.LANGUAGETOOL,
+                    reason=m.message,
+                    confidence=0.75,
+                ))
         return candidates
 
     @staticmethod

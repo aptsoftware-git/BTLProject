@@ -54,6 +54,25 @@ Paragraph:
 """
 
 
+_BATCH_PROMPT_TEMPLATE = """You are a spelling and grammar correction engine. You detect and correct ONLY genuine \
+errors in spelling, grammar, tense, and punctuation across multiple paragraphs.
+CRITICAL INSTRUCTIONS:
+- You must NEVER rewrite paragraphs or paraphrase.
+- You must NEVER improve style or change wording for flow.
+- You must ONLY target objective spelling, grammar, tense, and punctuation mistakes.
+- You must NOT modify any name of a person, organization, company, place, product, or protected token.
+
+PROTECTED TOKENS:
+{protected_terms}
+
+Return ONLY valid JSON with no markdown fences:
+{{"paragraph_results": [{{"paragraph_index": 1, "errors": [{{"original": "...", "corrected": "...", "reason": "...", "type": "spelling|grammar|tense|punctuation"}}]}}]}}
+
+Paragraphs to review:
+{paragraphs_block}
+"""
+
+
 class GrammarAgent:
     """Local-LLM based Level-2 grammar check + paragraph-level reviewer."""
 
@@ -67,16 +86,102 @@ class GrammarAgent:
         sentence_id_for_offset_lookup: Callable[[int], int],
         protected_terms_in_paragraph: List[ProtectedTerm],
     ) -> List[Candidate]:
-        protected_str = ", ".join(sorted({t.text for t in protected_terms_in_paragraph})) or "(none)"
-        prompt = _PROMPT_TEMPLATE.format(protected_terms=protected_str, paragraph_text=paragraph_text)
+        results = self.run_batch(
+            [{
+                "text": paragraph_text,
+                "doc_char_start": paragraph_doc_offset,
+                "protected_terms": protected_terms_in_paragraph,
+            }],
+            sentence_id_for_offset_lookup=sentence_id_for_offset_lookup,
+            batch_size=1,
+        )
+        return results
 
-        raw = self._call_ollama(prompt)
-        errors = self._parse_json(raw)
+    def run_batch(
+        self,
+        paragraphs_data: List[dict],
+        sentence_id_for_offset_lookup: Callable[[int], int],
+        batch_size: int = 15,
+    ) -> List[Candidate]:
+        if not paragraphs_data:
+            return []
 
+        all_candidates: List[Candidate] = []
+
+        # Process in chunks of batch_size
+        for i in range(0, len(paragraphs_data), batch_size):
+            chunk = paragraphs_data[i : i + batch_size]
+            
+            # Fast single fallback if batch_size == 1
+            if len(chunk) == 1:
+                item = chunk[0]
+                protected_str = ", ".join(sorted({t.text for t in item["protected_terms"]})) or "(none)"
+                prompt = _PROMPT_TEMPLATE.format(protected_terms=protected_str, paragraph_text=item["text"])
+                try:
+                    raw = self._call_ollama(prompt)
+                    errors = self._parse_json(raw)
+                    all_candidates.extend(
+                        self._candidates_from_errors(item["text"], item["doc_char_start"], errors, sentence_id_for_offset_lookup)
+                    )
+                except Exception:
+                    pass
+                continue
+
+            # Multi-paragraph batch execution
+            all_protected = set()
+            formatted_paragraphs = []
+            for idx, p_item in enumerate(chunk, 1):
+                for t in p_item.get("protected_terms", []):
+                    all_protected.add(t.text)
+                formatted_paragraphs.append(f"[Paragraph {idx}]\n{p_item['text']}\n")
+
+            protected_str = ", ".join(sorted(all_protected)) or "(none)"
+            paragraphs_block = "\n".join(formatted_paragraphs)
+            prompt = _BATCH_PROMPT_TEMPLATE.format(
+                protected_terms=protected_str, paragraphs_block=paragraphs_block
+            )
+
+            batch_success = False
+            try:
+                raw = self._call_ollama(prompt)
+                batch_data = self._parse_batch_json(raw)
+                if batch_data:
+                    batch_success = True
+                    for p_res in batch_data:
+                        p_idx = p_res.get("paragraph_index", 0) - 1
+                        if 0 <= p_idx < len(chunk):
+                            item = chunk[p_idx]
+                            errors = p_res.get("errors", [])
+                            all_candidates.extend(
+                                self._candidates_from_errors(item["text"], item["doc_char_start"], errors, sentence_id_for_offset_lookup)
+                            )
+            except Exception:
+                batch_success = False
+
+            # Fallback to individual processing if batch failed
+            if not batch_success:
+                for item in chunk:
+                    protected_str = ", ".join(sorted({t.text for t in item["protected_terms"]})) or "(none)"
+                    prompt = _PROMPT_TEMPLATE.format(protected_terms=protected_str, paragraph_text=item["text"])
+                    try:
+                        raw = self._call_ollama(prompt)
+                        errors = self._parse_json(raw)
+                        all_candidates.extend(
+                            self._candidates_from_errors(item["text"], item["doc_char_start"], errors, sentence_id_for_offset_lookup)
+                        )
+                    except Exception:
+                        pass
+
+        return all_candidates
+
+    def _candidates_from_errors(
+        self,
+        paragraph_text: str,
+        paragraph_doc_offset: int,
+        errors: List[dict],
+        sentence_id_for_offset_lookup: Callable[[int], int],
+    ) -> List[Candidate]:
         candidates = []
-        # Track how many times each original span has already been matched,
-        # so repeated identical words in the paragraph map to distinct
-        # occurrences rather than always matching the first one.
         used_positions: Dict[str, int] = {}
         for err in errors:
             original = err.get("original", "").strip()
@@ -85,7 +190,7 @@ class GrammarAgent:
                 continue
             span = self._locate_span(paragraph_text, original, used_positions)
             if span is None:
-                continue  # LLM referenced text that doesn't literally appear -- skip, don't guess
+                continue
             start, end = span
             candidates.append(Candidate(
                 sentence_id=sentence_id_for_offset_lookup(paragraph_doc_offset + start),
@@ -134,6 +239,19 @@ class GrammarAgent:
             return data.get("errors", [])
         except (json.JSONDecodeError, AttributeError):
             return []  # fail closed: no candidates rather than a crash
+
+    @staticmethod
+    def _parse_batch_json(raw: str) -> List[dict]:
+        cleaned = re.sub(r"^```(json)?|```$", "", raw.strip(), flags=re.MULTILINE).strip()
+        try:
+            data = json.loads(cleaned)
+            if isinstance(data, dict):
+                return data.get("paragraph_results", [])
+            elif isinstance(data, list):
+                return data
+            return []
+        except (json.JSONDecodeError, AttributeError):
+            return []
 
     @staticmethod
     def _locate_span(paragraph_text: str, original: str, used_positions: Dict[str, int]) -> Tuple[int, int] | None:

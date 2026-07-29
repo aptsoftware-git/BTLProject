@@ -7,6 +7,8 @@ from typing import Optional, Dict, Any
 from src.rag.ollama_client import OllamaClient
 from src.rag.config import RagConfig
 
+from src.model_router import MODEL_ROUTER
+
 logger = logging.getLogger("pipeline")
 
 class InferenceService:
@@ -16,8 +18,8 @@ class InferenceService:
     Supports both Ollama (local) and Anthropic Claude (cloud API) backends.
     """
 
-    def __init__(self, model_name: str = "qwen2.5-coder:7b"):
-        self.model_name = model_name
+    def __init__(self, model_name: Optional[str] = None):
+        self.model_name = model_name or os.environ.get("MODEL_CONTEXT_ANALYSIS", MODEL_ROUTER.get_model("context_analysis"))
         self.ollama_client = OllamaClient()
         self.prompts_dir = Path(__file__).parent / "prompts"
         

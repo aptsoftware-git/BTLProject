@@ -1,8 +1,10 @@
 from typing import List, Dict, Optional
 from src.rag.response_models import ModelMetadata
 
+from src.model_router import MODEL_ROUTER
+
 # The default model to fall back on if none is specified or if the requested model is invalid.
-DEFAULT_MODEL_ID = "qwen2.5-coder:7b"
+DEFAULT_MODEL_ID = MODEL_ROUTER.get_model("rag_chat")
 
 # Configuration-driven list of supported models.
 SUPPORTED_MODELS_LIST = [

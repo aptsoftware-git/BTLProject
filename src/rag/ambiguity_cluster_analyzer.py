@@ -11,6 +11,8 @@ from src.rag.ollama_client import OllamaClient
 
 logger = logging.getLogger("pipeline")
 
+from src.model_router import MODEL_ROUTER
+
 class AmbiguityClusterAnalyzer:
     """
     Phase 3: Local LLM Cluster-Level Ambiguity Analyzer.
@@ -22,7 +24,7 @@ class AmbiguityClusterAnalyzer:
 
     def __init__(self, config: Optional[RagConfig] = None):
         self.config = config or RagConfig()
-        self.model_name = getattr(self.config, "ollama_model", os.environ.get("OLLAMA_MODEL", "qwen2.5-coder:7b"))
+        self.model_name = os.environ.get("MODEL_CONTEXT_ANALYSIS", MODEL_ROUTER.get_model("context_analysis"))
         
         # Resolve host from config
         ollama_host = "http://192.168.19.21:11434"

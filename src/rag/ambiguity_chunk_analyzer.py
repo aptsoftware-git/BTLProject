@@ -12,6 +12,8 @@ from collections import Counter
 
 logger = logging.getLogger("pipeline")
 
+from src.model_router import MODEL_ROUTER
+
 class AmbiguityChunkAnalyzer:
     """
     Phase 2B: Local LLM Chunk-Level Ambiguity Analyzer.
@@ -22,7 +24,7 @@ class AmbiguityChunkAnalyzer:
 
     def __init__(self, config: Optional[RagConfig] = None):
         self.config = config or RagConfig()
-        self.model_name = getattr(self.config, "ollama_model", os.environ.get("OLLAMA_MODEL", "qwen2.5-coder:7b"))
+        self.model_name = os.environ.get("MODEL_CONTEXT_ANALYSIS", MODEL_ROUTER.get_model("context_analysis"))
         
         # Resolve host from config
         ollama_host = "http://192.168.19.21:11434"
@@ -216,20 +218,34 @@ class AmbiguityChunkAnalyzer:
         
         policy_keywords = {"must", "shall", "required", "mandatory", "policy", "prohibited", "condition", "unless", "except", "agreement", "liability", "term", "clause"}
 
-        def _process_chunk(ch):
+        # Filter chunks into fast-path fallback vs LLM candidate chunks
+        fallback_results = []
+        llm_chunks = []
+
+        for ch in chunks:
             chunk_id = ch["chunk_id"]
             text = ch["text"]
             extraction = ch.get("extraction", {})
             claims = extraction.get("claims", [])
             policies = extraction.get("policies", []) + extraction.get("obligations", [])
             words = text.split()
-
-            # Fast-path fallback for short chunks, table chunks, or chunks without policy/obligation statements
             has_policy_kw = any(kw in text.lower() for kw in policy_keywords)
             if len(words) < 30 or (not claims and not policies and not has_policy_kw) or not ollama_active:
-                return self._analyze_fallback_chunk(chunk_id, text, claims)
+                fallback_results.append(self._analyze_fallback_chunk(chunk_id, text, claims))
+            else:
+                llm_chunks.append(ch)
 
-            prompt = f"""Perform chunk-level claim validation and ambiguity analysis.
+        chunk_reasonings.extend(fallback_results)
+
+        def _process_chunk_batch(batch_chunks):
+            batch_results = []
+            if len(batch_chunks) == 1:
+                ch = batch_chunks[0]
+                chunk_id = ch["chunk_id"]
+                text = ch["text"]
+                extraction = ch.get("extraction", {})
+                claims = extraction.get("claims", [])
+                prompt = f"""Perform chunk-level claim validation and ambiguity analysis.
 
 Original Chunk Text:
 {text}
@@ -237,72 +253,67 @@ Original Chunk Text:
 Structured Extraction from Phase 2A:
 {json.dumps(extraction, indent=2)}
 
-Verify every claim in the list:
-- Does the original text fully support the claim?
-- Is there missing context?
-
-Search for linguistic ambiguities and errors strictly within the text:
-1. Wording ambiguity/vagueness (e.g. pronoun ambiguity, vague wording, temporal/numerical ambiguity, passive wording, inconsistent terminology, undefined terminology)
-2. Pronoun/Referential ambiguity ("he", "she", "it", "they" without clear antecedent)
-3. Numerical or Temporal ambiguity
-4. Modality/Condition issues (unclear conditions or obligations)
-5. Inconsistent terminology or passive wording
-
-Return the validation and issues strictly as a single JSON object.
-Do NOT include markdown fences, comments, or conversational text.
-
-Requested JSON Schema:
+Return JSON schema matching:
 {{
     "chunk_id": "{chunk_id}",
-    "claim_validation": [
-        {{
-            "claim_id": "string",
-            "status": "valid|partial|incorrect",
-            "reason": "explanation of validation status",
-            "improved_claim": "rewritten claim if partial or incorrect, else original claim",
-            "confidence": 0.95
-        }}
-    ],
-    "ambiguities": [
-        {{
-            "issue_id": "{chunk_id}_amb_000",
-            "type": "pronoun ambiguity|vague wording|temporal ambiguity|numerical ambiguity|passive wording|inconsistent terminology|undefined terminology",
-            "severity": "Low|Medium|High|Critical",
-            "quote": "exact word or phrase from text",
-            "reason": "why this is an issue",
-            "supporting_evidence": "the context around the quote",
-            "suggested_rewrite": "an improved version of the quote or sentence",
-            "affected_claims": ["claim_id_1"],
-            "confidence": 0.90
-        }}
-    ],
+    "claim_validation": [{"claim_id": "string", "status": "valid|partial|incorrect", "reason": "string", "improved_claim": "string", "confidence": 0.95}],
+    "ambiguities": [{"issue_id": "{chunk_id}_amb_000", "type": "vague wording", "severity": "Low|Medium|High", "quote": "string", "reason": "string", "supporting_evidence": "string", "suggested_rewrite": "string", "affected_claims": [], "confidence": 0.90}],
     "overall_chunk_risk": "Low|Medium|High",
     "overall_confidence": 0.92
 }}
 """
-            try:
-                logger.info(f"Running LLM Chunk Analysis for chunk: {chunk_id}")
-                resp = self.ollama_client.generate(
-                    model=self.model_name,
-                    prompt=prompt,
-                    system=system_prompt
-                )
-                return self._clean_and_parse_json(resp)
-            except Exception as e:
-                logger.error(f"Failed LLM chunk analysis for {chunk_id}: {e}. Falling back to rule-based.")
-                return self._analyze_fallback_chunk(chunk_id, text, claims)
-
-        from concurrent.futures import ThreadPoolExecutor, as_completed
-        max_workers = 8 if ollama_active else 12
-        with ThreadPoolExecutor(max_workers=max_workers) as executor:
-            futures = [executor.submit(_process_chunk, ch) for ch in chunks]
-            for f in as_completed(futures):
                 try:
-                    res = f.result()
-                    if res:
-                        chunk_reasonings.append(res)
-                except Exception as exc:
-                    logger.warning("Error in chunk processing thread: %s", exc)
+                    resp = self.ollama_client.generate(model=self.model_name, prompt=prompt, system=system_prompt)
+                    parsed = self._clean_and_parse_json(resp)
+                    if parsed:
+                        return [parsed]
+                except Exception as e:
+                    logger.warning(f"Single chunk LLM call failed for {chunk_id}: {e}")
+                return [self._analyze_fallback_chunk(chunk_id, text, claims)]
+
+            # Process multi-chunk batch
+            batch_prompt_parts = ["Analyze the following semantic document chunks for ambiguity and claim validation:\n"]
+            for idx, ch in enumerate(batch_chunks, 1):
+                batch_prompt_parts.append(
+                    f"--- Chunk {idx} (ID: {ch['chunk_id']}) ---\nText: {ch['text']}\nExtraction: {json.dumps(ch.get('extraction', {}))}\n"
+                )
+            batch_prompt_parts.append(
+                "Return a JSON object containing a 'chunk_results' list where each item matches the schema for a chunk.\n"
+                "Schema for each item: {\"chunk_id\": \"...\", \"claim_validation\": [...], \"ambiguities\": [...], \"overall_chunk_risk\": \"Low|Medium|High\", \"overall_confidence\": 0.9}"
+            )
+            batch_prompt = "\n".join(batch_prompt_parts)
+
+            try:
+                resp = self.ollama_client.generate(model=self.model_name, prompt=batch_prompt, system=system_prompt)
+                parsed = self._clean_and_parse_json(resp)
+                results_list = parsed.get("chunk_results", []) if isinstance(parsed, dict) else (parsed if isinstance(parsed, list) else [])
+                parsed_map = {r.get("chunk_id"): r for r in results_list if isinstance(r, dict) and "chunk_id" in r}
+
+                for ch in batch_chunks:
+                    c_id = ch["chunk_id"]
+                    if c_id in parsed_map:
+                        batch_results.append(parsed_map[c_id])
+                    else:
+                        batch_results.append(self._analyze_fallback_chunk(c_id, ch["text"], ch.get("extraction", {}).get("claims", [])))
+                return batch_results
+            except Exception as exc:
+                logger.warning(f"Batch chunk LLM analysis failed ({exc}). Falling back to fallback rules for batch.")
+                return [self._analyze_fallback_chunk(ch["chunk_id"], ch["text"], ch.get("extraction", {}).get("claims", [])) for ch in batch_chunks]
+
+        if llm_chunks:
+            batch_size = 5
+            chunk_batches = [llm_chunks[i : i + batch_size] for i in range(0, len(llm_chunks), batch_size)]
+            max_workers = min(8, len(chunk_batches))
+            from concurrent.futures import ThreadPoolExecutor, as_completed
+            with ThreadPoolExecutor(max_workers=max_workers) as executor:
+                futures = [executor.submit(_process_chunk_batch, b) for b in chunk_batches]
+                for f in as_completed(futures):
+                    try:
+                        res = f.result()
+                        if res:
+                            chunk_reasonings.extend(res)
+                    except Exception as exc:
+                        logger.warning("Error in batch chunk processing thread: %s", exc)
 
         # Ensure output directory exists
         reason_dir = job_dir / "11_chunk_reasoning"
