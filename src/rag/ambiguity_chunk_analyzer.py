@@ -214,14 +214,22 @@ class AmbiguityChunkAnalyzer:
             "Do not include markdown fences, conversational text, or explanations."
         )
         
-        for ch in chunks:
+        policy_keywords = {"must", "shall", "required", "mandatory", "policy", "prohibited", "condition", "unless", "except", "agreement", "liability", "term", "clause"}
+
+        def _process_chunk(ch):
             chunk_id = ch["chunk_id"]
             text = ch["text"]
-            extraction = ch["extraction"]
+            extraction = ch.get("extraction", {})
             claims = extraction.get("claims", [])
-            
-            if ollama_active:
-                prompt = f"""Perform chunk-level claim validation and ambiguity analysis.
+            policies = extraction.get("policies", []) + extraction.get("obligations", [])
+            words = text.split()
+
+            # Fast-path fallback for short chunks, table chunks, or chunks without policy/obligation statements
+            has_policy_kw = any(kw in text.lower() for kw in policy_keywords)
+            if len(words) < 30 or (not claims and not policies and not has_policy_kw) or not ollama_active:
+                return self._analyze_fallback_chunk(chunk_id, text, claims)
+
+            prompt = f"""Perform chunk-level claim validation and ambiguity analysis.
 
 Original Chunk Text:
 {text}
@@ -272,20 +280,29 @@ Requested JSON Schema:
     "overall_confidence": 0.92
 }}
 """
+            try:
+                logger.info(f"Running LLM Chunk Analysis for chunk: {chunk_id}")
+                resp = self.ollama_client.generate(
+                    model=self.model_name,
+                    prompt=prompt,
+                    system=system_prompt
+                )
+                return self._clean_and_parse_json(resp)
+            except Exception as e:
+                logger.error(f"Failed LLM chunk analysis for {chunk_id}: {e}. Falling back to rule-based.")
+                return self._analyze_fallback_chunk(chunk_id, text, claims)
+
+        from concurrent.futures import ThreadPoolExecutor, as_completed
+        max_workers = 8 if ollama_active else 12
+        with ThreadPoolExecutor(max_workers=max_workers) as executor:
+            futures = [executor.submit(_process_chunk, ch) for ch in chunks]
+            for f in as_completed(futures):
                 try:
-                    logger.info(f"Running LLM Chunk Analysis for chunk: {chunk_id}")
-                    resp = self.ollama_client.generate(
-                        model=self.model_name,
-                        prompt=prompt,
-                        system=system_prompt
-                    )
-                    parsed = self._clean_and_parse_json(resp)
-                    chunk_reasonings.append(parsed)
-                except Exception as e:
-                    logger.error(f"Failed LLM chunk analysis for {chunk_id}: {e}. Falling back to rule-based.")
-                    chunk_reasonings.append(self._analyze_fallback_chunk(chunk_id, text, claims))
-            else:
-                chunk_reasonings.append(self._analyze_fallback_chunk(chunk_id, text, claims))
+                    res = f.result()
+                    if res:
+                        chunk_reasonings.append(res)
+                except Exception as exc:
+                    logger.warning("Error in chunk processing thread: %s", exc)
 
         # Ensure output directory exists
         reason_dir = job_dir / "11_chunk_reasoning"

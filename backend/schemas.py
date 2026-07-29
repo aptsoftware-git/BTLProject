@@ -22,10 +22,14 @@ class JobStatusResponse(BaseModel):
     created_at: str
     completed_at: Optional[str] = None
     error: Optional[str] = None
+    extraction_ready: Optional[bool] = False
+    spell_ready: Optional[bool] = False
+    grammar_ready: Optional[bool] = False
     proofreading_ready: Optional[bool] = False
     rag_ready: Optional[bool] = False
     context_analysis_ready: Optional[bool] = False
     comparative_analysis_ready: Optional[bool] = False
+    reports_ready: Optional[bool] = False
 
 
 class ResultsResponse(BaseModel):

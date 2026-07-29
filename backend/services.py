@@ -39,7 +39,7 @@ STAGE_PROGRESS_MAP = {
 
 class JobProgressHandler(logging.Handler):
     """Logging handler that listens to progress updates on the 'pipeline' logger
-    and updates the current executing job status."""
+    and updates the current executing job status with granular stage readiness flags."""
 
     def emit(self, record: logging.LogRecord) -> None:
         global CURRENT_JOB_ID
@@ -47,16 +47,33 @@ class JobProgressHandler(logging.Handler):
             return
         try:
             msg = record.getMessage()
+            job = JOBS.get(CURRENT_JOB_ID)
+            if not job:
+                return
+
             for stage_key, (percentage, stage_name) in STAGE_PROGRESS_MAP.items():
                 if stage_key in msg:
-                    job = JOBS.get(CURRENT_JOB_ID)
-                    if job:
-                        job["current_stage"] = stage_name
-                        job["progress_percentage"] = percentage
-                        if stage_key in ("Generating annotated HTML", "Generating reports", "Completed"):
-                            job["proofreading_ready"] = True
-                            job["proofreading_status"] = "completed"
-                        save_job_metadata(CURRENT_JOB_ID)
+                    job["current_stage"] = stage_name
+                    job["progress_percentage"] = percentage
+                    
+                    if stage_key in ("Sentence splitting", "Building protected terms"):
+                        job["extraction_ready"] = True
+                        job["document_viewer_ready"] = True
+                    elif stage_key in ("Spell / grammar detection (LanguageTool + SymSpell)", "Grammar review (local LLM)"):
+                        job["extraction_ready"] = True
+                        job["spell_ready"] = True
+                    elif stage_key in ("Validation (protected-terms gate)", "Semantic validation"):
+                        job["extraction_ready"] = True
+                        job["spell_ready"] = True
+                        job["grammar_ready"] = True
+                    elif stage_key in ("Generating annotated HTML", "Generating reports", "Completed"):
+                        job["extraction_ready"] = True
+                        job["spell_ready"] = True
+                        job["grammar_ready"] = True
+                        job["proofreading_ready"] = True
+                        job["proofreading_status"] = "completed"
+                    
+                    save_job_metadata(CURRENT_JOB_ID)
                     break
         except Exception:
             pass

@@ -923,8 +923,8 @@ export default function Workspace() {
     );
   }
 
-  // Processing stages (show full screen scanner ONLY if proofreading is not yet ready)
-  const isProofreadingReady = doc.proofreading_ready || doc.proofreading_status === "completed" || (doc.annotated_html && doc.annotated_html.length > 0) || doc.status === "completed";
+  // Processing stages (show full screen scanner ONLY if extraction/proofreading is not yet ready)
+  const isProofreadingReady = doc.extraction_ready || doc.proofreading_ready || doc.proofreading_status === "completed" || (doc.annotated_html && doc.annotated_html.length > 0) || doc.status === "completed";
 
   if (!isProofreadingReady && (doc.status === "processing" || doc.status === "pending" || doc.status === "uploaded")) {
     const percent = doc.progress_percentage || 0;
