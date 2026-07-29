@@ -91,3 +91,6 @@ node_modules/
 ai-proofreader-frontend/node_modules/
 ai-proofreader-frontend/dist/
 
+
+data/input/
+
