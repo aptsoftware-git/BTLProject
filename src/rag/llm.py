@@ -2,14 +2,19 @@ from typing import List, Dict, Optional
 from src.rag.response_models import ModelMetadata
 
 # The default model to fall back on if none is specified or if the requested model is invalid.
-DEFAULT_MODEL_ID = "qwen2.5-coder:32b"
+DEFAULT_MODEL_ID = "qwen2.5-coder:7b"
 
 # Configuration-driven list of supported models.
 SUPPORTED_MODELS_LIST = [
     ModelMetadata(
+        id="qwen2.5-coder:7b",
+        display_name="Qwen2.5 Coder 7B",
+        description="Fast, high-performance model for document understanding, structured reasoning, and RAG."
+    ),
+    ModelMetadata(
         id="qwen2.5-coder:32b",
         display_name="Qwen2.5 Coder 32B",
-        description="Best overall model for document understanding, structured reasoning, grounded answers, and RAG."
+        description="High-capacity model for complex document understanding and structured reasoning."
     ),
     ModelMetadata(
         id="qwen3:30b-a3b",

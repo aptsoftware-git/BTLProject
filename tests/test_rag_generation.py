@@ -28,9 +28,9 @@ from src.rag.chunk_schema import ChunkMetadata
 
 def test_get_available_models():
     models = get_available_models()
-    assert len(models) == 5
+    assert len(models) == 6
     ids = [m.id for m in models]
-    assert "qwen2.5-coder:32b" in ids
+    assert "qwen2.5-coder:7b" in ids
     assert "deepseek-r1:32b" in ids
 
 

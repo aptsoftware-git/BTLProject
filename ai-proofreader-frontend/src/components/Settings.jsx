@@ -112,7 +112,7 @@ export default function Settings() {
     try {
       const defaultPrefs = {
         ollama_host: "http://192.168.19.21:11434",
-        ollama_model: "qwen2.5-coder:32b",
+        ollama_model: "qwen2.5-coder:7b",
         languagetool_language: "en-US",
         confidence_threshold: 40,
       };
@@ -279,7 +279,7 @@ export default function Settings() {
                   style={styles.input}
                   value={preferences.ollama_model}
                   onChange={(e) => setPreferences({ ...preferences, ollama_model: e.target.value })}
-                  placeholder="qwen2.5-coder:32b"
+                  placeholder="qwen2.5-coder:7b"
                 />
               </div>
 

@@ -23,15 +23,15 @@ def test_api_get_models():
     Verifies get_rag_models route returns supported model list with recommended flag.
     """
     response = run_async(get_rag_models())
-    assert len(response) == 5
+    assert len(response) == 6
     
     # Verify model fields
     model_ids = [m.id for m in response]
-    assert "qwen2.5-coder:32b" in model_ids
+    assert "qwen2.5-coder:7b" in model_ids
     assert "deepseek-r1:32b" in model_ids
     
     # Verify recommended flag
-    qwen_coder = next(m for m in response if m.id == "qwen2.5-coder:32b")
+    qwen_coder = next(m for m in response if m.id == "qwen2.5-coder:7b")
     assert qwen_coder.recommended is True
     
     deepseek = next(m for m in response if m.id == "deepseek-r1:32b")

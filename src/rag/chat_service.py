@@ -44,7 +44,7 @@ class ChatService:
         """
         Processes a user question about a document, performs hybrid retrieval, 
         constructs grounded prompts, calls Ollama with a 5-minute timeout, and returns a structured response.
-        Falls back to default model (qwen2.5-coder:32b) if the requested model exceeds 5 minutes or fails.
+        Falls back to default model (qwen2.5-coder:7b) if the requested model exceeds 5 minutes or fails.
         """
         logger.info(f"Receiving question... Document ID: {document_id}, Question: {repr(question)}")
         
