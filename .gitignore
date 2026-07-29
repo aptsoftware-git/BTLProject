@@ -70,7 +70,7 @@ htmlcov/
 ##################################################
 
 # Uncomment only if you don't want local vector DBs
-# data/chromadb/
+data/chromadb/
 
 
 # Crash dumps & temp files
@@ -90,3 +90,4 @@ scripts/
 node_modules/
 ai-proofreader-frontend/node_modules/
 ai-proofreader-frontend/dist/
+
