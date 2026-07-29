@@ -124,12 +124,39 @@ def save_job_metadata(job_id: str) -> None:
 
 def load_job_metadata(job_id: str) -> Optional[Dict[str, Any]]:
     """Loads job status metadata from data/output/{job_id}/metadata.json if it exists."""
-    metadata_path = get_job_dir(job_id) / "metadata.json"
+    job_dir = get_job_dir(job_id)
+    metadata_path = job_dir / "metadata.json"
     if not metadata_path.exists():
         return None
     try:
         with open(metadata_path, "r", encoding="utf-8") as f:
             job = json.load(f)
+
+            # 1. Check if full end-to-end report artifacts exist on disk
+            reports_dir = job_dir / "09_reports"
+            consistency_path = reports_dir / "consistency_report.html"
+            comparative_path = reports_dir / "comparative_report.html"
+            final_report_path = job_dir / "10_final" / "report.json"
+            annotated_path = reports_dir / "annotated.html"
+
+            if (final_report_path.exists() or annotated_path.exists()):
+                job["proofreading_ready"] = True
+                job["proofreading_status"] = "completed"
+
+            if consistency_path.exists() or comparative_path.exists():
+                job["status"] = "completed"
+                job["current_stage"] = "Completed"
+                job["progress_percentage"] = 100.0
+                job["proofreading_ready"] = True
+                job["rag_ready"] = True
+                job["context_analysis_ready"] = True
+                job["comparative_analysis_ready"] = True
+            elif job.get("status") == "processing" and (final_report_path.exists() or annotated_path.exists()):
+                # Proofreading is done, but server restarted mid-RAG: auto-resume context analysis background thread
+                if not job.get("_bg_resumed"):
+                    job["_bg_resumed"] = True
+                    run_context_analysis_bg(job_id, job_dir)
+
             JOBS[job_id] = job
             return job
     except Exception as exc:
