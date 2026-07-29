@@ -53,6 +53,9 @@ class JobProgressHandler(logging.Handler):
                     if job:
                         job["current_stage"] = stage_name
                         job["progress_percentage"] = percentage
+                        if stage_key in ("Generating annotated HTML", "Generating reports", "Completed"):
+                            job["proofreading_ready"] = True
+                            job["proofreading_status"] = "completed"
                         save_job_metadata(CURRENT_JOB_ID)
                     break
         except Exception:

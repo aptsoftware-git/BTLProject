@@ -264,8 +264,15 @@ export default function Workspace() {
           window.dispatchEvent(new Event("activeDocChanged"));
         }
 
-        // Process HTML/State only once when loaded
-        if (data && data.status === "completed") {
+        // Process HTML/State as soon as proofreading is ready or document completed
+        const isProofreadingAvailable = data && (
+          data.status === "completed" ||
+          data.proofreading_ready ||
+          data.proofreading_status === "completed" ||
+          (data.annotated_html && data.annotated_html.length > 0)
+        );
+
+        if (isProofreadingAvailable) {
           const threshold = ((prefs && prefs.confidence_threshold !== undefined) ? prefs.confidence_threshold : 40) / 100;
           const initialStatus = {};
 

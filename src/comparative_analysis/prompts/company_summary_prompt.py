@@ -19,7 +19,7 @@ CLAUDE_COMPANY_NAME_USER_PROMPT = """Identify the legal registered company name 
 {document_context}
 =====================
 
-OUTPUT ONLY JSON: {"company_name": "Exact Legal Name"}
+OUTPUT ONLY JSON: {{"company_name": "Exact Legal Name"}}
 """
 
 CLAUDE_COMPANY_SUMMARY_SYSTEM_PROMPT = """You are an elite Corporate Strategy Analyst at a tier-1 management consulting firm (Deloitte / McKinsey / EY).

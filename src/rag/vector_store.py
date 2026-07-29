@@ -34,21 +34,41 @@ class VectorStore:
         """
         doc_hash = None
         try:
-            from backend.services import get_job
+            from backend.services import get_job, DATA_DIR
             job = get_job(document_id)
             if job and "doc_hash" in job:
                 doc_hash = job["doc_hash"]
+            else:
+                meta_file = DATA_DIR / document_id / "metadata.json"
+                if meta_file.exists():
+                    import json
+                    with open(meta_file, "r", encoding="utf-8") as f:
+                        meta_data = json.load(f)
+                        doc_hash = meta_data.get("doc_hash")
         except Exception:
             pass
 
-        target_id = doc_hash[:16] if doc_hash else document_id
-        clean_id = "".join(c if c.isalnum() or c in ("-", "_") else "_" for c in target_id)
-        name = f"{self.collection_prefix}{clean_id}"
-        if len(name) < 3:
-            name = name.ljust(3, "0")
-        elif len(name) > 63:
-            name = name[:63]
-        return name
+        # Candidate names
+        clean_doc_id = "".join(c if c.isalnum() or c in ("-", "_") else "_" for c in document_id)
+        name_doc_id = f"{self.collection_prefix}{clean_doc_id}"[:63]
+
+        if doc_hash:
+            clean_hash_id = "".join(c if c.isalnum() or c in ("-", "_") else "_" for c in doc_hash[:16])
+            name_hash = f"{self.collection_prefix}{clean_hash_id}"[:63]
+        else:
+            name_hash = None
+
+        # Check existing collections in ChromaDB
+        try:
+            existing_names = [col.name for col in self.client.list_collections()]
+            if name_hash and name_hash in existing_names:
+                return name_hash
+            if name_doc_id in existing_names:
+                return name_doc_id
+        except Exception:
+            pass
+
+        return name_hash if name_hash else name_doc_id
 
     def get_existing_chunk_ids(self, document_id: str) -> Set[str]:
         """
