@@ -174,23 +174,27 @@ class ContextAnalysisPipeline:
 
         logger.info(f"Packed {len(eligible_clusters)} eligible clusters into {len(batches)} token-aware batch(es) (budget: {self.token_budget} tokens).")
 
-        # 5. Run LLM Audits over Packed Batches
+        # 5. Run LLM Audits over Packed Batches (Parallelized)
         candidate_issues: List[InconsistencyIssue] = []
-        for idx, batch_objs in enumerate(batches):
+        from concurrent.futures import ThreadPoolExecutor
+
+        def process_batch(item: Tuple[int, List[Dict[str, Any]]]) -> List[InconsistencyIssue]:
+            idx, batch_objs = item
             title = f"Semantic Consistency Group {idx+1}"
-            progress_pct = 65.0 + (idx / max(1, len(batches))) * 20.0
-            self._update_status(
-                doc_id, 
-                "running", 
-                f"LLM Analysis (Batch {idx+1}/{len(batches)})", 
-                progress_pct, 
-                issues_count=len(verified_issues) + len(candidate_issues)
-            )
             logger.info(f"Analyzing batch {idx+1}/{len(batches)} via InferenceService...")
-            found = self.analysis_agent.analyze_group(title, batch_objs)
-            if found:
-                logger.info(f"Found {len(found)} potential consistency issue(s) in batch.")
-                candidate_issues.extend(found)
+            try:
+                found = self.analysis_agent.analyze_group(title, batch_objs)
+                return found or []
+            except Exception as exc:
+                logger.warning(f"Error analyzing batch {idx+1}: {exc}")
+                return []
+
+        if batches:
+            max_batch_workers = min(4, len(batches))
+            with ThreadPoolExecutor(max_workers=max_batch_workers) as executor:
+                batch_results = list(executor.map(process_batch, enumerate(batches)))
+            for found_issues in batch_results:
+                candidate_issues.extend(found_issues)
 
         # Deduplicate candidate issues
         logger.info(f"Deduplicating {len(candidate_issues)} candidate issue(s)...")
@@ -216,25 +220,33 @@ class ContextAnalysisPipeline:
                 non_overlapping_candidates.append(issue)
         candidate_issues = non_overlapping_candidates
 
-        # 6. Verification and Evidence Collection
+        # 6. Verification and Evidence Collection (Parallelized)
         self._update_status(doc_id, "running", "Verification & Evidence Enrichment", 90.0, issues_count=len(verified_issues))
         logger.info(f"Verifying {len(candidate_issues)} unique candidate issues...")
-        for idx, issue in enumerate(candidate_issues):
-            # Validate citations
+
+        def process_verification(issue: InconsistencyIssue) -> Optional[InconsistencyIssue]:
             if not CitationValidator.validate_citation(issue, objects_by_id):
                 logger.info(f"Discarding issue: citation validation failed for IDs {issue.object_ids}")
-                continue
+                return None
                 
             EvidenceCollector.enrich_evidence(issue, objects_by_id)
             
-            # Verify issue using Verification Agent
             verified = self.verification_agent.verify_issue(issue, objects_by_id)
             if verified:
                 verified.category = map_to_enterprise_category(verified.category)
                 logger.info(f"Verified inconsistency: '{verified.description}'")
-                verified_issues.append(verified)
+                return verified
             else:
                 logger.info(f"Discarding false positive issue: '{issue.description}'")
+                return None
+
+        if candidate_issues:
+            max_ver_workers = min(4, len(candidate_issues))
+            with ThreadPoolExecutor(max_workers=max_ver_workers) as executor:
+                ver_results = list(executor.map(process_verification, candidate_issues))
+            for verified_item in ver_results:
+                if verified_item:
+                    verified_issues.append(verified_item)
 
         # 7. Save report.json and report.html
         logger.info(f"Generating final consistency reports inside {job_dir}...")

@@ -15,7 +15,7 @@ class ClaudeClient:
     """
 
     def __init__(self, api_key: Optional[str] = None, model: Optional[str] = None):
-        self.api_key = api_key or os.getenv("ANTHROPIC_API_KEY")
+        self.api_key = api_key or os.getenv("CLAUDE_API_KEY") or os.getenv("ANTHROPIC_API_KEY")
         # Check CLAUDE_MODEL as well as ANTHROPIC_MODEL
         self.model = model or os.getenv("ANTHROPIC_MODEL") or os.getenv("CLAUDE_MODEL") or "claude-3-5-sonnet-20241022"
         self.url = "https://api.anthropic.com/v1/messages"
@@ -24,7 +24,7 @@ class ClaudeClient:
 
     def send_message(self, prompt: str, system_prompt: str) -> str:
         if not self.api_key:
-            raise ValueError("Anthropic API key is missing. Please set ANTHROPIC_API_KEY in the environment or .env file.")
+            raise ValueError("Anthropic API key is missing. Please set CLAUDE_API_KEY or ANTHROPIC_API_KEY in the environment or .env file.")
 
         headers = {
             "x-api-key": self.api_key,

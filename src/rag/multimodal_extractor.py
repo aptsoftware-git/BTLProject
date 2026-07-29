@@ -675,7 +675,7 @@ class MultimodalExtractor:
                 with open(jsonl_path, "a", encoding="utf-8") as f:
                     for obj in batch_objects:
                         obj.embedding_status = "Pending"
-                        obj_dict = obj.dict() if hasattr(obj, "dict") else obj.model_dump()
+                        obj_dict = obj.model_dump() if hasattr(obj, "model_dump") else obj.dict()
                         f.write(json.dumps(obj_dict, ensure_ascii=False) + "\n")
             
             # Rebuilt Semantic Chunking (Tasks 1-8)

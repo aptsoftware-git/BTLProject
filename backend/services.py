@@ -100,7 +100,9 @@ def save_job_metadata(job_id: str) -> None:
     
     # Preserve context analysis and granular progress fields in serialized metadata
     for key in [
+        "proofreading_ready", "rag_ready", "context_analysis_ready", "comparative_analysis_ready",
         "context_analysis_status", "context_analysis_stage", "context_analysis_progress",
+        "comparative_analysis_status", "comparative_analysis_stage", "comparative_analysis_progress",
         "context_analysis_issues_count", "context_analysis_est_time",
         "knowledge_objects_generated", "embeddings_completed", "index_progress",
         "memory_usage", "cpu_usage", "current_page", "total_pages",
@@ -252,6 +254,11 @@ def run_context_analysis_inline(job_id: str, job_dir: Path) -> None:
     consistency_pipeline = ContextAnalysisPipeline(model_name=model_name)
     consistency_pipeline.run_analysis(job_dir, job_id)
 
+    if job:
+        job["rag_ready"] = True
+        job["rag_status"] = "completed"
+        save_job_metadata(job_id)
+
     # Stage 6: Local LLM Ambiguity Detection
     if job:
         job["current_stage"] = "Stage 6: Local LLM Ambiguity Detection"
@@ -297,6 +304,7 @@ def run_context_analysis_inline(job_id: str, job_dir: Path) -> None:
     if job:
         job["current_stage"] = "Stage 9: Executive Compliance Report Generation"
         job["progress_percentage"] = 90.0
+        job["context_analysis_ready"] = True
         save_job_metadata(job_id)
 
     from src.rag.final_report_generator import FinalReportGenerator
@@ -323,6 +331,7 @@ def run_context_analysis_inline(job_id: str, job_dir: Path) -> None:
         if job:
             job["comparative_analysis_status"] = comp_resp.status
             job["comparative_analysis_progress"] = 100.0
+            job["comparative_analysis_ready"] = True
             job["current_stage"] = "Stage 11: Executive Comparative Analysis Report Generation"
             job["progress_percentage"] = 98.0
             save_job_metadata(job_id)
@@ -409,10 +418,12 @@ def background_worker() -> None:
                 with ProofreadingPipeline(config) as pipeline:
                     result = pipeline.run(input_path, run_id=job_id)
                     job["result"] = result
-                    job["current_stage"] = "Stage 4: Proofreading"
+                    job["proofreading_ready"] = True
+                    job["proofreading_status"] = "completed"
+                    job["current_stage"] = "Proofreading Ready (Running RAG & Contextual Analysis in Background)"
                     job["progress_percentage"] = 50.0
                     save_job_metadata(job_id)
-                    backend_logger.info("Proofreading phase finished for job %s. Proceeding to RAG & Ambiguity Pipeline...", job_id)
+                    backend_logger.info("Proofreading phase finished for job %s. Results unlocked on UI. Proceeding to RAG & Ambiguity Pipeline...", job_id)
                     
                     try:
                         import shutil

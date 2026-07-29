@@ -24,9 +24,9 @@ class RagConfig:
     ollama_host: str = os.environ.get("OLLAMA_HOST", "http://192.168.19.21:11434")
     
     # Semantic Consistency Settings (Clustering & Retrieval)
-    similarity_floor: float = 0.72
+    similarity_floor: float = 0.75
     retrieval_top_k: int = 10
-    token_budget: int = 8000
+    token_budget: int = 12000
     provider: str = os.environ.get("RAG_PROVIDER", "ollama")
     claude_model: str = os.environ.get("ANTHROPIC_MODEL", "claude-3-5-sonnet-20241022")
 

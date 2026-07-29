@@ -124,7 +124,7 @@ def test_retrieval_pipeline():
     chunks_output = {
         "document_id": doc_id,
         "file_name": "test_doc.pdf",
-        "chunks": [c.dict() for c in chunks]
+        "chunks": [c.model_dump() if hasattr(c, "model_dump") else c.dict() for c in chunks]
     }
     with open(output_dir / "document_chunks.json", "w", encoding="utf-8") as f:
         json.dump(chunks_output, f, indent=2)

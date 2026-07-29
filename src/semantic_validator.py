@@ -51,26 +51,35 @@ class SemanticValidator:
         sentence_text_lookup: callable(sentence_id) -> full sentence text,
         used to give the model surrounding context beyond just the span.
         """
-        results = []
-        for idx, issue in enumerate(issues):
+        from concurrent.futures import ThreadPoolExecutor
+
+        def validate_single(item: Tuple[int, ValidatedIssue]) -> SemanticCheckResult:
+            idx, issue = item
             if issue.issue_type == IssueType.SPELLING:
-                results.append(SemanticCheckResult(
+                return SemanticCheckResult(
                     candidate_index=idx, meaning_preserved=True, grammatically_correct=True,
                     notes="spelling fix, no semantic check needed",
-                ))
-                continue
+                )
             sentence_text = sentence_text_lookup(issue.sentence_id)
             prompt = _PROMPT_TEMPLATE.format(
                 sentence_text=sentence_text, original=issue.original_text, suggested=issue.suggested_text,
             )
             raw = self._call_ollama(prompt)
             parsed = self._parse_json(raw)
-            results.append(SemanticCheckResult(
+            return SemanticCheckResult(
                 candidate_index=idx,
                 meaning_preserved=parsed.get("meaning_preserved", False),
                 grammatically_correct=parsed.get("grammatically_correct", False),
                 notes=parsed.get("notes", ""),
-            ))
+            )
+
+        if not issues:
+            return []
+
+        max_workers = min(4, len(issues))
+        with ThreadPoolExecutor(max_workers=max_workers) as executor:
+            results = list(executor.map(validate_single, enumerate(issues)))
+
         return results
 
     def _call_ollama(self, prompt: str) -> str:

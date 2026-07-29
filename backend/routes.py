@@ -172,10 +172,11 @@ async def get_results(job_id: str) -> ResultsResponse:
             detail=f"Job failed with error: {job.get('error')}",
         )
 
-    if job["status"] != "completed":
+    is_proofreading_done = job.get("status") == "completed" or job.get("proofreading_ready") or job.get("proofreading_status") == "completed"
+    if not is_proofreading_done:
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
-            detail=f"Job is currently in state '{job['status']}'. Results are only available for completed jobs.",
+            detail=f"Proofreading is currently in state '{job['status']}'. Results will be available as soon as proofreading finishes.",
         )
 
     job_dir = get_job_dir(job_id)

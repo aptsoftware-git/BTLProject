@@ -40,9 +40,9 @@ class InferenceService:
 
     def _call_claude(self, prompt: str, system: str) -> str:
         """Helper to invoke Anthropic Claude messages API via direct requests."""
-        api_key = os.environ.get("ANTHROPIC_API_KEY")
+        api_key = os.environ.get("CLAUDE_API_KEY") or os.environ.get("ANTHROPIC_API_KEY")
         if not api_key:
-            logger.error("ANTHROPIC_API_KEY environment variable is not set. Falling back to empty response.")
+            logger.error("CLAUDE_API_KEY / ANTHROPIC_API_KEY environment variable is not set. Falling back to empty response.")
             return ""
 
         headers = {

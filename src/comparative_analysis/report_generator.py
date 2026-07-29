@@ -270,15 +270,26 @@ class ComparativeReportGenerator:
     <title>Executive Comparative Analysis Report - {company_profile.company_name}</title>
     <style>
         :root {{
-            --bg: #090d16;
-            --card-bg: #131b2e;
-            --border: #202c46;
-            --text: #f8fafc;
-            --muted: #94a3b8;
-            --cyan: #38bdf8;
-            --emerald: #34d399;
-            --amber: #fbbf24;
-            --rose: #f43f5e;
+            --bg: #f4f6fb;
+            --card-bg: #ffffff;
+            --border: #e2e8f0;
+            --border-soft: #cbd5e1;
+            --text: #1e293b;
+            --muted: #64748b;
+            
+            /* Pastel Accents */
+            --blue-pastel-bg: #e0f2fe;
+            --blue-pastel-text: #0369a1;
+            --indigo-pastel-bg: #e0e7ff;
+            --indigo-pastel-text: #4338ca;
+            --mint-pastel-bg: #d1fae5;
+            --mint-pastel-text: #047857;
+            --amber-pastel-bg: #fef3c7;
+            --amber-pastel-text: #b45309;
+            --rose-pastel-bg: #ffe4e6;
+            --rose-pastel-text: #be123c;
+            --purple-pastel-bg: #f3e8ff;
+            --purple-pastel-text: #6b21a8;
         }}
         body {{
             font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
@@ -290,24 +301,26 @@ class ComparativeReportGenerator:
         }}
         .container {{ max-width: 1280px; margin: 0 auto; }}
         .header {{
-            background: linear-gradient(135deg, #1e293b, #0f172a);
+            background: linear-gradient(135deg, #ffffff, #f1f5f9);
             border: 1px solid var(--border);
-            border-left: 6px solid var(--cyan);
+            border-left: 6px solid var(--blue-pastel-text);
             padding: 32px;
             border-radius: 16px;
             margin-bottom: 24px;
             display: flex;
             justify-content: space-between;
             align-items: center;
+            box-shadow: 0 4px 15px -3px rgba(0, 0, 0, 0.05);
         }}
-        .header h1 {{ margin: 0 0 8px 0; color: var(--cyan); font-size: 2.2rem; }}
+        .header h1 {{ margin: 0 0 8px 0; color: #0f172a; font-size: 2.2rem; }}
         .header p {{ margin: 0; color: var(--muted); font-size: 0.95rem; }}
         .pos-badge {{
-            background: linear-gradient(135deg, #0284c7, #0369a1);
-            color: #ffffff;
+            background: var(--indigo-pastel-bg);
+            color: var(--indigo-pastel-text);
             font-weight: 700;
             padding: 10px 20px;
             border-radius: 12px;
+            border: 1px solid #c7d2fe;
         }}
         .section-card {{
             background-color: var(--card-bg);
@@ -315,39 +328,43 @@ class ComparativeReportGenerator:
             border-radius: 16px;
             padding: 30px;
             margin-bottom: 32px;
-            box-shadow: 0 10px 25px -5px rgba(0,0,0,0.4);
+            box-shadow: 0 4px 20px -2px rgba(0,0,0,0.04);
         }}
-        .section-card h2 {{ margin-top: 0; color: var(--cyan); border-bottom: 1px solid var(--border); padding-bottom: 12px; font-size: 1.4rem; }}
+        .section-card h2 {{ margin-top: 0; color: #0f172a; border-bottom: 2px solid #f1f5f9; padding-bottom: 12px; font-size: 1.4rem; }}
         .grid-2 {{ display: grid; grid-template-columns: repeat(auto-fit, minmax(360px, 1fr)); gap: 24px; }}
-        .comp-card, .gap-card, .rec-card {{ background: #19243c; border: 1px solid var(--border); border-radius: 14px; padding: 22px; margin-bottom: 16px; }}
+        .comp-card, .gap-card, .rec-card {{ background: #fafafa; border: 1px solid var(--border); border-radius: 14px; padding: 22px; margin-bottom: 16px; }}
         .comp-header {{ display: flex; align-items: center; gap: 14px; border-bottom: 1px solid var(--border); padding-bottom: 12px; margin-bottom: 12px; }}
-        .comp-logo {{ width: 36px; height: 36px; border-radius: 8px; background: #0f172a; padding: 4px; border: 1px solid var(--border); }}
-        .comp-rank {{ width: 36px; height: 36px; border-radius: 8px; background: rgba(56, 189, 248, 0.15); color: var(--cyan); font-weight: 700; display: flex; align-items: center; justify-content: center; }}
-        .comp-title {{ margin: 0; color: #ffffff; font-size: 1.1rem; }}
-        .comp-ind {{ color: var(--cyan); font-size: 0.8rem; font-weight: 600; }}
-        .comp-exec {{ font-size: 0.85rem; color: #cbd5e1; margin-bottom: 12px; }}
-        a.comp-link {{ color: var(--cyan); text-decoration: none; font-size: 0.85rem; }}
-        .matrix-table {{ width: 100%; border-collapse: collapse; margin-top: 14px; font-size: 0.85rem; min-width: 800px; }}
-        .matrix-table th {{ background: #0f172a; color: var(--cyan); padding: 12px; border: 1px solid var(--border); text-align: left; }}
-        .matrix-table td {{ padding: 12px; border: 1px solid var(--border); vertical-align: top; }}
-        .target-cell {{ background: rgba(56, 189, 248, 0.08); font-weight: 500; }}
+        .comp-logo {{ width: 36px; height: 36px; border-radius: 8px; background: #ffffff; padding: 4px; border: 1px solid var(--border); }}
+        .comp-rank {{ width: 36px; height: 36px; border-radius: 8px; background: var(--blue-pastel-bg); color: var(--blue-pastel-text); font-weight: 700; display: flex; align-items: center; justify-content: center; }}
+        .comp-title {{ margin: 0; color: #0f172a; font-size: 1.1rem; }}
+        .comp-ind {{ color: var(--blue-pastel-text); font-size: 0.8rem; font-weight: 600; }}
+        .comp-exec {{ font-size: 0.88rem; color: #334155; margin-bottom: 12px; }}
+        a.comp-link {{ color: var(--blue-pastel-text); text-decoration: none; font-size: 0.85rem; font-weight: 600; }}
+        .matrix-table {{ width: 100%; border-collapse: collapse; margin-top: 14px; font-size: 0.88rem; min-width: 800px; }}
+        .matrix-table th {{ background: #f1f5f9; color: #0f172a; padding: 12px; border: 1px solid var(--border); text-align: left; font-weight: 700; }}
+        .matrix-table td {{ padding: 12px; border: 1px solid var(--border); vertical-align: top; background: #ffffff; color: #334155; }}
+        .target-cell {{ background: var(--blue-pastel-bg) !important; color: var(--blue-pastel-text) !important; font-weight: 600; }}
         .swot-grid {{ display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }}
-        .swot-box {{ background: #162438; border: 1px solid var(--border); border-radius: 12px; padding: 20px; }}
-        .swot-box h3 {{ margin-top: 0; font-size: 1.1rem; border-bottom: 1px dashed var(--border); padding-bottom: 8px; }}
-        .swot-s h3 {{ color: var(--emerald); }}
-        .swot-w h3 {{ color: var(--rose); }}
-        .swot-o h3 {{ color: var(--cyan); }}
-        .swot-t h3 {{ color: var(--amber); }}
-        .rec-card.prio-high {{ border-left: 5px solid var(--rose); }}
-        .rec-card.prio-medium {{ border-left: 5px solid var(--amber); }}
-        .prio-tag.prio-high {{ background: var(--rose); color: #fff; padding: 3px 10px; border-radius: 12px; font-weight: 700; font-size: 0.75rem; }}
-        .prio-tag.prio-medium {{ background: var(--amber); color: #0f172a; padding: 3px 10px; border-radius: 12px; font-weight: 700; font-size: 0.75rem; }}
+        .swot-box {{ border-radius: 12px; padding: 20px; border: 1px solid var(--border); }}
+        .swot-box h3 {{ margin-top: 0; font-size: 1.1rem; border-bottom: 1px dashed var(--border-soft); padding-bottom: 8px; }}
+        .swot-s {{ background-color: var(--mint-pastel-bg); border-color: #a7f3d0; }}
+        .swot-s h3 {{ color: var(--mint-pastel-text); }}
+        .swot-w {{ background-color: var(--rose-pastel-bg); border-color: #fecdd3; }}
+        .swot-w h3 {{ color: var(--rose-pastel-text); }}
+        .swot-o {{ background-color: var(--blue-pastel-bg); border-color: #bae6fd; }}
+        .swot-o h3 {{ color: var(--blue-pastel-text); }}
+        .swot-t {{ background-color: var(--amber-pastel-bg); border-color: #fde68a; }}
+        .swot-t h3 {{ color: var(--amber-pastel-text); }}
+        .rec-card.prio-high {{ border-left: 5px solid #f43f5e; background: #fff5f5; }}
+        .rec-card.prio-medium {{ border-left: 5px solid #f59e0b; background: #fffbeb; }}
+        .prio-tag.prio-high {{ background: var(--rose-pastel-bg); color: var(--rose-pastel-text); padding: 3px 10px; border-radius: 12px; font-weight: 700; font-size: 0.75rem; border: 1px solid #fecdd3; }}
+        .prio-tag.prio-medium {{ background: var(--amber-pastel-bg); color: var(--amber-pastel-text); padding: 3px 10px; border-radius: 12px; font-weight: 700; font-size: 0.75rem; border: 1px solid #fde68a; }}
         .badge {{ padding: 2px 8px; border-radius: 6px; font-size: 0.75rem; font-weight: 600; }}
-        .badge-high {{ background: rgba(244, 63, 94, 0.2); color: var(--rose); }}
-        .badge-medium {{ background: rgba(251, 191, 36, 0.2); color: var(--amber); }}
-        details.evidence-panel {{ margin-top: 12px; border: 1px solid var(--border); border-radius: 8px; background: #0e1626; padding: 8px 12px; }}
-        details.evidence-panel summary {{ color: var(--cyan); font-size: 0.8rem; font-weight: 600; cursor: pointer; }}
-        .evidence-content {{ margin-top: 8px; font-size: 0.8rem; color: #94a3b8; border-top: 1px dashed var(--border); padding-top: 8px; }}
+        .badge-high {{ background: var(--rose-pastel-bg); color: var(--rose-pastel-text); border: 1px solid #fecdd3; }}
+        .badge-medium {{ background: var(--amber-pastel-bg); color: var(--amber-pastel-text); border: 1px solid #fde68a; }}
+        details.evidence-panel {{ margin-top: 12px; border: 1px solid var(--border); border-radius: 8px; background: #ffffff; padding: 8px 12px; }}
+        details.evidence-panel summary {{ color: var(--indigo-pastel-text); font-size: 0.8rem; font-weight: 600; cursor: pointer; }}
+        .evidence-content {{ margin-top: 8px; font-size: 0.8rem; color: #475569; border-top: 1px dashed var(--border); padding-top: 8px; }}
     </style>
 </head>
 <body>

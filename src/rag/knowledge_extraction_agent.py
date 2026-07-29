@@ -177,7 +177,7 @@ class KnowledgeExtractionAgent:
             self_ref = element.id
             text_content = element.text
             page = element.metadata.page_number
-            bbox = element.metadata.bbox.dict() if element.metadata.bbox else None
+            bbox = element.metadata.bbox.model_dump() if hasattr(element.metadata.bbox, "model_dump") else (element.metadata.bbox.dict() if element.metadata.bbox else None)
             
             # --- Heading Context Tracking ---
             if el_type == "heading":
@@ -1004,7 +1004,7 @@ class KnowledgeExtractionAgent:
             source_ids = meta.source_element_ids or []
             
             # Extract metadata dict safely
-            meta_dict = meta.dict() if hasattr(meta, "dict") else meta.model_dump()
+            meta_dict = meta.model_dump() if hasattr(meta, "model_dump") else meta.dict()
             
             flat_meta = {
                 k: v for k, v in meta_dict.items() 

@@ -192,21 +192,31 @@ class ProofreadingPipeline:
         
         lt_available = getattr(self.languagetool_agent, "available", False)
         
-        for sentence in all_sentences:
+        from concurrent.futures import ThreadPoolExecutor
+
+        def process_sentence(sent):
             if lt_available:
                 try:
-                    lt_candidates = self.languagetool_agent.run(sentence)
-                    all_candidates.extend(lt_candidates)
-                    flagged_spans_by_sentence[sentence.sentence_id] = {
-                        (c.char_start, c.char_end) for c in lt_candidates
-                    }
+                    candidates = self.languagetool_agent.run(sent)
+                    return sent.sentence_id, candidates, None
                 except Exception as exc:
-                    self.logger.warning("LanguageTool failed on sentence: %s. Falling back to SymSpell.", exc)
-                    lt_available = False
-            
-            if not lt_available:
-                spell_candidates = self.spell_agent.run(sentence, set())
-                all_candidates.extend(spell_candidates)
+                    return sent.sentence_id, [], exc
+            else:
+                candidates = self.spell_agent.run(sent, set())
+                return sent.sentence_id, candidates, None
+
+        if all_sentences:
+            max_lt_workers = min(8, len(all_sentences))
+            with ThreadPoolExecutor(max_workers=max_lt_workers) as executor:
+                sent_results = list(executor.map(process_sentence, all_sentences))
+
+            for sent_id, candidates, exc in sent_results:
+                if exc:
+                    self.logger.warning("LanguageTool failed on sentence %d: %s. Falling back to SymSpell.", sent_id, exc)
+                all_candidates.extend(candidates)
+                if candidates:
+                    flagged_spans_by_sentence[sent_id] = {(c.char_start, c.char_end) for c in candidates}
+
         save_json(all_candidates, stage_dirs["06_spell"] / "spell_candidates.json")
         self.logger.info("Spell/grammar candidates so far: %d", len(all_candidates))
 
@@ -220,19 +230,27 @@ class ProofreadingPipeline:
                         return sentence.sentence_id
                 return -1
 
-            for paragraph in document.paragraphs:
+            def process_paragraph(paragraph):
                 para_start = paragraph.doc_char_start or 0
                 para_end = para_start + len(paragraph.text)
                 terms_in_paragraph = [
                     t for t in protected_terms if t.char_start < para_end and t.char_end > para_start
                 ]
                 try:
-                    llm_candidates = self.grammar_agent.run(
+                    return self.grammar_agent.run(
                         paragraph.text, para_start, sentence_id_for_offset, terms_in_paragraph
                     )
-                    all_candidates.extend(llm_candidates)
                 except Exception as exc:
                     self.logger.warning("Grammar review (Ollama) failed: %s. Continuing...", exc)
+                    return []
+
+            if document.paragraphs:
+                max_para_workers = min(4, len(document.paragraphs))
+                with ThreadPoolExecutor(max_workers=max_para_workers) as executor:
+                    para_candidates_list = list(executor.map(process_paragraph, document.paragraphs))
+
+                for candidates in para_candidates_list:
+                    all_candidates.extend(candidates)
         else:
             self.logger.info("Skipping grammar review (Ollama) because model is 'none'")
         save_json(all_candidates, stage_dirs["07_grammar"] / "grammar_candidates.json")
