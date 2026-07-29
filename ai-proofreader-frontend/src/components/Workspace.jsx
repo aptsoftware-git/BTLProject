@@ -276,6 +276,17 @@ export default function Workspace() {
   const isSpellingIssue = (issue) => issue && (issue.issue_type === "spelling" || issue.issue_type === "punctuation");
   const isGrammarIssue = (issue) => issue && (issue.issue_type !== "spelling" && issue.issue_type !== "punctuation");
 
+  const handleRetryStage = async (stageId = "all") => {
+    if (!id) return;
+    try {
+      await retryJobStage(id, stageId);
+      const data = await fetchDocument(id);
+      if (data) setDoc(data);
+    } catch (err) {
+      console.error("Failed to retry stage:", err);
+    }
+  };
+
   // Synchronize document DOM highlights (fallback mode when annotatedHtml is rendered)
   useEffect(() => {
     if (!textContainerRef.current || doc?.raw_text) return;

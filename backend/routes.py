@@ -962,7 +962,7 @@ async def get_rag_models() -> List[RagModelResponse]:
             id=m.id,
             display_name=m.display_name,
             description=m.description,
-            recommended=(m.id == DEFAULT_MODEL_ID)
+            recommended=(m.id == DEFAULT_MODEL_ID or m.id == "qwen2.5-coder:7b")
         ) for m in models
     ]
 
