@@ -84,10 +84,12 @@ class SemanticValidator:
                     "sentence_text": sentence_text,
                 })
 
-        # Process non-spelling items in batches of 10
+        # Process non-spelling items in batches of 10 concurrently
         batch_size = 10
-        for b_start in range(0, len(non_spelling_items), batch_size):
-            batch = non_spelling_items[b_start : b_start + batch_size]
+        batches = [non_spelling_items[b : b + batch_size] for b in range(0, len(non_spelling_items), batch_size)]
+
+        def process_batch(batch):
+            batch_results = {}
             items_formatted = []
             for b_i, item in enumerate(batch, 1):
                 items_formatted.append(
@@ -106,7 +108,7 @@ class SemanticValidator:
                         rel_idx = res_item.get("item_index", 0) - 1
                         if 0 <= rel_idx < len(batch):
                             target_idx = batch[rel_idx]["idx"]
-                            results_map[target_idx] = SemanticCheckResult(
+                            batch_results[target_idx] = SemanticCheckResult(
                                 candidate_index=target_idx,
                                 meaning_preserved=res_item.get("meaning_preserved", False),
                                 grammatically_correct=res_item.get("grammatically_correct", False),
@@ -115,9 +117,8 @@ class SemanticValidator:
             except Exception:
                 batch_success = False
 
-            # Fallback to single validation if batch call failed or missed items
             for item in batch:
-                if item["idx"] not in results_map:
+                if item["idx"] not in batch_results:
                     try:
                         single_prompt = _PROMPT_TEMPLATE.format(
                             sentence_text=item["sentence_text"],
@@ -126,19 +127,31 @@ class SemanticValidator:
                         )
                         raw = self._call_ollama(single_prompt)
                         parsed = self._parse_json(raw)
-                        results_map[item["idx"]] = SemanticCheckResult(
+                        batch_results[item["idx"]] = SemanticCheckResult(
                             candidate_index=item["idx"],
                             meaning_preserved=parsed.get("meaning_preserved", False),
                             grammatically_correct=parsed.get("grammatically_correct", False),
                             notes=parsed.get("notes", ""),
                         )
                     except Exception:
-                        results_map[item["idx"]] = SemanticCheckResult(
+                        batch_results[item["idx"]] = SemanticCheckResult(
                             candidate_index=item["idx"],
-                            meaning_preserved=True,
-                            grammatically_correct=True,
-                            notes="validation fallback on error",
+                            meaning_preserved=False,
+                            grammatically_correct=False,
+                            notes="validation error",
                         )
+            return batch_results
+
+        if len(batches) > 1:
+            from concurrent.futures import ThreadPoolExecutor
+            workers = min(4, len(batches))
+            with ThreadPoolExecutor(max_workers=workers) as executor:
+                res_list = executor.map(process_batch, batches)
+                for b_res in res_list:
+                    results_map.update(b_res)
+        else:
+            for b in batches:
+                results_map.update(process_batch(b))
 
         return [results_map[i] for i in range(len(issues))]
 

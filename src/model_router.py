@@ -21,7 +21,7 @@ DEFAULT_MODEL_ROUTER: Dict[str, str] = {
     "rag_chat": os.environ.get("MODEL_RAG_CHAT", "qwen2.5-coder:32b"),
     "context_analysis": os.environ.get("MODEL_CONTEXT_ANALYSIS", "deepseek-r1:32b"),
     "comparative_analysis": os.environ.get("MODEL_COMPARATIVE_ANALYSIS", "deepseek-r1:32b"),
-    "executive_report": os.environ.get("MODEL_EXECUTIVE_REPORT", os.environ.get("ANTHROPIC_MODEL", "claude-3-5-sonnet-20241022")),
+    "executive_report": os.environ.get("MODEL_EXECUTIVE_REPORT", os.environ.get("CLAUDE_MODEL", os.environ.get("ANTHROPIC_MODEL", "claude-sonnet-4-6"))),
     "embedding_model": os.environ.get("MODEL_EMBEDDING", "BAAI/bge-small-en-v1.5"),
 }
 

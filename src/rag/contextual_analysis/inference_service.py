@@ -26,7 +26,7 @@ class InferenceService:
         # Load configuration settings
         self.config = RagConfig()
         self.provider = getattr(self.config, "provider", "ollama")
-        self.claude_model = getattr(self.config, "claude_model", "claude-3-5-sonnet-20241022")
+        self.claude_model = getattr(self.config, "claude_model", os.environ.get("CLAUDE_MODEL", "claude-sonnet-4-6"))
 
         # Load prompt templates
         self.system_prompt = self._load_prompt("system_prompt.txt")

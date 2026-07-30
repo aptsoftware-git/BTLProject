@@ -51,13 +51,15 @@ class StrategicRecommendationAgent:
 
     def _normalize_model_name(self, model: Optional[str]) -> str:
         if not model:
-            return "claude-3-5-sonnet-20241022"
+            return "claude-sonnet-4-6"
         m_lower = model.lower()
-        if "3.5" in m_lower or "sonnet" in m_lower:
+        if "4.6" in m_lower or "4-6" in m_lower or "sonnet-4" in m_lower:
+            return "claude-sonnet-4-6"
+        if "3.5" in m_lower:
             return "claude-3-5-sonnet-20241022"
         if "haiku" in m_lower:
             return "claude-3-haiku-20240307"
-        return "claude-3-5-sonnet-20241022"
+        return model
 
     def generate_recommendations(
         self,
@@ -90,6 +92,7 @@ class StrategicRecommendationAgent:
         if self.api_key:
             candidate_models = [
                 self.model_name,
+                "claude-sonnet-4-6",
                 "claude-3-5-sonnet-20241022",
                 "claude-3-haiku-20240307"
             ]

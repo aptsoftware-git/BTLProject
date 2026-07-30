@@ -38,30 +38,47 @@ class LanguageToolAgent:
         return self.run_batch([sentence])
 
     def run_batch(self, sentences: List[Sentence]) -> List[Candidate]:
-        """Process a list of sentences, returning all detected candidates."""
+        """Process a list of sentences concurrently, returning all detected candidates."""
         if not self.available or not sentences:
             return []
         
+        def check_sentence(sentence: Sentence) -> List[Candidate]:
+            if sentence.doc_char_start is None or not sentence.text.strip():
+                return []
+            sentence_candidates = []
+            try:
+                matches = self.tool.check(sentence.text)
+                for m in matches:
+                    if not m.replacements:
+                        continue
+                    issue_type = self._classify(m.rule_id, m.rule_issue_type)
+                    sentence_candidates.append(Candidate(
+                        sentence_id=sentence.sentence_id,
+                        char_start=sentence.doc_char_start + m.offset,
+                        char_end=sentence.doc_char_start + m.offset + m.error_length,
+                        original_text=sentence.text[m.offset:m.offset + m.error_length],
+                        suggested_text=m.replacements[0],
+                        issue_type=issue_type,
+                        source=SourceAgent.LANGUAGETOOL,
+                        reason=m.message,
+                        confidence=0.75,
+                    ))
+            except Exception:
+                pass
+            return sentence_candidates
+
         candidates: List[Candidate] = []
-        for sentence in sentences:
-            if sentence.doc_char_start is None:
-                continue
-            matches = self.tool.check(sentence.text)
-            for m in matches:
-                if not m.replacements:
-                    continue
-                issue_type = self._classify(m.rule_id, m.rule_issue_type)
-                candidates.append(Candidate(
-                    sentence_id=sentence.sentence_id,
-                    char_start=sentence.doc_char_start + m.offset,
-                    char_end=sentence.doc_char_start + m.offset + m.error_length,
-                    original_text=sentence.text[m.offset:m.offset + m.error_length],
-                    suggested_text=m.replacements[0],
-                    issue_type=issue_type,
-                    source=SourceAgent.LANGUAGETOOL,
-                    reason=m.message,
-                    confidence=0.75,
-                ))
+        if len(sentences) > 5:
+            from concurrent.futures import ThreadPoolExecutor
+            workers = min(16, max(4, len(sentences) // 25))
+            with ThreadPoolExecutor(max_workers=workers) as executor:
+                results = executor.map(check_sentence, sentences)
+                for res in results:
+                    candidates.extend(res)
+        else:
+            for s in sentences:
+                candidates.extend(check_sentence(s))
+
         return candidates
 
     @staticmethod

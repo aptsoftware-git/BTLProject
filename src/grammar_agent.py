@@ -108,11 +108,10 @@ class GrammarAgent:
 
         all_candidates: List[Candidate] = []
 
-        # Process in chunks of batch_size
-        for i in range(0, len(paragraphs_data), batch_size):
-            chunk = paragraphs_data[i : i + batch_size]
-            
-            # Fast single fallback if batch_size == 1
+        chunks = [paragraphs_data[i : i + batch_size] for i in range(0, len(paragraphs_data), batch_size)]
+
+        def process_chunk(chunk: List[dict]) -> List[Candidate]:
+            chunk_candidates: List[Candidate] = []
             if len(chunk) == 1:
                 item = chunk[0]
                 protected_str = ", ".join(sorted({t.text for t in item["protected_terms"]})) or "(none)"
@@ -120,14 +119,13 @@ class GrammarAgent:
                 try:
                     raw = self._call_ollama(prompt)
                     errors = self._parse_json(raw)
-                    all_candidates.extend(
+                    chunk_candidates.extend(
                         self._candidates_from_errors(item["text"], item["doc_char_start"], errors, sentence_id_for_offset_lookup)
                     )
                 except Exception:
                     pass
-                continue
+                return chunk_candidates
 
-            # Multi-paragraph batch execution
             all_protected = set()
             formatted_paragraphs = []
             for idx, p_item in enumerate(chunk, 1):
@@ -152,13 +150,12 @@ class GrammarAgent:
                         if 0 <= p_idx < len(chunk):
                             item = chunk[p_idx]
                             errors = p_res.get("errors", [])
-                            all_candidates.extend(
+                            chunk_candidates.extend(
                                 self._candidates_from_errors(item["text"], item["doc_char_start"], errors, sentence_id_for_offset_lookup)
                             )
             except Exception:
                 batch_success = False
 
-            # Fallback to individual processing if batch failed
             if not batch_success:
                 for item in chunk:
                     protected_str = ", ".join(sorted({t.text for t in item["protected_terms"]})) or "(none)"
@@ -166,11 +163,23 @@ class GrammarAgent:
                     try:
                         raw = self._call_ollama(prompt)
                         errors = self._parse_json(raw)
-                        all_candidates.extend(
+                        chunk_candidates.extend(
                             self._candidates_from_errors(item["text"], item["doc_char_start"], errors, sentence_id_for_offset_lookup)
                         )
                     except Exception:
                         pass
+            return chunk_candidates
+
+        if len(chunks) > 1:
+            from concurrent.futures import ThreadPoolExecutor
+            workers = min(4, len(chunks))
+            with ThreadPoolExecutor(max_workers=workers) as executor:
+                results = executor.map(process_chunk, chunks)
+                for res in results:
+                    all_candidates.extend(res)
+        else:
+            for c in chunks:
+                all_candidates.extend(process_chunk(c))
 
         return all_candidates
 
