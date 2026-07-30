@@ -109,10 +109,11 @@ const NAV_ITEMS = [
   { id: "sec-references", label: "References", icon: IconGlobe }
 ];
 
-export default function ComparativeAnalysisView({ data, isRunning = false, currentStage = '', id, onRerun }) {
+function ComparativeAnalysisInnerView({ data, isRunning = false, currentStage = '', id, onRerun }) {
   const [activeGapCategory, setActiveGapCategory] = useState('ALL');
   const [evidenceOpen, setEvidenceOpen] = useState(false);
   const [activeNav, setActiveNav] = useState("sec-overview");
+  const [reRunning, setReRunning] = useState(false);
 
   const payload = data?.data || data || {};
   const company = payload.company_profile || {};
@@ -223,13 +224,18 @@ export default function ComparativeAnalysisView({ data, isRunning = false, curre
     ? allGaps
     : allGaps.filter(g => (g.category || '').toLowerCase().includes(activeGapCategory.toLowerCase()));
 
-  // Capped at max 5 bullet points per quadrant (Requirement 9)
-  const strengthsList = (swot.strengths_vs_competitors || company.business_strengths || []).slice(0, 5);
-  const weaknessesList = (swot.weaknesses_vs_competitors || []).slice(0, 5);
-  const opportunitiesList = (swot.opportunities_in_market || []).slice(0, 5);
-  const threatsList = (swot.threats_from_competitors || []).slice(0, 5);
+  // Capped at max 5 bullet points per quadrant with safe array type checking
+  const rawStrengths = swot.strengths_vs_competitors || company.business_strengths || [];
+  const strengthsList = Array.isArray(rawStrengths) ? rawStrengths.slice(0, 5) : (typeof rawStrengths === 'string' ? [rawStrengths] : []);
 
-  const [reRunning, setReRunning] = useState(false);
+  const rawWeaknesses = swot.weaknesses_vs_competitors || [];
+  const weaknessesList = Array.isArray(rawWeaknesses) ? rawWeaknesses.slice(0, 5) : (typeof rawWeaknesses === 'string' ? [rawWeaknesses] : []);
+
+  const rawOpportunities = swot.opportunities_in_market || [];
+  const opportunitiesList = Array.isArray(rawOpportunities) ? rawOpportunities.slice(0, 5) : (typeof rawOpportunities === 'string' ? [rawOpportunities] : []);
+
+  const rawThreats = swot.threats_from_competitors || [];
+  const threatsList = Array.isArray(rawThreats) ? rawThreats.slice(0, 5) : (typeof rawThreats === 'string' ? [rawThreats] : []);
 
   const handleReRun = async () => {
     const docId = id || payload?.document_job_id || payload?.id;
@@ -577,13 +583,17 @@ export default function ComparativeAnalysisView({ data, isRunning = false, curre
 
                       <div style={styles.compMetaRow}>
                         <span style={styles.compMetaLabel}>Geography:</span>
-                        <span style={styles.compMetaVal}>{(comp.geographic_presence || ["Global"]).join(", ")}</span>
+                        <span style={styles.compMetaVal}>
+                          {Array.isArray(comp.geographic_presence) 
+                            ? comp.geographic_presence.join(", ") 
+                            : (typeof comp.geographic_presence === "string" ? comp.geographic_presence : "Global")}
+                        </span>
                       </div>
 
-                      {comp.core_services && comp.core_services.length > 0 && (
+                      {comp.core_services && (Array.isArray(comp.core_services) ? comp.core_services.length > 0 : typeof comp.core_services === "string") && (
                         <div style={{ paddingTop: 6, borderTop: "1px solid #E2E8F0" }}>
                           <span style={styles.compHeading}>Key Services</span>
-                          {renderPillList(comp.core_services)}
+                          {renderPillList(Array.isArray(comp.core_services) ? comp.core_services : [comp.core_services])}
                         </div>
                       )}
                     </div>
@@ -880,6 +890,69 @@ export default function ComparativeAnalysisView({ data, isRunning = false, curre
         </div>
       </div>
     </div>
+  );
+}
+
+class ComparativeAnalysisErrorBoundary extends React.Component {
+  constructor(props) {
+    super(props);
+    this.state = { hasError: false, error: null };
+  }
+
+  static getDerivedStateFromError(error) {
+    return { hasError: true, error };
+  }
+
+  componentDidCatch(error, errorInfo) {
+    console.error("ComparativeAnalysisView caught rendering error:", error, errorInfo);
+  }
+
+  render() {
+    if (this.state.hasError) {
+      return (
+        <div style={{
+          padding: 32,
+          background: "var(--bg-card, #ffffff)",
+          border: "1px solid var(--border, #e2e8f0)",
+          borderRadius: 12,
+          textAlign: "center",
+          margin: "20px 0"
+        }}>
+          <h3 style={{ color: "var(--brand, #4f46e5)", fontSize: 18, fontWeight: 700, marginBottom: 8 }}>
+            Executive Comparative Analysis Summary
+          </h3>
+          <p style={{ color: "#475569", fontSize: 14, marginBottom: 16 }}>
+            {this.state.error?.message || "Render caught an exception while processing comparative data structure."}
+          </p>
+          <button
+            onClick={() => {
+              this.setState({ hasError: false, error: null });
+              if (this.props.onRerun) this.props.onRerun();
+            }}
+            style={{
+              background: "var(--brand, #4f46e5)",
+              color: "#ffffff",
+              border: "none",
+              padding: "10px 20px",
+              borderRadius: 8,
+              fontWeight: 600,
+              cursor: "pointer"
+            }}
+          >
+            Reload View
+          </button>
+        </div>
+      );
+    }
+    return this.props.children;
+  }
+}
+
+export default function ComparativeAnalysisView(props) {
+  return (
+    <ComparativeAnalysisErrorBoundary onRerun={props.onRerun}>
+      <ComparativeAnalysisInnerView {...props} />
+    </ComparativeAnalysisErrorBoundary>
   );
 }
 

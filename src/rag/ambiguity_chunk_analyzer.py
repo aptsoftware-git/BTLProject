@@ -338,8 +338,8 @@ Structured Extraction from Phase 2A:
 Return JSON schema matching:
 {{
     "chunk_id": "{chunk_id}",
-    "claim_validation": [{"claim_id": "string", "status": "valid|partial|incorrect", "reason": "string", "improved_claim": "string", "confidence": 0.95}],
-    "ambiguities": [{"issue_id": "{chunk_id}_amb_000", "type": "vague wording", "severity": "Low|Medium|High", "quote": "string", "reason": "string", "supporting_evidence": "string", "suggested_rewrite": "string", "affected_claims": [], "confidence": 0.90}],
+    "claim_validation": [{{"claim_id": "string", "status": "valid|partial|incorrect", "reason": "string", "improved_claim": "string", "confidence": 0.95}}],
+    "ambiguities": [{{"issue_id": "{chunk_id}_amb_000", "type": "vague wording", "severity": "Low|Medium|High", "quote": "string", "reason": "string", "supporting_evidence": "string", "suggested_rewrite": "string", "affected_claims": [], "confidence": 0.90}}],
     "overall_chunk_risk": "Low|Medium|High",
     "overall_confidence": 0.92
 }}
@@ -411,7 +411,9 @@ Return JSON schema matching:
         # 2. Output validated_claims.json
         validated_claims_list = []
         for cr in chunk_reasonings:
-            cid = cr["chunk_id"]
+            if not isinstance(cr, dict):
+                continue
+            cid = cr.get("chunk_id", "")
             # Find original chunk text mapping
             original_c = next((ch for ch in chunks if ch["chunk_id"] == cid), {})
             orig_claims = original_c.get("extraction", {}).get("claims", [])
@@ -440,7 +442,9 @@ Return JSON schema matching:
         # 3. Output ambiguity_index.json
         ambiguities_list = []
         for cr in chunk_reasonings:
-            cid = cr["chunk_id"]
+            if not isinstance(cr, dict):
+                continue
+            cid = cr.get("chunk_id", "")
             for amb in cr.get("ambiguities", []):
                 if isinstance(amb, str):
                     amb = {"issue_id": f"amb_{len(ambiguities_list)+1:03d}", "quote": amb, "type": "Undefined Term", "reason": amb}
@@ -489,8 +493,8 @@ Return JSON schema matching:
         total_claims_val = len(validated_claims_list)
         total_ambs = len(ambiguities_list)
         
-        risk_counter = Counter([cr.get("overall_chunk_risk", "Low") for cr in chunk_reasonings])
-        avg_conf = sum(cr.get("overall_confidence", 0.0) for cr in chunk_reasonings) / max(1, total_chunks)
+        risk_counter = Counter([cr.get("overall_chunk_risk", "Low") for cr in chunk_reasonings if isinstance(cr, dict)])
+        avg_conf = sum(cr.get("overall_confidence", 0.0) for cr in chunk_reasonings if isinstance(cr, dict)) / max(1, total_chunks)
 
         # 5. Output chunk_statistics.json
         stats_data = {
@@ -511,7 +515,9 @@ Return JSON schema matching:
         # chunk_reasoning.md
         md_reasoning = ["# Chunk-Level Ambiguity & Reasonings\n\n"]
         for cr in chunk_reasonings:
-            cid = cr["chunk_id"]
+            if not isinstance(cr, dict):
+                continue
+            cid = cr.get("chunk_id", "")
             original_c = next((ch for ch in chunks if ch["chunk_id"] == cid), {})
             md_reasoning.append(f"## Chunk `{cid}` (Risk: {cr.get('overall_chunk_risk')})\n")
             md_reasoning.append(f"### Original Text\n```\n{original_c.get('text', '').strip()}\n```\n")
