@@ -30,7 +30,7 @@ from typing import Any, Dict, List, Optional, Tuple
 from src.config import PipelineConfig, ROOT_DIR
 from src.logger import get_logger
 
-logger = logging.getLogger("backend")
+logger = get_logger("backend")
 
 STAGES_DEFINITIONS: List[Dict[str, str]] = [
     {

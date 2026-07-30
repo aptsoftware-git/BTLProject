@@ -42,7 +42,10 @@ class LayoutAnalyzer:
         self.logger = logger
 
     def analyze(self, document: Document) -> Document:
-        self.logger.stage("Analyzing layout")
+        if hasattr(self.logger, "stage"):
+            self.logger.stage("Analyzing layout")
+        else:
+            self.logger.info("Analyzing layout")
         blocks = self._split_into_blocks(document.raw_text)
 
         layout_blocks: List[LayoutBlock] = []

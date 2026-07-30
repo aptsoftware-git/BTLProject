@@ -25,6 +25,14 @@ class PipelineLogger(logging.Logger):
         self.info(name)
         self.info("=" * 60)
 
+# Dynamically ensure all Logger instances support .stage() banner calls
+if not hasattr(logging.Logger, "stage"):
+    def _logger_stage_banner(self: logging.Logger, name: str) -> None:
+        self.info("=" * 60)
+        self.info(name)
+        self.info("=" * 60)
+    setattr(logging.Logger, "stage", _logger_stage_banner)
+
 
 def get_logger(name: str = "pipeline", log_file: Path | None = None) -> PipelineLogger:
     logging.setLoggerClass(PipelineLogger)
