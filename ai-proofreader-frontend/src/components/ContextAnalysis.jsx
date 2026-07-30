@@ -66,18 +66,21 @@ export default function ContextAnalysis({ id }) {
         if (!active) return;
         setDocProgress(docData);
 
-        if (docData.context_analysis_status === "completed" || docData.context_analysis_ready || docData.reports_ready || docData.status === "completed") {
+        const isContextComplete = docData.context_analysis_status === "completed";
+        const isContextRunning = docData.context_analysis_status === "running" || docData.context_analysis_status === "pending";
+
+        if (isContextComplete) {
           setRunning(false);
           await fetchAllReports();
-        } else if (docData.context_analysis_status === "running" || docData.context_analysis_status === "pending") {
+        } else if (isContextRunning) {
           setRunning(true);
           timerId = setTimeout(checkStatus, 2500);
+        } else if (docData.context_analysis_ready) {
+          setRunning(false);
+          await fetchAllReports();
         } else if (docData.context_analysis_status === "failed") {
           setRunning(false);
           setError("Audit execution failed: " + (docData.error || "Check engine log."));
-        } else if (docData.status === "processing" || docData.status === "pending") {
-          setRunning(true);
-          timerId = setTimeout(checkStatus, 2500);
         } else {
           setRunning(true);
           await runContextAnalysis(id).catch(() => {});
@@ -253,7 +256,7 @@ export default function ContextAnalysis({ id }) {
     });
 
     return Array.from(deduplicatedMap.values());
-  }, [finalReport, claudeReport]);
+  }, [finalReport, claudeReport, chunkReport, clusterReport]);
 
   const funnelData = useMemo(() => {
     let initial = docProgress?.context_analysis_issues_count || claimsReport?.data?.claims?.length || chunkReport?.data?.chunks?.length || consolidatedFindings.length;

@@ -1113,8 +1113,34 @@ export default function Workspace() {
   };
 
   const handleDownloadFormat = (packageName, format) => {
-    alert(`Preparing ${packageName} report in ${format.toUpperCase()} format...`);
-    handleDownloadCorrected();
+    const reportKeyMap = {
+      executive: "final-report",
+      detailed: "chunk-reasoning",
+      writing: "cluster-reasoning",
+      ai_verification: "claude-verification",
+      technical: "comparative-analysis"
+    };
+    const reportKey = reportKeyMap[packageName] || "final-report";
+    
+    if (format === "pdf") {
+      const link = document.createElement("a");
+      link.href = `/api/reports/${id}/${reportKey}/pdf`;
+      link.download = `${reportKey}_${id}.pdf`;
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+    } else if (format === "html") {
+      window.open(`/api/reports/${id}/${reportKey}`, "_blank");
+    } else if (format === "zip") {
+      const link = document.createElement("a");
+      link.href = `/api/documents/${id}/export`;
+      link.download = `export_${id}.zip`;
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+    } else {
+      handleDownloadCorrected();
+    }
   };
 
   // Copy Corrected Document text directly to clipboard

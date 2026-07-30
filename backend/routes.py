@@ -1439,10 +1439,16 @@ async def download_report_pdf(job_id: str, report_type: str):
 
     html_file = report_html_map.get(report_type.lower())
     if not html_file or not html_file.exists():
-        alt_html = job_dir / "15_final_report" / "final_report.html"
-        if alt_html.exists():
-            html_file = alt_html
-        else:
+        candidates = [
+            job_dir / "15_final_report" / "final_report.html",
+            job_dir / "09_reports" / "consistency_report.html",
+            job_dir / "business_report.html",
+            job_dir / "comparative_analysis" / "comparative_report.html",
+            job_dir / "09_reports" / "comparative_analysis.html",
+            job_dir / "10_final" / "corrected_document.html"
+        ]
+        html_file = next((c for c in candidates if c.exists()), None)
+        if not html_file:
             raise HTTPException(status_code=404, detail=f"HTML source for report '{report_type}' not found.")
 
     pdf_output_path = job_dir / f"{report_type}_report.pdf"
@@ -1452,15 +1458,35 @@ async def download_report_pdf(job_id: str, report_type: str):
         try:
             import fitz
             html_text = html_file.read_text(encoding="utf-8")
-            story = fitz.Story(html=html_text)
-            writer = fitz.DocumentWriter(str(pdf_output_path))
-            more = True
-            while more:
-                page = writer.begin_page(fitz.PaperSize("A4"))
-                more, _ = story.place(fitz.Rect(36, 36, page.rect.width - 36, page.rect.height - 36))
-                story.draw(page)
-                writer.end_page()
-            writer.close()
+            try:
+                story = fitz.Story(html=html_text)
+                writer = fitz.DocumentWriter(str(pdf_output_path))
+                more = True
+                while more:
+                    page = writer.begin_page(fitz.PaperSize("A4"))
+                    more, _ = story.place(fitz.Rect(36, 36, page.rect.width - 36, page.rect.height - 36))
+                    story.draw(page)
+                    writer.end_page()
+                writer.close()
+            except Exception as story_exc:
+                backend_logger.warning(f"fitz.Story failed: {story_exc}, compiling clean PDF layout fallback")
+                import re
+                clean_text = re.sub(r'<style.*?>.*?</style>', '', html_text, flags=re.DOTALL)
+                clean_text = re.sub(r'<script.*?>.*?</script>', '', clean_text, flags=re.DOTALL)
+                clean_text = re.sub(r'<[^>]+>', '\n', clean_text)
+                lines = [line.strip() for line in clean_text.split('\n') if line.strip()]
+                
+                doc = fitz.open()
+                page = doc.new_page()
+                y = 50
+                for line in lines:
+                    if y > page.rect.height - 50:
+                        page = doc.new_page()
+                        y = 50
+                    page.insert_text((36, y), line[:110], fontsize=10)
+                    y += 14
+                doc.save(str(pdf_output_path))
+                doc.close()
         except Exception as e:
             backend_logger.error(f"Failed to compile PDF via PyMuPDF: {e}")
             return FileResponse(
