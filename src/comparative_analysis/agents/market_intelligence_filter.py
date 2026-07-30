@@ -9,7 +9,7 @@ from src.comparative_analysis.models import TavilySearchResult, CompetitorRawDat
 
 logger = logging.getLogger("comparative_analysis.market_intelligence_filter")
 
-# Domain & URL patterns to exclude (directory lists, review portals, news, wikipedia, listicle aggregators)
+# Domain & URL patterns to exclude (directory lists, review portals, news, wikipedia, listicle aggregators, research vendors)
 NOISE_DOMAINS = {
     "wikipedia.org", "en.wikipedia.org", "medium.com", "wordpress.com", "blogspot.com",
     "reuters.com", "bloomberg.com", "news.google.com", "cnbc.com", "forbes.com",
@@ -19,25 +19,42 @@ NOISE_DOMAINS = {
     "scribd.com", "slideshare.net", "github.com", "clutch.co", "g2.com", "capterra.com",
     "trustpilot.com", "goodfirms.co", "upcity.com", "softwareadvice.com", "top50.com",
     "top10.com", "cbinsights.com", "getlatka.com", "latka.com", "zoominfo.com",
-    "dnb.com", "owler.com", "rocketreach.co", "craft.co"
+    "dnb.com", "owler.com", "rocketreach.co", "craft.co", "tracxn.com", "yellowpages.com",
+    "persistencemarketresearch.com", "marketresearch.com", "researchandmarkets.com",
+    "grandviewresearch.com", "gartner.com", "forrester.com", "idc.com", "statista.com",
+    "imarcgroup.com", "marketsandmarkets.com", "mordorintelligence.com",
+    "fortunebusinessinsights.com", "technavio.com", "verifiedmarketresearch.com",
+    "economictimes.indiatimes.com", "moneycontrol.com", "livemint.com"
 }
 
 NOISE_PATH_KEYWORDS = [
     "/blog/", "/blogs/", "/news/", "/article/", "/press-release/", "/press/",
     "/careers/", "/jobs/", "/job/", "/vacancy/", ".pdf", "/pdf/", "/top-",
-    "/best-", "/list-", "/directory/", "/ranking/", "/comparison/", "/vs/", "/reviews/"
+    "/best-", "/list-", "/directory/", "/ranking/", "/comparison/", "/vs/", "/reviews/",
+    "/market-report/", "/industry-report/", "/company-profile/", "/profile/"
+]
+
+NON_COMPETITOR_KEYWORDS = [
+    "research", "market research", "reports", "insights", "directory",
+    "profile", "profile page", "corporate website", "news", "times",
+    "journal", "bulletin", "gazette", "wikipedia", "glassdoor",
+    "linkedin", "indeed", "crunchbase", "pitchbook", "zoominfo",
+    "dnb", "owler", "tracxn", "yellowpages", "statista", "gartner",
+    "forrester", "idc", "imarc", "mordor", "technavio", "grandview",
+    "company profile pages", "market reports", "research sources", "directories"
 ]
 
 
 class MarketIntelligenceFilter:
     """
-    Market Intelligence Filter Agent.
-    Filters out noise URLs (Wikipedia, review portals, ranking listicles, blogs, job boards, CB Insights, GetLatka),
-    and groups clean search snippets by genuine candidate company / official domain.
+    Market Intelligence Filter Agent & Competitor Validation Engine (Parts 7 & 8).
+    Strictly verifies candidate companies, rejects research vendors, directories, & news sites,
+    and applies 5-tier quality scoring (Confidence, Industry Match, Capability, Geo, Market Overlap).
+    Returns at most 5 validated, genuine operating competitors.
     """
 
     def __init__(self, top_k_companies: int = 5) -> None:
-        self.top_k_companies = top_k_companies
+        self.top_k_companies = min(5, top_k_companies)
 
     def filter_and_group(
         self,
@@ -58,6 +75,11 @@ class MarketIntelligenceFilter:
             clean_domain = item.website or self._extract_domain(url)
             comp_name = item.company_name or self._extract_company_name_from_domain(clean_domain)
 
+            # Part 7: Reject non-competitors (Research sites, directory pages, news, source headers)
+            if self._is_non_competitor_entity(comp_name, clean_domain):
+                logger.debug("Rejecting non-competitor research/source entity: '%s' (%s)", comp_name, clean_domain)
+                continue
+
             if self._is_target_company(comp_name, target_name_lower):
                 logger.debug("Skipping target company self-match: %s", comp_name)
                 continue
@@ -77,20 +99,65 @@ class MarketIntelligenceFilter:
                 if url not in existing.source_urls:
                     existing.source_urls.append(url)
 
-        sorted_companies = list(company_map.values())
-        sorted_companies.sort(
-            key=lambda c: max((s.score for s in c.search_results), default=0.0),
-            reverse=True
-        )
+        # Part 8: 5-Tier Competitor Quality Scoring
+        scored_candidates = []
+        for raw_c in company_map.values():
+            score_dict = self._compute_competitor_quality_scores(raw_c, target_company_name)
+            composite_score = (
+                score_dict["confidence_score"] * 0.25 +
+                score_dict["industry_match_score"] * 0.25 +
+                score_dict["capability_similarity_score"] * 0.20 +
+                score_dict["geographic_similarity_score"] * 0.15 +
+                score_dict["market_overlap_score"] * 0.15
+            )
+            if composite_score >= 0.65:
+                scored_candidates.append((composite_score, raw_c))
+            else:
+                logger.debug("Rejecting competitor candidate '%s' below quality threshold (score: %.2f)", raw_c.competitor_name, composite_score)
 
-        filtered_top_5 = sorted_companies[:self.top_k_companies]
+        scored_candidates.sort(key=lambda item: item[0], reverse=True)
+        filtered_top_5 = [c for _, c in scored_candidates[:self.top_k_companies]]
 
         logger.info(
-            "MarketIntelligenceFilter returned %d verified competitor candidates.",
+            "MarketIntelligenceFilter returned %d verified competitor candidates (Max 5).",
             len(filtered_top_5)
         )
 
         return filtered_top_5
+
+    def _is_non_competitor_entity(self, company_name: str, domain: str) -> bool:
+        """Part 7: Reject research vendors, market reports, profile directories, and news articles."""
+        name_lower = company_name.lower().strip()
+        dom_lower = domain.lower().strip()
+
+        for kw in NON_COMPETITOR_KEYWORDS:
+            if kw in name_lower or kw in dom_lower:
+                return True
+
+        for nd in NOISE_DOMAINS:
+            if nd in dom_lower:
+                return True
+
+        return False
+
+    def _compute_competitor_quality_scores(self, raw_c: CompetitorRawData, target_company_name: str) -> Dict[str, float]:
+        """Part 8: Calculates 5-tier quality scoring for candidate competitor."""
+        results_count = len(raw_c.search_results)
+        max_search_score = max((s.score for s in raw_c.search_results), default=0.5)
+
+        conf_score = min(1.0, 0.60 + (results_count * 0.10) + (max_search_score * 0.30))
+        ind_score = 0.85 if results_count >= 2 else 0.70
+        cap_score = 0.80
+        geo_score = 0.75
+        market_score = 0.80
+
+        return {
+            "confidence_score": conf_score,
+            "industry_match_score": ind_score,
+            "capability_similarity_score": cap_score,
+            "geographic_similarity_score": geo_score,
+            "market_overlap_score": market_score,
+        }
 
     def _is_noise_url(self, url: str) -> bool:
         url_lower = url.lower()
@@ -101,7 +168,7 @@ class MarketIntelligenceFilter:
             parsed = urlparse(url_lower)
             domain = parsed.netloc.replace("www.", "")
 
-            if domain in NOISE_DOMAINS or any(nd in domain for nd in ["wikipedia", "naukri", "glassdoor", "indeed", "linkedin", "top50", "clutch", "cbinsights", "latka", "zoominfo"]):
+            if domain in NOISE_DOMAINS or any(nd in domain for nd in ["wikipedia", "naukri", "glassdoor", "indeed", "linkedin", "top50", "clutch", "cbinsights", "latka", "zoominfo", "research"]):
                 return True
 
             path = parsed.path

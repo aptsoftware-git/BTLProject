@@ -47,123 +47,88 @@ class ComparativeBenchmarkingAgent:
         competitors = competitor_summary_list.competitors
         feature_matrix: List[FeatureComparisonRow] = []
 
-        # 1. Core Services Comparison
+        # Part 9: 7 Clean Core Comparison Dimensions
+        # 1. Core Services
         target_services_str = ", ".join(company_profile.core_services) if company_profile.core_services else "Not specified"
-        comp_services_map: Dict[str, str] = {}
-        for c in competitors:
-            comp_services_map[c.company_name] = ", ".join(c.core_services) if c.core_services else "Not specified"
-        
+        comp_services_map = {c.company_name: ", ".join(c.core_services) if c.core_services else "Not specified" for c in competitors}
         feature_matrix.append(
             FeatureComparisonRow(
                 dimension="Core Services",
                 target_company_score=target_services_str,
                 competitor_scores=comp_services_map,
-                insights=f"{company_profile.company_name} provides specialized services; competitors offer benchmarked industry solutions."
+                insights=f"{company_profile.company_name} specialized services benchmarked against peers."
             )
         )
 
-        # 2. Products Comparison
-        target_prods_str = ", ".join(company_profile.products) if company_profile.products else "Enterprise Platforms"
-        comp_prods_map: Dict[str, str] = {}
-        for c in competitors:
-            comp_prods_map[c.company_name] = ", ".join(c.products) if c.products else "Peer Platforms"
-
-        feature_matrix.append(
-            FeatureComparisonRow(
-                dimension="Products & Software",
-                target_company_score=target_prods_str,
-                competitor_scores=comp_prods_map,
-                insights=f"{company_profile.company_name} maintains dedicated offerings alongside industry peer products."
-            )
-        )
-
-        # 3. Technologies Comparison
-        target_tech_str = ", ".join(company_profile.technologies) if company_profile.technologies else "Enterprise Stack"
-        comp_tech_map: Dict[str, str] = {}
-        for c in competitors:
-            comp_tech_map[c.company_name] = ", ".join(c.technologies) if c.technologies else "Cloud & Automation Tech"
-
-        feature_matrix.append(
-            FeatureComparisonRow(
-                dimension="Technologies & Architecture",
-                target_company_score=target_tech_str,
-                competitor_scores=comp_tech_map,
-                insights=f"Technology capabilities evaluated across {company_profile.primary_industry} competitors."
-            )
-        )
-
-        # 4. Business Domains Comparison
+        # 2. Business Segments
         target_domains_str = ", ".join(company_profile.business_domains) if company_profile.business_domains else company_profile.primary_industry
-        comp_domains_map: Dict[str, str] = {}
-        for c in competitors:
-            comp_domains_map[c.company_name] = c.industry if c.industry else company_profile.primary_industry
-
+        comp_domains_map = {c.company_name: c.industry if c.industry else company_profile.primary_industry for c in competitors}
         feature_matrix.append(
             FeatureComparisonRow(
-                dimension="Business Domains",
+                dimension="Business Segments",
                 target_company_score=target_domains_str,
                 competitor_scores=comp_domains_map,
-                insights=f"Competitors operate within overlapping {company_profile.primary_industry} verticals."
+                insights=f"Business segment coverage across {company_profile.primary_industry} ecosystem."
             )
         )
 
-        # 5. Major Projects Comparison
-        target_projects_str = ", ".join(company_profile.major_projects) if company_profile.major_projects else "Enterprise Projects"
-        comp_projects_map: Dict[str, str] = {}
-        for c in competitors:
-            comp_projects_map[c.company_name] = ", ".join(c.major_projects) if c.major_projects else "Industry Deployments"
-
+        # 3. Technology Capabilities
+        target_tech_str = ", ".join(company_profile.technologies) if company_profile.technologies else "Enterprise Stack"
+        comp_tech_map = {c.company_name: ", ".join(c.technologies) if c.technologies else "Cloud & Automation Tech" for c in competitors}
         feature_matrix.append(
             FeatureComparisonRow(
-                dimension="Major Projects Track Record",
-                target_company_score=target_projects_str,
-                competitor_scores=comp_projects_map,
-                insights="Track record evaluated across enterprise customer implementations."
+                dimension="Technology Capabilities",
+                target_company_score=target_tech_str,
+                competitor_scores=comp_tech_map,
+                insights=f"Technology stack and digital capabilities evaluated against market peers."
             )
         )
 
-        # 6. Target Industries Comparison
-        target_ind_str = ", ".join(company_profile.target_industries) if company_profile.target_industries else company_profile.primary_industry
-        comp_ind_map: Dict[str, str] = {}
-        for c in competitors:
-            comp_ind_map[c.company_name] = c.industry if c.industry else company_profile.primary_industry
-
-        feature_matrix.append(
-            FeatureComparisonRow(
-                dimension="Target Customer Industries",
-                target_company_score=target_ind_str,
-                competitor_scores=comp_ind_map,
-                insights=f"Target client sectors aligned with {company_profile.primary_industry} ecosystem."
-            )
-        )
-
-        # 7. Geographic Presence Comparison
+        # 4. Market Presence
         target_geo_str = ", ".join(company_profile.geographic_presence) if company_profile.geographic_presence else "Global"
-        comp_geo_map: Dict[str, str] = {}
-        for c in competitors:
-            comp_geo_map[c.company_name] = ", ".join(c.geographic_presence) if c.geographic_presence else "Global"
-
+        comp_geo_map = {c.company_name: ", ".join(c.geographic_presence) if c.geographic_presence else "Global" for c in competitors}
         feature_matrix.append(
             FeatureComparisonRow(
-                dimension="Geographic Presence",
+                dimension="Market Presence",
                 target_company_score=target_geo_str,
                 competitor_scores=comp_geo_map,
-                insights="Geographic footprint benchmarked against international competitors."
+                insights="Geographic footprint and regional presence benchmarked against peers."
             )
         )
 
-        # 8. Business Strengths Comparison
-        target_str_str = ", ".join(company_profile.business_strengths) if company_profile.business_strengths else "Proven Track Record"
-        comp_str_map: Dict[str, str] = {}
-        for c in competitors:
-            comp_str_map[c.company_name] = ", ".join(c.business_strengths) if c.business_strengths else "Market presence"
-
+        # 5. Competitive Advantages
+        target_adv_str = ", ".join(company_profile.competitive_advantages or company_profile.business_strengths) if (company_profile.competitive_advantages or company_profile.business_strengths) else "Domain Expertise"
+        comp_adv_map = {c.company_name: ", ".join(c.business_strengths) if c.business_strengths else "Market presence" for c in competitors}
         feature_matrix.append(
             FeatureComparisonRow(
-                dimension="Business Strengths",
-                target_company_score=target_str_str,
-                competitor_scores=comp_str_map,
-                insights=f"Core competencies forming key market differentiation for {company_profile.company_name}."
+                dimension="Competitive Advantages",
+                target_company_score=target_adv_str,
+                competitor_scores=comp_adv_map,
+                insights=f"Key competitive moats distinguishing {company_profile.company_name}."
+            )
+        )
+
+        # 6. Major Projects
+        target_projects_str = ", ".join(company_profile.major_projects) if company_profile.major_projects else "Enterprise Deployments"
+        comp_projects_map = {c.company_name: ", ".join(c.major_projects) if c.major_projects else "Industry Projects" for c in competitors}
+        feature_matrix.append(
+            FeatureComparisonRow(
+                dimension="Major Projects",
+                target_company_score=target_projects_str,
+                competitor_scores=comp_projects_map,
+                insights="Project track record evaluated across enterprise customer implementations."
+            )
+        )
+
+        # 7. Strategic Positioning
+        target_pos_str = f"Specialized Provider in {company_profile.primary_industry}"
+        comp_pos_map = {c.company_name: f"Peer Competitor in {c.industry}" for c in competitors}
+        feature_matrix.append(
+            FeatureComparisonRow(
+                dimension="Strategic Positioning",
+                target_company_score=target_pos_str,
+                competitor_scores=comp_pos_map,
+                insights=f"Strategic market tier positioning within {company_profile.primary_industry}."
             )
         )
 

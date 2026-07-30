@@ -54,7 +54,16 @@ class LocalConsistencyChecker:
         issues.extend(self.check_broken_section_references(objects))
         issues.extend(self.check_date_mismatches(objects))
         issues.extend(self.check_formatting_inconsistencies(objects))
-        return issues
+
+        from src.rag.finding_filter import FindingRelevanceFilter
+        rf = FindingRelevanceFilter()
+        clean_issues = []
+        for issue in issues:
+            quote = getattr(issue, "evidence", "") or getattr(issue, "quoted_text", "") or ""
+            desc = getattr(issue, "description", "") or ""
+            if not rf.is_suppressed(quote, "", desc):
+                clean_issues.append(issue)
+        return clean_issues
 
     def check_broken_section_references(self, objects: List[Dict[str, Any]]) -> List[InconsistencyIssue]:
         """Detects references to non-existent sections (e.g. 'See Section 6.2' when Section 6.2 doesn't exist)."""

@@ -42,5 +42,11 @@ class RagConfig:
     top_k_rerank: int = 10         # Number of chunks passed to the reranking stage
     top_k_final: int = 5           # Number of final chunks returned to the user
     
+    # Quality, Finding Filtering & Executive Report Thresholds
+    finding_min_confidence: float = float(os.environ.get("FINDING_MIN_CONFIDENCE", 0.70))
+    max_findings_per_report: int = int(os.environ.get("MAX_FINDINGS_PER_REPORT", 10))
+    min_findings_per_report: int = int(os.environ.get("MIN_FINDINGS_PER_REPORT", 4))
+    max_competitors: int = int(os.environ.get("MAX_COMPETITORS", 5))
+
     # Defaults
     top_k_default: int = 5

@@ -310,8 +310,17 @@ class FinalReportGenerator:
             "Missing Information": "Writing Clarity"
         }
 
-        # Consolidate and group findings into clean executive cards
-        business_findings = _group_and_consolidate_findings(confirmed_findings, chunk_map, category_mappings)
+        from src.rag.finding_filter import FindingRelevanceFilter
+
+        # Consolidate and group findings into clean executive cards via FindingRelevanceFilter (Parts 1-5, 13)
+        raw_consolidated = _group_and_consolidate_findings(confirmed_findings, chunk_map, category_mappings)
+        relevance_filter = FindingRelevanceFilter(
+            min_confidence=getattr(self.config, "finding_min_confidence", 0.70),
+            max_findings=getattr(self.config, "max_findings_per_report", 10),
+            min_findings=getattr(self.config, "min_findings_per_report", 4)
+        )
+        business_findings = relevance_filter.filter_and_consolidate(raw_consolidated)
+
         for f_item in business_findings:
             f_item["ambiguity_category"] = f_item["category"]
             f_item["why_claude_flagged_it"] = f_item["claude_explanation"]

@@ -163,16 +163,24 @@ class AmbiguityChunkAnalyzer:
                 })
                 amb_idx += 1
 
+        from src.rag.finding_filter import FindingRelevanceFilter
+        rf = FindingRelevanceFilter()
+        clean_ambiguities = [
+            amb for amb in ambiguities
+            if not rf.is_suppressed(amb.get("quote", ""), amb.get("type", ""), amb.get("reason", ""))
+            and float(amb.get("confidence", 0.85)) >= rf.min_confidence
+        ]
+
         overall_risk = "Low"
-        if len(ambiguities) >= 3:
+        if len(clean_ambiguities) >= 3:
             overall_risk = "High"
-        elif len(ambiguities) > 0:
+        elif len(clean_ambiguities) > 0:
             overall_risk = "Medium"
 
         return {
             "chunk_id": chunk_id,
             "claim_validation": claim_validation,
-            "ambiguities": ambiguities,
+            "ambiguities": clean_ambiguities,
             "overall_chunk_risk": overall_risk,
             "overall_confidence": 0.88
         }
