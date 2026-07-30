@@ -89,7 +89,10 @@ SUPPRESSED_EXACT_PATTERNS = {
 PLACEHOLDER_TEXT_PATTERNS = [
     "the model processes", "example text", "sample content", "placeholder",
     "lorem ipsum", "internal test", "test string", "sample paragraph",
-    "chunk analysis", "internal validation"
+    "chunk analysis", "internal validation", "in this chunk", "claims made in this chunk",
+    "unrelated to the provided text", "from the given text", "validation or disvalidation",
+    "information provided in the table", "based on information provided in",
+    "no direct evidence", "the claims and entities"
 ]
 
 PROJECT_FACILITY_PATTERNS = [

@@ -109,7 +109,7 @@ const NAV_ITEMS = [
   { id: "sec-references", label: "References", icon: IconGlobe }
 ];
 
-export default function ComparativeAnalysisView({ data, isRunning = false, currentStage = '' }) {
+export default function ComparativeAnalysisView({ data, isRunning = false, currentStage = '', id, onRerun }) {
   const [activeGapCategory, setActiveGapCategory] = useState('ALL');
   const [evidenceOpen, setEvidenceOpen] = useState(false);
   const [activeNav, setActiveNav] = useState("sec-overview");

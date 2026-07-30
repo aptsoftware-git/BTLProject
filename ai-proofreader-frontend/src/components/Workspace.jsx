@@ -1735,12 +1735,20 @@ export default function Workspace() {
           /* Executive Comparative Analysis Workspace */
           <div style={{ background: "var(--bg-card)", border: "1px solid var(--border)", borderRadius: 12, padding: 20, minHeight: 500 }}>
             <ComparativeAnalysisView
+              id={id}
               data={comparativeData}
               isRunning={
                 !(comparativeData?.company_profile || comparativeData?.data?.company_profile || comparativeData?.comparative_analysis) &&
                 (comparativeLoading || doc?.comparative_analysis_status === "running")
               }
               currentStage={doc?.current_stage || "Stage 10: Comparative Analysis"}
+              onRerun={() => {
+                setComparativeLoading(true);
+                fetchComparativeAnalysis(id).then(res => {
+                  setComparativeData(res);
+                  setComparativeLoading(false);
+                }).catch(() => setComparativeLoading(false));
+              }}
             />
           </div>
         ) : (
