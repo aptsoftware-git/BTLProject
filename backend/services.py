@@ -350,6 +350,9 @@ def delete_stage_output_cache(job_id: str, stage_id: str = "all") -> None:
         (job_dir / "business_report.html").unlink(missing_ok=True)
         (job_dir / "09_reports" / "consistency_report.html").unlink(missing_ok=True)
         (job_dir / "09_reports" / "consistency_report.json").unlink(missing_ok=True)
+        import shutil
+        for folder in ["06_context_analysis", "07_semantic_clustering", "09_semantic_clusters", "10_claim_extraction", "11_chunk_reasoning", "12_cluster_reasoning", "13_claude_input", "14_claude_verification", "15_final_report"]:
+            shutil.rmtree(job_dir / folder, ignore_errors=True)
     if stage_id in ("all", "stage_7_comparative", "comparative"):
         comp_dir = job_dir / "comparative_analysis"
         if comp_dir.exists():

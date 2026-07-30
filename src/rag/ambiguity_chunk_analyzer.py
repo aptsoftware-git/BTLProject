@@ -86,7 +86,6 @@ class AmbiguityChunkAnalyzer:
             cid = c.get("claim_id")
             c_text = c.get("text", "")
             
-            # Check if claim contains any spelling error
             matched_err = None
             for err, info in error_rules.items():
                 if err in c_text.lower():
@@ -114,14 +113,13 @@ class AmbiguityChunkAnalyzer:
 
         # 2. Extract Ambiguities
         amb_idx = 0
+        
+        # 2a. Dict spelling/grammar error matches
         for err, info in error_rules.items():
             pattern = re.compile(rf"\b{err}\b", re.IGNORECASE)
             match = pattern.search(text)
             if match:
-                # Find which claims are affected
                 affected = [c.get("claim_id") for c in claims if err in c.get("text", "").lower()]
-                
-                # Context evidence
                 start_idx = max(0, match.start() - 30)
                 end_idx = min(len(text), match.end() + 30)
                 evidence = text[start_idx:end_idx].strip()
@@ -138,13 +136,89 @@ class AmbiguityChunkAnalyzer:
                     "confidence": 0.85
                 })
                 amb_idx += 1
+
+        # 2b. Vague Operational Qualifiers
+        vague_patterns = [
+            (r"\b(as soon as possible|asap)\b", "vague wording", "High", "Timeframe 'as soon as possible' lacks an explicit deadline or operational SLA."),
+            (r"\b(in a timely manner|timely manner|reasonable time|at earliest convenience|at the earliest convenience)\b", "vague wording", "Medium", "Qualifying timeframe lacks a defined quantitative window or milestone target."),
+            (r"\b(subject to change|to be decided|tbd|from time to time|periodically|regularly)\b", "vague wording", "Medium", "Operational directive relies on unspecified or variable schedule parameters."),
+            (r"\b(as appropriate|where appropriate|as necessary|as required|at discretion|discretionary|satisfactory|sufficient|substantially)\b", "vague wording", "Medium", "Directive contains subjective qualifier lacking explicit measurable performance criteria."),
+            (r"\b(etc|etc\.|and/or|various|several|promptly)\b", "vague wording", "Low", "Catch-all or open-ended phrasing introduces ambiguity in scope and implementation bounds.")
+        ]
+        for v_pat, v_type, v_sev, v_reason in vague_patterns:
+            matches = list(re.finditer(v_pat, text, re.IGNORECASE))
+            for m in matches[:2]:
+                q_text = m.group(0)
+                if not any(a["quote"].lower() == q_text.lower() for a in ambiguities):
+                    start_idx = max(0, m.start() - 25)
+                    end_idx = min(len(text), m.end() + 25)
+                    evidence = text[start_idx:end_idx].strip()
+                    ambiguities.append({
+                        "issue_id": f"{chunk_id}_amb_{amb_idx:03d}",
+                        "type": v_type,
+                        "severity": v_sev,
+                        "quote": q_text,
+                        "reason": v_reason,
+                        "supporting_evidence": f"...{evidence}...",
+                        "suggested_rewrite": "Specify precise quantitative parameters and concrete operational criteria.",
+                        "affected_claims": [c.get("claim_id") for c in claims if q_text.lower() in c.get("text", "").lower()],
+                        "confidence": 0.85
+                    })
+                    amb_idx += 1
+
+        # 2c. Numerical & Quantifier Ambiguity
+        num_patterns = [
+            (r"\b(a few|multiple|high volume|low cost|standard|normal)\b", "numerical ambiguity", "Medium", "Qualitative description used in place of specific numerical metrics."),
+            (r"\b(approximately \d+|nearly \d+|about \d+|around \d+|up to \d+|\d+ or more)\b", "numerical ambiguity", "Medium", "Numerical specification contains approximate bounds rather than exact limits.")
+        ]
+        for n_pat, n_type, n_sev, n_reason in num_patterns:
+            matches = list(re.finditer(n_pat, text, re.IGNORECASE))
+            for m in matches[:2]:
+                q_text = m.group(0)
+                if not any(a["quote"].lower() == q_text.lower() for a in ambiguities):
+                    start_idx = max(0, m.start() - 25)
+                    end_idx = min(len(text), m.end() + 25)
+                    evidence = text[start_idx:end_idx].strip()
+                    ambiguities.append({
+                        "issue_id": f"{chunk_id}_amb_{amb_idx:03d}",
+                        "type": n_type,
+                        "severity": n_sev,
+                        "quote": q_text,
+                        "reason": n_reason,
+                        "supporting_evidence": f"...{evidence}...",
+                        "suggested_rewrite": "Provide exact numerical thresholds and measurable range bounds.",
+                        "affected_claims": [],
+                        "confidence": 0.82
+                    })
+                    amb_idx += 1
+
+        # 2d. Temporal Ambiguity
+        temp_matches = list(re.finditer(r"\b(soon|later|recently|in due course|shortly|upcoming|future date|at a later date)\b", text, re.IGNORECASE))
+        for m in temp_matches[:2]:
+            q_text = m.group(0)
+            if not any(a["quote"].lower() == q_text.lower() for a in ambiguities):
+                start_idx = max(0, m.start() - 25)
+                end_idx = min(len(text), m.end() + 25)
+                evidence = text[start_idx:end_idx].strip()
+                ambiguities.append({
+                    "issue_id": f"{chunk_id}_amb_{amb_idx:03d}",
+                    "type": "temporal ambiguity",
+                    "severity": "Medium",
+                    "quote": q_text,
+                    "reason": f"Relative temporal descriptor '{q_text}' lacks explicit calendar dates or milestone references.",
+                    "supporting_evidence": f"...{evidence}...",
+                    "suggested_rewrite": "Specify precise dates, quarters, or milestone triggers.",
+                    "affected_claims": [],
+                    "confidence": 0.80
+                })
+                amb_idx += 1
                 
-        # Pronoun Ambiguity Check
-        pronouns = ["he", "she", "they", "it"]
+        # 2e. Pronoun Ambiguity Check
+        pronouns = ["he", "she", "they", "it", "this", "these"]
         for p in pronouns:
             pattern = re.compile(rf"\b{p}\b", re.IGNORECASE)
             match = pattern.search(text)
-            if match:
+            if match and not any(a["quote"].lower() == match.group(0).lower() for a in ambiguities):
                 affected = [c.get("claim_id") for c in claims if p in c.get("text", "").lower()]
                 start_idx = max(0, match.start() - 30)
                 end_idx = min(len(text), match.end() + 30)
@@ -157,7 +231,7 @@ class AmbiguityChunkAnalyzer:
                     "quote": match.group(0),
                     "reason": f"Pronoun '{match.group(0)}' lacks a clear structural antecedent in the chunk.",
                     "supporting_evidence": f"...{evidence}...",
-                    "suggested_rewrite": text.replace(match.group(0), f"[Insert antecedent name here]"),
+                    "suggested_rewrite": text.replace(match.group(0), f"[Insert explicit noun antecedent]"),
                     "affected_claims": affected,
                     "confidence": 0.80
                 })
@@ -168,7 +242,7 @@ class AmbiguityChunkAnalyzer:
         clean_ambiguities = [
             amb for amb in ambiguities
             if not rf.is_suppressed(amb.get("quote", ""), amb.get("type", ""), amb.get("reason", ""))
-            and float(amb.get("confidence", 0.85)) >= rf.min_confidence
+            and float(amb.get("confidence", 0.85)) >= 0.70
         ]
 
         overall_risk = "Low"
@@ -182,15 +256,15 @@ class AmbiguityChunkAnalyzer:
             "claim_validation": claim_validation,
             "ambiguities": clean_ambiguities,
             "overall_chunk_risk": overall_risk,
-            "overall_confidence": 0.88
+            "overall_confidence": 0.85
         }
 
-    def run_analysis(self, job_dir: Path, doc_id: str) -> None:
+    def run_analysis(self, job_dir: Path, doc_id: str, force_regenerate: bool = False) -> None:
         logger.info(f"Starting Phase 2B Chunk Analysis for job: {doc_id}")
         
         # Cache hit check
         cache_reasoning_path = job_dir / "11_chunk_reasoning" / "chunk_reasoning.json"
-        if cache_reasoning_path.exists() and cache_reasoning_path.stat().st_size > 0:
+        if not force_regenerate and cache_reasoning_path.exists() and cache_reasoning_path.stat().st_size > 0:
             logger.info(f"[CACHE HIT] Chunk reasoning analysis already exists for job {doc_id}. Skipping re-analysis.")
             return
 

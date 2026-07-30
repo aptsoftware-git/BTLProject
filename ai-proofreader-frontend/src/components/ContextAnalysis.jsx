@@ -9,6 +9,12 @@ const CATEGORY_MAPPINGS = {
   "Lexical Ambiguity": "Ambiguities",
   "Referential Ambiguity": "Ambiguities",
   "Ambiguous Reference": "Ambiguities",
+  "vague wording": "Ambiguities",
+  "pronoun ambiguity": "Ambiguities",
+  "temporal ambiguity": "Ambiguities",
+  "undefined terminology": "Ambiguities",
+  "Undefined Term": "Ambiguities",
+  "Undefined Acronym": "Ambiguities",
   "Grammar Errors": "Grammar Issues",
   "Grammar Error": "Grammar Issues",
   "Spelling Errors": "Spelling Issues",
@@ -16,12 +22,12 @@ const CATEGORY_MAPPINGS = {
   "Writing Style Issues": "Writing Clarity",
   "Writing Quality": "Writing Clarity",
   "Terminology Inconsistency": "Terminology",
-  "Undefined Term": "Terminology",
   "Inconsistent Terminology": "Terminology",
   "Policy Conflict": "Policy Conflicts",
   "Policy Conflicts": "Policy Conflicts",
   "Numerical Conflict": "Numerical Issues",
   "Numerical Inconsistency": "Numerical Issues",
+  "numerical ambiguity": "Numerical Issues",
   "Temporal Conflict": "Contradictions",
   "Contradictory Statement": "Contradictions",
   "Contradictions": "Contradictions",
@@ -125,6 +131,11 @@ export default function ContextAnalysis({ id }) {
   const handleGenerate = async () => {
     setRunning(true);
     setError(null);
+    setFinalReport(null);
+    setClaudeReport(null);
+    setChunkReport(null);
+    setClusterReport(null);
+    setClaimsReport(null);
     try {
       await runContextAnalysis(id);
       const docData = await fetchDocument(id);
@@ -136,7 +147,11 @@ export default function ContextAnalysis({ id }) {
   };
 
   const PLACEHOLDER_PATTERNS = [
-    "the model processes", "example text", "sample content", "placeholder", "lorem ipsum", "internal test"
+    "the model processes", "example text", "sample content", "placeholder", "lorem ipsum", "internal test",
+    "in this chunk", "claims made in this chunk", "unrelated to the provided text", "from the given text",
+    "validation or disvalidation", "information provided in the table", "based on information provided",
+    "no direct evidence", "the claims and entities", "claims and entities in this chunk",
+    "seem unrelated to the provided text", "do not have direct evidence", "reference any specific business"
   ];
 
   const isPlaceholderText = (text) => {
@@ -149,7 +164,16 @@ export default function ContextAnalysis({ id }) {
     let rawItems = [];
 
     if (finalReport?.data?.findings && finalReport.data.findings.length > 0) {
-      rawItems = finalReport.data.findings;
+      rawItems = finalReport.data.findings.map(f => {
+        const rawCat = f.category || f.business_category || "Writing Clarity";
+        const cat = CATEGORY_MAPPINGS[rawCat] || rawCat;
+        return {
+          ...f,
+          category: cat,
+          highlighted_ambiguity: f.highlighted_ambiguity || f.quote || f.suspected_text || "",
+          claude_explanation: f.claude_explanation || f.reason || f.explanation || "Passage contains ambiguous phrasing affecting clarity."
+        };
+      });
     } else if (claudeReport?.data?.verified_findings) {
       const confirmed = claudeReport.data.verified_findings.filter(f => f.status === "confirmed");
       let idx = 1;
@@ -173,6 +197,31 @@ export default function ContextAnalysis({ id }) {
           evidence: f.evidence || [],
           internal_reference: f.chunk_id || f.issue_id || "chunk_001"
         };
+      });
+    } else if (chunkReport?.data?.chunks || chunkReport?.chunks) {
+      const chunksList = chunkReport?.data?.chunks || chunkReport?.chunks || [];
+      let idx = 1;
+      chunksList.forEach(ch => {
+        (ch.ambiguities || []).forEach(amb => {
+          const rawCat = amb.type || "Undefined Term";
+          const cat = CATEGORY_MAPPINGS[rawCat] || rawCat;
+          rawItems.push({
+            finding_id: amb.issue_id || `finding_${idx++}`,
+            title: `${cat} in Chunk ${ch.chunk_id || "001"}`,
+            severity: amb.severity || "Medium",
+            category: cat,
+            location_display: `Page ${ch.page_number || ch.page || 1}`,
+            page_number: ch.page_number || ch.page || 1,
+            section_heading: ch.section_heading || ch.heading || "Document Section",
+            highlighted_ambiguity: amb.quote || amb.highlighted_ambiguity || "",
+            original_chunk: ch.text || amb.quote || "",
+            claude_explanation: amb.reason || "Ambiguous phrasing detected in chunk.",
+            business_impact: "Operational execution deviation & stakeholder ambiguity.",
+            recommended_resolution: amb.suggested_rewrite || "Revise sentence structure to state explicit operational parameters.",
+            evidence: [],
+            internal_reference: ch.chunk_id || "chunk_001"
+          });
+        });
       });
     }
 

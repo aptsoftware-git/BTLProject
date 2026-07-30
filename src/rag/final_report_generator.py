@@ -1298,3 +1298,6 @@ class FinalReportGenerator:
             f.write(html_content)
 
         logger.info(f"Phase 15 Enterprise Report generation complete. Outputs written to {report_dir}")
+
+    def generate_report(self, job_dir: Path, doc_id: str, force_regenerate: bool = False) -> None:
+        return self.run_generation(job_dir, doc_id, force_regenerate=force_regenerate)

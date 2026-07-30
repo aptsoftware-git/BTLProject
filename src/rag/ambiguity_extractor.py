@@ -159,12 +159,12 @@ class AmbiguityExtractor:
             "confidence": 0.50
         }
 
-    def run_extraction(self, job_dir: Path, doc_id: str) -> None:
+    def run_extraction(self, job_dir: Path, doc_id: str, force_regenerate: bool = False) -> None:
         logger.info(f"Starting Phase 2A Claim Extraction for job: {doc_id}")
         
         # Cache hit check
         cache_claims_path = job_dir / "10_claim_extraction" / "chunk_claims.json"
-        if cache_claims_path.exists() and cache_claims_path.stat().st_size > 0:
+        if not force_regenerate and cache_claims_path.exists() and cache_claims_path.stat().st_size > 0:
             logger.info(f"[CACHE HIT] Claim extractions already exist for job {doc_id}. Skipping re-extraction.")
             return
 

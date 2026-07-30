@@ -18,12 +18,12 @@ class ClaudeInputBuilder:
     def __init__(self, config: Optional[RagConfig] = None):
         self.config = config or RagConfig()
 
-    def run_packaging(self, job_dir: Path, doc_id: str) -> None:
+    def run_packaging(self, job_dir: Path, doc_id: str, force_regenerate: bool = False) -> None:
         logger.info(f"Starting Phase 13 Claude Input Packaging for job: {doc_id}")
         
         # Cache hit check
         cache_claude_input = job_dir / "13_claude_input" / "claude_input.json"
-        if cache_claude_input.exists() and cache_claude_input.stat().st_size > 0:
+        if not force_regenerate and cache_claude_input.exists() and cache_claude_input.stat().st_size > 0:
             logger.info(f"[CACHE HIT] Claude input package already exists for job {doc_id}. Skipping re-packaging.")
             return
 

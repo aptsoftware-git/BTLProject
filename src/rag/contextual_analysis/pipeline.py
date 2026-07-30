@@ -61,7 +61,7 @@ class ContextAnalysisPipeline:
         except Exception:
             pass
 
-    def run_analysis(self, job_dir: Path, doc_id: str) -> None:
+    def run_analysis(self, job_dir: Path, doc_id: str, force_regenerate: bool = False) -> None:
         logger.info(f"Starting Contextual Consistency Analysis for job: {doc_id}")
         
         # Smart Caching check
@@ -69,7 +69,7 @@ class ContextAnalysisPipeline:
         report_html_path = job_dir / "report.html"
         business_html_path = job_dir / "business_report.html"
         
-        if report_json_path.exists() and report_html_path.exists() and business_html_path.exists():
+        if not force_regenerate and report_json_path.exists() and report_html_path.exists() and business_html_path.exists():
             logger.info("Contextual Consistency Report cache hit! Reusing existing reports.")
             issues_count = 0
             try:

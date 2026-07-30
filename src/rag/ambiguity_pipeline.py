@@ -62,12 +62,12 @@ class AmbiguityPipeline:
                 unique_parts.append(part)
         return " & ".join(unique_parts[:3])
 
-    def run_clustering(self, job_dir: Path, doc_id: str) -> Dict[str, Any]:
+    def run_clustering(self, job_dir: Path, doc_id: str, force_regenerate: bool = False) -> Dict[str, Any]:
         logger.info(f"Running Ambiguity Pipeline (Phase 1 Clustering) for job: {doc_id}")
         
         # Cache hit check
         cache_clusters_path = job_dir / "09_semantic_clusters" / "semantic_clusters.json"
-        if cache_clusters_path.exists() and cache_clusters_path.stat().st_size > 0:
+        if not force_regenerate and cache_clusters_path.exists() and cache_clusters_path.stat().st_size > 0:
             logger.info(f"[CACHE HIT] Semantic clusters already exist for job {doc_id}. Skipping re-clustering.")
             try:
                 with open(cache_clusters_path, "r", encoding="utf-8") as f:

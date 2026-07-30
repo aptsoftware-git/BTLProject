@@ -698,6 +698,10 @@ class StageOrchestrator:
         self.update_stage_state(stage_id, "Running", start_time=start_time.isoformat())
 
         try:
+            if force_regenerate:
+                from backend.services import delete_stage_output_cache
+                delete_stage_output_cache(self.job_id, "stage_6_context")
+
             from src.rag.contextual_analysis.pipeline import ContextAnalysisPipeline
             from src.config import load_preferences
 
@@ -705,31 +709,35 @@ class StageOrchestrator:
             model_name = prefs.get("ollama", {}).get("model", "qwen2.5-coder:7b")
 
             consistency_pipeline = ContextAnalysisPipeline(model_name=model_name)
-            consistency_pipeline.run_analysis(self.job_dir, self.job_id)
+            consistency_pipeline.run_analysis(self.job_dir, self.job_id, force_regenerate=force_regenerate)
 
             from src.rag.ambiguity_pipeline import AmbiguityPipeline
             ambiguity_pipeline = AmbiguityPipeline()
-            ambiguity_pipeline.run_clustering(self.job_dir, self.job_id)
+            ambiguity_pipeline.run_clustering(self.job_dir, self.job_id, force_regenerate=force_regenerate)
 
             from src.rag.ambiguity_extractor import AmbiguityExtractor
             ambiguity_extractor = AmbiguityExtractor()
-            ambiguity_extractor.run_extraction(self.job_dir, self.job_id)
+            ambiguity_extractor.run_extraction(self.job_dir, self.job_id, force_regenerate=force_regenerate)
 
             from src.rag.ambiguity_chunk_analyzer import AmbiguityChunkAnalyzer
             chunk_analyzer = AmbiguityChunkAnalyzer()
-            chunk_analyzer.run_analysis(self.job_dir, self.job_id)
+            chunk_analyzer.run_analysis(self.job_dir, self.job_id, force_regenerate=force_regenerate)
 
             from src.rag.ambiguity_cluster_analyzer import AmbiguityClusterAnalyzer
             cluster_analyzer = AmbiguityClusterAnalyzer()
-            cluster_analyzer.run_analysis(self.job_dir, self.job_id)
+            cluster_analyzer.run_analysis(self.job_dir, self.job_id, force_regenerate=force_regenerate)
 
             from src.rag.claude_input_builder import ClaudeInputBuilder
             input_builder = ClaudeInputBuilder()
-            input_builder.run_packaging(self.job_dir, self.job_id)
+            input_builder.run_packaging(self.job_dir, self.job_id, force_regenerate=force_regenerate)
 
             from src.rag.claude.verification_service import ClaudeVerificationService
             verification_service = ClaudeVerificationService()
-            verification_service.run_verification(self.job_dir, self.job_id)
+            verification_service.run_verification(self.job_dir, self.job_id, force_regenerate=force_regenerate)
+
+            from src.rag.final_report_generator import FinalReportGenerator
+            report_gen = FinalReportGenerator()
+            report_gen.generate_report(self.job_dir, self.job_id, force_regenerate=force_regenerate)
 
             # Copy to 09_reports
             import shutil

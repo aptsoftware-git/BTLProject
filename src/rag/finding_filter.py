@@ -92,7 +92,8 @@ PLACEHOLDER_TEXT_PATTERNS = [
     "chunk analysis", "internal validation", "in this chunk", "claims made in this chunk",
     "unrelated to the provided text", "from the given text", "validation or disvalidation",
     "information provided in the table", "based on information provided in",
-    "no direct evidence", "the claims and entities"
+    "no direct evidence", "the claims and entities", "claims and entities in this chunk",
+    "seem unrelated to the provided text", "do not have direct evidence"
 ]
 
 PROJECT_FACILITY_PATTERNS = [
@@ -174,9 +175,10 @@ class FindingRelevanceFilter:
             if pattern.search(quote) or pattern.search(title):
                 return True
 
-        # Suppress short quotes (< 15 chars) without action verbs
-        if len(quote.strip()) < 15 and not re.search(r"\b(?:is|are|was|were|has|have|will|must|should|cannot)\b", quote, re.IGNORECASE):
-            return True
+        # Suppress short quotes (< 8 chars) without action verbs unless it's an ambiguity quote/term
+        if len(quote.strip()) < 8 and not re.search(r"\b(?:is|are|was|were|has|have|will|must|should|cannot|tbd|asap|etc|or)\b", quote, re.IGNORECASE):
+            if not any(term in (title + " " + quote).lower() for term in ["ambiguity", "vague", "spelling", "typo", "pronoun", "unclear", "undefined"]):
+                return True
 
         return False
 

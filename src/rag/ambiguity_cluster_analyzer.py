@@ -187,12 +187,12 @@ class AmbiguityClusterAnalyzer:
             "overall_confidence": 0.88
         }
 
-    def run_analysis(self, job_dir: Path, doc_id: str) -> None:
+    def run_analysis(self, job_dir: Path, doc_id: str, force_regenerate: bool = False) -> None:
         logger.info(f"Starting Phase 3 Cluster-Level Analysis for job: {doc_id}")
         
         # Cache hit check
         cache_cluster_reasoning_path = job_dir / "12_cluster_reasoning" / "cluster_reasoning.json"
-        if cache_cluster_reasoning_path.exists() and cache_cluster_reasoning_path.stat().st_size > 0:
+        if not force_regenerate and cache_cluster_reasoning_path.exists() and cache_cluster_reasoning_path.stat().st_size > 0:
             logger.info(f"[CACHE HIT] Cluster reasoning analysis already exists for job {doc_id}. Skipping re-analysis.")
             return
 
