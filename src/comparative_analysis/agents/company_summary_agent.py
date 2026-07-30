@@ -51,16 +51,7 @@ class CompanySummaryAgent:
         self.url = "https://api.anthropic.com/v1/messages"
 
     def _normalize_model_name(self, model: Optional[str]) -> str:
-        if not model:
-            return "claude-sonnet-4-6"
-        m_lower = model.lower()
-        if "4.6" in m_lower or "4-6" in m_lower or "sonnet-4" in m_lower:
-            return "claude-sonnet-4-6"
-        if "3.5" in m_lower:
-            return "claude-3-5-sonnet-20241022"
-        if "haiku" in m_lower:
-            return "claude-3-haiku-20240307"
-        return model
+        return "claude-sonnet-4-6"
 
     def summarize(self, profile: TargetCompanyProfile) -> CompanyProfile:
         global _WORKING_MODEL, _FAILED_MODELS

@@ -60,15 +60,18 @@ export default function ContextAnalysis({ id }) {
         if (!active) return;
         setDocProgress(docData);
 
-        if (docData.context_analysis_status === "running" || docData.context_analysis_status === "pending" || docData.status === "processing" || docData.status === "pending") {
-          setRunning(true);
-          timerId = setTimeout(checkStatus, 2500);
-        } else if (docData.context_analysis_status === "completed" || docData.status === "completed") {
+        if (docData.context_analysis_status === "completed" || docData.context_analysis_ready || (docData.status === "completed" && docData.context_analysis_status !== "running")) {
           setRunning(false);
           await fetchAllReports();
+        } else if (docData.context_analysis_status === "running" || docData.context_analysis_status === "pending") {
+          setRunning(true);
+          timerId = setTimeout(checkStatus, 2500);
         } else if (docData.context_analysis_status === "failed") {
           setRunning(false);
           setError("Audit execution failed: " + (docData.error || "Check engine log."));
+        } else if (docData.status === "processing" || docData.status === "pending") {
+          setRunning(true);
+          timerId = setTimeout(checkStatus, 2500);
         } else {
           setRunning(true);
           await runContextAnalysis(id).catch(() => {});

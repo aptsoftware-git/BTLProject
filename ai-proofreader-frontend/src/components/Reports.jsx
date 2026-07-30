@@ -65,9 +65,6 @@ export default function Reports({ activeDocId }) {
       if (doc) setActiveDoc(doc);
 
       const isDocProcessing = doc && (
-        doc.status === "processing" || 
-        doc.status === "running" ||
-        doc.status === "pending" ||
         doc.context_analysis_status === "running" || 
         doc.context_analysis_status === "pending"
       );

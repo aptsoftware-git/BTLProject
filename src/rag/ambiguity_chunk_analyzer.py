@@ -312,16 +312,19 @@ Return JSON schema matching:
             batch_size = 10
             chunk_batches = [llm_chunks[i : i + batch_size] for i in range(0, len(llm_chunks), batch_size)]
             max_workers = min(8, len(chunk_batches))
+            logger.info("Starting LLM Ambiguity Analysis for %d candidate chunks in %d batch(es)...", len(llm_chunks), len(chunk_batches))
             from concurrent.futures import ThreadPoolExecutor, as_completed
             with ThreadPoolExecutor(max_workers=max_workers) as executor:
-                futures = [executor.submit(_process_chunk_batch, b) for b in chunk_batches]
+                futures = {executor.submit(_process_chunk_batch, b): idx for idx, b in enumerate(chunk_batches, 1)}
                 for f in as_completed(futures):
+                    b_idx = futures[f]
                     try:
                         res = f.result()
                         if res:
                             chunk_reasonings.extend(res)
+                            logger.info("[Batch %d/%d] Completed chunk ambiguity analysis batch.", b_idx, len(chunk_batches))
                     except Exception as exc:
-                        logger.warning("Error in batch chunk processing thread: %s", exc)
+                        logger.warning("Error in batch chunk processing thread for batch %d: %s", b_idx, exc)
 
         # Ensure output directory exists
         reason_dir = job_dir / "11_chunk_reasoning"

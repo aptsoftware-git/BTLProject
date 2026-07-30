@@ -37,7 +37,11 @@ class ClaudeVerificationService:
             orig_text = cr.get("text") or cr.get("original_text") or ""
             
             for amb in cr.get("ambiguities", []):
-                amb_type = amb.get("type", "").lower()
+                if isinstance(amb, str):
+                    amb = {"quote": amb, "type": "vague wording", "reason": amb}
+                if not isinstance(amb, dict):
+                    continue
+                amb_type = str(amb.get("type", "")).lower()
                 if "pronoun" in amb_type or "reference" in amb_type:
                     cat = "Pronoun Ambiguity"
                 elif "grammar" in amb_type or "syntax" in amb_type:
