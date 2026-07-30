@@ -60,7 +60,7 @@ export default function ContextAnalysis({ id }) {
         if (!active) return;
         setDocProgress(docData);
 
-        if (docData.context_analysis_status === "completed" || docData.context_analysis_ready || (docData.status === "completed" && docData.context_analysis_status !== "running")) {
+        if (docData.context_analysis_status === "completed" || docData.context_analysis_ready || docData.reports_ready || docData.status === "completed") {
           setRunning(false);
           await fetchAllReports();
         } else if (docData.context_analysis_status === "running" || docData.context_analysis_status === "pending") {

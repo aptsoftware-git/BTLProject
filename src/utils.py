@@ -53,6 +53,16 @@ def save_text(text: str, path: Path) -> None:
         fh.write(text)
 
 
+def load_json(path: Path) -> Any:
+    with path.open("r", encoding="utf-8") as fh:
+        return json.load(fh)
+
+
+def load_text(path: Path) -> str:
+    with path.open("r", encoding="utf-8") as fh:
+        return fh.read()
+
+
 def dataclass_kwargs(obj: Any) -> dict:
     """
     Return {field_name: value} for a dataclass INSTANCE, preserving the

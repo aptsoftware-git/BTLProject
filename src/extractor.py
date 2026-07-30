@@ -39,7 +39,7 @@ class DocumentExtractor:
         self.enable_table_extraction = enable_table_extraction
 
     def extract(self, file_path: Path, output_dir: Path | None = None) -> Document:
-        self.logger.stage("Extracting document")
+        self.logger.info("Extracting document")
         suffix = file_path.suffix.lower()
         if suffix not in SUPPORTED_EXTENSIONS:
             raise UnsupportedFileTypeError(f"Unsupported file type: {suffix}")

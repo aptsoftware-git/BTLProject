@@ -82,22 +82,41 @@ async def upload_document(file: UploadFile = File(...)) -> UploadResponse:
         input_dir = ROOT_DIR / "data" / "input"
         input_dir.mkdir(parents=True, exist_ok=True)
 
-        # Generate unique ID and save file to data/input
         import uuid
-        from backend.services import get_all_jobs
-        
-        job_id = str(uuid.uuid4().hex)
-        safe_filename = f"{job_id}_{file.filename}"
-        dest_path = input_dir / safe_filename
+        from backend.services import get_all_jobs, delete_stage_output_cache, save_job_metadata
 
-        with open(dest_path, "wb") as buffer:
-            # Read and write chunks to handle large files efficiently
-            while chunk := await file.read(1024 * 1024):
-                buffer.write(chunk)
+        existing_job_id = None
+        for j in get_all_jobs():
+            if j.get("filename") == file.filename:
+                existing_job_id = j.get("job_id")
+                break
 
-        # Create job entry
-        job = create_job(file.filename, dest_path, job_id=job_id)
-        backend_logger.info("Uploaded file %s successfully. Job ID: %s", file.filename, job["job_id"])
+        if existing_job_id:
+            job_id = existing_job_id
+            safe_filename = f"{job_id}_{file.filename}"
+            dest_path = input_dir / safe_filename
+            with open(dest_path, "wb") as buffer:
+                while chunk := await file.read(1024 * 1024):
+                    buffer.write(chunk)
+
+            delete_stage_output_cache(job_id, "all")
+            job = get_job(job_id) or create_job(file.filename, dest_path, job_id=job_id)
+            job["file_path"] = str(dest_path)
+            job["status"] = "pending"
+            save_job_metadata(job_id)
+            queue_job(job_id, force=True)
+            backend_logger.info("Re-uploaded file %s. Reusing job %s (ChromaDB vectors preserved, analysis re-generated).", file.filename, job_id)
+        else:
+            job_id = str(uuid.uuid4().hex)
+            safe_filename = f"{job_id}_{file.filename}"
+            dest_path = input_dir / safe_filename
+
+            with open(dest_path, "wb") as buffer:
+                while chunk := await file.read(1024 * 1024):
+                    buffer.write(chunk)
+
+            job = create_job(file.filename, dest_path, job_id=job_id)
+            queue_job(job["job_id"])
         
         return UploadResponse(job_id=job["job_id"], filename=file.filename)
     except Exception as exc:
@@ -517,20 +536,44 @@ async def upload_and_start_document(file: UploadFile = File(...)):
         input_dir.mkdir(parents=True, exist_ok=True)
 
         import uuid
-        from backend.services import get_all_jobs
+        from backend.services import get_all_jobs, delete_stage_output_cache, save_job_metadata
 
-        job_id = str(uuid.uuid4().hex)
-        safe_filename = f"{job_id}_{file.filename}"
-        dest_path = input_dir / safe_filename
+        # Check if job for this filename already exists to avoid creating duplicate folders
+        existing_job_id = None
+        for j in get_all_jobs():
+            if j.get("filename") == file.filename:
+                existing_job_id = j.get("job_id")
+                break
 
-        with open(dest_path, "wb") as buffer:
-            while chunk := await file.read(1024 * 1024):
-                buffer.write(chunk)
+        if existing_job_id:
+            job_id = existing_job_id
+            safe_filename = f"{job_id}_{file.filename}"
+            dest_path = input_dir / safe_filename
+            with open(dest_path, "wb") as buffer:
+                while chunk := await file.read(1024 * 1024):
+                    buffer.write(chunk)
 
-        # Create job
-        job = create_job(file.filename, dest_path, job_id=job_id)
-        # Queue job
-        queue_job(job["job_id"])
+            # Invalidate old report files while preserving ChromaDB vector index & extracted chunks
+            delete_stage_output_cache(job_id, "all")
+            job = get_job(job_id) or create_job(file.filename, dest_path, job_id=job_id)
+            job["file_path"] = str(dest_path)
+            job["status"] = "pending"
+            save_job_metadata(job_id)
+            queue_job(job_id, force=True)
+            backend_logger.info("Re-uploaded file %s. Reusing job %s (ChromaDB vectors preserved, analysis re-generated).", file.filename, job_id)
+        else:
+            job_id = str(uuid.uuid4().hex)
+            safe_filename = f"{job_id}_{file.filename}"
+            dest_path = input_dir / safe_filename
+
+            with open(dest_path, "wb") as buffer:
+                while chunk := await file.read(1024 * 1024):
+                    buffer.write(chunk)
+
+            # Create job
+            job = create_job(file.filename, dest_path, job_id=job_id)
+            # Queue job
+            queue_job(job["job_id"])
         
         # Calculate size string
         size_str = f"{(dest_path.stat().st_size / 1024 / 1024):.1f} MB"

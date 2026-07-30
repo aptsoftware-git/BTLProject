@@ -343,9 +343,13 @@ Return JSON schema matching:
             orig_claims = original_c.get("extraction", {}).get("claims", [])
             
             for cv in cr.get("claim_validation", []):
+                if isinstance(cv, str):
+                    cv = {"claim_id": f"claim_{len(validated_claims_list)+1:03d}", "status": "valid", "reason": cv}
+                if not isinstance(cv, dict):
+                    continue
                 claim_id = cv.get("claim_id")
                 # find original text of claim
-                orig_c_text = next((c.get("text", "") for c in orig_claims if c.get("claim_id") == claim_id), "N/A")
+                orig_c_text = next((c.get("text", "") for c in orig_claims if isinstance(c, dict) and c.get("claim_id") == claim_id), "N/A")
                 
                 validated_claims_list.append({
                     "claim_id": claim_id,
@@ -364,6 +368,10 @@ Return JSON schema matching:
         for cr in chunk_reasonings:
             cid = cr["chunk_id"]
             for amb in cr.get("ambiguities", []):
+                if isinstance(amb, str):
+                    amb = {"issue_id": f"amb_{len(ambiguities_list)+1:03d}", "quote": amb, "type": "Undefined Term", "reason": amb}
+                if not isinstance(amb, dict):
+                    continue
                 ambiguities_list.append({
                     "issue_id": amb.get("issue_id"),
                     "chunk_id": cid,
