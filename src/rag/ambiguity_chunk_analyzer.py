@@ -238,7 +238,7 @@ class AmbiguityChunkAnalyzer:
             policies = extraction.get("policies", []) + extraction.get("obligations", [])
             words = text.split()
             has_policy_kw = any(kw in text.lower() for kw in policy_keywords)
-            if len(words) < 30 or (not claims and not policies and not has_policy_kw) or not ollama_active:
+            if len(words) < 45 or (not claims and not policies and not has_policy_kw) or not ollama_active:
                 fallback_results.append(self._analyze_fallback_chunk(chunk_id, text, claims))
             else:
                 llm_chunks.append(ch)
@@ -309,7 +309,7 @@ Return JSON schema matching:
                 return [self._analyze_fallback_chunk(ch["chunk_id"], ch["text"], ch.get("extraction", {}).get("claims", [])) for ch in batch_chunks]
 
         if llm_chunks:
-            batch_size = 5
+            batch_size = 10
             chunk_batches = [llm_chunks[i : i + batch_size] for i in range(0, len(llm_chunks), batch_size)]
             max_workers = min(8, len(chunk_batches))
             from concurrent.futures import ThreadPoolExecutor, as_completed

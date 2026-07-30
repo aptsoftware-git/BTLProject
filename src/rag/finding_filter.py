@@ -124,6 +124,10 @@ class FindingRelevanceFilter:
         if q_clean in SUPPRESSED_EXACT_PATTERNS or t_clean in SUPPRESSED_EXACT_PATTERNS:
             return True
 
+        # Do not suppress evidence quotes for explicit deterministic mismatches, broken references, or numeric conflicts
+        if any(term in e_clean or term in t_clean for term in ["numeric", "mismatch", "broken", "reference", "page reference", "section reference", "parentheses"]):
+            return False
+
         # Suppress single/double-word quotes without context (< 20 chars)
         if len(quote.strip()) <= 20 and not re.search(r"\b(?:is|are|was|were|has|have|will|must|should|cannot)\b", quote, re.IGNORECASE):
             return True

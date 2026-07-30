@@ -19,8 +19,8 @@ DEFAULT_MODEL_ROUTER: Dict[str, str] = {
     "semantic_validation": os.environ.get("MODEL_SEMANTIC_VALIDATION", "qwen2.5-coder:7b"),
     "vision_analysis": os.environ.get("MODEL_VISION_ANALYSIS", "qwen2.5vl:latest"),
     "rag_chat": os.environ.get("MODEL_RAG_CHAT", "qwen2.5-coder:32b"),
-    "context_analysis": os.environ.get("MODEL_CONTEXT_ANALYSIS", "deepseek-r1:32b"),
-    "comparative_analysis": os.environ.get("MODEL_COMPARATIVE_ANALYSIS", "deepseek-r1:32b"),
+    "context_analysis": os.environ.get("MODEL_CONTEXT_ANALYSIS", "qwen2.5-coder:7b"),
+    "comparative_analysis": os.environ.get("MODEL_COMPARATIVE_ANALYSIS", "qwen2.5-coder:7b"),
     "executive_report": os.environ.get("MODEL_EXECUTIVE_REPORT", os.environ.get("CLAUDE_MODEL", os.environ.get("ANTHROPIC_MODEL", "claude-sonnet-4-6"))),
     "embedding_model": os.environ.get("MODEL_EMBEDDING", "BAAI/bge-small-en-v1.5"),
 }

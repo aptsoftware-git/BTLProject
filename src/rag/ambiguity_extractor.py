@@ -20,7 +20,8 @@ class AmbiguityExtractor:
 
     def __init__(self, config: Optional[RagConfig] = None):
         self.config = config or RagConfig()
-        self.model_name = getattr(self.config, "ollama_model", os.environ.get("OLLAMA_MODEL", "qwen2.5-coder:7b"))
+        from src.model_router import MODEL_ROUTER
+        self.model_name = os.environ.get("MODEL_KNOWLEDGE_EXTRACTION", MODEL_ROUTER.get_model("knowledge_extraction"))
         
         # Instantiate OllamaClient using host from configuration
         ollama_host = "http://192.168.19.21:11434"
@@ -230,9 +231,12 @@ class AmbiguityExtractor:
             
             chunk_type = meta.get("chunk_type", "text")
             words = text.split()
+            text_lower = text.lower()
 
-            # Fast-path fallback for short / table / structural chunks (< 35 words) or when Ollama is inactive
-            if len(words) < 35 or chunk_type == "table" or not ollama_active:
+            has_trigger = any(kw in text_lower for kw in ["must", "shall", "will", "agree", "policy", "section", "claim", "require", "mandatory", "guarantee", "indemnify", "liability", "term", "contract", "specifications", "schedule"])
+
+            # Fast-path fallback for short / structural / non-policy chunks (< 45 words) or when Ollama is inactive
+            if len(words) < 45 or chunk_type in ("table", "heading", "header", "footer") or not has_trigger or not ollama_active:
                 return chunk_id, self._extract_fallback_knowledge(chunk_id, text)
             
             prompt = f"""Extract structural metadata from this document chunk.

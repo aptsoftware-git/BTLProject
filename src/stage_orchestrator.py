@@ -182,8 +182,21 @@ class StageOrchestrator:
         
         self.save_job()
 
+    def _run_stage_with_auto_retry(self, stage_fn, stage_id: str, max_retries: int = 3) -> None:
+        """Executes a stage function with up to max_retries automatic retries on failure."""
+        for attempt in range(1, max_retries + 1):
+            stage_fn()
+            job = self.get_job()
+            if job:
+                stage_obj = next((s for s in job.get("stages", []) if s["stage_id"] == stage_id), None)
+                if stage_obj and stage_obj["status"] == "Completed":
+                    return
+                if attempt < max_retries:
+                    logger.warning("Stage %s attempt %d/%d did not complete cleanly (%s). Automatically retrying...", stage_id, attempt, max_retries, stage_obj.get("errors") if stage_obj else "unknown")
+                    time.sleep(attempt * 1.0)
+
     def execute_all_stages(self) -> None:
-        """Executes stages 2 through 8 independently."""
+        """Executes stages 2 through 8 independently with automatic retry on failure."""
         job = self.get_job()
         if not job:
             logger.error("Job %s not found in memory/disk during execution", self.job_id)
@@ -195,25 +208,25 @@ class StageOrchestrator:
         logger.info("Starting stage orchestration for job %s (%s)", self.job_id, job.get("filename"))
 
         # Stage 2: Document Extraction
-        self.run_stage_2_extraction()
+        self._run_stage_with_auto_retry(self.run_stage_2_extraction, "stage_2_extraction")
 
         # Stage 3: Spell Checking
-        self.run_stage_3_spell()
+        self._run_stage_with_auto_retry(self.run_stage_3_spell, "stage_3_spell")
 
         # Stage 4: Grammar Checking
-        self.run_stage_4_grammar()
+        self._run_stage_with_auto_retry(self.run_stage_4_grammar, "stage_4_grammar")
 
         # Stage 5: RAG Index Construction
-        self.run_stage_5_rag()
+        self._run_stage_with_auto_retry(self.run_stage_5_rag, "stage_5_rag")
 
         # Stage 6: Contextual Consistency Analysis
-        self.run_stage_6_context()
+        self._run_stage_with_auto_retry(self.run_stage_6_context, "stage_6_context")
 
         # Stage 7: Comparative Analysis
-        self.run_stage_7_comparative()
+        self._run_stage_with_auto_retry(self.run_stage_7_comparative, "stage_7_comparative")
 
         # Stage 8: Executive Report Generation
-        self.run_stage_8_reports()
+        self._run_stage_with_auto_retry(self.run_stage_8_reports, "stage_8_reports")
 
         # Final check
         job = self.get_job()

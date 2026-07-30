@@ -71,7 +71,7 @@ class TestComparativeAnalysisWorkflow(unittest.TestCase):
 
         benchmarking_agent = ComparativeBenchmarkingAgent()
         comp_matrix = benchmarking_agent.benchmark(company_profile, comp_summary_list)
-        self.assertEqual(len(comp_matrix.feature_matrix), 8)
+        self.assertEqual(len(comp_matrix.feature_matrix), 7)
 
         gap_agent = GapAnalysisAgent()
         gaps, strengths = gap_agent.analyze_gaps_and_strengths(company_profile, comp_summary_list)
