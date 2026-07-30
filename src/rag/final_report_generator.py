@@ -379,6 +379,18 @@ class FinalReportGenerator:
             "phase_3_polish": low_items
         }
 
+        t_stats = getattr(relevance_filter, "transparency_stats", {})
+        pipeline_transparency_metrics = {
+            "raw_findings_generated": t_stats.get("raw_findings_generated", len(raw_consolidated)),
+            "heading_rejections": t_stats.get("heading_rejections", 0),
+            "table_rejections": t_stats.get("table_rejections", 0),
+            "placeholder_rejections": t_stats.get("placeholder_rejections", 0),
+            "project_name_rejections": t_stats.get("project_name_rejections", 0),
+            "duplicate_rejections": t_stats.get("duplicate_rejections", 0),
+            "claude_rejections": len(rejected_findings) + t_stats.get("claude_rejections", 0),
+            "executive_findings_retained": len(business_findings)
+        }
+
         # Structure clean final JSON schema (Requirement 10)
         final_report_data = {
             "document_job_id": doc_id,
@@ -386,6 +398,7 @@ class FinalReportGenerator:
             "dashboard_kpis": dashboard_kpis,
             "publication_status": pub_status,
             "validation_summary": validation_summary,
+            "pipeline_transparency_metrics": pipeline_transparency_metrics,
             "executive_summary": {
                 "document_quality_score": f"{doc_quality_score}/100",
                 "summary_text": f"The Local AI Review Engine first analyzed the document and identified {total_local_findings} potential findings. Claude performed an expert validation of those findings, confirming {verified_by_claude} valid findings while unsupported findings ({false_positives}) were rejected as false positives. Consequently, only the {len(business_findings)} validated findings appear in this final report. Overall document publication readiness is evaluated as: {pub_status['label']}.",

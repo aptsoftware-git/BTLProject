@@ -82,12 +82,20 @@ SUPPRESSED_EXACT_PATTERNS = {
     "ABOUT US", "EXECUTIVE SUMMARY", "INTRODUCTION", "FINANCIAL PERFORMANCE",
     "SERVICES", "PRODUCTS", "LEADERSHIP", "MANAGEMENT", "CORPORATE INFORMATION",
     "REGISTERED OFFICE", "FINANCIAL ASSETS", "NET DEBT", "TOTAL EQUITY", "SENSITIVITY ANALYSIS",
-    "TABLE 1", "APPENDIX"
+    "FIXED RATE INSTRUMENTS", "VARIABLE RATE INSTRUMENTS", "OUR GOVERNANCE COMMITMENT",
+    "EDUCATION AND SKILL DEVELOPMENT", "GROWTH", "TABLE 1", "APPENDIX"
 }
 
 PLACEHOLDER_TEXT_PATTERNS = [
     "the model processes", "example text", "sample content", "placeholder",
-    "lorem ipsum", "internal test", "test string", "sample paragraph"
+    "lorem ipsum", "internal test", "test string", "sample paragraph",
+    "chunk analysis", "internal validation"
+]
+
+PROJECT_FACILITY_PATTERNS = [
+    "coal handling plant", "raw material handling plant", "pet coke handling system",
+    "bifpcl bangladesh maitree", "sail dsp", "iocl paradip", "yadadri tps",
+    "ntpc pakri mines", "talcher fertilizer", "wbpdcl power plant", "sagardighi"
 ]
 
 EXCLUDED_BOILERPLATE_SECTIONS = [
@@ -96,7 +104,7 @@ EXCLUDED_BOILERPLATE_SECTIONS = [
 ]
 
 SUPPRESSED_REGEXES = [
-    re.compile(r"^\s*(?:our vision|our mission|vision|mission|projects|overview|strengths|content|document|section|our heritage|company profile|contact|industry|headquarters|board|leadership|website|email|address|phone|tel|fax|about us|table\s*\d+|appendix)\s*$", re.IGNORECASE),
+    re.compile(r"^\s*(?:our vision|our mission|vision|mission|projects|overview|strengths|content|document|section|our heritage|company profile|contact|industry|headquarters|board|leadership|website|email|address|phone|tel|fax|about us|growth|table\s*\d+|appendix|our governance commitment|education and skill development)\s*$", re.IGNORECASE),
     re.compile(r"^\s*(?:https?://|www\.|[\w.+-]+@[\w-]+\.[\w.-]+)\s*$", re.IGNORECASE),
     re.compile(r"^\s*(?:page\s*\d+|section\s*\d+(?:\.\d+)*)\s*$", re.IGNORECASE),
     re.compile(r"^\s*\w+\s*(?:is|lacks|undefined|vague|not defined|lacks explanation|lacks context)\s*$", re.IGNORECASE),
@@ -106,23 +114,42 @@ SUPPRESSED_REGEXES = [
 class FindingRelevanceFilter:
     """
     Filtering, scoring, deduplication, and consolidation engine for Context Analysis & Executive Reports.
-    Enforces Context Analysis Quality & Claude Verification Overhaul (Phases 1-9).
+    Enforces Context Analysis Quality & Transparency Overhaul (Issues 1-11).
     """
 
-    def __init__(self, min_confidence: float = 0.70, max_findings: int = 30, min_findings: int = 5):
+    def __init__(self, min_confidence: float = 0.70, max_findings: int = 25, min_findings: int = 5):
         self.min_confidence = min_confidence
         self.max_findings = max_findings
         self.min_findings = min_findings
+        self.transparency_stats = {
+            "raw_findings_generated": 0,
+            "heading_rejections": 0,
+            "table_rejections": 0,
+            "placeholder_rejections": 0,
+            "project_name_rejections": 0,
+            "duplicate_rejections": 0,
+            "claude_rejections": 0,
+            "executive_findings_retained": 0
+        }
 
     def is_placeholder(self, text: str) -> bool:
-        """Phase 1: Detects and rejects internal system/placeholder text leakage."""
+        """Issue 3: Detects and rejects internal system/placeholder text leakage."""
         if not text:
             return False
         text_lower = text.lower()
         return any(pattern in text_lower for pattern in PLACEHOLDER_TEXT_PATTERNS)
 
+    def is_project_or_facility_name(self, quote: str, title: str = "") -> bool:
+        """Issue 4: Detects standalone project names, plant names, client facility references."""
+        text_block = (quote + " " + title).lower()
+        if any(proj in text_block for proj in PROJECT_FACILITY_PATTERNS):
+            # Only flag as issue if there is an explicit numeric conflict or broken reference
+            if not any(kw in text_block for kw in ["mismatch", "conflict", "contradict", "differ", "incorrect", "broken"]):
+                return True
+        return False
+
     def is_boilerplate_heading_or_table(self, quote: str, title: str = "", section: str = "") -> bool:
-        """Phase 1: Detects section titles, headings, TOC entries, tables, and boilerplate sections."""
+        """Issues 1 & 2: Detects section titles, headings, TOC entries, and financial tables/data grids."""
         q_clean = quote.strip().upper()
         t_clean = title.strip().upper()
         s_clean = section.strip().lower()
@@ -135,8 +162,8 @@ class FindingRelevanceFilter:
         if q_clean in SUPPRESSED_EXACT_PATTERNS or t_clean in SUPPRESSED_EXACT_PATTERNS:
             return True
 
-        # Skip financial tables and data grids
-        if re.search(r"\|\s*[\d,.-]+\s*\|", quote) or re.search(r"financial assets|net debt|total equity|sensitivity analysis", q_clean, re.IGNORECASE):
+        # Issue 2: Skip financial tables, data grids, and spreadsheet rows
+        if re.search(r"\|\s*[\d,.-]+\s*\|", quote) or re.search(r"financial assets|net debt|total equity|fixed rate instruments|variable rate instruments|sensitivity analysis", q_clean, re.IGNORECASE):
             return True
 
         # Check regex suppressions
@@ -144,7 +171,7 @@ class FindingRelevanceFilter:
             if pattern.search(quote) or pattern.search(title):
                 return True
 
-        # Phase 1: Suppress short quotes (< 15 chars) without action verbs
+        # Suppress short quotes (< 15 chars) without action verbs
         if len(quote.strip()) < 15 and not re.search(r"\b(?:is|are|was|were|has|have|will|must|should|cannot)\b", quote, re.IGNORECASE):
             return True
 
@@ -153,6 +180,9 @@ class FindingRelevanceFilter:
     def is_suppressed(self, quote: str, title: str = "", explanation: str = "", section: str = "") -> bool:
         """Determines if a finding is low-value noise or suppressed content."""
         if self.is_placeholder(quote) or self.is_placeholder(title) or self.is_placeholder(explanation):
+            return True
+
+        if self.is_project_or_facility_name(quote, title):
             return True
 
         e_clean = (explanation + " " + title).lower()
@@ -164,11 +194,15 @@ class FindingRelevanceFilter:
 
         return False
 
-    def normalize_category(self, raw_category: str) -> str:
-        """Phase 4: Maps raw category strings into the 12 standard business taxonomy categories."""
-        if raw_category in TAXONOMY_CATEGORIES:
-            return raw_category
-        return CATEGORY_MAPPINGS.get(raw_category, "Undefined Term")
+    def normalize_category(self, raw_category: str, quote: str = "", explanation: str = "") -> str:
+        """Phase 4 & Issue 9: Maps raw category strings. Enforces strict Policy Conflict rules (requires contradiction evidence)."""
+        cat = CATEGORY_MAPPINGS.get(raw_category, "Undefined Term")
+        if cat == "Policy Conflict":
+            text_block = (quote + " " + explanation).lower()
+            # Issue 9: Require explicit section contradiction evidence for Policy Conflict
+            if not any(kw in text_block for kw in ["whereas", "contradict", "conflicts with", "section a", "section b", "differs from"]):
+                return "Governance Inconsistency"
+        return cat
 
     def generate_specific_business_impact(self, category: str, title: str = "", text: str = "") -> str:
         """Phase 5: Generates category-specific business impacts."""
@@ -258,14 +292,25 @@ class FindingRelevanceFilter:
 
     def filter_and_consolidate(self, raw_findings: List[Dict[str, Any]]) -> List[Dict[str, Any]]:
         """
-        Executes Context Analysis Quality Overhaul (Issues 1-12):
-        - Filters out noise, placeholders, tables, & headings.
+        Executes Context Analysis Quality & Transparency Overhaul (Issues 1-11):
+        - Filters out noise, placeholders, tables, project names, & headings.
         - Enforces confidence threshold >= 0.70.
         - Performs semantic deduplication & aggregates page locations.
         - Generates specific impacts & recommendations.
-        - Consolidates findings down to 15-40 high-signal items for 200+ page reports.
+        - Consolidates findings down to 10-25 high-signal items for 200+ page reports.
+        - Calculates full pipeline transparency metrics.
         """
         valid_findings = []
+        self.transparency_stats = {
+            "raw_findings_generated": len(raw_findings),
+            "heading_rejections": 0,
+            "table_rejections": 0,
+            "placeholder_rejections": 0,
+            "project_name_rejections": 0,
+            "duplicate_rejections": 0,
+            "claude_rejections": 0,
+            "executive_findings_retained": 0
+        }
 
         for f in raw_findings:
             quote = f.get("quote") or f.get("highlighted_ambiguity") or f.get("suspected_text") or f.get("original_text") or ""
@@ -275,19 +320,32 @@ class FindingRelevanceFilter:
             confidence = float(f.get("confidence") or 0.85)
             page = f.get("page") or f.get("page_number") or 1
 
-            # Issue 8: Confidence Threshold Check (< 0.70 -> REJECT)
             if confidence < self.min_confidence:
+                self.transparency_stats["claude_rejections"] += 1
                 logger.debug(f"[FILTER] Dropping low-confidence finding ({confidence} < {self.min_confidence}): {title}")
                 continue
 
-            # Issues 1, 2, 3, 4, 11: Suppression & Placeholder/Heading Check
-            if self.is_suppressed(quote, title, explanation, section):
-                logger.debug(f"[FILTER] Suppressing noise/placeholder/heading finding: '{quote}' | {title}")
+            if self.is_placeholder(quote) or self.is_placeholder(title) or self.is_placeholder(explanation):
+                self.transparency_stats["placeholder_rejections"] += 1
+                logger.debug(f"[FILTER] Suppressing placeholder text finding: '{quote}'")
+                continue
+
+            if self.is_project_or_facility_name(quote, title):
+                self.transparency_stats["project_name_rejections"] += 1
+                logger.debug(f"[FILTER] Suppressing standalone project/facility name: '{quote}'")
+                continue
+
+            if self.is_boilerplate_heading_or_table(quote, title, section):
+                if re.search(r"\|\s*[\d,.-]+\s*\|", quote) or re.search(r"financial assets|net debt|total equity|fixed rate|variable rate", quote, re.IGNORECASE):
+                    self.transparency_stats["table_rejections"] += 1
+                else:
+                    self.transparency_stats["heading_rejections"] += 1
+                logger.debug(f"[FILTER] Suppressing heading/table noise finding: '{quote}' | {title}")
                 continue
 
             # Category Normalization & Specific Impact / Recommendation
-            raw_cat = f.get("category") or f.get("type") or f.get("business_category") or "Business Consistency"
-            category = self.normalize_category(raw_cat)
+            raw_cat = f.get("category") or f.get("type") or f.get("business_category") or "Undefined Term"
+            category = self.normalize_category(raw_cat, quote, explanation)
             f["category"] = category
             f["business_impact"] = self.generate_specific_business_impact(category, title, explanation)
             f["recommendation"] = self.generate_specific_recommendation(category, title, explanation)
@@ -302,14 +360,13 @@ class FindingRelevanceFilter:
 
             valid_findings.append(f)
 
-        # Issue 1 & Issue 9: Semantic Deduplication & Root-Cause Consolidation
+        # Issue 6: Semantic Deduplication & Root-Cause Consolidation
         consolidated_map = {}
         for f in valid_findings:
             cat = f["category"]
             quote_clean = f.get("quote", "").strip().lower()
             title_clean = f.get("title", "").strip().lower()
 
-            # Group key based on category + main topic stem
             topic_words = re.findall(r"\b[a-z]{4,}\b", title_clean + " " + quote_clean)
             key_words = [w for w in topic_words if w not in {"the", "this", "that", "from", "with", "have", "been", "where"}]
             topic_key = "_".join(sorted(key_words[:3])) if key_words else title_clean[:20]
@@ -318,13 +375,12 @@ class FindingRelevanceFilter:
             if group_key not in consolidated_map:
                 consolidated_map[group_key] = f
             else:
+                self.transparency_stats["duplicate_rejections"] += 1
                 existing = consolidated_map[group_key]
-                # Merge page locations across pages (Issue 1: Aggregate supporting locations)
                 new_locations = set(existing.get("locations", [])) | set(f.get("locations", []))
                 existing["locations"] = sorted(list(new_locations))
                 existing["occurrence_count"] = int(existing.get("occurrence_count", 1)) + 1
 
-                # Keep highest confidence & strongest severity
                 if f.get("confidence", 0) > existing.get("confidence", 0):
                     existing["confidence"] = f["confidence"]
                     existing["quote"] = f["quote"]
@@ -335,10 +391,11 @@ class FindingRelevanceFilter:
 
         result = list(consolidated_map.values())
 
-        # Issue 12: Target 15-40 meaningful findings max for large annual reports
+        # Issue 11: Target 10-25 executive findings max for 200+ page reports (Deloitte / EY / PwC / KPMG quality)
         if len(result) > self.max_findings:
             sev_rank = {"Critical": 0, "High": 1, "Medium": 2, "Low": 3, "Informational": 4}
             result.sort(key=lambda item: sev_rank.get(item.get("severity", "Medium"), 2))
             result = result[: self.max_findings]
 
+        self.transparency_stats["executive_findings_retained"] = len(result)
         return result

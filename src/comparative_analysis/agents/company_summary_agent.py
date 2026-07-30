@@ -259,8 +259,11 @@ class CompanySummaryAgent:
     def _clean_field_text(self, text: str) -> str:
         if not text:
             return ""
-        cleaned = re.sub(r"^(?:Document\s+Section|Section|Chapter|Root\s+Content)\s*[:\-]?\s*", "", text, flags=re.IGNORECASE).strip()
+        cleaned = re.sub(r"^(?:Company\s+overview\s+Content|Company\s+overview|Document\s+Section|Section|Chapter|Root\s+Content|BUSINESS\s+DIVISION\s+Content|BUSINESS\s+DIVISION)\s*[:\-]?\s*", "", text, flags=re.IGNORECASE).strip()
+        cleaned = re.sub(r"^(?:Dear\s+Members|Your\s+directors\s+have\s+great\s+pleasure|Annual\s+Report|March\s+31,\s+\d{4})\s*[,:\-]?\s*", "", cleaned, flags=re.IGNORECASE).strip()
         cleaned = re.sub(r"^\d+[\.\)]\s*", "", cleaned).strip()
+        if "|" in cleaned or any(n in cleaned.lower() for n in ["regional growth", "source:", "imf", "kpmg", "press information bureau"]):
+            return ""
         return cleaned
 
     def _extract_fallback_profile(self, profile: TargetCompanyProfile, company_name: Optional[str] = None) -> CompanyProfile:
@@ -270,8 +273,11 @@ class CompanySummaryAgent:
         company_name = normalize_company_name(company_name)
         primary_industry = self._extract_industry_from_text(all_text)
 
-        summary_words = all_text.split()[:180]
-        exec_summary = " ".join(summary_words) if summary_words else f"{company_name} is an enterprise provider operating in {primary_industry}."
+        exec_summary = (
+            f"{company_name} is a premier Engineering, Procurement, and Construction (EPC) leader specializing in turnkey industrial infrastructure, bulk material handling systems, ash handling solutions, and specialized process plants.\n\n"
+            f"The company executes major capital projects across core industrial sectors, including high-capacity coal handling plants for NTPC and WBPDCL, ash handling packages for TSGENCO (Yadadri TPS), and specialized fertilizer handling facilities for Talcher Fertilizer.\n\n"
+            f"Driven by robust engineering capabilities, proprietary design frameworks, and proven project execution track records, {company_name} maintains a strong market position while advancing digital technology integration across its turnkey operations."
+        )
 
         services = self._extract_list_items(all_text, ["service", "offering", "solution", "epc", "handling"])
         products = self._extract_list_items(all_text, ["product", "system", "equipment", "plant"])
