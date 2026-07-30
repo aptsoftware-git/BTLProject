@@ -44,8 +44,8 @@ class RagConfig:
     
     # Quality, Finding Filtering & Executive Report Thresholds
     finding_min_confidence: float = float(os.environ.get("FINDING_MIN_CONFIDENCE", 0.70))
-    max_findings_per_report: int = int(os.environ.get("MAX_FINDINGS_PER_REPORT", 10))
-    min_findings_per_report: int = int(os.environ.get("MIN_FINDINGS_PER_REPORT", 4))
+    max_findings_per_report: int = int(os.environ.get("MAX_FINDINGS_PER_REPORT", 40))
+    min_findings_per_report: int = int(os.environ.get("MIN_FINDINGS_PER_REPORT", 5))
     max_competitors: int = int(os.environ.get("MAX_COMPETITORS", 5))
 
     # Defaults

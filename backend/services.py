@@ -317,13 +317,19 @@ def create_job(filename: str, original_file_path: Path, job_id: Optional[str] = 
     return job
 
 
-def queue_job(job_id: str) -> Dict[str, Any]:
+def queue_job(job_id: str, force: bool = False) -> Dict[str, Any]:
     """Queues a job for background stage orchestration if it is not already running or completed."""
     job = get_job(job_id)
     if not job:
         raise ValueError("Job not found")
         
-    if job["status"] in ("completed", "pending", "processing"):
+    global CURRENT_JOB_ID
+    # If the active worker thread is already executing this exact job, return it
+    if not force and CURRENT_JOB_ID == job_id:
+        return job
+
+    # If the job is already finished, do not re-queue unless forced
+    if not force and job.get("status") == "completed":
         return job
 
     job["status"] = "pending"
@@ -411,6 +417,22 @@ def background_worker() -> None:
 # Start worker thread
 worker_thread = threading.Thread(target=background_worker, daemon=True)
 worker_thread.start()
+
+
+def recover_stuck_jobs_on_startup():
+    """Recovers jobs that were left in 'processing' or 'pending' state when server was restarted."""
+    try:
+        time.sleep(1)
+        all_jobs = get_all_jobs()
+        for j in all_jobs:
+            if j.get("status") in ("processing", "pending") and j.get("job_id") != CURRENT_JOB_ID:
+                logging.getLogger("backend").info("Recovering stuck job %s from disk metadata, re-queuing...", j["job_id"])
+                queue_job(j["job_id"], force=True)
+    except Exception as exc:
+        logging.getLogger("backend").error("Failed startup stuck job recovery: %s", exc)
+
+
+threading.Thread(target=recover_stuck_jobs_on_startup, daemon=True).start()
 
 
 def get_all_jobs() -> list[Dict[str, Any]]:

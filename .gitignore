@@ -93,4 +93,7 @@ ai-proofreader-frontend/dist/
 
 
 data/input/
+data/output/
+
+data/cache/ 
 

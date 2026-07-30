@@ -64,38 +64,31 @@ CATEGORY_MAPPINGS = {
     "Incomplete Info": "Incomplete Information",
 }
 
-# PART 1: Suppressed Terms, Section Headers, Contact Details, and Standalone Entities
+# PART 1: Suppressed Terms, Section Headers, Contact Details, Standalone Entities & Boilerplate Sections
 SUPPRESSED_EXACT_PATTERNS = {
-    "COMPANY PROFILE",
-    "CONTACT",
-    "CONTACT US",
-    "INDUSTRY",
-    "HEADQUARTERS",
-    "BOARD & KEY LEADERSHIP",
-    "BOARD AND KEY LEADERSHIP",
-    "KEY LEADERSHIP",
-    "LARSEN & TOUBRO",
-    "LARSEN AND TOUBRO",
-    "L&T",
-    "WEBSITE",
-    "EMAIL",
-    "ADDRESS",
-    "OVERVIEW",
-    "ABOUT US",
-    "TABLE OF CONTENTS",
-    "EXECUTIVE SUMMARY",
-    "INTRODUCTION",
-    "FINANCIAL PERFORMANCE",
-    "SERVICES",
-    "PRODUCTS",
-    "LEADERSHIP",
-    "MANAGEMENT",
-    "CORPORATE INFORMATION",
-    "REGISTERED OFFICE",
+    "OUR VISION", "OUR MISSION", "VISION", "MISSION", "PROJECTS", "OVERVIEW",
+    "STRENGTHS", "CONTENT", "DOCUMENT", "SECTION", "OUR HERITAGE", "TABLE OF CONTENTS",
+    "CONTENTS PAGE", "INDEX PAGE", "CHAIRMAN'S MESSAGE", "CORPORATE PHILOSOPHY",
+    "ACKNOWLEDGEMENTS", "FORWARD LOOKING STATEMENTS", "COMPANY PROFILE", "CONTACT",
+    "CONTACT US", "INDUSTRY", "HEADQUARTERS", "BOARD & KEY LEADERSHIP",
+    "BOARD AND KEY LEADERSHIP", "KEY LEADERSHIP", "WEBSITE", "EMAIL", "ADDRESS",
+    "ABOUT US", "EXECUTIVE SUMMARY", "INTRODUCTION", "FINANCIAL PERFORMANCE",
+    "SERVICES", "PRODUCTS", "LEADERSHIP", "MANAGEMENT", "CORPORATE INFORMATION",
+    "REGISTERED OFFICE", "FINANCIAL ASSETS", "NET DEBT", "TOTAL EQUITY", "SENSITIVITY ANALYSIS"
 }
 
+PLACEHOLDER_TEXT_PATTERNS = [
+    "the model processes", "example text", "sample content", "placeholder",
+    "lorem ipsum", "internal test", "test string", "sample paragraph"
+]
+
+EXCLUDED_BOILERPLATE_SECTIONS = [
+    "chairman's message", "vision", "mission", "corporate philosophy",
+    "acknowledgements", "forward looking statements", "contents page", "index page"
+]
+
 SUPPRESSED_REGEXES = [
-    re.compile(r"^\s*(?:company profile|contact|industry|headquarters|board|leadership|larsen\s*&\s*toubro|l&t|website|email|address|phone|tel|fax|overview|about us)\s*$", re.IGNORECASE),
+    re.compile(r"^\s*(?:our vision|our mission|vision|mission|projects|overview|strengths|content|document|section|our heritage|company profile|contact|industry|headquarters|board|leadership|website|email|address|phone|tel|fax|about us)\s*$", re.IGNORECASE),
     re.compile(r"^\s*(?:https?://|www\.|[\w.+-]+@[\w-]+\.[\w.-]+)\s*$", re.IGNORECASE),
     re.compile(r"^\s*(?:page\s*\d+|section\s*\d+(?:\.\d+)*)\s*$", re.IGNORECASE),
     re.compile(r"^\s*\w+\s*(?:is|lacks|undefined|vague|not defined|lacks explanation|lacks context)\s*$", re.IGNORECASE),
@@ -104,52 +97,107 @@ SUPPRESSED_REGEXES = [
 
 class FindingRelevanceFilter:
     """
-    Filtering, scoring, and consolidation engine for Context Analysis & Executive Reports.
+    Filtering, scoring, deduplication, and consolidation engine for Context Analysis & Executive Reports.
+    Enforces Context Analysis Quality Overhaul (Issues 1-12).
     """
 
-    def __init__(self, min_confidence: float = 0.70, max_findings: int = 10, min_findings: int = 4):
+    def __init__(self, min_confidence: float = 0.70, max_findings: int = 40, min_findings: int = 5):
         self.min_confidence = min_confidence
         self.max_findings = max_findings
         self.min_findings = min_findings
 
-    def is_suppressed(self, quote: str, title: str = "", explanation: str = "") -> bool:
-        """
-        Determines if a finding is low-value noise (e.g. section header, contact info, standalone company name).
-        """
+    def is_placeholder(self, text: str) -> bool:
+        """Issue 2: Detects and rejects internal system/placeholder text leakage."""
+        if not text:
+            return False
+        text_lower = text.lower()
+        return any(pattern in text_lower for pattern in PLACEHOLDER_TEXT_PATTERNS)
+
+    def is_boilerplate_heading_or_table(self, quote: str, title: str = "", section: str = "") -> bool:
+        """Issues 3, 4, 11: Detects section titles, headings, tables, and boilerplate annual report sections."""
         q_clean = quote.strip().upper()
         t_clean = title.strip().upper()
-        e_clean = explanation.strip().lower()
+        s_clean = section.strip().lower()
 
-        # Check exact pattern suppression list
+        # Issue 11: Ignore boilerplate annual report sections
+        if any(b_sec in s_clean or b_sec in q_clean.lower() or b_sec in t_clean.lower() for b_sec in EXCLUDED_BOILERPLATE_SECTIONS):
+            return True
+
+        # Issue 3: Ignore single-word headings, TOC labels, section titles
         if q_clean in SUPPRESSED_EXACT_PATTERNS or t_clean in SUPPRESSED_EXACT_PATTERNS:
             return True
 
-        # Do not suppress evidence quotes for explicit deterministic mismatches, broken references, or numeric conflicts
-        if any(term in e_clean or term in t_clean for term in ["numeric", "mismatch", "broken", "reference", "page reference", "section reference", "parentheses"]):
-            return False
-
-        # Suppress single/double-word quotes without context (< 20 chars)
-        if len(quote.strip()) <= 20 and not re.search(r"\b(?:is|are|was|were|has|have|will|must|should|cannot)\b", quote, re.IGNORECASE):
+        # Issue 4: Skip financial tables and data grids from ambiguity flags
+        if re.search(r"\|\s*[\d,.-]+\s*\|", quote) or re.search(r"financial assets|net debt|total equity|sensitivity analysis", q_clean, re.IGNORECASE):
             return True
-
-        # Suppress specific low-value "X is vague / undefined" noise on short terms
-        if re.search(r"\b(?:is ambiguous|is vague|lacks context|is undefined|lacks explanation)\b", e_clean):
-            for term in ["company profile", "headquarters", "contact", "industry", "larsen & toubro", "l&t", "website", "email", "address"]:
-                if term in q_clean.lower() or term in t_clean.lower():
-                    return True
 
         # Check regex suppressions
         for pattern in SUPPRESSED_REGEXES:
             if pattern.search(quote) or pattern.search(title):
                 return True
 
+        # Suppress short quotes (< 15 chars) without action verbs
+        if len(quote.strip()) <= 15 and not re.search(r"\b(?:is|are|was|were|has|have|will|must|should|cannot)\b", quote, re.IGNORECASE):
+            return True
+
+        return False
+
+    def is_suppressed(self, quote: str, title: str = "", explanation: str = "", section: str = "") -> bool:
+        """Determines if a finding is low-value noise or suppressed content."""
+        if self.is_placeholder(quote) or self.is_placeholder(title) or self.is_placeholder(explanation):
+            return True
+
+        e_clean = (explanation + " " + title).lower()
+        # Do not suppress evidence quotes for explicit deterministic mismatches, broken references, or numeric conflicts
+        if any(term in e_clean for term in ["numeric", "mismatch", "broken", "reference", "page reference", "section reference", "parentheses"]):
+            return False
+
+        if self.is_boilerplate_heading_or_table(quote, title, section):
+            return True
+
         return False
 
     def normalize_category(self, raw_category: str) -> str:
-        """Maps any legacy or raw category into one of the 15 standard business taxonomy categories."""
+        """Maps raw category strings into the 15 standard business taxonomy categories."""
         if raw_category in TAXONOMY_CATEGORIES:
             return raw_category
         return CATEGORY_MAPPINGS.get(raw_category, "Business Consistency")
+
+    def generate_specific_business_impact(self, category: str, title: str = "", text: str = "") -> str:
+        """Issue 5: Generates specific business impacts based on category (No generic impact templates)."""
+        cat_lower = category.lower()
+        text_block = (title + " " + text).lower()
+
+        if "numerical" in cat_lower or "financial" in text_block:
+            return "Financial reporting risk & valuation discrepancy across statutory statements."
+        if "regulatory" in cat_lower or "compliance" in cat_lower:
+            return "Regulatory exposure & potential statutory audit observation under Companies Act."
+        if "acronym" in cat_lower or "undefined" in cat_lower or "term" in text_block:
+            return "Interpretation risk & stakeholder misunderstanding of specialized terms."
+        if "reference" in cat_lower or "mismatch" in text_block:
+            return "Audit traceability risk & broken cross-reference navigation in final report."
+        if "missing evidence" in cat_lower or "claim" in text_block:
+            return "Credibility risk & potential compliance audit challenge regarding unverified statements."
+        if "contradict" in cat_lower or "conflict" in text_block:
+            return "Policy governance conflict & operational misalignment across departmental disclosures."
+        return "Operational execution deviation & stakeholder ambiguity."
+
+    def generate_specific_recommendation(self, category: str, title: str = "", text: str = "") -> str:
+        """Issue 6: Generates specific actionable recommendations based on finding category."""
+        cat_lower = category.lower()
+        text_block = (title + " " + text).lower()
+
+        if "acronym" in cat_lower or "undefined" in cat_lower:
+            return "Define the acronym/term clearly at its first occurrence in the document."
+        if "reference" in cat_lower or "mismatch" in text_block:
+            return "Correct section, note, and page cross-references across all document chapters."
+        if "numerical" in cat_lower or "financial" in text_block:
+            return "Reconcile numerical values and figures across financial notes and primary tables."
+        if "contradict" in cat_lower or "conflict" in text_block:
+            return "Harmonize policy language and resolve contradictory statements across sections."
+        if "missing evidence" in cat_lower or "claim" in text_block:
+            return "Provide empirical supporting evidence, audit citations, or explanatory notes."
+        return "Revise sentence structure to state explicit operational parameters."
 
     def calculate_severity(
         self,
@@ -159,26 +207,20 @@ class FindingRelevanceFilter:
         impact: str = "",
         occurrence_count: int = 1
     ) -> str:
-        """
-        Calculates business severity (Critical, High, Medium, Low, Informational) based on business risk.
-        """
+        """Issue 7: Assigns 5-tier severity (Critical, High, Medium, Low, Informational)."""
         text_block = (explanation + " " + impact).lower()
 
-        # Critical: Severe compliance violation, legal liability, or major financial contradiction
-        if any(w in text_block for w in ["regulatory audit failure", "legal liability", "contract breach", "certification halt", "penalty"]):
+        if any(w in text_block for w in ["regulatory audit failure", "legal liability", "contract breach", "penalty", "statutory violation"]):
             return "Critical"
         if category in ("Regulatory Risk", "Compliance Risk") and occurrence_count > 1:
             return "Critical"
 
-        # High: Numerical mismatches, contradictory policy/strategy statements, strategic risk
-        if category in ("Contradictory Statements", "Numerical Consistency", "Strategic Risk") or any(w in text_block for w in ["financial mismatch", "contradiction", "discrepancy", "unauthorized"]):
+        if category in ("Contradictory Statements", "Numerical Consistency", "Strategic Risk") or any(w in text_block for w in ["financial mismatch", "contradiction", "discrepancy"]):
             return "High"
 
-        # Medium: Operational ambiguity, cross-reference gaps, missing evidence
         if category in ("Operational Ambiguity", "Cross-Reference Mismatch", "Missing Evidence", "Market Positioning Conflict", "Incomplete Information"):
             return "Medium"
 
-        # Low: Acronym definition, data quality, duplicate information
         if category in ("Acronym Definition", "Data Quality", "Duplicate Information", "Document Structure"):
             return "Low"
 
@@ -189,8 +231,12 @@ class FindingRelevanceFilter:
 
     def filter_and_consolidate(self, raw_findings: List[Dict[str, Any]]) -> List[Dict[str, Any]]:
         """
-        Executes Parts 1-5 to filter out noise, enforce confidence thresholds,
-        score severity, and consolidate findings into a high-signal list of 4-10 items.
+        Executes Context Analysis Quality Overhaul (Issues 1-12):
+        - Filters out noise, placeholders, tables, & headings.
+        - Enforces confidence threshold >= 0.70.
+        - Performs semantic deduplication & aggregates page locations.
+        - Generates specific impacts & recommendations.
+        - Consolidates findings down to 15-40 high-signal items for 200+ page reports.
         """
         valid_findings = []
 
@@ -198,55 +244,72 @@ class FindingRelevanceFilter:
             quote = f.get("quote") or f.get("highlighted_ambiguity") or f.get("suspected_text") or f.get("original_text") or ""
             title = f.get("title", "")
             explanation = f.get("claude_explanation") or f.get("reason") or f.get("explanation") or ""
+            section = f.get("section", "")
             confidence = float(f.get("confidence") or 0.85)
+            page = f.get("page") or f.get("page_number") or 1
 
-            # Part 2: Confidence Threshold Check
+            # Issue 8: Confidence Threshold Check (< 0.70 -> REJECT)
             if confidence < self.min_confidence:
                 logger.debug(f"[FILTER] Dropping low-confidence finding ({confidence} < {self.min_confidence}): {title}")
                 continue
 
-            # Part 1: Suppression Filter
-            if self.is_suppressed(quote, title, explanation):
-                logger.debug(f"[FILTER] Suppressing low-value finding: '{quote}' | {title}")
+            # Issues 1, 2, 3, 4, 11: Suppression & Placeholder/Heading Check
+            if self.is_suppressed(quote, title, explanation, section):
+                logger.debug(f"[FILTER] Suppressing noise/placeholder/heading finding: '{quote}' | {title}")
                 continue
 
-            # Part 5: Taxonomy Normalization
+            # Category Normalization & Specific Impact / Recommendation
             raw_cat = f.get("category") or f.get("type") or f.get("business_category") or "Business Consistency"
             category = self.normalize_category(raw_cat)
             f["category"] = category
+            f["business_impact"] = self.generate_specific_business_impact(category, title, explanation)
+            f["recommendation"] = self.generate_specific_recommendation(category, title, explanation)
 
-            # Part 3: Severity Calculation
+            # Severity Calculation
             occurrence_count = int(f.get("occurrence_count") or 1)
-            impact = f.get("business_impact") or ""
-            f["severity"] = self.calculate_severity(category, confidence, explanation, impact, occurrence_count)
+            f["severity"] = self.calculate_severity(category, confidence, explanation, f["business_impact"], occurrence_count)
+
+            # Store page location
+            pages_list = f.get("locations") or ([page] if page else [1])
+            f["locations"] = sorted(list(set(pages_list)))
 
             valid_findings.append(f)
 
-        # Part 4: Consolidate Similar / Repetitive Findings
+        # Issue 1 & Issue 9: Semantic Deduplication & Root-Cause Consolidation
         consolidated_map = {}
         for f in valid_findings:
             cat = f["category"]
-            title = f.get("title", "").strip()
-            # Topic key based on category + main subject
-            topic_match = re.search(r"\b([A-Za-z0-9\-]{4,})\b", title)
-            topic_stem = topic_match.group(1).lower() if topic_match else title[:20].lower()
-            group_key = (cat, topic_stem)
+            quote_clean = f.get("quote", "").strip().lower()
+            title_clean = f.get("title", "").strip().lower()
+
+            # Group key based on category + main topic stem
+            topic_words = re.findall(r"\b[a-z]{4,}\b", title_clean + " " + quote_clean)
+            key_words = [w for w in topic_words if w not in {"the", "this", "that", "from", "with", "have", "been", "where"}]
+            topic_key = "_".join(sorted(key_words[:3])) if key_words else title_clean[:20]
+            group_key = (cat, topic_key)
 
             if group_key not in consolidated_map:
                 consolidated_map[group_key] = f
             else:
                 existing = consolidated_map[group_key]
-                # Merge evidence & update count
+                # Merge page locations across pages (Issue 1: Aggregate supporting locations)
+                new_locations = set(existing.get("locations", [])) | set(f.get("locations", []))
+                existing["locations"] = sorted(list(new_locations))
                 existing["occurrence_count"] = int(existing.get("occurrence_count", 1)) + 1
+
+                # Keep highest confidence & strongest severity
+                if f.get("confidence", 0) > existing.get("confidence", 0):
+                    existing["confidence"] = f["confidence"]
+                    existing["quote"] = f["quote"]
+
                 sev_order = {"Critical": 4, "High": 3, "Medium": 2, "Low": 1, "Informational": 0}
                 if sev_order.get(f["severity"], 0) > sev_order.get(existing["severity"], 0):
                     existing["severity"] = f["severity"]
 
         result = list(consolidated_map.values())
 
-        # Part 13: Cap finding count to target (4-10 meaningful findings)
+        # Issue 12: Target 15-40 meaningful findings max for large annual reports
         if len(result) > self.max_findings:
-            # Sort by severity priority: Critical -> High -> Medium -> Low -> Informational
             sev_rank = {"Critical": 0, "High": 1, "Medium": 2, "Low": 3, "Informational": 4}
             result.sort(key=lambda item: sev_rank.get(item.get("severity", "Medium"), 2))
             result = result[: self.max_findings]

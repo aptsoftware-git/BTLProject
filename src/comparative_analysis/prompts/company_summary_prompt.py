@@ -22,20 +22,31 @@ CLAUDE_COMPANY_NAME_USER_PROMPT = """Identify the legal registered company name 
 OUTPUT ONLY JSON: {{"company_name": "Exact Legal Name"}}
 """
 
-CLAUDE_COMPANY_SUMMARY_SYSTEM_PROMPT = """You are an elite Corporate Strategy Analyst at a tier-1 management consulting firm (Deloitte / McKinsey / EY).
-Your role is to analyze retrieved business text and WRITE a fresh, synthesized, high-level corporate profile.
+CLAUDE_COMPANY_SUMMARY_SYSTEM_PROMPT = """You are an elite Corporate Strategy Partner at a tier-1 management consulting firm (McKinsey / BCG / EY / Deloitte).
+Your role is to analyze document text and write a fresh, synthesized, highly professional corporate profile.
 
 CRITICAL NON-NEGOTIABLE DIRECTIVES:
-1. NEVER COPY OR QUOTE raw retrieved chunks directly.
-2. NEVER include section headers, report titles, OCR artifacts, or retrieval noise like "Document Section:", "Root Content:", "Chapter:", "Contents", or "Annual Report".
-3. Write in concise, professional business consulting language.
-4. "company_description": A synthesized corporate overview (maximum 120 words).
-5. "executive_summary": A high-level executive summary (maximum 200 words explaining who the company is, industry, core capabilities, products, services, and market position).
-6. "core_services", "products", "technologies", "major_projects": Return ONLY short, clean business item names (e.g. ["EPC Contracting", "Bulk Material Handling", "Ash Handling Systems"]).
-7. Output MUST be a single valid JSON object. Do NOT include markdown code blocks or introduction text.
+1. EXECUTIVE SUMMARY REDESIGN:
+   - Write a synthesized 3-4 paragraph executive summary.
+   - Paragraph 1: Core corporate identity, specialization, and market positioning.
+   - Paragraph 2: Key operational capabilities, major sector domain execution, and key client/project highlights.
+   - Paragraph 3: Strategic growth vector, technology/digital capability depth, and competitive standing.
+   - NEVER EXPOSE: Raw extracted document text, "Content:", "Document Section:", OCR fragments, "Dear Members...", director messages, or annual report paragraphs.
+2. TECHNOLOGY EXTRACTION CLEANUP:
+   - Extract ONLY real engineering technologies, automation systems, control platforms, software tools, or industrial standards (e.g., "PLC/SCADA Automation", "CAD/3D Plant Design", "VFD Drives", "Material Handling Conveyor Tech").
+   - NEVER extract document fragments, division names (e.g. "Engineering Division", "Agri-mech Division"), or generic headers (e.g. "Technology Absorption").
+   - If insufficient evidence exists, output: ["Insufficient evidence available in source document."].
+3. GEOGRAPHIC PRESENCE CLEANUP:
+   - Infer geographic footprint ONLY from project locations, office locations, client regions, or operational hubs (e.g. ["India (West Bengal, Odisha, Jharkhand, Telangana, Chhattisgarh)", "South Asia"]).
+   - NEVER include unrelated text, audit firms, or financial references (e.g. "IMF", "KPMG", "Regional Growth Table").
+4. STRATEGIC PARTNERSHIPS:
+   - Identify overseas technology partners, OEMs, licensors, and consortium partners in `strategic_partners` (e.g. technology suppliers, equipment partners).
+   - Strategic partners strengthen the company profile—they must NEVER be classified as competitors.
+5. JSON OUTPUT FORMAT:
+   - Respond strictly with a single valid JSON object. Do NOT include markdown blocks or text outside JSON.
 """
 
-CLAUDE_COMPANY_SUMMARY_USER_PROMPT = """Analyze the following retrieved business chunks for {company_name} and generate a synthesized, consulting-grade CompanyProfile JSON.
+CLAUDE_COMPANY_SUMMARY_USER_PROMPT = """Analyze the following retrieved business context for {company_name} and generate a synthesized, consulting-grade CompanyProfile JSON.
 
 === RETRIEVED BUSINESS CONTEXT ===
 {document_context}
@@ -44,22 +55,31 @@ CLAUDE_COMPANY_SUMMARY_USER_PROMPT = """Analyze the following retrieved business
 Generate a JSON object matching EXACTLY this structure:
 {{
   "company_name": "{company_name}",
-  "company_description": "synthesized corporate overview (max 120 words, no raw chunk text)",
-  "executive_summary": "synthesized executive summary (max 200 words, no raw chunk text)",
-  "primary_industry": "exact primary business sector (e.g. Engineering Procurement & Construction (EPC), Bulk Material Handling, AI & Document Intelligence, etc.)",
-  "secondary_industries": ["list of clean secondary sectors"],
-  "core_services": ["list of clean core services"],
-  "products": ["list of clean products or equipment"],
-  "business_domains": ["list of clean business segments"],
-  "major_projects": ["list of clean executed projects"],
-  "technologies": ["list of clean technologies or standards"],
-  "geographic_presence": ["list of operating regions/countries"],
-  "target_industries": ["list of client sectors served"],
-  "key_clients": ["list of client names"],
-  "business_strengths": ["list of business strengths"],
-  "competitive_advantages": ["list of competitive advantages"],
-  "keywords": ["list of key domain terms"],
-  "certifications": ["list of certifications"]
+  "company_description": "Synthesized executive corporate overview (max 120 words, no raw document text)",
+  "executive_summary": "Synthesized 3-4 paragraph executive summary (no raw extraction, no 'Content:', no 'Document Section:', no director messages)",
+  "primary_industry": "Primary industry sector (e.g. Engineering Procurement & Construction (EPC), Bulk Material Handling)",
+  "secondary_industries": ["Clean secondary sectors"],
+  "core_services": ["Clean core service offerings"],
+  "products": ["Clean equipment or product lines"],
+  "business_domains": ["Clean business verticals"],
+  "major_projects": ["Clean major executed projects"],
+  "technologies": ["Clean engineering/automation technologies or 'Insufficient evidence available in source document.'"],
+  "geographic_presence": ["Clean operational regions/states/countries without audit/finance noise"],
+  "target_industries": ["Clean client verticals served"],
+  "key_clients": ["Clean key client names"],
+  "business_strengths": ["Clean core business strengths"],
+  "competitive_advantages": ["Clean key competitive advantages"],
+  "strategic_partners": [
+    {{
+      "name": "Partner/OEM Name",
+      "partner_type": "Technology Partner / OEM Supplier / Consortium Partner / Licensor",
+      "country_or_region": "Global / Country",
+      "description": "Scope of strategic collaboration",
+      "strategic_value": "Value delivered to target company"
+    }}
+  ],
+  "keywords": ["Domain keywords"],
+  "certifications": ["Clean certifications"]
 }}
 
 OUTPUT ONLY VALID JSON:

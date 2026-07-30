@@ -316,8 +316,8 @@ class FinalReportGenerator:
         raw_consolidated = _group_and_consolidate_findings(confirmed_findings, chunk_map, category_mappings)
         relevance_filter = FindingRelevanceFilter(
             min_confidence=getattr(self.config, "finding_min_confidence", 0.70),
-            max_findings=getattr(self.config, "max_findings_per_report", 10),
-            min_findings=getattr(self.config, "min_findings_per_report", 4)
+            max_findings=getattr(self.config, "max_findings_per_report", 40),
+            min_findings=getattr(self.config, "min_findings_per_report", 5)
         )
         business_findings = relevance_filter.filter_and_consolidate(raw_consolidated)
 

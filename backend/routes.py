@@ -86,13 +86,7 @@ async def upload_document(file: UploadFile = File(...)) -> UploadResponse:
         import uuid
         from backend.services import get_all_jobs
         
-        existing_job_id = None
-        for j in get_all_jobs():
-            if j.get("filename") == file.filename:
-                existing_job_id = j.get("job_id")
-                break
-                
-        job_id = existing_job_id or str(uuid.uuid4().hex)
+        job_id = str(uuid.uuid4().hex)
         safe_filename = f"{job_id}_{file.filename}"
         dest_path = input_dir / safe_filename
 
@@ -525,13 +519,7 @@ async def upload_and_start_document(file: UploadFile = File(...)):
         import uuid
         from backend.services import get_all_jobs
 
-        existing_job_id = None
-        for j in get_all_jobs():
-            if j.get("filename") == file.filename:
-                existing_job_id = j.get("job_id")
-                break
-
-        job_id = existing_job_id or str(uuid.uuid4().hex)
+        job_id = str(uuid.uuid4().hex)
         safe_filename = f"{job_id}_{file.filename}"
         dest_path = input_dir / safe_filename
 
