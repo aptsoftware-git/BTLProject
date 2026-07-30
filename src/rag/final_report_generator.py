@@ -351,8 +351,16 @@ class FinalReportGenerator:
         critical_high_count = severity_counts.get("Critical", 0) + severity_counts.get("High", 0)
         now_timestamp = datetime.now().strftime("%b %d, %Y at %H:%M")
 
+        crit_count = severity_counts.get("Critical", 0)
+        high_count = severity_counts.get("High", 0)
+        med_count = severity_counts.get("Medium", 0)
+        low_count = severity_counts.get("Low", 0)
+        total_deductions = (crit_count * 10) + (high_count * 5) + (med_count * 2) + (low_count * 1)
+        doc_quality_score = max(50, min(100, 100 - total_deductions))
+
         dashboard_kpis = {
             "document_status": "Completed",
+            "document_quality_score": f"{doc_quality_score}/100",
             "publication_readiness": pub_status["label"],
             "publication_guidance": pub_status["action"],
             "verified_findings_count": len(business_findings),
@@ -374,10 +382,12 @@ class FinalReportGenerator:
         # Structure clean final JSON schema (Requirement 10)
         final_report_data = {
             "document_job_id": doc_id,
+            "document_quality_score": f"{doc_quality_score}/100",
             "dashboard_kpis": dashboard_kpis,
             "publication_status": pub_status,
             "validation_summary": validation_summary,
             "executive_summary": {
+                "document_quality_score": f"{doc_quality_score}/100",
                 "summary_text": f"The Local AI Review Engine first analyzed the document and identified {total_local_findings} potential findings. Claude performed an expert validation of those findings, confirming {verified_by_claude} valid findings while unsupported findings ({false_positives}) were rejected as false positives. Consequently, only the {len(business_findings)} validated findings appear in this final report. Overall document publication readiness is evaluated as: {pub_status['label']}.",
                 "overall_risk_level": overall_risk,
                 "category_breakdown": dict(category_counts),

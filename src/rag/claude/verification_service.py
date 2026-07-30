@@ -27,7 +27,7 @@ class ClaudeVerificationService:
     def _generate_fallback_verification(self, input_data: dict) -> dict:
         """Determines verification status locally if Claude API is offline/invalid key."""
         logger.warning("Using local deterministic compiler for Claude verification fallback.")
-        verified_findings = []
+        raw_findings = []
         
         # 1. Chunk ambiguities mapping
         chunk_reasoning = input_data.get("chunk_reasoning", {})
@@ -38,47 +38,24 @@ class ClaudeVerificationService:
             
             for amb in cr.get("ambiguities", []):
                 if isinstance(amb, str):
-                    amb = {"quote": amb, "type": "vague wording", "reason": amb}
+                    amb = {"quote": amb, "type": "Undefined Term", "reason": amb}
                 if not isinstance(amb, dict):
                     continue
-                amb_type = str(amb.get("type", "")).lower()
-                if "pronoun" in amb_type or "reference" in amb_type:
-                    cat = "Pronoun Ambiguity"
-                elif "grammar" in amb_type or "syntax" in amb_type:
-                    cat = "Grammar Issue"
-                elif "spell" in amb_type:
-                    cat = "Spelling Issue"
-                elif "undefined" in amb_type or "acronym" in amb_type:
-                    cat = "Undefined Term"
-                elif "term" in amb_type:
-                    cat = "Terminology Issue"
-                elif "number" in amb_type or "numerical" in amb_type:
-                    cat = "Numerical Inconsistency"
-                else:
-                    cat = "Writing Clarity"
 
                 quote_text = amb.get("quote") or amb.get("highlighted_ambiguity") or orig_text[:60]
                 chunk_full = orig_text if orig_text else quote_text
 
-                verified_findings.append({
-                    "issue_id": amb.get("issue_id", f"finding_{len(verified_findings)+1:03d}"),
-                    "status": "confirmed",
-                    "severity": amb.get("severity", "Medium"),
-                    "business_category": cat,
+                raw_findings.append({
+                    "issue_id": amb.get("issue_id", f"finding_{len(raw_findings)+1:03d}"),
+                    "raw_category": amb.get("type", "Undefined Term"),
                     "page": page_num,
                     "section": sec_heading,
                     "chunk_id": cid,
                     "original_chunk": chunk_full,
-                    "highlighted_ambiguity": quote_text,
-                    "reason": amb.get("reason") or "Passage contains ambiguous phrasing affecting clarity.",
-                    "business_impact": amb.get("business_impact") or "Ambiguity in operational instructions may cause execution deviations across teams.",
-                    "recommendation": amb.get("suggested_rewrite") or amb.get("recommendation") or "Revise the sentence to state explicit parameters.",
-                    "evidence": [
-                        {
-                            "chunk_id": cid,
-                            "quote": quote_text
-                        }
-                    ]
+                    "quote": quote_text,
+                    "explanation": amb.get("reason") or "Passage contains ambiguous phrasing affecting clarity.",
+                    "confidence": float(amb.get("confidence") or 0.85),
+                    "evidence": [{"chunk_id": cid, "quote": quote_text}]
                 })
                 
         # 2. Cluster findings mapping
@@ -89,34 +66,85 @@ class ClaudeVerificationService:
                 primary_cid = evidence[0].get("chunk_id") if evidence and evidence[0].get("chunk_id") else "N/A"
                 quote_text = evidence[0].get("quote") if evidence and evidence[0].get("quote") else ""
 
-                verified_findings.append({
-                    "issue_id": find.get("issue_id", f"finding_{len(verified_findings)+1:03d}"),
-                    "status": "confirmed",
-                    "severity": find.get("severity", "High"),
-                    "business_category": "Policy Conflict",
+                raw_findings.append({
+                    "issue_id": find.get("issue_id", f"finding_{len(raw_findings)+1:03d}"),
+                    "raw_category": "Policy Conflict",
                     "page": find.get("page", 1),
                     "section": find.get("section", "Cross-Section Policy"),
                     "chunk_id": primary_cid,
                     "original_chunk": quote_text or "Cross-section document passage evaluated during assurance audit.",
-                    "highlighted_ambiguity": quote_text or "Conflicting operational directives",
-                    "reason": find.get("reason") or "Cross-section directives present contradictory operational rules.",
-                    "business_impact": find.get("business_impact") or "Conflicting directives create legal exposure and compliance audit risk.",
-                    "recommendation": find.get("suggested_resolution") or find.get("recommendation") or "Reconcile conflicting section statements to establish a single authoritative policy.",
+                    "quote": quote_text or "Conflicting operational directives",
+                    "explanation": find.get("reason") or "Cross-section directives present contradictory operational rules.",
+                    "confidence": float(find.get("confidence") or 0.90),
                     "evidence": evidence
                 })
-                
-        severity_counts = Counter(f["severity"] for f in verified_findings)
+
+        from src.rag.finding_filter import FindingRelevanceFilter
+        rf = FindingRelevanceFilter(min_confidence=0.70, max_findings=30, min_findings=5)
+
+        verified_findings = []
+        rejection_reasons = Counter()
+
+        for f in raw_findings:
+            quote = f["quote"]
+            title = f.get("title", "")
+            explanation = f["explanation"]
+            section = f["section"]
+            confidence = f["confidence"]
+
+            if confidence < 0.70:
+                rejection_reasons["low_confidence (<70%)"] += 1
+                f["status"] = "rejected"
+                f["rejection_reason"] = "low_confidence (<70%)"
+                verified_findings.append(f)
+                continue
+
+            if rf.is_placeholder(quote) or rf.is_placeholder(explanation):
+                rejection_reasons["placeholder_text"] += 1
+                f["status"] = "rejected"
+                f["rejection_reason"] = "placeholder text"
+                verified_findings.append(f)
+                continue
+
+            if rf.is_boilerplate_heading_or_table(quote, title, section):
+                rejection_reasons["heading_or_table"] += 1
+                f["status"] = "rejected"
+                f["rejection_reason"] = "section heading or table label"
+                verified_findings.append(f)
+                continue
+
+            cat = rf.normalize_category(f["raw_category"])
+            f["status"] = "confirmed"
+            f["business_category"] = cat
+            f["business_impact"] = rf.generate_specific_business_impact(cat, title, explanation)
+            f["recommendation"] = rf.generate_specific_recommendation(cat, title, explanation)
+            f["severity"] = rf.calculate_severity(cat, confidence, explanation, f["business_impact"])
+            f["highlighted_ambiguity"] = quote
+            f["reason"] = explanation
+            verified_findings.append(f)
+
+        confirmed_list = [v for v in verified_findings if v.get("status") == "confirmed"]
+        deduped_confirmed = rf.filter_and_consolidate(confirmed_list)
+
+        total_rejected = len(raw_findings) - len(deduped_confirmed)
+        rejection_rate_pct = round((total_rejected / max(len(raw_findings), 1)) * 100, 1)
+
+        severity_counts = Counter(f.get("severity") for f in deduped_confirmed)
         
         return {
             "executive_summary": {
-                "total_verified_findings": len(verified_findings),
+                "total_verified_findings": len(deduped_confirmed),
+                "total_audited": len(raw_findings),
+                "total_rejected": total_rejected,
+                "rejection_rate": f"{rejection_rate_pct}%",
                 "high_severity_count": severity_counts.get("High", 0) + severity_counts.get("Critical", 0),
                 "medium_severity_count": severity_counts.get("Medium", 0),
                 "low_severity_count": severity_counts.get("Low", 0),
-                "document_risk_level": "High" if severity_counts.get("High", 0) + severity_counts.get("Critical", 0) > 0 else ("Medium" if verified_findings else "Low")
+                "document_risk_level": "High" if severity_counts.get("High", 0) + severity_counts.get("Critical", 0) > 0 else ("Medium" if deduped_confirmed else "Low")
             },
-            "overall_document_risk": "High" if severity_counts.get("High", 0) + severity_counts.get("Critical", 0) > 0 else ("Medium" if verified_findings else "Low"),
-            "verified_findings": verified_findings,
+            "overall_document_risk": "High" if severity_counts.get("High", 0) + severity_counts.get("Critical", 0) > 0 else ("Medium" if deduped_confirmed else "Low"),
+            "verified_findings": deduped_confirmed,
+            "rejection_breakdown": dict(rejection_reasons),
             "recommendations": [
                 "Reconcile cross-section policy directives to establish a unified operational protocol.",
                 "Ensure all technical acronyms and proprietary terms have explicit definitions in the appendix.",

@@ -678,13 +678,13 @@ class StageOrchestrator:
     # ------------------------------------------------------------------
     # Stage 6: Contextual Consistency Analysis
     # ------------------------------------------------------------------
-    def run_stage_6_context(self) -> None:
+    def run_stage_6_context(self, force_regenerate: bool = False) -> None:
         stage_id = "stage_6_context"
         rep_html = self.job_dir / "09_reports" / "consistency_report.html"
         rep_json = self.job_dir / "report.json"
 
         # Cache check
-        if rep_html.exists() and rep_json.exists():
+        if not force_regenerate and rep_html.exists() and rep_json.exists():
             logger.info("[CACHE HIT] Stage 6 (Context Analysis) already completed for job %s", self.job_id)
             self.update_stage_state(stage_id, "Completed", duration=0.0, output_location="09_reports/consistency_report.html")
             job = self.get_job()
@@ -769,12 +769,12 @@ class StageOrchestrator:
     # ------------------------------------------------------------------
     # Stage 7: Comparative Analysis
     # ------------------------------------------------------------------
-    def run_stage_7_comparative(self) -> None:
+    def run_stage_7_comparative(self, force_regenerate: bool = False) -> None:
         stage_id = "stage_7_comparative"
         comp_html = self.job_dir / "comparative_analysis" / "comparative_report.html"
 
         # Cache check
-        if comp_html.exists() and comp_html.stat().st_size > 0:
+        if not force_regenerate and comp_html.exists() and comp_html.stat().st_size > 0:
             logger.info("[CACHE HIT] Stage 7 (Comparative Analysis) already completed for job %s", self.job_id)
             self.update_stage_state(stage_id, "Completed", duration=0.0, output_location="comparative_analysis/comparative_report.html")
             job = self.get_job()
@@ -830,13 +830,13 @@ class StageOrchestrator:
     # ------------------------------------------------------------------
     # Stage 8: Executive Report Generation
     # ------------------------------------------------------------------
-    def run_stage_8_reports(self) -> None:
+    def run_stage_8_reports(self, force_regenerate: bool = False) -> None:
         stage_id = "stage_8_reports"
         biz_html = self.job_dir / "business_report.html"
         rep_html = self.job_dir / "09_reports" / "final_report.html"
 
         # Cache check
-        if biz_html.exists() and biz_html.stat().st_size > 0:
+        if not force_regenerate and biz_html.exists() and biz_html.stat().st_size > 0:
             logger.info("[CACHE HIT] Stage 8 (Executive Report Generation) already completed for job %s", self.job_id)
             self.update_stage_state(stage_id, "Completed", duration=0.0, output_location="business_report.html")
             job = self.get_job()
@@ -852,7 +852,7 @@ class StageOrchestrator:
             from src.rag.final_report_generator import FinalReportGenerator
 
             report_generator = FinalReportGenerator()
-            report_generator.run_generation(self.job_dir, self.job_id)
+            report_generator.run_generation(self.job_dir, self.job_id, force_regenerate=force_regenerate)
 
             import shutil
             reports_dir = self.job_dir / "09_reports"

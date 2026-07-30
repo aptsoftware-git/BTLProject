@@ -342,11 +342,31 @@ def queue_job(job_id: str, force: bool = False) -> Dict[str, Any]:
     return job
 
 
+def delete_stage_output_cache(job_id: str, stage_id: str = "all") -> None:
+    """Removes cached output files for specified stage to ensure fresh execution."""
+    job_dir = get_job_dir(job_id)
+    if stage_id in ("all", "stage_6_context", "context"):
+        (job_dir / "report.json").unlink(missing_ok=True)
+        (job_dir / "business_report.html").unlink(missing_ok=True)
+        (job_dir / "09_reports" / "consistency_report.html").unlink(missing_ok=True)
+        (job_dir / "09_reports" / "consistency_report.json").unlink(missing_ok=True)
+    if stage_id in ("all", "stage_7_comparative", "comparative"):
+        (job_dir / "comparative_analysis" / "comparative_report.html").unlink(missing_ok=True)
+        (job_dir / "09_reports" / "comparative_report.html").unlink(missing_ok=True)
+    if stage_id in ("all", "stage_8_reports", "reports"):
+        (job_dir / "business_report.html").unlink(missing_ok=True)
+        (job_dir / "09_reports" / "final_report.html").unlink(missing_ok=True)
+        (job_dir / "15_final_report" / "final_report.json").unlink(missing_ok=True)
+        (job_dir / "15_final_report" / "final_report.html").unlink(missing_ok=True)
+
+
 def retry_job_stage(job_id: str, stage_id: str = "all") -> Dict[str, Any]:
     """Resets a failed or specific stage to pending and triggers background re-execution."""
     job = get_job(job_id)
     if not job:
         raise ValueError(f"Job '{job_id}' not found.")
+
+    delete_stage_output_cache(job_id, stage_id)
 
     if "stages" not in job or not job["stages"]:
         job["stages"] = initialize_job_stages(job.get("created_at"))
@@ -360,16 +380,16 @@ def retry_job_stage(job_id: str, stage_id: str = "all") -> Dict[str, Any]:
     job["error"] = None
     save_job_metadata(job_id)
 
-    job_queue.put(job_id)
+    queue_job(job_id, force=True)
     return job
 
 
 def run_context_analysis_inline(job_id: str, job_dir: Path) -> None:
-    """Legacy helper for backward compatibility."""
+    """Helper to execute stages 6, 7, and 8 with forced re-generation."""
     orchestrator = StageOrchestrator(job_id, job_dir, Path(get_job(job_id)["file_path"]))
-    orchestrator.run_stage_6_context()
-    orchestrator.run_stage_7_comparative()
-    orchestrator.run_stage_8_reports()
+    orchestrator.run_stage_6_context(force_regenerate=True)
+    orchestrator.run_stage_7_comparative(force_regenerate=True)
+    orchestrator.run_stage_8_reports(force_regenerate=True)
 
 
 def background_worker() -> None:
@@ -457,6 +477,7 @@ def get_all_jobs() -> list[Dict[str, Any]]:
 def run_context_analysis_bg(job_id: str, job_dir: Path) -> None:
     def worker():
         try:
+            delete_stage_output_cache(job_id, "all")
             run_context_analysis_inline(job_id, job_dir)
         except Exception as e:
             import traceback

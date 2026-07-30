@@ -21,47 +21,54 @@ from collections import Counter
 
 logger = logging.getLogger("pipeline")
 
-# PART 5: Business-Focused Finding Taxonomy (15 Standard Categories)
+# Phase 4: Business Taxonomy (12 Executive Categories)
 TAXONOMY_CATEGORIES = {
-    "Business Consistency",
-    "Numerical Consistency",
-    "Acronym Definition",
-    "Missing Evidence",
-    "Regulatory Risk",
+    "Numerical Inconsistency",
+    "Cross-Reference Error",
+    "Undefined Term",
+    "Undefined Acronym",
+    "Unsupported Claim",
+    "Policy Conflict",
+    "Governance Inconsistency",
     "Compliance Risk",
-    "Contradictory Statements",
-    "Duplicate Information",
-    "Incomplete Information",
-    "Cross-Reference Mismatch",
-    "Market Positioning Conflict",
-    "Operational Ambiguity",
-    "Strategic Risk",
-    "Data Quality",
-    "Document Structure",
+    "Regulatory Risk",
+    "Missing Evidence",
+    "Business Logic Conflict",
+    "Contradictory Statement",
 }
 
-# Mapping legacy / raw LLM category strings to the 15 standard business categories
+# Mapping legacy / raw LLM category strings to the 12 standard business categories
 CATEGORY_MAPPINGS = {
-    "vague wording": "Operational Ambiguity",
-    "Writing Clarity": "Operational Ambiguity",
-    "undefined terminology": "Acronym Definition",
-    "Undefined Term": "Acronym Definition",
-    "policy conflict": "Contradictory Statements",
-    "Policy Conflict": "Contradictory Statements",
-    "contradiction": "Contradictory Statements",
-    "numerical ambiguity": "Numerical Consistency",
-    "Numerical Mismatch": "Numerical Consistency",
-    "temporal ambiguity": "Business Consistency",
-    "Reference Conflict": "Cross-Reference Mismatch",
-    "weak instructions": "Operational Ambiguity",
-    "pronoun ambiguity": "Operational Ambiguity",
+    "vague wording": "Undefined Term",
+    "Writing Clarity": "Undefined Term",
+    "undefined terminology": "Undefined Term",
+    "Undefined Term": "Undefined Term",
+    "undefined acronym": "Undefined Acronym",
+    "acronym definition": "Undefined Acronym",
+    "Acronym Definition": "Undefined Acronym",
+    "policy conflict": "Policy Conflict",
+    "Policy Conflict": "Policy Conflict",
+    "contradiction": "Contradictory Statement",
+    "Contradictory Statements": "Contradictory Statement",
+    "Contradictory Statement": "Contradictory Statement",
+    "numerical ambiguity": "Numerical Inconsistency",
+    "Numerical Mismatch": "Numerical Inconsistency",
+    "Numerical Consistency": "Numerical Inconsistency",
+    "temporal ambiguity": "Contradictory Statement",
+    "Reference Conflict": "Cross-Reference Error",
+    "Cross-Reference Mismatch": "Cross-Reference Error",
+    "weak instructions": "Business Logic Conflict",
+    "pronoun ambiguity": "Undefined Term",
     "Compliance Risk": "Compliance Risk",
     "Regulatory Risk": "Regulatory Risk",
-    "Data Quality": "Data Quality",
+    "Governance Inconsistency": "Governance Inconsistency",
+    "Business Logic Conflict": "Business Logic Conflict",
+    "Unsupported Claim": "Unsupported Claim",
+    "Data Quality": "Numerical Inconsistency",
     "Missing Evidence": "Missing Evidence",
-    "Market Overlap": "Market Positioning Conflict",
-    "Duplicate Info": "Duplicate Information",
-    "Incomplete Info": "Incomplete Information",
+    "Market Overlap": "Business Logic Conflict",
+    "Duplicate Info": "Contradictory Statement",
+    "Incomplete Info": "Missing Evidence",
 }
 
 # PART 1: Suppressed Terms, Section Headers, Contact Details, Standalone Entities & Boilerplate Sections
@@ -74,7 +81,8 @@ SUPPRESSED_EXACT_PATTERNS = {
     "BOARD AND KEY LEADERSHIP", "KEY LEADERSHIP", "WEBSITE", "EMAIL", "ADDRESS",
     "ABOUT US", "EXECUTIVE SUMMARY", "INTRODUCTION", "FINANCIAL PERFORMANCE",
     "SERVICES", "PRODUCTS", "LEADERSHIP", "MANAGEMENT", "CORPORATE INFORMATION",
-    "REGISTERED OFFICE", "FINANCIAL ASSETS", "NET DEBT", "TOTAL EQUITY", "SENSITIVITY ANALYSIS"
+    "REGISTERED OFFICE", "FINANCIAL ASSETS", "NET DEBT", "TOTAL EQUITY", "SENSITIVITY ANALYSIS",
+    "TABLE 1", "APPENDIX"
 }
 
 PLACEHOLDER_TEXT_PATTERNS = [
@@ -88,7 +96,7 @@ EXCLUDED_BOILERPLATE_SECTIONS = [
 ]
 
 SUPPRESSED_REGEXES = [
-    re.compile(r"^\s*(?:our vision|our mission|vision|mission|projects|overview|strengths|content|document|section|our heritage|company profile|contact|industry|headquarters|board|leadership|website|email|address|phone|tel|fax|about us)\s*$", re.IGNORECASE),
+    re.compile(r"^\s*(?:our vision|our mission|vision|mission|projects|overview|strengths|content|document|section|our heritage|company profile|contact|industry|headquarters|board|leadership|website|email|address|phone|tel|fax|about us|table\s*\d+|appendix)\s*$", re.IGNORECASE),
     re.compile(r"^\s*(?:https?://|www\.|[\w.+-]+@[\w-]+\.[\w.-]+)\s*$", re.IGNORECASE),
     re.compile(r"^\s*(?:page\s*\d+|section\s*\d+(?:\.\d+)*)\s*$", re.IGNORECASE),
     re.compile(r"^\s*\w+\s*(?:is|lacks|undefined|vague|not defined|lacks explanation|lacks context)\s*$", re.IGNORECASE),
@@ -98,36 +106,36 @@ SUPPRESSED_REGEXES = [
 class FindingRelevanceFilter:
     """
     Filtering, scoring, deduplication, and consolidation engine for Context Analysis & Executive Reports.
-    Enforces Context Analysis Quality Overhaul (Issues 1-12).
+    Enforces Context Analysis Quality & Claude Verification Overhaul (Phases 1-9).
     """
 
-    def __init__(self, min_confidence: float = 0.70, max_findings: int = 40, min_findings: int = 5):
+    def __init__(self, min_confidence: float = 0.70, max_findings: int = 30, min_findings: int = 5):
         self.min_confidence = min_confidence
         self.max_findings = max_findings
         self.min_findings = min_findings
 
     def is_placeholder(self, text: str) -> bool:
-        """Issue 2: Detects and rejects internal system/placeholder text leakage."""
+        """Phase 1: Detects and rejects internal system/placeholder text leakage."""
         if not text:
             return False
         text_lower = text.lower()
         return any(pattern in text_lower for pattern in PLACEHOLDER_TEXT_PATTERNS)
 
     def is_boilerplate_heading_or_table(self, quote: str, title: str = "", section: str = "") -> bool:
-        """Issues 3, 4, 11: Detects section titles, headings, tables, and boilerplate annual report sections."""
+        """Phase 1: Detects section titles, headings, TOC entries, tables, and boilerplate sections."""
         q_clean = quote.strip().upper()
         t_clean = title.strip().upper()
         s_clean = section.strip().lower()
 
-        # Issue 11: Ignore boilerplate annual report sections
+        # Reject boilerplate annual report sections
         if any(b_sec in s_clean or b_sec in q_clean.lower() or b_sec in t_clean.lower() for b_sec in EXCLUDED_BOILERPLATE_SECTIONS):
             return True
 
-        # Issue 3: Ignore single-word headings, TOC labels, section titles
+        # Reject single-word headings, TOC labels, section titles, table labels
         if q_clean in SUPPRESSED_EXACT_PATTERNS or t_clean in SUPPRESSED_EXACT_PATTERNS:
             return True
 
-        # Issue 4: Skip financial tables and data grids from ambiguity flags
+        # Skip financial tables and data grids
         if re.search(r"\|\s*[\d,.-]+\s*\|", quote) or re.search(r"financial assets|net debt|total equity|sensitivity analysis", q_clean, re.IGNORECASE):
             return True
 
@@ -136,8 +144,8 @@ class FindingRelevanceFilter:
             if pattern.search(quote) or pattern.search(title):
                 return True
 
-        # Suppress short quotes (< 15 chars) without action verbs
-        if len(quote.strip()) <= 15 and not re.search(r"\b(?:is|are|was|were|has|have|will|must|should|cannot)\b", quote, re.IGNORECASE):
+        # Phase 1: Suppress short quotes (< 15 chars) without action verbs
+        if len(quote.strip()) < 15 and not re.search(r"\b(?:is|are|was|were|has|have|will|must|should|cannot)\b", quote, re.IGNORECASE):
             return True
 
         return False
@@ -148,7 +156,6 @@ class FindingRelevanceFilter:
             return True
 
         e_clean = (explanation + " " + title).lower()
-        # Do not suppress evidence quotes for explicit deterministic mismatches, broken references, or numeric conflicts
         if any(term in e_clean for term in ["numeric", "mismatch", "broken", "reference", "page reference", "section reference", "parentheses"]):
             return False
 
@@ -158,46 +165,66 @@ class FindingRelevanceFilter:
         return False
 
     def normalize_category(self, raw_category: str) -> str:
-        """Maps raw category strings into the 15 standard business taxonomy categories."""
+        """Phase 4: Maps raw category strings into the 12 standard business taxonomy categories."""
         if raw_category in TAXONOMY_CATEGORIES:
             return raw_category
-        return CATEGORY_MAPPINGS.get(raw_category, "Business Consistency")
+        return CATEGORY_MAPPINGS.get(raw_category, "Undefined Term")
 
     def generate_specific_business_impact(self, category: str, title: str = "", text: str = "") -> str:
-        """Issue 5: Generates specific business impacts based on category (No generic impact templates)."""
+        """Phase 5: Generates category-specific business impacts."""
         cat_lower = category.lower()
-        text_block = (title + " " + text).lower()
 
-        if "numerical" in cat_lower or "financial" in text_block:
-            return "Financial reporting risk & valuation discrepancy across statutory statements."
-        if "regulatory" in cat_lower or "compliance" in cat_lower:
-            return "Regulatory exposure & potential statutory audit observation under Companies Act."
-        if "acronym" in cat_lower or "undefined" in cat_lower or "term" in text_block:
-            return "Interpretation risk & stakeholder misunderstanding of specialized terms."
-        if "reference" in cat_lower or "mismatch" in text_block:
-            return "Audit traceability risk & broken cross-reference navigation in final report."
-        if "missing evidence" in cat_lower or "claim" in text_block:
-            return "Credibility risk & potential compliance audit challenge regarding unverified statements."
-        if "contradict" in cat_lower or "conflict" in text_block:
-            return "Policy governance conflict & operational misalignment across departmental disclosures."
+        if "numerical" in cat_lower:
+            return "May affect financial reporting accuracy and stakeholder trust."
+        if "acronym" in cat_lower:
+            return "May cause interpretation inconsistencies among readers."
+        if "cross-reference" in cat_lower or "reference" in cat_lower:
+            return "May reduce document traceability during audits and reviews."
+        if "unsupported" in cat_lower:
+            return "Unsubstantiated statement creates credibility risk during regulatory or investor audit."
+        if "policy" in cat_lower:
+            return "May create compliance exposure and departmental misalignment."
+        if "governance" in cat_lower:
+            return "Inconsistent governance rules create operational execution risk across units."
+        if "compliance" in cat_lower:
+            return "Statutory or internal compliance gap introduces potential audit penalty."
+        if "regulatory" in cat_lower:
+            return "Non-aligned regulatory statement introduces statutory exposure."
+        if "missing evidence" in cat_lower:
+            return "Missing empirical evidence weakens document authority and audit readiness."
+        if "logic" in cat_lower:
+            return "Logical inconsistency in business rules introduces operational errors."
+        if "contradictory" in cat_lower:
+            return "Conflicting disclosures degrade executive clarity and audit reliability."
         return "Operational execution deviation & stakeholder ambiguity."
 
     def generate_specific_recommendation(self, category: str, title: str = "", text: str = "") -> str:
-        """Issue 6: Generates specific actionable recommendations based on finding category."""
+        """Phase 6: Generates category-specific actionable recommendations."""
         cat_lower = category.lower()
-        text_block = (title + " " + text).lower()
 
-        if "acronym" in cat_lower or "undefined" in cat_lower:
-            return "Define the acronym/term clearly at its first occurrence in the document."
-        if "reference" in cat_lower or "mismatch" in text_block:
+        if "acronym" in cat_lower:
+            return "Define the acronym at its first occurrence and use it consistently thereafter."
+        if "numerical" in cat_lower:
+            return "Reconcile the reported values across referenced sections and update the source figures."
+        if "unsupported" in cat_lower:
+            return "Add supporting evidence, references, or metrics to substantiate the claim."
+        if "cross-reference" in cat_lower or "reference" in cat_lower:
             return "Correct section, note, and page cross-references across all document chapters."
-        if "numerical" in cat_lower or "financial" in text_block:
-            return "Reconcile numerical values and figures across financial notes and primary tables."
-        if "contradict" in cat_lower or "conflict" in text_block:
-            return "Harmonize policy language and resolve contradictory statements across sections."
-        if "missing evidence" in cat_lower or "claim" in text_block:
-            return "Provide empirical supporting evidence, audit citations, or explanatory notes."
-        return "Revise sentence structure to state explicit operational parameters."
+        if "policy" in cat_lower:
+            return "Harmonize policy language across departments to establish a single authoritative rule."
+        if "governance" in cat_lower:
+            return "Align governance directives across operational chapters."
+        if "compliance" in cat_lower:
+            return "Remediate compliance clause to satisfy statutory audit standards."
+        if "regulatory" in cat_lower:
+            return "Align disclosure text with regulatory mandate."
+        if "missing evidence" in cat_lower:
+            return "Provide empirical supporting data, citations, or audit notes."
+        if "logic" in cat_lower:
+            return "Reconcile business rule logic across process descriptions."
+        if "contradictory" in cat_lower:
+            return "Reconcile contradictory statements into a unified authoritative narrative."
+        return "Add explicit definition in glossary or at first occurrence in text."
 
     def calculate_severity(
         self,
