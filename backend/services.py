@@ -351,7 +351,10 @@ def delete_stage_output_cache(job_id: str, stage_id: str = "all") -> None:
         (job_dir / "09_reports" / "consistency_report.html").unlink(missing_ok=True)
         (job_dir / "09_reports" / "consistency_report.json").unlink(missing_ok=True)
     if stage_id in ("all", "stage_7_comparative", "comparative"):
-        (job_dir / "comparative_analysis" / "comparative_report.html").unlink(missing_ok=True)
+        comp_dir = job_dir / "comparative_analysis"
+        if comp_dir.exists():
+            import shutil
+            shutil.rmtree(comp_dir, ignore_errors=True)
         (job_dir / "09_reports" / "comparative_report.html").unlink(missing_ok=True)
     if stage_id in ("all", "stage_8_reports", "reports"):
         (job_dir / "business_report.html").unlink(missing_ok=True)

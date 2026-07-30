@@ -81,6 +81,12 @@ const IconExternalLink = ({ size = 12, color = "currentColor" }) => (
   </svg>
 );
 
+const IconRefreshCw = ({ size = 14, color = "currentColor", className = "" }) => (
+  <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className} style={{ flexShrink: 0 }}>
+    <path d="M23 4v6h-6M1 20v-6h6M3.51 9a9 9 0 0114.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0020.49 15" />
+  </svg>
+);
+
 const LOADING_STAGES = [
   { step: 1, label: "Understanding Target Company Profile" },
   { step: 2, label: "Classifying Primary Industry & Business Domain" },
@@ -223,6 +229,22 @@ export default function ComparativeAnalysisView({ data, isRunning = false, curre
   const opportunitiesList = (swot.opportunities_in_market || []).slice(0, 5);
   const threatsList = (swot.threats_from_competitors || []).slice(0, 5);
 
+  const [reRunning, setReRunning] = useState(false);
+
+  const handleReRun = async () => {
+    const docId = id || payload?.document_job_id || payload?.id;
+    if (!docId) return;
+    setReRunning(true);
+    try {
+      await fetch(`/api/comparative-analysis/run/${docId}`, { method: 'POST' });
+      if (onRerun) onRerun();
+      setTimeout(() => window.location.reload(), 4000);
+    } catch (err) {
+      console.error(err);
+      setReRunning(false);
+    }
+  };
+
   return (
     <div style={styles.pageWrap}>
 
@@ -251,8 +273,33 @@ export default function ComparativeAnalysisView({ data, isRunning = false, curre
 
         {/* 1. REPORT HEADER: Detected Company Name is LARGEST element */}
         <div style={styles.headerCard}>
-          <span style={styles.headerTag}>EXECUTIVE COMPARATIVE ANALYSIS REPORT</span>
-          <h1 style={styles.companyTitle}>{companyName}</h1>
+          <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", gap: 16 }}>
+            <div>
+              <span style={styles.headerTag}>EXECUTIVE COMPARATIVE ANALYSIS REPORT</span>
+              <h1 style={styles.companyTitle}>{companyName}</h1>
+            </div>
+            <button
+              onClick={handleReRun}
+              disabled={reRunning}
+              style={{
+                background: "var(--brand)",
+                color: "#FFFFFF",
+                border: "none",
+                borderRadius: 6,
+                padding: "8px 16px",
+                fontSize: 12,
+                fontWeight: 700,
+                cursor: reRunning ? "wait" : "pointer",
+                display: "flex",
+                alignItems: "center",
+                gap: 6,
+                boxShadow: "0 2px 4px rgba(0,0,0,0.1)"
+              }}
+            >
+              <IconRefreshCw size={14} color="#FFFFFF" className={reRunning ? "spin" : ""} />
+              <span>{reRunning ? "Re-generating..." : "↻ Re-run Comparative Report"}</span>
+            </button>
+          </div>
 
           <div style={styles.badgeRow}>
             <div style={styles.badgePill}>

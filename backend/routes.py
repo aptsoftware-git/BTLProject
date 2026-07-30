@@ -1108,6 +1108,31 @@ async def run_context_analysis(job_id: str):
         raise HTTPException(status_code=500, detail=str(e))
 
 
+@router.post("/comparative-analysis/run/{job_id}", summary="Force Run Comparative Analysis")
+@router.post("/reports/{job_id}/comparative-analysis/run", summary="Force Run Comparative Analysis (Alias)")
+async def run_comparative_analysis_endpoint(job_id: str):
+    import threading
+    from backend.services import get_job, get_job_dir, delete_stage_output_cache
+    from src.stage_orchestrator import StageOrchestrator
+    
+    job = get_job(job_id)
+    if not job:
+        raise HTTPException(status_code=404, detail="Job not found")
+        
+    job_dir = get_job_dir(job_id)
+    delete_stage_output_cache(job_id, "stage_7_comparative")
+    
+    def worker():
+        try:
+            orchestrator = StageOrchestrator(job_id, job_dir, Path(job["file_path"]))
+            orchestrator.run_stage_7_comparative(force_regenerate=True)
+        except Exception as e:
+            backend_logger.error("Comparative Analysis re-run failed for job %s: %s", job_id, e)
+            
+    threading.Thread(target=worker, daemon=True).start()
+    return {"status": "running", "message": "Comparative Analysis re-generation started in background."}
+
+
 @router.get("/context-analysis/report/{job_id}", summary="Get Contextual Consistency Report")
 async def get_context_analysis_report(job_id: str):
     from backend.services import get_job_dir
