@@ -99,6 +99,11 @@ class DocumentExtractor:
             pipeline_options = PdfPipelineOptions()
             pipeline_options.do_ocr = self.enable_ocr
             pipeline_options.do_table_structure = self.enable_table_extraction
+            try:
+                from docling.datamodel.pipeline_options import RapidOcrOptions
+                pipeline_options.ocr_options = RapidOcrOptions()
+            except ImportError:
+                pass
 
             converter = DocumentConverter(
                 format_options={

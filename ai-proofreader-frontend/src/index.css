@@ -343,4 +343,96 @@ a {
   40% { transform: scale(1.0); }
 }
 
+/* Tooltip & Micro-Interaction Enhancements */
+mark.pending-highlight {
+  position: relative !important;
+  cursor: pointer !important;
+  display: inline !important;
+}
+
+mark.pending-highlight[data-error-tooltip]:hover::after {
+  content: attr(data-error-tooltip);
+  position: absolute;
+  bottom: calc(100% + 8px);
+  left: 50%;
+  transform: translateX(-50%);
+  background: #0F172A;
+  color: #FFFFFF;
+  padding: 6px 12px;
+  border-radius: 6px;
+  font-size: 11.5px;
+  font-weight: 600;
+  white-space: nowrap;
+  pointer-events: none;
+  z-index: 999;
+  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.2);
+  animation: tooltipFade 0.18s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+@keyframes tooltipFade {
+  from { opacity: 0; transform: translate(-50%, 4px); }
+  to { opacity: 1; transform: translate(-50%, 0); }
+}
+
+/* Document Tables */
+table.doc-table {
+  width: 100%;
+  border-collapse: separate;
+  border-spacing: 0;
+  margin: 1.5em 0;
+  border-radius: 8px;
+  overflow: hidden;
+  border: 1px solid var(--border);
+  font-size: 12.5px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.02);
+}
+
+table.doc-table th {
+  background: #F8FAFC;
+  color: #0F172A;
+  font-weight: 700;
+  padding: 10px 14px;
+  text-align: left;
+  border-bottom: 2px solid #E2E8F0;
+}
+
+table.doc-table td {
+  padding: 9px 14px;
+  border-bottom: 1px solid #F1F5F9;
+  color: #334155;
+}
+
+table.doc-table tr:hover td {
+  background: #F8FAFC;
+}
+
+/* Custom Smooth Scrollbar */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+  background: #CBD5E1;
+  border-radius: 999px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #94A3B8;
+}
+
+/* Interactive Card Micro-States */
+.interactive-card {
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.interactive-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 24px -4px rgba(0, 0, 0, 0.08);
+}
+
 

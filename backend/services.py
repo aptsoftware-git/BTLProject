@@ -246,7 +246,7 @@ def create_job(filename: str, original_file_path: Path, job_id: Optional[str] = 
         "doc_hash": doc_hash,
         "filename": filename,
         "status": "uploaded",
-        "current_stage": "Stage 1: Upload Complete",
+        "current_stage": "Document Uploaded",
         "progress_percentage": 12.5,
         "overall_progress": 12,
         "created_at": created_at_iso,

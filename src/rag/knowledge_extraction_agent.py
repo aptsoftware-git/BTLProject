@@ -377,13 +377,14 @@ class KnowledgeExtractionAgent:
                         except Exception as move_err:
                             logger.error(f"Failed to move image crop: {move_err}")
                             
-                    # Smart filtering: skip VLM if decorative/small
+                    # Smart filtering: skip VLM for decorative, small icons, logos, or minor graphics
                     is_decorative = False
                     if new_png_path.exists():
                         try:
+                            file_size_kb = new_png_path.stat().st_size / 1024.0
                             with Image.open(new_png_path) as pil_img:
                                 w, h = pil_img.size
-                                if w < 50 or h < 50 or (w * h) < 2500:
+                                if w < 120 or h < 120 or (w * h) < 15000 or file_size_kb < 8.0:
                                     is_decorative = True
                         except Exception:
                             pass

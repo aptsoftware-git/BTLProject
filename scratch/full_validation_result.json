@@ -1,0 +1,32 @@
+{
+  "before": {
+    "retrieved_chunks": [
+      "df35600eaeeb4bc292bb4537eb9789f8_chunk_0026",
+      "df35600eaeeb4bc292bb4537eb9789f8_chunk_0027",
+      "df35600eaeeb4bc292bb4537eb9789f8_chunk_0028"
+    ],
+    "retrieved_pages": [
+      5
+    ],
+    "context_character_length": 1280,
+    "clients_extracted": [
+      "Bharat Heavy Electricals Limited (BHEL)"
+    ]
+  },
+  "after": {
+    "used_chunk_ids": [
+      "df35600eaeeb4bc292bb4537eb9789f8_chunk_0030",
+      "df35600eaeeb4bc292bb4537eb9789f8_chunk_0032",
+      "df35600eaeeb4bc292bb4537eb9789f8_chunk_0034",
+      "df35600eaeeb4bc292bb4537eb9789f8_chunk_0036",
+      "df35600eaeeb4bc292bb4537eb9789f8_chunk_0038",
+      "df35600eaeeb4bc292bb4537eb9789f8_chunk_0040"
+    ],
+    "retrieved_pages": [
+      5,
+      6
+    ],
+    "context_character_length": 9764,
+    "llm_response": "The following are the marquee clients listed in the document:\n\n- Bharat Heavy Electricals Limited (BHEL)\n- National Thermal Power Corporation (NTPC)\n- Adani Power Limited (APL)\n- Coal India Limited\n- Steel Authority of India Limited\n- Indian Oil Corporation Limited (IOCL)\n- Numaligarh Refinery Limited\n- Brahmaputra Cracker and Polymer Limited (BCPL)\n- Oil and Natural Gas Corporation Limited (ONGC)\n- Neelachal Ispat Nigam Limited\n- Krishak Bharati Cooperative Limited (KRIBHCO)\n- Bhabha Atomic Research Centre (BARC)\n- Larsen & Toubro\n- National Aluminium Company Limited (NALCO)\n- Damodar Valley Corporation Limited\n- Hindustan Urvarak and Rasayan Limited (HURL)\n- Talcher Fertilisers Limited\n- JMS Mining Private Limited\n- Ordnance Factory, Ambajhari (OFAJ)\n- Power Transmission Corporation of Uttarakhand Limited (PTCUL)\n- Tata Steel Limited\n- Jharkhand Urban Infrastructure Development Company Limited (JUIDCO)\n- Indu Projects Limited (INDU)\n- UltraTech Cement Limited"
+  }
+}

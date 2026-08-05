@@ -1,4 +1,4 @@
-const API_BASE = (import.meta.env && import.meta.env.VITE_API_BASE_URL) || "http://localhost:8000/api";
+const API_BASE = (import.meta.env && import.meta.env.VITE_API_BASE_URL) || "/api";
 
 async function request(endpoint, options = {}) {
   const url = `${API_BASE}${endpoint}`;
@@ -75,7 +75,7 @@ export function uploadDocument(file, onProgress, xhrRef) {
       return reject(err);
     }
 
-    const baseUrl = (import.meta.env && import.meta.env.VITE_API_BASE_URL) ? import.meta.env.VITE_API_BASE_URL.replace(/\/+$/, "") : "http://localhost:8000/api";
+    const baseUrl = (import.meta.env && import.meta.env.VITE_API_BASE_URL) ? import.meta.env.VITE_API_BASE_URL.replace(/\/+$/, "") : "/api";
     const url = `${baseUrl}/documents/upload`;
 
     if (import.meta.env?.DEV) {

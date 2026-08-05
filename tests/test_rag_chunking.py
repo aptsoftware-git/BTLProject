@@ -145,11 +145,12 @@ def test_chunk_builder_on_txt():
 def test_chunking_end_to_end_on_pdf():
     # Run the MultimodalExtractor on nsmail.pdf with output_dir provided
     # which will trigger ChunkBuilder and save document_chunks.json
-    pdf_path = Path("C:/Users/sanju/INTERNSHIP-APT/DocumentProofreadingSystem/data/input/nsmail.pdf")
+    from src.config import ROOT_DIR
+    pdf_path = ROOT_DIR / "data" / "input" / "nsmail.pdf"
     if not pdf_path.exists():
         return
         
-    temp_output_dir = Path("C:/Users/sanju/INTERNSHIP-APT/DocumentProofreadingSystem/data/output/temp_chunk_test")
+    temp_output_dir = ROOT_DIR / "data" / "output" / "temp_chunk_test"
     temp_output_dir.mkdir(parents=True, exist_ok=True)
     
     extractor = MultimodalExtractor(

@@ -15,8 +15,10 @@ from src.rag.reranker import Reranker
 from src.rag.vector_store import VectorStore
 from src.rag.retriever import Retriever
 
+from src.config import ROOT_DIR
+
 # Temp database path for tests
-TEMP_DB_DIR = Path("C:/Users/sanju/INTERNSHIP-APT/DocumentProofreadingSystem/data/output/temp_chromadb_retrieval_test")
+TEMP_DB_DIR = ROOT_DIR / "data" / "output" / "temp_chromadb_retrieval_test"
 
 @pytest.fixture(autouse=True)
 def cleanup_temp_db():

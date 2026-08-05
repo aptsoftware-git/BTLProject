@@ -24,10 +24,10 @@ app = FastAPI(
 # Configure CORS Middleware
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],  # Allows all origins for development; narrow this down in production
-    allow_credentials=True,
-    allow_methods=["*"],  # Allows all methods (GET, POST, etc.)
-    allow_headers=["*"],  # Allows all headers
+    allow_origins=["*"],
+    allow_credentials=False,
+    allow_methods=["*"],
+    allow_headers=["*"],
 )
 
 # Register routes
@@ -35,7 +35,10 @@ app.include_router(router, prefix="/api")
 
 from fastapi.staticfiles import StaticFiles
 from src.config import ROOT_DIR
-app.mount("/outputs", StaticFiles(directory=str(ROOT_DIR / "data" / "output")), name="outputs")
+
+output_dir = ROOT_DIR / "data" / "output"
+output_dir.mkdir(parents=True, exist_ok=True)
+app.mount("/outputs", StaticFiles(directory=str(output_dir)), name="outputs")
 
 
 @app.get("/", summary="Health Check API")

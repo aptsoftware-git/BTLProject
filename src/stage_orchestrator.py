@@ -35,49 +35,49 @@ logger = get_logger("backend")
 STAGES_DEFINITIONS: List[Dict[str, str]] = [
     {
         "stage_id": "stage_1_upload",
-        "name": "Upload Complete",
+        "name": "Document Uploaded",
         "unlocked_feature": "Document Uploaded",
         "flag": "upload_ready"
     },
     {
         "stage_id": "stage_2_extraction",
-        "name": "Document Extraction",
+        "name": "Document Content Extraction",
         "unlocked_feature": "Document Viewer",
         "flag": "document_viewer_ready"
     },
     {
         "stage_id": "stage_3_spell",
-        "name": "Spell Checking",
+        "name": "Language & Spelling Review",
         "unlocked_feature": "Proofreading",
         "flag": "spell_ready"
     },
     {
         "stage_id": "stage_4_grammar",
-        "name": "Grammar Checking",
+        "name": "Grammar & Writing Quality Review",
         "unlocked_feature": "Grammar Results",
         "flag": "grammar_ready"
     },
     {
         "stage_id": "stage_5_rag",
-        "name": "RAG Index Construction",
+        "name": "Knowledge Index Creation",
         "unlocked_feature": "AI Assistant",
         "flag": "rag_ready"
     },
     {
         "stage_id": "stage_6_context",
-        "name": "Contextual Consistency Analysis",
+        "name": "Consistency & Contradiction Review",
         "unlocked_feature": "Context Analysis",
         "flag": "context_analysis_ready"
     },
     {
         "stage_id": "stage_7_comparative",
-        "name": "Comparative Analysis",
+        "name": "Competitive Benchmark Analysis",
         "unlocked_feature": "Comparative Analysis",
         "flag": "comparative_analysis_ready"
     },
     {
         "stage_id": "stage_8_reports",
-        "name": "Executive Report Generation",
+        "name": "Executive Insights Report",
         "unlocked_feature": "Reports",
         "flag": "reports_ready"
     }
@@ -166,10 +166,11 @@ class StageOrchestrator:
                     s["output_location"] = output_location
                 break
 
-        # Calculate overall progress
+        # Calculate overall progress from completed/skipped stages
         completed_count = sum(1 for s in job["stages"] if s["status"] in ("Completed", "Skipped"))
-        job["overall_progress"] = int((completed_count / len(STAGES_DEFINITIONS)) * 100)
-        job["progress_percentage"] = float(job["overall_progress"])
+        progress_pct = round((completed_count / len(STAGES_DEFINITIONS)) * 100.0, 1)
+        job["overall_progress"] = int(progress_pct)
+        job["progress_percentage"] = progress_pct
 
         # Update current stage display name
         running_stage = next((s["name"] for s in job["stages"] if s["status"] == "Running"), None)
@@ -568,8 +569,8 @@ class StageOrchestrator:
             merge_agent = MergeAgent(self.config.merge)
             merged = merge_agent.merge(confirmed)
 
-            high_conf = [m for m in merged if m.final_confidence > 0.50]
-            low_conf = [m for m in merged if m.final_confidence <= 0.50]
+            high_conf = [m for m in merged if m.final_confidence >= 0.20] or merged
+            low_conf = [m for m in merged if m not in high_conf]
 
             final_dir = self.job_dir / "10_final"
             final_dir.mkdir(parents=True, exist_ok=True)

@@ -86,29 +86,36 @@ class ContextBuilder:
                     merged_chunks.append(chunk)
         selected_chunks = merged_chunks
 
-        # 4. Format context string
-        context_parts = []
+        # 4. Section-level Context Assembly & Merging (Phase 6 Context Assembly)
+        sections_dict = {}
         used_chunk_ids = []
         page_references = set()
         
         for chunk in selected_chunks:
             used_chunk_ids.append(chunk.metadata.chunk_id)
             page_references.add(chunk.metadata.page_number)
-            
-            section_info = f"Section: {chunk.metadata.section}" if chunk.metadata.section else ""
-            heading_info = f"Heading: {chunk.metadata.heading}" if chunk.metadata.heading else ""
-            meta_header = f"[Page {chunk.metadata.page_number}]"
-            if section_info or heading_info:
-                meta_header += f" | {' > '.join(filter(None, [section_info, heading_info]))}"
-            
-            formatted_chunk = (
-                f"{meta_header}\n"
-                f"Content:\n{chunk.content.strip()}\n"
-                f"-----------------------------------------\n"
-            )
-            context_parts.append(formatted_chunk)
+            sec_key = getattr(chunk.metadata, "section_heading", None) or chunk.metadata.section or "General Context"
+            if sec_key not in sections_dict:
+                sections_dict[sec_key] = []
+            sections_dict[sec_key].append(chunk)
 
-        context_str = "\n".join(context_parts)
+        context_parts = []
+        for sec_key, sec_chunks in sections_dict.items():
+            first_page = min(c.metadata.page_number for c in sec_chunks)
+            last_page = max(c.metadata.page_number for c in sec_chunks)
+            page_label = f"Page {first_page}" if first_page == last_page else f"Pages {first_page}-{last_page}"
+            
+            combined_section_body = "\n\n".join(c.content for c in sec_chunks)
+            
+            context_part = (
+                f"=== SECTION CONTEXT: {sec_key.upper()} [{page_label}] ===\n"
+                f"{combined_section_body}\n"
+                f"=== END SECTION CONTEXT: {sec_key.upper()} ==="
+            )
+            context_parts.append(context_part)
+
+        context_str = "\n\n".join(context_parts)
+        sorted_pages = sorted(list(page_references))
         
-        logger.info(f"Context constructed with {len(selected_chunks)} chunks, total token estimate ~{current_tokens}.")
-        return context_str, used_chunk_ids, sorted(list(page_references))
+        logger.info(f"Context constructed using {len(used_chunk_ids)} chunks across pages {sorted_pages} in {len(sections_dict)} section blocks.")
+        return context_str, used_chunk_ids, sorted_pages

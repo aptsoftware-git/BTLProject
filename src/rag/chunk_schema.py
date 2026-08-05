@@ -22,7 +22,13 @@ class ChunkMetadata(BaseModel):
     element_types: List[str] = Field(default_factory=list, description="Types of source elements composing this chunk")
     relationships: Dict[str, Any] = Field(default_factory=dict, description="Relationships to other chunks or elements")
     
-    # Enriched Metadata Fields (Phase 6 Optimization)
+    # Enriched Metadata Fields (Phase 6 Optimization & Section Hierarchy)
+    section_id: Optional[str] = Field(None, description="Unique ID of the parent section object")
+    section_heading: Optional[str] = Field(None, description="Top-level parent section heading (e.g. 'Our Marquee Clients')")
+    subsection_heading: Optional[str] = Field(None, description="Immediate subsection heading if present")
+    is_section_root: bool = Field(False, description="True if chunk represents an intact section object")
+    child_chunk_ids: List[str] = Field(default_factory=list, description="IDs of sub-chunks within this section")
+    
     report_number: Optional[str] = Field(None, description="Extracted report number context")
     state: Optional[str] = Field(None, description="Associated state name")
     region: Optional[str] = Field(None, description="Associated region name")
@@ -34,6 +40,18 @@ class ChunkMetadata(BaseModel):
     weapons: List[str] = Field(default_factory=list, description="Extracted weapon terms")
     locations: List[str] = Field(default_factory=list, description="Extracted location/GPE names")
     keywords: List[str] = Field(default_factory=list, description="Extracted text keywords")
+
+class SectionObject(BaseModel):
+    """
+    Coherent section object preserving entity lists and section-level context.
+    """
+    section_id: str = Field(..., description="Unique section identifier")
+    section_title: str = Field(..., description="Canonical section title")
+    page_start: int = Field(..., description="Starting page of section")
+    page_end: int = Field(..., description="Ending page of section")
+    content: str = Field(..., description="Full consolidated section content")
+    child_chunks: List[str] = Field(default_factory=list, description="List of child chunk IDs")
+
 
 
 class DocumentChunk(BaseModel):

@@ -1,0 +1,96 @@
+Total chunks in df35600eaeeb4bc292bb4537eb9789f8: 2285
+Total chunks on Page 5: 8
+
+=== Page 5 Chunk #1 (ID: df35600eaeeb4bc292bb4537eb9789f8_chunk_0026) ===
+Heading: Our marquee clients | Section: Our marquee clients
+Content Length: 66 chars
+Document Section: Our marquee clients
+Content:
+Our marquee clients
+============================================================
+
+=== Page 5 Chunk #2 (ID: df35600eaeeb4bc292bb4537eb9789f8_chunk_0027) ===
+Heading: Our marquee clients | Section: Our marquee clients
+Content Length: 203 chars
+Document Section: Our marquee clients
+Content:
+We are proud to serve India's leading public and private enterprises, powering the nation's growth across energy, infrastructure, mining, and manufacturing.
+============================================================
+
+=== Page 5 Chunk #3 (ID: df35600eaeeb4bc292bb4537eb9789f8_chunk_0028) ===
+Heading: Our marquee clients | Section: Our marquee clients
+Content Length: 358 chars
+Document Section: Our marquee clients
+Content:
+Bharat Heavy Electricals Limited: A Maharatna PSU, the Company is India's largest engineering and manufacturing company in the energy and infrastructure sectors with strong EPC capabilities. It offers end-to-end services for power projects and is expanding into non-conventional energy and digital technologies.
+============================================================
+
+=== Page 5 Chunk #4 (ID: df35600eaeeb4bc292bb4537eb9789f8_chunk_0029) ===
+Heading: National Thermal Power Corporation: | Section: National Thermal Power Corporation:
+Content Length: 98 chars
+Document Section: National Thermal Power Corporation:
+Content:
+National Thermal Power Corporation:
+============================================================
+
+=== Page 5 Chunk #5 (ID: df35600eaeeb4bc292bb4537eb9789f8_chunk_0030) ===
+Heading: National Thermal Power Corporation: | Section: National Thermal Power Corporation:
+Content Length: 2358 chars
+Document Section: National Thermal Power Corporation:
+Content:
+A Maharatna PSU under the Ministry of Power, the Company is India's largest power utility with a diverse portfolio of thermal, hydro, solar, and wind projects. It is central to the country's energy supply and is targeting 60 GW of renewable capacity by 2032 as a part of its green transition commitment.
+
+Adani Power Limited: APL is the largest private thermal power producer in India and a part of the Adani Group. As of mid 2025, its operational capacity was around 15,250-17,550 MW, spread across thermal plants in Gujarat, Maharashtra, Karnataka, Rajasthan, Chhattisgarh, Madhya Pradesh, Jharkhand, and Tamil Nadu. The Company intends to expand to 42,000 MW by 2032.
+
+Coal India Limited: A Maharatna PSU under the Ministry of Coal, the Company is the world's largest coal producer, contributing over 80% of India's coal output. Operating through eight subsidiaries, it plays a vital role in energy security, while advancing sustainable and digital mining practices.
+
+Steel Authority of India Limited: A Maharatna PSU under the Ministry of Steel, the Company is one of India's largest steel producers with integrated plants across the country. It plays a key role in sectors like infrastructure, defense, and railways, while focusing on modernisation and capacity growth.
+
+Indian Oil Corporation Limited (IOCL): India's largest oil refining and marketing company, IOCL operates across the entire hydrocarbon value chain. It plays a vital role in the nation's energy security, supplying fuel, lubricants, and petrochemicals.
+
+Numaligarh Refinery Limited: A public sector refinery located in Assam, known for its eco-friendly operations. It processes crude oil into high-value petroleum products for Northeast India and beyond.
+
+Brahmaputra Cracker and Polymer Limited: A central PSU engaged in producing polymers from natural gas in Assam. It operates a petrochemical complex in Lepetkata, providing a boost to the region's industrial development. BCPL is a subsidiary of GAIL (India) Ltd.
+
+Oil and Natural Gas Corporation Limited: India's largest oil and gas exploration and production company. It plays a critical role in meeting the country's energy demands through offshore and onshore fields. ONGC is actively involved in energy transition through renewable and alternate energy projects.
+============================================================
+
+=== Page 5 Chunk #6 (ID: df35600eaeeb4bc292bb4537eb9789f8_chunk_0031) ===
+Heading: Neelachal Ispat Nigam Limited: | Section: Neelachal Ispat Nigam Limited:
+Content Length: 88 chars
+Document Section: Neelachal Ispat Nigam Limited:
+Content:
+Neelachal Ispat Nigam Limited:
+============================================================
+
+=== Page 5 Chunk #7 (ID: df35600eaeeb4bc292bb4537eb9789f8_chunk_0032) ===
+Heading: Neelachal Ispat Nigam Limited: | Section: Neelachal Ispat Nigam Limited:
+Content Length: 2379 chars
+Document Section: Neelachal Ispat Nigam Limited:
+Content:
+Under Tata Steel long products, the Company is being revived to enhance steel production. Located in Odisha, it focuses on integrated steel manufacturing and raw material optimisation.
+
+Krishak Bharati Cooperative Limited (KRIBHCO): A national-level Indian cooperative society founded in 1980 by the Government of India. It is primarily engaged in the production and distribution of agricultural inputs, with a focus on fertilisers, and operates major production facilities in Hazira, and Shahjahanpur. KRIBHCO aims to empower the farmer community by providing quality agricultural products.
+
+Bhabha Atomic Research Centre: India's premier nuclear research facility under the department of atomic energy. It pioneers research in nuclear science, reactors, and isotope technologies. BARC also works in multidisciplinary areas like water treatment, agriculture, and healthcare.
+
+Larsen & Toubro: Major Indian multinational in engineering, construction, and manufacturing. It offers turnkey solutions across the infrastructure, power, defense, and hydrocarbons sectors. Renowned for its execution strength, L&T is a trusted EPC partner for large-scale projects.
+
+National Aluminium Company Limited (NALCO): A Navratna PSU under the Ministry of Mines, the Company is a leading producer of alumina and aluminum with integrated operations from mining to power generation. It enjoys a strong export footprint and is committed to sustainability, renewable energy, and circular economy initiatives.
+
+Damodar Valley Corporation Limited: Jointly owned by the Government of India and the States of Jharkhand and West Bengal, the Company is a key power utility in eastern India. It operates thermal and hydel plants while supporting flood control, irrigation, and grid modernisation in the Damodar valley region.
+
+Hindustan Urvarak and Rasayan Limited (HURL): A joint venture company of Coal India Limited, NTPC Limited and Indian Oil Corporation Limited as lead promoters with Fertiliser Corporation of India Limited and Hindustan Fertiliser Corporation Limited as other partners.
+
+Talcher Fertilisers Limited: A joint venture company established to revive the closed Talcher plant in Odisha. It is India's first coal gasification-based fertiliser project, aimed at producing urea while reducing a dependence on imported natural gas.
+============================================================
+
+=== Page 5 Chunk #8 (ID: df35600eaeeb4bc292bb4537eb9789f8_chunk_0033) ===
+Heading: Neelachal Ispat Nigam Limited: | Section: Neelachal Ispat Nigam Limited:
+Content Length: 467 chars
+Document Section: Neelachal Ispat Nigam Limited:
+Content:
+It is India's first coal gasification-based fertiliser project, aimed at producing urea while reducing a dependence on imported natural gas.
+JMS Mining Private Limited: JMS Mining is among India's leading underground coal mining service providers. The Company specialises in mine development and contract mining; it deployed of advanced technologies to ensure safe, efficient, and sustainable coal extraction.
+============================================================
+

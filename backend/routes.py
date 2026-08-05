@@ -407,6 +407,54 @@ async def download_file(job_id: str, file: str) -> FileResponse:
 
 
 @router.get(
+    "/documents/{job_id}/file",
+    summary="Get/View the original document file for iframe or download",
+)
+async def get_document_file(job_id: str):
+    job = get_job(job_id)
+    target_path = None
+    filename = "document.pdf"
+
+    if job:
+        filename = job.get("filename", filename)
+        if job.get("file_path"):
+            p = Path(job["file_path"])
+            if p.exists():
+                target_path = p
+
+    if not target_path or not target_path.exists():
+        input_dir = ROOT_DIR / "data" / "input"
+        if input_dir.exists():
+            for p in input_dir.iterdir():
+                if p.is_file() and (job_id in p.name or (job and job.get("filename") == p.name)):
+                    target_path = p
+                    break
+
+    if not target_path or not target_path.exists():
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail=f"Original document file for job '{job_id}' not found.",
+        )
+
+    suffix = target_path.suffix.lower()
+    if suffix == ".pdf":
+        media_type = "application/pdf"
+    elif suffix == ".docx":
+        media_type = "application/vnd.openxmlformats-officedocument.wordprocessingml.document"
+    elif suffix == ".txt":
+        media_type = "text/plain; charset=utf-8"
+    else:
+        media_type = "application/octet-stream"
+
+    return FileResponse(
+        path=target_path,
+        media_type=media_type,
+        filename=filename,
+        headers={"Content-Disposition": f"inline; filename=\"{filename}\""}
+    )
+
+
+@router.get(
     "/documents",
     summary="Get all documents list",
 )
@@ -669,80 +717,166 @@ async def get_document(job_id: str):
         "memory_safe_mode": job.get("memory_safe_mode", True),
     }
 
-    is_proofreading_ready = job.get("status") == "completed" or job.get("proofreading_ready") or job.get("proofreading_status") == "completed"
-    if is_proofreading_ready:
-        job_dir = get_job_dir(job_id)
-        
-        # Load Issues
-        issues = []
-        report_path = job_dir / "10_final" / "report.json"
-        if report_path.exists():
-            try:
-                with open(report_path, "r", encoding="utf-8") as f:
-                    report_data = json.load(f)
-                    issues = report_data.get("issues", [])
-            except Exception as exc:
-                backend_logger.warning("Error reading report.json for job %s: %s", job_id, exc)
-        response_data["issues"] = issues
+    job_dir = get_job_dir(job_id)
+    
+    # Load Issues & Decisions
+    issues = []
+    decisions = {}
+    decisions_path = job_dir / "10_final" / "decisions.json"
+    if decisions_path.exists():
+        try:
+            with open(decisions_path, "r", encoding="utf-8") as f:
+                decisions = json.load(f)
+        except Exception:
+            pass
 
-        # Load Protected Terms
-        protected_terms = []
-        pt_path = job_dir / "05_protected_terms" / "protected_terms.json"
-        if pt_path.exists():
-            try:
-                with open(pt_path, "r", encoding="utf-8") as f:
-                    protected_terms = json.load(f)
-            except Exception as exc:
-                backend_logger.warning("Error reading protected_terms.json for job %s: %s", job_id, exc)
-        response_data["protected_terms"] = protected_terms
+    report_path = job_dir / "10_final" / "report.json"
+    if report_path.exists():
+        try:
+            with open(report_path, "r", encoding="utf-8") as f:
+                report_data = json.load(f)
+                issues = report_data.get("issues", [])
+                for idx, issue in enumerate(issues):
+                    if isinstance(issue, dict):
+                        issue_id_str = str(issue.get("issue_id", idx))
+                        if issue_id_str in decisions:
+                            issue["status"] = decisions[issue_id_str]
+                        elif str(idx) in decisions:
+                            issue["status"] = decisions[str(idx)]
+        except Exception as exc:
+            backend_logger.warning("Error reading report.json for job %s: %s", job_id, exc)
+    response_data["issues"] = issues
+    response_data["decisions"] = decisions
 
-        # Load HTMLs
-        annotated_html = ""
-        annotated_path = job_dir / "10_final" / "annotated_original.html"
-        if annotated_path.exists():
-            try:
-                annotated_html = annotated_path.read_text(encoding="utf-8")
-            except Exception as exc:
-                backend_logger.warning("Error reading annotated_original.html for job %s: %s", job_id, exc)
-        response_data["annotated_html"] = annotated_html
+    # Load Protected Terms
+    protected_terms = []
+    pt_path = job_dir / "05_protected_terms" / "protected_terms.json"
+    if pt_path.exists():
+        try:
+            with open(pt_path, "r", encoding="utf-8") as f:
+                protected_terms = json.load(f)
+        except Exception as exc:
+            backend_logger.warning("Error reading protected_terms.json for job %s: %s", job_id, exc)
+    response_data["protected_terms"] = protected_terms
 
-        corrected_html = ""
-        corrected_path = job_dir / "10_final" / "corrected_document.html"
-        if corrected_path.exists():
-            try:
-                corrected_html = corrected_path.read_text(encoding="utf-8")
-            except Exception as exc:
-                backend_logger.warning("Error reading corrected_document.html for job %s: %s", job_id, exc)
-        response_data["corrected_html"] = corrected_html
+    # Load HTMLs
+    annotated_html = ""
+    annotated_path = job_dir / "10_final" / "annotated_original.html"
+    if annotated_path.exists():
+        try:
+            annotated_html = annotated_path.read_text(encoding="utf-8")
+        except Exception as exc:
+            backend_logger.warning("Error reading annotated_original.html for job %s: %s", job_id, exc)
+    response_data["annotated_html"] = annotated_html
 
-        # Load Reports
-        reports = {}
-        changes_path = job_dir / "10_final" / "changes.md"
-        if changes_path.exists():
-            try:
-                reports["changes.md"] = changes_path.read_text(encoding="utf-8")
-            except Exception as exc:
-                backend_logger.warning("Error reading changes.md for job %s: %s", job_id, exc)
+    corrected_html = ""
+    corrected_path = job_dir / "10_final" / "corrected_document.html"
+    if corrected_path.exists():
+        try:
+            corrected_html = corrected_path.read_text(encoding="utf-8")
+        except Exception as exc:
+            backend_logger.warning("Error reading corrected_document.html for job %s: %s", job_id, exc)
+    response_data["corrected_html"] = corrected_html
 
-        summary_path = job_dir / "10_final" / "summary.csv"
-        if summary_path.exists():
-            try:
-                reports["summary.csv"] = summary_path.read_text(encoding="utf-8")
-            except Exception as exc:
-                backend_logger.warning("Error reading summary.csv for job %s: %s", job_id, exc)
-        response_data["reports"] = reports
+    # Load Reports
+    reports = {}
+    changes_path = job_dir / "10_final" / "changes.md"
+    if changes_path.exists():
+        try:
+            reports["changes.md"] = changes_path.read_text(encoding="utf-8")
+        except Exception as exc:
+            backend_logger.warning("Error reading changes.md for job %s: %s", job_id, exc)
 
-        # Load raw_text
-        raw_text = ""
-        raw_text_path = job_dir / "03_preprocessed" / "normalized_text.txt"
-        if raw_text_path.exists():
-            try:
-                raw_text = raw_text_path.read_text(encoding="utf-8")
-            except Exception as exc:
-                backend_logger.warning("Error reading normalized_text.txt for job %s: %s", job_id, exc)
-        response_data["raw_text"] = raw_text
+    summary_path = job_dir / "10_final" / "summary.csv"
+    if summary_path.exists():
+        try:
+            reports["summary.csv"] = summary_path.read_text(encoding="utf-8")
+        except Exception as exc:
+            backend_logger.warning("Error reading summary.csv for job %s: %s", job_id, exc)
+    response_data["reports"] = reports
 
+    # Load raw_text
+    raw_text = ""
+    raw_text_path = job_dir / "03_preprocessed" / "normalized_text.txt"
+    if raw_text_path.exists():
+        try:
+            raw_text = raw_text_path.read_text(encoding="utf-8")
+        except Exception as exc:
+            backend_logger.warning("Error reading normalized_text.txt for job %s: %s", job_id, exc)
     return response_data
+
+
+@router.get(
+    "/documents/{job_id}/issues",
+    summary="Get proofreading issues for a document",
+)
+async def get_document_issues(job_id: str):
+    job = get_job(job_id)
+    if not job:
+        raise HTTPException(status_code=404, detail=f"Job with ID '{job_id}' not found.")
+    
+    job_dir = get_job_dir(job_id)
+    decisions = {}
+    decisions_path = job_dir / "10_final" / "decisions.json"
+    if decisions_path.exists():
+        try:
+            with open(decisions_path, "r", encoding="utf-8") as f:
+                decisions = json.load(f)
+        except Exception:
+            pass
+
+    issues = []
+    report_path = job_dir / "10_final" / "report.json"
+    if report_path.exists():
+        try:
+            with open(report_path, "r", encoding="utf-8") as f:
+                report_data = json.load(f)
+                issues = report_data.get("issues", [])
+                for idx, issue in enumerate(issues):
+                    if isinstance(issue, dict):
+                        issue_id_str = str(issue.get("issue_id", idx))
+                        if issue_id_str in decisions:
+                            issue["status"] = decisions[issue_id_str]
+                        elif str(idx) in decisions:
+                            issue["status"] = decisions[str(idx)]
+        except Exception as exc:
+            backend_logger.warning("Error reading report.json for job %s: %s", job_id, exc)
+
+    return {"job_id": job_id, "issues": issues, "decisions": decisions}
+
+
+@router.patch(
+    "/documents/{job_id}/issues/{issue_id}",
+    summary="Update decision status for a proofreading issue",
+)
+async def update_document_issue_status(job_id: str, issue_id: str, payload: Dict[str, Any]):
+    job = get_job(job_id)
+    if not job:
+        raise HTTPException(status_code=404, detail=f"Job with ID '{job_id}' not found.")
+    
+    job_dir = get_job_dir(job_id)
+    final_dir = job_dir / "10_final"
+    final_dir.mkdir(parents=True, exist_ok=True)
+    decisions_path = final_dir / "decisions.json"
+    
+    decisions = {}
+    if decisions_path.exists():
+        try:
+            with open(decisions_path, "r", encoding="utf-8") as f:
+                decisions = json.load(f)
+        except Exception:
+            pass
+
+    new_status = payload.get("status", "accepted")
+    decisions[str(issue_id)] = new_status
+
+    try:
+        with open(decisions_path, "w", encoding="utf-8") as f:
+            json.dump(decisions, f, indent=2, ensure_ascii=False)
+    except Exception as exc:
+        raise HTTPException(status_code=500, detail=f"Failed to persist decision: {str(exc)}")
+
+    return {"job_id": job_id, "issue_id": issue_id, "status": new_status, "decisions": decisions}
 
 
 @router.delete(
@@ -844,7 +978,7 @@ async def get_preferences_setting():
         "ollama_host": cfg.ollama.host,
         "ollama_model": cfg.ollama.model,
         "languagetool_language": cfg.languagetool.language,
-        "confidence_threshold": 40,
+        "confidence_threshold": 50,
     }
 
 

@@ -159,7 +159,7 @@ class ChunkBuilder:
 
             chunk_idx = len(chunks)
             page_number = acc["elements"][0].metadata.page_number
-            heading, section, hierarchy_path = self._get_heading_contexts(active_headings, active_heading_ids)
+            heading, section, hierarchy_path, sec_heading, subsec_heading, sec_id = self._get_heading_contexts(active_headings, active_heading_ids)
             
             # Prepend Context Conditioning (Task 5)
             header = f"Document Section: {section}\nContent:\n"
@@ -188,6 +188,9 @@ class ChunkBuilder:
                 chunk_type=acc_type,
                 heading=heading,
                 section=section,
+                section_id=sec_id,
+                section_heading=sec_heading,
+                subsection_heading=subsec_heading,
                 hierarchy_path=hierarchy_path,
                 source_element_ids=source_ids,
                 word_count=count_words(content),
@@ -238,7 +241,7 @@ class ChunkBuilder:
                 active_heading_ids[lvl] = element.id
                 
                 if is_semantic_content(element.text):
-                    heading, section, hierarchy_path = self._get_heading_contexts(active_headings, active_heading_ids)
+                    heading, section, hierarchy_path, sec_heading, subsec_heading, sec_id = self._get_heading_contexts(active_headings, active_heading_ids)
                     content = f"Document Section: {section}\nContent:\n{element.text}"
                     
                     chunk_idx = len(chunks)
@@ -258,6 +261,9 @@ class ChunkBuilder:
                         chunk_type="heading",
                         heading=heading,
                         section=section,
+                        section_id=sec_id,
+                        section_heading=sec_heading,
+                        subsection_heading=subsec_heading,
                         hierarchy_path=hierarchy_path,
                         source_element_ids=[element.id],
                         word_count=count_words(content),
@@ -341,7 +347,7 @@ class ChunkBuilder:
         and markdown grid coordinates. Returns None if it is not semantic.
         """
         page_number = element.metadata.page_number
-        heading, section, hierarchy_path = self._get_heading_contexts(active_headings, active_heading_ids)
+        heading, section, hierarchy_path, sec_heading, subsec_heading, sec_id = self._get_heading_contexts(active_headings, active_heading_ids)
         
         caption_text = ""
         markdown_str = element.text
@@ -399,6 +405,9 @@ class ChunkBuilder:
             chunk_type="table",
             heading=heading,
             section=section,
+            section_id=sec_id,
+            section_heading=sec_heading,
+            subsection_heading=subsec_heading,
             hierarchy_path=hierarchy_path,
             source_element_ids=[element.id],
             word_count=count_words(content),
@@ -425,7 +434,7 @@ class ChunkBuilder:
         Creates one semantic image chunk consolidating caption, OCR blocks, and VLM descriptions.
         """
         page_number = element.metadata.page_number
-        heading, section, hierarchy_path = self._get_heading_contexts(active_headings, active_heading_ids)
+        heading, section, hierarchy_path, sec_heading, subsec_heading, sec_id = self._get_heading_contexts(active_headings, active_heading_ids)
         
         caption_text = element.metadata.caption_text or ""
         ocr_text = element.metadata.ocr_text or ""
@@ -469,6 +478,9 @@ class ChunkBuilder:
             chunk_type="image",
             heading=heading,
             section=section,
+            section_id=sec_id,
+            section_heading=sec_heading,
+            subsection_heading=subsec_heading,
             hierarchy_path=hierarchy_path,
             source_element_ids=[element.id],
             word_count=count_words(content),
@@ -486,9 +498,9 @@ class ChunkBuilder:
         self, 
         active_headings: Dict[int, str], 
         active_heading_ids: Dict[int, str]
-    ) -> tuple[Optional[str], Optional[str], List[str]]:
+    ) -> tuple[Optional[str], Optional[str], List[str], Optional[str], Optional[str], Optional[str]]:
         """
-        Helper to construct immediate heading, section path, and hierarchy path.
+        Helper to construct immediate heading, section path, hierarchy path, section_heading, subsection_heading, section_id.
         """
         sorted_lvls = sorted(active_headings.keys())
         headings_list = [active_headings[k] for k in sorted_lvls]
@@ -497,7 +509,14 @@ class ChunkBuilder:
         heading = headings_list[-1] if headings_list else None
         section = format_section_path(headings_list) if headings_list else "Root"
         
-        return heading, section, heading_ids_list
+        sec_heading = headings_list[0] if headings_list else "Root"
+        subsec_heading = headings_list[1] if len(headings_list) > 1 else (heading if len(headings_list) > 1 else None)
+        
+        import re
+        slug = re.sub(r'[^a-zA-Z0-9]+', '_', sec_heading.lower()).strip('_')
+        sec_id = f"sec_{slug}" if slug else "sec_root"
+        
+        return heading, section, heading_ids_list, sec_heading, subsec_heading, sec_id
 
     def _enrich_chunk_metadata(self, content: str, page_number: int, section_path: Optional[str] = None) -> dict:
         """

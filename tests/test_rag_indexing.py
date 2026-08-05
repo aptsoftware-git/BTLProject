@@ -13,8 +13,10 @@ from src.rag.embedder import Embedder
 from src.rag.embedding_provider import SentenceTransformersEmbeddingProvider
 from src.rag.multimodal_extractor import MultimodalExtractor
 
+from src.config import ROOT_DIR
+
 # Temp database path for tests
-TEMP_DB_DIR = Path("C:/Users/sanju/INTERNSHIP-APT/DocumentProofreadingSystem/data/output/temp_chromadb_test")
+TEMP_DB_DIR = ROOT_DIR / "data" / "output" / "temp_chromadb_test"
 
 @pytest.fixture(autouse=True)
 def cleanup_temp_db():
@@ -192,11 +194,11 @@ def test_rag_indexing_pipeline():
 
 def test_indexing_end_to_end_on_pdf():
     # End-to-end extraction and automatic indexing on nsmail.pdf
-    pdf_path = Path("C:/Users/sanju/INTERNSHIP-APT/DocumentProofreadingSystem/data/input/nsmail.pdf")
+    pdf_path = ROOT_DIR / "data" / "input" / "nsmail.pdf"
     if not pdf_path.exists():
         return
         
-    temp_output_dir = Path("C:/Users/sanju/INTERNSHIP-APT/DocumentProofreadingSystem/data/output/temp_indexing_test_run")
+    temp_output_dir = ROOT_DIR / "data" / "output" / "temp_indexing_test_run"
     temp_output_dir.mkdir(parents=True, exist_ok=True)
     
     # Configure custom database path for testing

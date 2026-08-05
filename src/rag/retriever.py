@@ -402,29 +402,58 @@ class Retriever:
     def _search_metadata(self, chunks: List[DocumentChunk], query: str) -> List[DocumentChunk]:
         matched = []
         q = query.lower()
+        
+        # Section Keyword Aliases
+        alias_tokens = {
+            "client": ["marquee", "client", "customer", "clientele"],
+            "board": ["director", "board", "governance", "managerial", "leadership"],
+            "award": ["award", "recognition", "accreditation", "honor"],
+            "project": ["project", "order book", "contract", "turnkey"],
+            "certification": ["certification", "iso", "quality"],
+            "subsidiary": ["subsidiary", "joint venture", "associate"],
+            "facility": ["facility", "plant", "factory", "works", "manufacturing"]
+        }
+        
+        target_keys = []
+        for cat, keywords in alias_tokens.items():
+            if any(k in q for k in keywords):
+                target_keys.extend(keywords)
+
         for c in chunks:
             meta = c.metadata
-            if meta.heading and meta.heading.lower() in q:
-                matched.append(c)
-            elif meta.section and meta.section.lower() in q:
+            sec_title = (getattr(meta, "section_heading", None) or meta.heading or meta.section or "").lower()
+            
+            # Direct or alias heading match
+            if sec_title and (sec_title in q or any(tk in sec_title for tk in target_keys)):
                 matched.append(c)
             elif "table" in q and meta.chunk_type == "table":
                 matched.append(c)
             elif any(term in q for term in ["image", "figure", "chart", "diagram"]) and meta.chunk_type == "image":
                 matched.append(c)
+                
         return self._deduplicate_chunks(matched)
 
     def _search_toc_and_headings(self, chunks: List[DocumentChunk], doc_struct: Optional[StructuredDocument], query: str) -> List[DocumentChunk]:
         matched = []
-        if not doc_struct:
-            return matched
-            
         q = query.lower()
-        for el in doc_struct.elements:
-            if el.type == "heading" and el.text.lower() in q:
-                for c in chunks:
-                    if c.metadata.heading == el.text or (c.metadata.section and el.text in c.metadata.section):
-                        matched.append(c)
+        
+        # Heading tokens to check
+        heading_keywords = ["marquee", "client", "customer", "director", "board", "award", "project", "certification", "subsidiary", "facility", "plant"]
+        matched_keywords = [k for k in heading_keywords if k in q]
+
+        for c in chunks:
+            sec_title = (getattr(c.metadata, "section_heading", None) or c.metadata.heading or c.metadata.section or "").lower()
+            if any(mk in sec_title for mk in matched_keywords):
+                matched.append(c)
+                
+        if doc_struct:
+            for el in doc_struct.elements:
+                if el.type == "heading" and (el.text.lower() in q or any(mk in el.text.lower() for mk in matched_keywords)):
+                    for c in chunks:
+                        sec_title = (getattr(c.metadata, "section_heading", None) or c.metadata.heading or c.metadata.section or "").lower()
+                        if el.text.lower() in sec_title:
+                            matched.append(c)
+                            
         return self._deduplicate_chunks(matched)
 
     def _expand_context(self, scored_results: List[Tuple[DocumentChunk, float]], all_chunks: List[DocumentChunk], doc_struct: Optional[StructuredDocument]) -> List[DocumentChunk]:
@@ -441,6 +470,20 @@ class Retriever:
             expanded.append(chunk)
             seen.add(cid)
             
+            # Section-level Sibling Expansion (Phase 5 Section-Level Retrieval)
+            sec_id = getattr(chunk.metadata, "section_id", None)
+            sec_heading = getattr(chunk.metadata, "section_heading", None) or chunk.metadata.section
+            
+            if sec_id or sec_heading:
+                for sibling in all_chunks:
+                    sib_id = sibling.metadata.chunk_id
+                    if sib_id not in seen:
+                        sib_sec_id = getattr(sibling.metadata, "section_id", None)
+                        sib_sec_heading = getattr(sibling.metadata, "section_heading", None) or sibling.metadata.section
+                        if (sec_id and sib_sec_id == sec_id) or (sec_heading and sib_sec_heading == sec_heading):
+                            expanded.append(sibling)
+                            seen.add(sib_id)
+
             idx = chunk_indices.get(cid)
             if idx is not None:
                 if idx > 0:

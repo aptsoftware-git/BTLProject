@@ -38,7 +38,7 @@ export default function RecentDocuments({ documents = [], onRefresh }) {
   }, [documents]);
 
   const handleOpen = (id) => {
-    navigate(`/documents/${id}`);
+    navigate(`/documents/${id}?tab=proofreading`);
   };
 
   const handleDelete = async (e, id, filename) => {
@@ -56,7 +56,7 @@ export default function RecentDocuments({ documents = [], onRefresh }) {
 
   const getAssessmentText = (doc) => {
     if (doc.status === "failed") return "Failed";
-    if (doc.status === "processing" || doc.status === "pending") return "Under Review";
+    if (doc.status === "processing" || doc.status === "pending") return "In Progress";
     if (doc.status !== "completed") return "Pending";
     
     const detail = docDetails[doc.id];
@@ -172,7 +172,7 @@ export default function RecentDocuments({ documents = [], onRefresh }) {
                 <th style={{ ...styles.th, width: 100 }}>Pages</th>
                 <th style={{ ...styles.th, width: 150 }}>Upload Date</th>
                 <th style={{ ...styles.th, width: 120 }}>Status</th>
-                <th style={{ ...styles.th, width: 220 }}>Overall Assessment</th>
+                <th style={{ ...styles.th, width: 220 }}>Detailed Status</th>
                 <th style={{ ...styles.th, width: 260, textAlign: "right" }}>Actions</th>
               </tr>
             </thead>

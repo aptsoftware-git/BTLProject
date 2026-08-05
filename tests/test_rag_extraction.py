@@ -3,9 +3,11 @@ from pathlib import Path
 from src.rag.multimodal_extractor import MultimodalExtractor
 from src.rag.document_schema import StructuredDocument
 
+from src.config import ROOT_DIR
+
 def test_rag_extraction_on_txt():
     # Test on a simple text file
-    txt_path = Path("C:/Users/sanju/INTERNSHIP-APT/DocumentProofreadingSystem/data/input/test_document.txt")
+    txt_path = ROOT_DIR / "data" / "input" / "test_document.txt"
     if not txt_path.exists():
         # Create a dummy file if not exists
         txt_path.parent.mkdir(parents=True, exist_ok=True)
@@ -35,7 +37,7 @@ def test_rag_extraction_on_txt():
 
 def test_rag_extraction_on_pdf():
     # Test on a PDF file
-    pdf_path = Path("C:/Users/sanju/INTERNSHIP-APT/DocumentProofreadingSystem/data/input/nsmail.pdf")
+    pdf_path = ROOT_DIR / "data" / "input" / "nsmail.pdf"
     if not pdf_path.exists():
         return # Skip if file not found in test environment
         
@@ -61,7 +63,7 @@ def test_rag_extraction_on_pdf():
 
 def test_rag_extraction_on_pdf_attention():
     # Test on attention_is_all_you_need.pdf which contains tables and images
-    pdf_path = Path("C:/Users/sanju/INTERNSHIP-APT/DocumentProofreadingSystem/data/input/attention_is_all_you_need.pdf")
+    pdf_path = ROOT_DIR / "data" / "input" / "attention_is_all_you_need.pdf"
     if not pdf_path.exists():
         return # Skip if file not found in test environment
         
@@ -72,7 +74,7 @@ def test_rag_extraction_on_pdf_attention():
     )
     
     # Run extractor and save structured_document.json to a temp dir
-    temp_output_dir = Path("C:/Users/sanju/INTERNSHIP-APT/DocumentProofreadingSystem/data/output/temp_rag_test")
+    temp_output_dir = ROOT_DIR / "data" / "output" / "temp_rag_test"
     temp_output_dir.mkdir(parents=True, exist_ok=True)
     
     raw_text, structured_doc, page_count = extractor.extract(pdf_path, temp_output_dir)

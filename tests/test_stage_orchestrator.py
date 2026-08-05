@@ -38,7 +38,7 @@ def test_stage_orchestrator_initialization(tmp_path):
     orchestrator.update_stage_state("stage_2_extraction", "Running", start_time="2026-07-29T18:01:00")
 
     updated_job = get_job(job_id)
-    assert updated_job["current_stage"] == "Document Extraction"
+    assert updated_job["current_stage"] == "Document Content Extraction"
     assert updated_job["stages"][1]["status"] == "Running"
 
     orchestrator.update_stage_state(

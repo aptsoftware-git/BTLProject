@@ -85,7 +85,7 @@ export default function App() {
                         localStorage.setItem("currentlyOpenDocName", result.filename || "");
                         localStorage.setItem("currentlyOpenDocPages", result.total_pages || result.pages || 1);
                         window.dispatchEvent(new Event("activeDocChanged"));
-                        navigate(`/documents/${result.id}`);
+                        navigate(`/documents/${result.id}?tab=proofreading`);
                       }
                     }} />
                   </div>
@@ -112,7 +112,7 @@ export default function App() {
 }
 
 const styles = {
-  content: { padding: "24px 28px", maxWidth: 1040, width: "100%", margin: "0 auto" },
+  content: { padding: "24px 28px", maxWidth: 1440, width: "100%", margin: "0 auto" },
   pageHeader: { display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 20 },
   pageTitle: { margin: 0, fontSize: 24, fontWeight: 700, textAlign: "left" },
   pageSub: { margin: "4px 0 0", fontSize: 13, color: "var(--text-secondary)", textAlign: "left" },

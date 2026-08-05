@@ -58,32 +58,48 @@ const getCategory = (reason) => {
   return "Technical Terms";
 };
 
+const STAGE_NAME_MAP = {
+  "Upload Complete": "Document Uploaded",
+  "Document Extraction": "Document Content Extraction",
+  "Spell Checking": "Language & Spelling Review",
+  "Grammar Checking": "Grammar & Writing Quality Review",
+  "RAG Index Construction": "Knowledge Index Creation",
+  "Contextual Consistency Analysis": "Consistency & Contradiction Review",
+  "Comparative Analysis": "Competitive Benchmark Analysis",
+  "Executive Report Generation": "Executive Insights Report"
+};
+
 const REQUIRED_8_STAGES = [
-  { id: 1, name: "Upload Complete", feature: "Document Uploaded", flag: "upload_ready" },
-  { id: 2, name: "Document Extraction", feature: "Document Viewer", flag: "document_viewer_ready" },
-  { id: 3, name: "Spell Checking", feature: "Proofreading", flag: "spell_ready" },
-  { id: 4, name: "Grammar Checking", feature: "Grammar Results", flag: "grammar_ready" },
-  { id: 5, name: "RAG Index Construction", feature: "AI Assistant", flag: "rag_ready" },
-  { id: 6, name: "Contextual Consistency Analysis", feature: "Context Analysis", flag: "context_analysis_ready" },
-  { id: 7, name: "Comparative Analysis", feature: "Comparative Analysis", flag: "comparative_analysis_ready" },
-  { id: 8, name: "Executive Report Generation", feature: "Reports", flag: "reports_ready" }
+  { id: 1, name: "Document Uploaded", description: "Document successfully received and queued.", feature: "Document Uploaded", flag: "upload_ready" },
+  { id: 2, name: "Document Content Extraction", description: "Extracting text, tables, images and document structure.", feature: "Document Viewer", flag: "document_viewer_ready" },
+  { id: 3, name: "Language & Spelling Review", description: "Identifying spelling and language issues.", feature: "Proofreading", flag: "spell_ready" },
+  { id: 4, name: "Grammar & Writing Quality Review", description: "Analyzing grammar, readability and writing quality.", feature: "Grammar Results", flag: "grammar_ready" },
+  { id: 5, name: "Knowledge Index Creation", description: "Preparing document knowledge base for AI Q&A.", feature: "AI Assistant", flag: "rag_ready" },
+  { id: 6, name: "Consistency & Contradiction Review", description: "Checking document consistency and detecting conflicts.", feature: "Context Analysis", flag: "context_analysis_ready" },
+  { id: 7, name: "Competitive Benchmark Analysis", description: "Comparing document against industry and peer references.", feature: "Comparative Analysis", flag: "comparative_analysis_ready" },
+  { id: 8, name: "Executive Insights Report", description: "Generating management-ready executive insights.", feature: "Reports", flag: "reports_ready" }
 ];
 
 const getTimelineStages = (doc) => {
   if (!doc) return [];
 
   if (Array.isArray(doc.stages) && doc.stages.length > 0) {
-    return doc.stages.map((st, idx) => ({
-      id: idx + 1,
-      stage_id: st.stage_id,
-      label: st.name,
-      feature: st.unlocked_feature || REQUIRED_8_STAGES[idx]?.feature || "Feature",
-      status: st.status || "Pending",
-      duration: st.duration,
-      errors: st.errors,
-      output_location: st.output_location,
-      state: st.status === "Completed" ? "completed" : st.status === "Running" ? "active" : st.status === "Failed" ? "failed" : "pending"
-    }));
+    return doc.stages.map((st, idx) => {
+      const mappedName = STAGE_NAME_MAP[st.name] || st.name || REQUIRED_8_STAGES[idx]?.name || `Stage ${idx + 1}`;
+      const desc = REQUIRED_8_STAGES[idx]?.description || "";
+      return {
+        id: idx + 1,
+        stage_id: st.stage_id,
+        label: mappedName,
+        description: desc,
+        feature: st.unlocked_feature || REQUIRED_8_STAGES[idx]?.feature || "Feature",
+        status: st.status || "Pending",
+        duration: st.duration,
+        errors: st.errors,
+        output_location: st.output_location,
+        state: st.status === "Completed" ? "completed" : st.status === "Running" ? "active" : st.status === "Failed" ? "failed" : "pending"
+      };
+    });
   }
 
   const percent = doc.progress_percentage || 0;
@@ -102,6 +118,7 @@ const getTimelineStages = (doc) => {
       id: st.id,
       stage_id: `stage_${st.id}`,
       label: st.name,
+      description: st.description,
       feature: st.feature,
       status: status,
       duration: null,
@@ -148,7 +165,7 @@ const StagePipelineCard = ({ doc, onRetryStage }) => {
       </div>
 
       {/* Grid of 8 Stage Cards */}
-      <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(220px, 1fr))", gap: 10 }}>
+      <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(240px, 1fr))", gap: 12 }}>
         {stages.map((st, idx) => {
           const isCompleted = st.status === "Completed";
           const isRunning = st.status === "Running";
@@ -158,44 +175,68 @@ const StagePipelineCard = ({ doc, onRetryStage }) => {
             <div key={st.stage_id || idx} style={{
               border: "1px solid var(--border)",
               borderColor: isRunning ? "var(--brand)" : isCompleted ? "var(--green)" : isFailed ? "var(--red)" : "var(--border)",
-              background: isRunning ? "rgba(138, 92, 246, 0.05)" : isCompleted ? "rgba(34, 197, 94, 0.04)" : "var(--bg-card)",
+              background: isRunning ? "rgba(108, 92, 231, 0.05)" : isCompleted ? "rgba(34, 197, 94, 0.04)" : "var(--bg-card)",
               borderRadius: 8,
-              padding: "10px 12px",
+              padding: "12px 14px",
               display: "flex",
               flexDirection: "column",
-              justifyContent: "space-between"
+              justify: "space-between",
+              minHeight: 110
             }}>
               <div>
-                <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 4 }}>
+                <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 6 }}>
+                  {/* Stage Number & Indicator Group */}
                   <div style={{ display: "flex", alignItems: "center", gap: 6 }}>
+                    {/* Circular Stage Number Badge - ALWAYS VISIBLE */}
                     <span style={{
-                      width: 18, height: 18, borderRadius: "50%",
+                      width: 20, height: 20, borderRadius: "50%",
                       background: isCompleted ? "var(--green-light)" : isRunning ? "var(--brand-light)" : isFailed ? "var(--red-light)" : "var(--border)",
                       color: isCompleted ? "var(--green)" : isRunning ? "var(--brand)" : isFailed ? "var(--red)" : "var(--text-muted)",
-                      display: "flex", alignItems: "center", justifyContent: "center",
-                      fontSize: 10, fontWeight: 700
+                      display: "inline-flex", alignItems: "center", justifyContent: "center",
+                      fontSize: 11, fontWeight: 800, flexShrink: 0
                     }}>
-                      {isCompleted ? "✓" : isRunning ? "⟳" : isFailed ? "✕" : (idx + 1)}
+                      {idx + 1}
                     </span>
-                    <span style={{ fontSize: 12, fontWeight: 700, color: "var(--text-primary)" }}>
+
+                    {/* Status Icon / Animated Spinner immediately to the right */}
+                    {isRunning && (
+                      <span style={{
+                        width: 12, height: 12, borderRadius: "50%",
+                        border: "2px solid var(--brand-light)",
+                        borderTopColor: "var(--brand)",
+                        animation: "spin 0.8s linear infinite",
+                        display: "inline-block", flexShrink: 0
+                      }} />
+                    )}
+                    {isCompleted && (
+                      <span style={{ fontSize: 12, color: "var(--green)", fontWeight: 800, flexShrink: 0 }}>✓</span>
+                    )}
+                    {isFailed && (
+                      <span style={{ fontSize: 12, color: "var(--red)", fontWeight: 800, flexShrink: 0 }}>⚠</span>
+                    )}
+
+                    <span style={{ fontSize: 12.5, fontWeight: 700, color: "var(--text-primary)" }}>
                       {st.label}
                     </span>
                   </div>
+
                   <span style={{
-                    fontSize: 9.5, fontWeight: 700, padding: "1px 6px", borderRadius: 4,
+                    fontSize: 9.5, fontWeight: 700, padding: "2px 6px", borderRadius: 4,
                     background: isCompleted ? "var(--green-light)" : isRunning ? "var(--brand-light)" : isFailed ? "var(--red-light)" : "var(--border)",
-                    color: isCompleted ? "var(--green)" : isRunning ? "var(--brand)" : isFailed ? "var(--red)" : "var(--text-muted)"
+                    color: isCompleted ? "var(--green)" : isRunning ? "var(--brand)" : isFailed ? "var(--red)" : "var(--text-muted)",
+                    flexShrink: 0
                   }}>
                     {st.status}
                   </span>
                 </div>
-                <div style={{ fontSize: 11, color: "var(--text-secondary)", marginTop: 4 }}>
-                  Unlocks: <strong style={{ color: "var(--text-primary)" }}>{st.feature}</strong>
-                </div>
+
+                <p style={{ margin: "4px 0 0", fontSize: 11, color: "var(--text-secondary)", lineHeight: 1.35 }}>
+                  {st.description}
+                </p>
               </div>
 
               <div style={{ marginTop: 8, display: "flex", justifyContent: "space-between", alignItems: "center", fontSize: 10.5, color: "var(--text-muted)" }}>
-                <span>{isCompleted ? "✓ Unlocked" : isRunning ? "Running..." : isFailed ? "Failed" : "Queued"}</span>
+                <span>{isCompleted ? "✓ Completed" : isRunning ? "Processing..." : isFailed ? "Failed" : "Queued"}</span>
                 {st.duration !== null && st.duration !== undefined && (
                   <span>{st.duration}s</span>
                 )}
@@ -205,7 +246,7 @@ const StagePipelineCard = ({ doc, onRetryStage }) => {
                 <button
                   style={{
                     marginTop: 6, background: "var(--red)", color: "white", border: "none",
-                    borderRadius: 4, padding: "3px 8px", fontSize: 10.5, fontWeight: 700, cursor: "pointer"
+                    borderRadius: 4, padding: "4px 8px", fontSize: 10.5, fontWeight: 700, cursor: "pointer"
                   }}
                   onClick={() => onRetryStage(st.stage_id)}
                 >
@@ -216,6 +257,212 @@ const StagePipelineCard = ({ doc, onRetryStage }) => {
           );
         })}
       </div>
+    </div>
+  );
+};
+
+const WorkspaceSidebar = ({
+  doc,
+  stages,
+  overallProgress,
+  onRefresh,
+  onViewRawText,
+  onOpenAssistant,
+  onDownloadOriginal,
+  onRetryStage
+}) => {
+  if (!doc) return null;
+
+  const isProcessing = doc.status === "processing" || doc.status === "pending";
+  const isFailed = doc.status === "failed";
+  const currentStageName = doc.current_stage || (doc.status === "completed" ? "Executive Insights Report" : "Stage 1: Document Uploaded");
+
+  const sidebarActionStyle = {
+    display: "flex",
+    alignItems: "center",
+    gap: 8,
+    width: "100%",
+    padding: "8px 12px",
+    borderRadius: 7,
+    background: "var(--bg-card, #FFFFFF)",
+    border: "1px solid var(--border, #E2E8F0)",
+    color: "var(--text-primary, #1E293B)",
+    fontSize: 12,
+    fontWeight: 650,
+    cursor: "pointer",
+    transition: "all 0.15s ease",
+    textAlign: "left"
+  };
+
+  return (
+    <div style={{
+      background: "var(--bg-card)",
+      border: "1px solid var(--border)",
+      borderRadius: 12,
+      padding: 16,
+      display: "flex",
+      flexDirection: "column",
+      gap: 16,
+      boxShadow: "var(--shadow-card)",
+      minWidth: 280,
+      maxWidth: 340,
+      width: "100%",
+      flexShrink: 0,
+      position: "sticky",
+      top: 80,
+      alignSelf: "flex-start"
+    }}>
+      
+      {/* SECTION 1: DOCUMENT DETAILS */}
+      <div style={{ borderBottom: "1px solid var(--border)", paddingBottom: 14 }}>
+        <h4 style={{ margin: "0 0 10px", fontSize: 13.5, fontWeight: 750, color: "var(--text-primary)", display: "flex", alignItems: "center", gap: 6 }}>
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="var(--brand)" strokeWidth="2.5"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+          Document Details
+        </h4>
+
+        <div style={{ display: "flex", flexDirection: "column", gap: 8, fontSize: 12 }}>
+          <div style={{ display: "flex", justifyContent: "space-between" }}>
+            <span style={{ color: "var(--text-secondary)" }}>File Name:</span>
+            <strong style={{ color: "var(--text-primary)", maxWidth: 150, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }} title={doc.filename}>
+              {doc.filename}
+            </strong>
+          </div>
+
+          <div style={{ display: "flex", justifyContent: "space-between" }}>
+            <span style={{ color: "var(--text-secondary)" }}>Pages:</span>
+            <strong style={{ color: "var(--text-primary)" }}>{doc.total_pages || doc.pages || 1}</strong>
+          </div>
+
+          <div style={{ display: "flex", justifyContent: "space-between" }}>
+            <span style={{ color: "var(--text-secondary)" }}>Uploaded:</span>
+            <strong style={{ color: "var(--text-primary)" }}>{doc.uploadedLabel || "Aug 04, 2026"}</strong>
+          </div>
+
+          <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+            <span style={{ color: "var(--text-secondary)" }}>Status:</span>
+            <span style={{
+              fontSize: 10.5, fontWeight: 750, padding: "2px 8px", borderRadius: 4,
+              background: doc.status === "completed" ? "var(--green-light)" : isFailed ? "var(--red-light)" : "var(--amber-light)",
+              color: doc.status === "completed" ? "var(--green)" : isFailed ? "var(--red)" : "var(--amber)"
+            }}>
+              {doc.status === "completed" ? "Completed" : isFailed ? "Failed" : "Processing"}
+            </span>
+          </div>
+
+          <div style={{ display: "flex", flexDirection: "column", gap: 2, marginTop: 2 }}>
+            <span style={{ color: "var(--text-secondary)", fontSize: 11 }}>Current Stage:</span>
+            <strong style={{ color: "var(--brand)", fontSize: 11.5, lineHeight: 1.3 }}>{currentStageName}</strong>
+          </div>
+
+          <div style={{ marginTop: 4 }}>
+            <div style={{ display: "flex", justifyContent: "space-between", fontSize: 11, fontWeight: 700, marginBottom: 4 }}>
+              <span>Pipeline Progress</span>
+              <span style={{ color: "var(--brand)" }}>{overallProgress}%</span>
+            </div>
+            <div style={{ width: "100%", height: 6, background: "var(--border)", borderRadius: 3, overflow: "hidden" }}>
+              <div style={{ width: `${overallProgress}%`, height: "100%", background: "var(--brand)", transition: "width 0.3s ease" }} />
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* SECTION 2: PIPELINE STAGES (8 STAGES COLOR CODED) */}
+      <div style={{ borderBottom: "1px solid var(--border)", paddingBottom: 14 }}>
+        <h4 style={{ margin: "0 0 10px", fontSize: 13.5, fontWeight: 750, color: "var(--text-primary)", display: "flex", alignItems: "center", gap: 6 }}>
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="var(--brand)" strokeWidth="2.5"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
+          Pipeline Stages (8)
+        </h4>
+
+        <div style={{ display: "flex", flexDirection: "column", gap: 5 }}>
+          {stages.map((st, idx) => {
+            const isComp = st.status === "Completed";
+            const isRun = st.status === "Running";
+            const isFail = st.status === "Failed";
+
+            return (
+              <div key={idx} style={{
+                display: "flex", alignItems: "center", justifyContent: "space-between",
+                padding: "5px 7px", borderRadius: 6,
+                background: isRun ? "rgba(108, 92, 231, 0.08)" : isComp ? "rgba(34, 197, 94, 0.05)" : "transparent",
+                border: isRun ? "1px solid rgba(108, 92, 231, 0.2)" : "1px solid transparent"
+              }}>
+                <div style={{ display: "flex", alignItems: "center", gap: 6, overflow: "hidden" }}>
+                  <span style={{
+                    width: 17, height: 17, borderRadius: "50%",
+                    background: isComp ? "var(--green-light)" : isRun ? "var(--brand-light)" : isFail ? "var(--red-light)" : "var(--border)",
+                    color: isComp ? "var(--green)" : isRun ? "var(--brand)" : isFail ? "var(--red)" : "var(--text-muted)",
+                    fontSize: 9.5, fontWeight: 800, display: "inline-flex", alignItems: "center", justifyContent: "center", flexShrink: 0
+                  }}>
+                    {idx + 1}
+                  </span>
+                  <span style={{ fontSize: 11, fontWeight: isRun ? 700 : 500, color: "var(--text-primary)", whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>
+                    {st.label}
+                  </span>
+                </div>
+
+                <span style={{
+                  fontSize: 9.5, fontWeight: 750, padding: "2px 5px", borderRadius: 4, flexShrink: 0,
+                  background: isComp ? "#E4F9EC" : isRun ? "#EEECFB" : isFail ? "#FEE2E2" : "#F1F5F9",
+                  color: isComp ? "#22C55E" : isRun ? "#6C5CE7" : isFail ? "#EF4444" : "#64748B"
+                }}>
+                  {isComp ? "✓ Done" : isRun ? "⟳ Active" : isFail ? "⚠ Failed" : "Queued"}
+                </span>
+              </div>
+            );
+          })}
+        </div>
+      </div>
+
+      {/* SECTION 3: CURRENT PROCESSING STATUS (If processing) */}
+      {isProcessing && (
+        <div style={{ background: "#EEECFB", border: "1px solid rgba(108,92,231,0.2)", borderRadius: 8, padding: 10 }}>
+          <div style={{ display: "flex", alignItems: "center", gap: 6, fontSize: 11.5, fontWeight: 700, color: "var(--brand)" }}>
+            <span style={{ width: 8, height: 8, borderRadius: "50%", background: "var(--brand)", animation: "pulse 1.2s infinite" }} />
+            Live Processing Activity
+          </div>
+          <p style={{ margin: "4px 0 0", fontSize: 11, color: "#1E293B" }}>
+            {currentStageName}
+          </p>
+        </div>
+      )}
+
+      {/* SECTION 4: QUICK ACTIONS */}
+      <div>
+        <h4 style={{ margin: "0 0 10px", fontSize: 13.5, fontWeight: 750, color: "var(--text-primary)", display: "flex", alignItems: "center", gap: 6 }}>
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="var(--brand)" strokeWidth="2.5"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>
+          Quick Actions
+        </h4>
+
+        <div style={{ display: "flex", flexDirection: "column", gap: 6 }}>
+          <button onClick={onRefresh} style={sidebarActionStyle}>
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><path d="M21.5 2v6h-6M21.34 15.57a10 10 0 11-.57-8.38l5.67-5.67"/></svg>
+            Refresh Status
+          </button>
+
+          <button onClick={onViewRawText} style={sidebarActionStyle}>
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><polyline points="10 9 9 9 8 9"/></svg>
+            View Extracted Text
+          </button>
+
+          <button onClick={onOpenAssistant} style={sidebarActionStyle}>
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+            Ask AI Assistant
+          </button>
+
+          <button onClick={onDownloadOriginal} style={sidebarActionStyle}>
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+            Download Original
+          </button>
+
+          {isFailed && (
+            <button onClick={() => onRetryStage("all")} style={{ ...sidebarActionStyle, background: "var(--red-light)", color: "var(--red)", border: "1px solid rgba(239,68,68,0.2)" }}>
+              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><path d="M1 4v6h6M23 20v-6h-6"/><path d="M20.49 9A9 9 0 0 0 5.64 5.64L1 10m22 4l-4.64 4.36A9 9 0 0 1 3.51 15"/></svg>
+              Re-run Analysis
+            </button>
+          )}
+        </div>
+      </div>
+
     </div>
   );
 };
@@ -233,14 +480,37 @@ export default function Workspace() {
   const [preferences, setPreferences] = useState({ confidence_threshold: 40 });
 
   // Workspace active states
-  const [activeTab, setActiveTab] = useState("overview"); 
+  const [activeTab, setActiveTab] = useState(() => {
+    const params = new URLSearchParams(window.location.search);
+    const initialTab = params.get("tab") || "proofreading";
+    console.log("[Workspace Runtime] Initialized activeTab:", initialTab);
+    return initialTab;
+  });
   const [isDownloadModalOpen, setIsDownloadModalOpen] = useState(false);
   const [isActionsDropdownOpen, setIsActionsDropdownOpen] = useState(false);
+  const [rawTextOpen, setRawTextOpen] = useState(false);
   const [statusDetailsExpanded, setStatusDetailsExpanded] = useState(false);
   const [proofSubTab, setProofSubTab] = useState("annotated");
+  const [zoomLevel, setZoomLevel] = useState(100);
+  const [currentPage, setCurrentPage] = useState(1);
+  const [documentViewMode, setDocumentViewMode] = useState("pdfOverlay");
+  const [isIssuesDrawerOpen, setIsIssuesDrawerOpen] = useState(true);
+  const [isDocInfoOpen, setIsDocInfoOpen] = useState(false);
   const [comparativeData, setComparativeData] = useState(null);
   const [comparativeLoading, setComparativeLoading] = useState(false);
+  const [reRunningPipeline, setReRunningPipeline] = useState(false);
   const actionsRef = useRef(null);
+
+  const handleDownloadOriginal = () => {
+    if (!id) return;
+    const link = document.createElement("a");
+    link.href = `/api/documents/${id}/file`;
+    link.target = "_blank";
+    link.download = doc?.filename || "document.pdf";
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+  };
 
   useEffect(() => {
     function handleClickOutside(event) {
@@ -257,6 +527,16 @@ export default function Workspace() {
     window.addEventListener("openDownloadModal", handleOpenModal);
     return () => window.removeEventListener("openDownloadModal", handleOpenModal);
   }, []);
+
+  // Synchronize activeTab with URL search query parameter (?tab=...)
+  useEffect(() => {
+    const params = new URLSearchParams(location.search);
+    const tabParam = params.get("tab");
+    if (tabParam) {
+      console.log("[Workspace Runtime] Syncing activeTab from URL parameter:", tabParam);
+      setActiveTab(tabParam);
+    }
+  }, [location.search]);
 
   const [activeIssueIdx, setActiveIssueIdx] = useState(null);
   const [issueDecisions, setIssueDecisions] = useState({});
@@ -284,6 +564,25 @@ export default function Workspace() {
       if (data) setDoc(data);
     } catch (err) {
       console.error("Failed to retry stage:", err);
+    }
+  };
+
+  const handleReRunProofreadPipeline = async () => {
+    if (!id || reRunningPipeline) return;
+
+    setReRunningPipeline(true);
+    try {
+      await retryJobStage(id, "all");
+      const data = await fetchDocument(id);
+      if (data) {
+        setDoc(data);
+      }
+      setActiveTab("proofreading");
+      setProofSubTab("annotated");
+    } catch (err) {
+      console.error("Failed to re-run proofreading pipeline:", err);
+    } finally {
+      setReRunningPipeline(false);
     }
   };
 
@@ -382,19 +681,43 @@ export default function Workspace() {
     let timerId = null;
 
     async function load() {
+      if (!id) {
+        if (active) {
+          setError("No document ID specified.");
+          setLoading(false);
+        }
+        return;
+      }
       try {
         const data = await fetchDocument(id);
         
         if (!active) return;
+        if (!data) {
+          setError("Document not found or backend service unreachable.");
+          setLoading(false);
+          return;
+        }
+
         setDoc(data);
         if (data) {
           localStorage.setItem("currentlyOpenDocId", data.id);
-          localStorage.setItem("currentlyOpenDocName", data.filename);
+          localStorage.setItem("currentlyOpenDocName", data.filename || "Document");
           localStorage.setItem("currentlyOpenDocPages", data.total_pages || data.pages || 1);
           localStorage.setItem("currentlyOpenDocStatus", data.status || "pending");
           localStorage.setItem("currentlyOpenDocIssuesCount", (data.issues || []).length);
           localStorage.setItem("currentlyOpenDocConsistencyIssues", data.context_analysis_issues_count || 0);
-          window.dispatchEvent(new Event("activeDocChanged"));
+          localStorage.setItem("currentlyOpenDocFlags", JSON.stringify({
+            upload_ready: data.upload_ready,
+            document_viewer_ready: data.document_viewer_ready || data.extraction_ready,
+            spell_ready: data.spell_ready,
+            grammar_ready: data.grammar_ready,
+            proofreading_ready: data.proofreading_ready || data.spell_ready || data.grammar_ready || data.status === "completed",
+            rag_ready: data.rag_ready || data.rag_status === "completed" || data.status === "completed",
+            context_analysis_ready: data.context_analysis_ready || data.context_analysis_status === "completed" || data.status === "completed",
+            comparative_analysis_ready: data.comparative_analysis_ready || data.comparative_analysis_status === "completed" || data.status === "completed",
+            reports_ready: data.reports_ready || data.status === "completed"
+          }));
+          window.dispatchEvent(new CustomEvent("activeDocChanged", { detail: data }));
         }
 
         // Process HTML/State as soon as proofreading is ready or document completed
@@ -441,9 +764,19 @@ export default function Workspace() {
 
         setLoading(false);
         
-        // If still processing or pending, poll every 2.5 seconds
-        if (data.status === "processing" || data.status === "pending") {
-          timerId = setTimeout(load, 2500);
+        // Dynamic Real-Time Stage Polling: Poll every 1.5s as long as any stage is Running, Pending, or processing
+        const hasRunningOrPendingStage = Array.isArray(data.stages) && data.stages.some(
+          st => st.status === "Running" || st.status === "Pending" || st.status === "queued" || st.status === "processing"
+        );
+        const isPipelineIncomplete = data.status === "processing" ||
+                                     data.status === "pending" ||
+                                     data.status === "uploaded" ||
+                                     (data.progress_percentage || 0) < 100 ||
+                                     hasRunningOrPendingStage ||
+                                     data.comparative_analysis_status === "running";
+
+        if (data && isPipelineIncomplete && data.status !== "failed") {
+          timerId = setTimeout(load, 1500);
         }
       } catch (err) {
         if (active) {
@@ -655,9 +988,16 @@ export default function Workspace() {
   // Helper to determine if an issue is confidence filtered
   const isFiltered = (issue) => {
     if (!issue) return true;
-    const conf = issue.final_confidence || issue.confidence || 0;
-    const threshold = ((preferences && preferences.confidence_threshold !== undefined) ? preferences.confidence_threshold : 40) / 100;
-    return conf <= threshold;
+    let conf = issue.final_confidence !== undefined ? issue.final_confidence : issue.confidence;
+    if (conf === undefined || conf === null || conf === 0) conf = 0.85;
+    if (conf > 1) conf = conf / 100;
+    
+    // Only filter if user explicitly configured a confidence threshold > 0
+    const prefThreshold = (preferences && preferences.confidence_threshold !== undefined && preferences.confidence_threshold > 0)
+      ? preferences.confidence_threshold
+      : 0;
+    const threshold = prefThreshold / 100;
+    return conf < threshold;
   };
 
   // Unresolved issues count memoizers for filter pills
@@ -1165,7 +1505,14 @@ export default function Workspace() {
   const renderResultsOverview = () => {
     const totalIssues = doc?.issues?.length || 0;
     const consistencyIssues = doc?.context_analysis_issues_count || 0;
-    
+    const isCompleted = doc?.status === "completed";
+
+    // Feature unlocking flags from backend
+    const isProofreadUnlocked = doc?.proofreading_ready || doc?.spell_ready || doc?.grammar_ready || isCompleted;
+    const isAmbiguityUnlocked = doc?.context_analysis_ready || doc?.context_analysis_status === "completed" || isCompleted;
+    const isAiAssistantUnlocked = doc?.rag_ready || doc?.rag_status === "completed" || isCompleted;
+    const isComparativeUnlocked = doc?.comparative_analysis_ready || doc?.comparative_analysis_status === "completed" || isCompleted;
+
     return (
       <div style={styles.overviewContainer}>
         <div style={styles.overviewHeader}>
@@ -1174,103 +1521,123 @@ export default function Workspace() {
         </div>
         
         <div style={styles.overviewGrid}>
-          {/* Card 1: Overall Assessment */}
-          <div style={styles.overviewCard}>
+          {/* Card 1: Proofreading */}
+          <div style={{ ...styles.overviewCard, opacity: isProofreadUnlocked ? 1 : 0.85 }}>
             <div style={styles.overviewCardTop}>
               <span style={{
                 ...styles.cardBadge,
-                backgroundColor: totalIssues === 0 ? "var(--green-light)" : totalIssues <= 10 ? "var(--amber-light)" : "var(--red-light)",
-                color: totalIssues === 0 ? "var(--green)" : totalIssues <= 10 ? "var(--amber)" : "var(--red)"
+                backgroundColor: !isProofreadUnlocked ? "var(--amber-light)" : totalIssues === 0 ? "var(--green-light)" : totalIssues <= 10 ? "var(--amber-light)" : "var(--red-light)",
+                color: !isProofreadUnlocked ? "var(--amber)" : totalIssues === 0 ? "var(--green)" : totalIssues <= 10 ? "var(--amber)" : "var(--red)"
               }}>
-                {totalIssues === 0 ? "Ready for Publication" : totalIssues <= 10 ? "Needs Attention" : "Revisions Recommended"}
+                {!isProofreadUnlocked ? "Stage 3/4 Processing..." : totalIssues === 0 ? "Ready for Publication" : `${totalIssues} Issues Found`}
               </span>
-              <h3 style={styles.overviewCardTitle}>Overall Assessment</h3>
+              <h3 style={styles.overviewCardTitle}>Proofreading & Quality</h3>
             </div>
             <p style={styles.overviewCardDesc}>
-              This document has been reviewed across spelling, structural grammar, and semantic contradiction layers.
+              {isProofreadUnlocked
+                ? "Spelling and structural grammar verification flags typographical bugs and formatting errors."
+                : "Language, spelling & writing quality review runs in Stages 3 & 4."}
             </p>
-            <button style={styles.overviewCardBtn} onClick={() => handleTabChange("proofreading")}>
-              View Proofreading &rarr;
+            <button
+              style={{
+                ...styles.overviewCardBtn,
+                opacity: isProofreadUnlocked ? 1 : 0.6,
+                cursor: isProofreadUnlocked ? "pointer" : "not-allowed"
+              }}
+              disabled={!isProofreadUnlocked}
+              onClick={() => isProofreadUnlocked && handleTabChange("proofreading")}
+            >
+              {isProofreadUnlocked ? "View Proofreading →" : "🔒 Proofreading Locked"}
             </button>
           </div>
 
-          {/* Card 2: Writing Quality */}
-          <div style={styles.overviewCard}>
+          {/* Card 2: Ambiguity Analysis */}
+          <div style={{ ...styles.overviewCard, opacity: isAmbiguityUnlocked ? 1 : 0.85 }}>
             <div style={styles.overviewCardTop}>
               <span style={{
                 ...styles.cardBadge,
-                backgroundColor: totalIssues === 0 ? "var(--green-light)" : "var(--amber-light)",
-                color: totalIssues === 0 ? "var(--green)" : "var(--amber)"
+                backgroundColor: !isAmbiguityUnlocked ? "var(--amber-light)" : consistencyIssues === 0 ? "var(--green-light)" : "var(--amber-light)",
+                color: !isAmbiguityUnlocked ? "var(--amber)" : consistencyIssues === 0 ? "var(--green)" : "var(--amber)"
               }}>
-                {totalIssues} Issues Found
+                {!isAmbiguityUnlocked ? "Stage 6 Pending..." : consistencyIssues === 0 ? "0 Conflicts Found" : `${consistencyIssues} Conflicts Mapped`}
               </span>
-              <h3 style={styles.overviewCardTitle}>Writing Quality</h3>
+              <h3 style={styles.overviewCardTitle}>Ambiguity Analysis</h3>
             </div>
             <p style={styles.overviewCardDesc}>
-              Spelling and structural grammar verification flags typographical bugs and formatting errors.
+              {isAmbiguityUnlocked
+                ? "Audits conflicting sections, numerical mismatches, and undefined acronyms across clauses."
+                : "Consistency and contradiction auditing will evaluate numerical mismatches and acronym conflicts in Stage 6."}
             </p>
-            <button style={styles.overviewCardBtn} onClick={() => handleTabChange("proofreading")}>
-              View Proofreading &rarr;
+            <button
+              style={{
+                ...styles.overviewCardBtn,
+                opacity: isAmbiguityUnlocked ? 1 : 0.6,
+                cursor: isAmbiguityUnlocked ? "pointer" : "not-allowed"
+              }}
+              disabled={!isAmbiguityUnlocked}
+              onClick={() => isAmbiguityUnlocked && handleTabChange("analysis")}
+            >
+              {isAmbiguityUnlocked ? "View Ambiguity Analysis →" : "🔒 Ambiguity Analysis Locked"}
             </button>
           </div>
 
-          {/* Card 3: Consistency Review */}
-          <div style={styles.overviewCard}>
+          {/* Card 3: AI Assistant */}
+          <div style={{ ...styles.overviewCard, opacity: isAiAssistantUnlocked ? 1 : 0.85 }}>
             <div style={styles.overviewCardTop}>
               <span style={{
                 ...styles.cardBadge,
-                backgroundColor: consistencyIssues === 0 ? "var(--green-light)" : "var(--amber-light)",
-                color: consistencyIssues === 0 ? "var(--green)" : "var(--amber)"
+                backgroundColor: !isAiAssistantUnlocked ? "var(--amber-light)" : "var(--brand-light)",
+                color: !isAiAssistantUnlocked ? "var(--amber)" : "var(--brand)"
               }}>
-                {consistencyIssues} Conflicts Mapped
+                {!isAiAssistantUnlocked ? "Stage 5 Indexing..." : "Interactive Q&A Ready"}
               </span>
-              <h3 style={styles.overviewCardTitle}>Consistency Review</h3>
+              <h3 style={styles.overviewCardTitle}>AI Assistant</h3>
             </div>
             <p style={styles.overviewCardDesc}>
-              Audits conflicting sections to check that clauses do not contradict.
+              {isAiAssistantUnlocked
+                ? "Ask questions across document text, financial tables, and verified domain knowledge."
+                : "Knowledge Index Creation must complete in Stage 5 before AI document Q&A becomes available."}
             </p>
-            <button style={styles.overviewCardBtn} onClick={() => handleTabChange("analysis")}>
-              View Context Analysis &rarr;
+            <button
+              style={{
+                ...styles.overviewCardBtn,
+                opacity: isAiAssistantUnlocked ? 1 : 0.6,
+                cursor: isAiAssistantUnlocked ? "pointer" : "not-allowed"
+              }}
+              disabled={!isAiAssistantUnlocked}
+              onClick={() => isAiAssistantUnlocked && handleTabChange("assistant")}
+            >
+              {isAiAssistantUnlocked ? "Ask AI Assistant →" : "🔒 AI Assistant Locked"}
             </button>
           </div>
 
-          {/* Card 4: AI Verification */}
-          <div style={styles.overviewCard}>
+          {/* Card 4: Comparative Analysis */}
+          <div style={{ ...styles.overviewCard, opacity: isComparativeUnlocked ? 1 : 0.85 }}>
             <div style={styles.overviewCardTop}>
               <span style={{
                 ...styles.cardBadge,
-                backgroundColor: consistencyIssues === 0 ? "var(--green-light)" : "var(--amber-light)",
-                color: consistencyIssues === 0 ? "var(--green)" : "var(--amber)"
+                backgroundColor: !isComparativeUnlocked ? "var(--amber-light)" : "#EFF6FF",
+                color: !isComparativeUnlocked ? "var(--amber)" : "#2563EB"
               }}>
-                Validation Run
+                {!isComparativeUnlocked ? "Stage 7 Pending..." : "Executive Benchmark Ready"}
               </span>
-              <h3 style={styles.overviewCardTitle}>AI Verification</h3>
+              <h3 style={styles.overviewCardTitle}>Comparative Analysis</h3>
             </div>
             <p style={styles.overviewCardDesc}>
-              Advanced cross-sectional logic checks verifying statements are factual and consistent.
+              {isComparativeUnlocked
+                ? "Deloitte/McKinsey executive benchmarking comparing capabilities against market peers."
+                : "Competitive benchmark analysis against industry references runs in Stage 7."}
             </p>
-            <button style={styles.overviewCardBtn} onClick={() => handleTabChange("analysis")}>
-              View Context Analysis &rarr;
-            </button>
-          </div>
-
-          {/* Card 5: Reports Page */}
-          <div style={styles.overviewCard}>
-            <div style={styles.overviewCardTop}>
-              <span style={{
-                ...styles.cardBadge,
-                backgroundColor: "var(--brand-light)",
-                color: "var(--brand)"
-              }}>
-                Ready to Export
-              </span>
-              <h3 style={styles.overviewCardTitle}>Reports Archive</h3>
-            </div>
-            <p style={styles.overviewCardDesc}>
-              Access intermediate logical analysis, cross references, and formal executive summaries.
-            </p>
-            <button style={styles.overviewCardBtn} onClick={() => handleTabChange("reports")}>
-              View Reports &rarr;
+            <button
+              style={{
+                ...styles.overviewCardBtn,
+                opacity: isComparativeUnlocked ? 1 : 0.6,
+                cursor: isComparativeUnlocked ? "pointer" : "not-allowed"
+              }}
+              disabled={!isComparativeUnlocked}
+              onClick={() => isComparativeUnlocked && handleTabChange("comparative")}
+            >
+              {isComparativeUnlocked ? "View Comparative Analysis →" : "🔒 Comparative Analysis Locked"}
             </button>
           </div>
         </div>
@@ -1322,7 +1689,7 @@ export default function Workspace() {
               <span>Uploaded {doc.uploadedLabel || "Recently"}</span>
               <span>•</span>
               <span style={{ fontWeight: 650, color: doc.status === "completed" ? "var(--green)" : "var(--amber)" }}>
-                {doc.status === "completed" ? "✓ Scan Complete" : "⚠ Under Review"}
+                {doc.status === "completed" ? "✓ Scan Complete" : "⚠ In Progress"}
               </span>
             </div>
             
@@ -1402,420 +1769,556 @@ export default function Workspace() {
         </div>
       </div>
 
-        {/* 3. Main editor split pane */}
-        {activeTab === "overview" ? (
-          <div>
-            <StagePipelineCard doc={doc} onRetryStage={handleRetryStage} />
-            {renderResultsOverview()}
-          </div>
-        ) : activeTab === "proofreading" || activeTab === "annotated" || activeTab === "corrected" ? (
-          <div style={{ display: "flex", flexDirection: "column", gap: 16 }}>
-            {/* Sub-selector toggle */}
-            <div style={{ display: "flex", gap: 8, margin: "4px 0" }}>
-              <button
-                style={{
-                  background: proofSubTab === "annotated" ? "var(--brand-light)" : "var(--bg-card)",
-                  border: "1px solid var(--border)",
-                  borderRadius: 6, padding: "5px 12px", fontSize: 12, fontWeight: 700,
-                  color: proofSubTab === "annotated" ? "var(--brand)" : "var(--text-secondary)",
-                  cursor: "pointer", transition: "all 0.15s"
-                }}
-                onClick={() => setProofSubTab("annotated")}
-              >
-                Interactive Editor
-              </button>
-              <button
-                style={{
-                  background: proofSubTab === "corrected" ? "var(--brand-light)" : "var(--bg-card)",
-                  border: "1px solid var(--border)",
-                  borderRadius: 6, padding: "5px 12px", fontSize: 12, fontWeight: 700,
-                  color: proofSubTab === "corrected" ? "var(--brand)" : "var(--text-secondary)",
-                  cursor: "pointer", transition: "all 0.15s"
-                }}
-                onClick={() => setProofSubTab("corrected")}
-              >
-                Clean Preview
-              </button>
-            </div>
+        {/* 3. Master-Detail Enterprise Workspace Split Layout (100% for Proofreading | 73%/27% for Overview and other tabs) */}
+        {(() => {
+          const isProofreadTab = activeTab === "proofreading" || activeTab === "proofread" || activeTab === "annotated" || activeTab === "corrected";
+          console.log("[Workspace Render] activeTab runtime value:", activeTab, "| isProofreadTab:", isProofreadTab);
 
-            {proofSubTab === "corrected" ? (
-              /* Corrected View (Clean Preview) */
-              <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
-                <div style={{ ...styles.editorPanel, minHeight: 400 }}>
-                  {doc.raw_text ? (
-                    <div style={styles.textView}>
-                      {buildDecidedText(doc.raw_text, doc.issues, issueDecisions)}
-                    </div>
-                  ) : (
-                    <div 
-                      style={{ ...styles.textView, ...styles.correctedText }}
-                      className="clean-corrected-view"
-                      dangerouslySetInnerHTML={{ __html: getParagraphBody(annotatedHtml) }}
-                    />
-                  )}
-                </div>
-              </div>
-            ) : (
-              /* Annotated split editor */
-              <div style={styles.splitGrid}>
-                {/* Left panel: Document text with inline highlights */}
-                <div style={styles.editorPanel}>
-                  {doc.raw_text ? (
-                    <div 
-                      ref={textContainerRef}
-                      style={{ ...styles.textView, whiteSpace: "pre-wrap" }}
-                      className="annotated-text-view"
-                    >
-                      {renderDocumentMarkup()}
-                    </div>
-                  ) : (
-                    <div 
-                      ref={textContainerRef}
-                      style={styles.textView}
-                      className="annotated-text-view"
-                      dangerouslySetInnerHTML={{ __html: getParagraphBody(annotatedHtml) }}
-                    />
-                  )}
-                </div>
-
-                {/* Right panel: Suggestions rail */}
-                <div style={styles.sidebarPanel}>
-                  {/* Sticky Segmented Filter Bar */}
-                  <div
-                    className="segmented-filter-bar"
-                    role="tablist"
-                    aria-label="Correction issue category filters"
-                    style={{
-                      position: "sticky",
-                      top: 0,
-                      zIndex: 10,
-                      background: "var(--bg-card)",
-                      padding: "4px 0",
-                      borderBottom: "1px solid var(--border)",
-                      marginBottom: "4px"
-                    }}
-                  >
+          return (
+            <div style={{ display: "flex", gap: 20, alignItems: "flex-start", width: "100%" }}>
+              
+              {/* Main Left Workspace View (100% width when proofreading, 73% width otherwise) */}
+              <div style={{ flex: isProofreadTab ? "1 1 100%" : "1 1 73%", minWidth: 0, display: "flex", flexDirection: "column", gap: 16 }}>
+                {activeTab === "overview" ? (
+                  <div>
+                    <StagePipelineCard doc={doc} onRetryStage={handleRetryStage} />
+                    {renderResultsOverview()}
+                  </div>
+                ) : isProofreadTab ? (
+                  <div style={{ display: "flex", flexDirection: "column", gap: 14, width: "100%" }}>
+                    
+                    {/* Live Statistics & Mode Selector Banner */}
                     <div style={{
-                      display: "flex",
-                      background: "var(--bg-page)",
-                      padding: "3px",
-                      borderRadius: "10px",
-                      border: "1px solid var(--border)",
-                      gap: "3px"
+                      display: "flex", justifyContent: "space-between", alignItems: "center",
+                      background: "var(--bg-card)", border: "1px solid var(--border)",
+                      borderRadius: 10, padding: "10px 16px", boxShadow: "var(--shadow-card)",
+                      flexWrap: "wrap", gap: 10
                     }}>
-                      {[
-                        { id: "all", label: "All Issues", count: allUnresolvedCount },
-                        { id: "grammar", label: "Grammar", count: grammarUnresolvedCount },
-                        { id: "spelling", label: "Spelling", count: spellingUnresolvedCount }
-                      ].map((tab) => {
-                        const isSelected = typeFilter === tab.id;
-                        return (
+                      {/* Left: Mode Switcher */}
+                      <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
+                        <div style={{
+                          display: "flex", background: "#F1F5F9", padding: "3px", borderRadius: 8, border: "1px solid #CBD5E1", gap: 2
+                        }}>
                           <button
-                            key={tab.id}
-                            role="tab"
-                            id={`filter-tab-${tab.id}`}
-                            aria-selected={isSelected}
-                            aria-controls="corrections-card-list"
-                            tabIndex={0}
-                            className={`filter-pill-btn ${isSelected ? "active" : ""}`}
-                            onClick={() => setTypeFilter(tab.id)}
-                            onKeyDown={(e) => {
-                              if (e.key === "Enter" || e.key === " ") {
-                                e.preventDefault();
-                                setTypeFilter(tab.id);
-                              }
-                            }}
                             style={{
-                              flex: 1,
-                              display: "flex",
-                              alignItems: "center",
-                              justifyContent: "center",
-                              gap: "4px",
-                              padding: "7px 6px",
-                              fontSize: "12px",
-                              fontWeight: isSelected ? 700 : 600,
-                              borderRadius: "7px",
-                              border: "none",
-                              cursor: "pointer",
-                              background: isSelected ? "var(--brand)" : "transparent",
-                              color: isSelected ? "#ffffff" : "var(--text-secondary)",
-                              boxShadow: isSelected ? "0 1px 3px rgba(0, 0, 0, 0.12)" : "none",
-                              transition: "all 0.15s ease",
-                              outline: "none"
+                              background: proofSubTab !== "corrected" ? "linear-gradient(135deg, #6C5CE7, #5B4DCC)" : "transparent",
+                              border: "none", borderRadius: 6, padding: "6px 14px", fontSize: 12, fontWeight: 750,
+                              color: proofSubTab !== "corrected" ? "#FFFFFF" : "var(--text-secondary)", cursor: "pointer",
+                              boxShadow: proofSubTab !== "corrected" ? "0 2px 6px rgba(108, 92, 231, 0.3)" : "none"
                             }}
+                            onClick={() => setProofSubTab("annotated")}
                           >
-                            <span>{tab.label}</span>
-                            <span style={{
-                              fontSize: "10px",
-                              fontWeight: 700,
-                              padding: "1px 5px",
-                              borderRadius: "999px",
-                              background: isSelected ? "rgba(255, 255, 255, 0.25)" : "var(--border)",
-                              color: isSelected ? "#ffffff" : "var(--text-muted)"
-                            }}>
-                              {tab.count}
-                            </span>
+                            ✏️ Interactive Review
                           </button>
-                        );
-                      })}
-                    </div>
-                  </div>
-
-                  {/* Toolbar - Search input */}
-                  <div style={styles.sidebarToolbar}>
-                    <input
-                      type="text"
-                      placeholder="Search issues..."
-                      style={{ ...styles.sidebarSearch, padding: "8px 12px", border: "1px solid var(--border)", borderRadius: 8, width: "100%", outline: "none", fontSize: 12.5 }}
-                      value={search}
-                      onChange={(e) => setSearch(e.target.value)}
-                    />
-                  </div>
-
-                  <div style={styles.sidebarActionHeader}>
-                    <p style={styles.sidebarTitle}>
-                      {typeFilter === "all" ? "All Unresolved" : typeFilter === "grammar" ? "Grammar Issues" : "Spelling Issues"} ({visibleIssues.length})
-                    </p>
-                    {visibleIssues.length > 0 && (
-                      <div style={styles.bulkRow}>
-                        <button style={styles.bulkAccept} onClick={handleAcceptAll}>Accept All</button>
-                        <button style={styles.bulkReject} onClick={handleRejectAll}>Reject All</button>
-                      </div>
-                    )}
-                  </div>
-
-                  <div id="corrections-card-list" role="tabpanel" style={styles.cardList}>
-                    {visibleIssues.length === 0 ? (
-                      <div style={{ ...styles.emptyCard, padding: "24px 16px" }}>
-                        <div style={{ display: "flex", justifyContent: "center", marginBottom: 8 }}>
-                          <span style={{
-                            display: "inline-flex", alignItems: "center", justifyContent: "center",
-                            width: 36, height: 36, borderRadius: "50%",
-                            background: "var(--green-light)", color: "var(--green)"
-                          }}>
-                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-                              <polyline points="20 6 9 17 4 12" />
-                            </svg>
-                          </span>
+                          <button
+                            style={{
+                              background: proofSubTab === "corrected" ? "linear-gradient(135deg, #6C5CE7, #5B4DCC)" : "transparent",
+                              border: "none", borderRadius: 6, padding: "6px 14px", fontSize: 12, fontWeight: 750,
+                              color: proofSubTab === "corrected" ? "#FFFFFF" : "var(--text-secondary)", cursor: "pointer",
+                              boxShadow: proofSubTab === "corrected" ? "0 2px 6px rgba(108, 92, 231, 0.3)" : "none"
+                            }}
+                            onClick={() => setProofSubTab("corrected")}
+                          >
+                            ✨ Clean Preview
+                          </button>
                         </div>
-                        <p style={{ margin: "0 0 4px", fontWeight: 700, color: "var(--text-primary)", fontSize: 13.5 }}>
-                          {typeFilter === "grammar"
-                            ? "No grammar issues found."
-                            : typeFilter === "spelling"
-                            ? "No spelling issues found."
-                            : "No active issues found."}
-                        </p>
-                        <p style={{ margin: 0, fontSize: 11.5, color: "var(--text-muted)", lineHeight: 1.4 }}>
-                          {typeFilter === "grammar"
-                            ? "Your document has no detected grammar or structural issues."
-                            : typeFilter === "spelling"
-                            ? "No spelling or punctuation errors were detected."
-                            : "All spelling and grammar mistakes have been resolved or filtered."}
-                        </p>
+                      </div>
+
+                      {/* Middle: Live Proofreading Statistics Counter */}
+                      {(() => {
+                        const totalCount = issues.length;
+                        const openCount = visibleIssues.filter(i => issueDecisions[i.originalIndex] === undefined).length;
+                        const accCount = Object.values(issueDecisions).filter(v => v === "accepted").length;
+                        const rejCount = Object.values(issueDecisions).filter(v => v === "rejected").length;
+
+                        return (
+                          <div style={{ display: "flex", alignItems: "center", gap: 16, fontSize: 12, fontWeight: 650 }}>
+                            <span style={{ color: "var(--text-secondary)" }}>
+                              Total Issues: <strong style={{ color: "var(--text-primary)" }}>{totalCount}</strong>
+                            </span>
+                            <span style={{ color: "var(--amber)" }}>
+                              Open: <strong style={{ background: "var(--amber-light)", padding: "2px 6px", borderRadius: 4 }}>{openCount}</strong>
+                            </span>
+                            <span style={{ color: "var(--green)" }}>
+                              Accepted: <strong style={{ background: "var(--green-light)", padding: "2px 6px", borderRadius: 4 }}>{accCount}</strong>
+                            </span>
+                            <span style={{ color: "var(--red)" }}>
+                              Rejected: <strong style={{ background: "var(--red-light)", padding: "2px 6px", borderRadius: 4 }}>{rejCount}</strong>
+                            </span>
+                          </div>
+                        );
+                      })()}
+
+                      {/* Right: Re-run Pipeline Button */}
+                      <button
+                        style={{
+                          background: reRunningPipeline ? "#F1F5F9" : "linear-gradient(135deg, #0F172A, #1E293B)",
+                          color: "#FFFFFF", border: "none", borderRadius: 7, padding: "6px 14px",
+                          fontSize: 12, fontWeight: 700, cursor: reRunningPipeline ? "not-allowed" : "pointer",
+                          boxShadow: "0 2px 6px rgba(0,0,0,0.18)"
+                        }}
+                        disabled={reRunningPipeline}
+                        onClick={handleReRunProofreadPipeline}
+                        title="Re-run proofreading pipeline across current document with latest rules"
+                      >
+                        {reRunningPipeline ? "⏳ Re-running Pipeline..." : "↻ Re-run Pipeline"}
+                      </button>
+                    </div>
+
+                    {proofSubTab === "corrected" ? (
+                      /* Clean Preview View */
+                      <div style={{ display: "flex", flexDirection: "column", gap: 12, background: "var(--bg-card)", border: "1px solid var(--border)", borderRadius: 10, padding: 20 }}>
+                        <div style={styles.editorToolbar}>
+                          <div>
+                            <h3 style={{ margin: 0, fontSize: 16, fontWeight: 700, color: "var(--text-primary)" }}>✨ Clean Document Output Preview</h3>
+                            <p style={{ margin: "2px 0 0", fontSize: 12, color: "var(--text-secondary)" }}>Clean document preview with all accepted corrections applied directly.</p>
+                          </div>
+                          <button style={styles.downloadBtn} onClick={handleDownloadCorrected}>
+                            Download Clean Document
+                          </button>
+                        </div>
+                        <div style={{ ...styles.editorPanel, minHeight: 500, padding: 24, background: "#FFFFFF", borderRadius: 8, border: "1px solid #E2E8F0" }}>
+                          {doc.raw_text ? (
+                            <div style={{ ...styles.textView, whiteSpace: "pre-wrap" }}>
+                              {buildDecidedText(doc.raw_text, doc.issues, issueDecisions)}
+                            </div>
+                          ) : (
+                            <div 
+                              style={{ ...styles.textView, ...styles.correctedText }}
+                              className="clean-corrected-view"
+                              dangerouslySetInnerHTML={{ __html: getParagraphBody(annotatedHtml) }}
+                            />
+                          )}
+                        </div>
                       </div>
                     ) : (
-                      visibleIssues.map((issue) => {
-                        const idx = issue.originalIndex;
-                        const SEVERITY_COLORS = { low: "#eab308", medium: "#f97316", high: "#ef4444", critical: "#b91c1c" };
-                        const severity = issue.severity || "medium";
-                        const accentColor = SEVERITY_COLORS[severity] || SEVERITY_COLORS.medium;
-                        const isSelected = activeIssueIdx === idx;
-                        return (
-                          <div
-                            key={idx}
-                            id={`suggestion-${idx}`}
-                            onClick={() => handleSelectIssue(idx)}
-                            style={{
-                              ...styles.suggestionCard,
-                              borderLeft: isSelected ? `3px solid var(--brand)` : "3px solid var(--border)",
-                              boxShadow: isSelected ? "var(--shadow-card)" : "none",
-                              backgroundColor: isSelected ? "var(--brand-light)" : "var(--bg-card)",
-                              padding: "14px",
-                              marginBottom: "10px",
-                              borderRadius: "8px",
-                              cursor: "pointer",
-                              transition: "all 0.2s ease",
-                              textAlign: "left",
-                              border: "1px solid var(--border)"
-                            }}
-                          >
-                            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 6 }}>
-                              <span style={{ fontSize: 11, fontWeight: 750, color: accentColor, textTransform: "uppercase", letterSpacing: 0.5 }}>
-                                {issue.issue_type}
+                      /* Full-Width Interactive Review (Original Document PDF + Annotation Overlay + Right Review Panel) */
+                      <div style={{ display: "flex", gap: 16, width: "100%", minHeight: "calc(100vh - 210px)", alignItems: "stretch" }}>
+                        
+                        {/* 1. Original Document Primary View + Proofreading Annotation Overlay (calc(100% - 400px) width) */}
+                        <div style={{
+                          flex: "1 1 calc(100% - 400px)",
+                          minWidth: 0,
+                          background: "#F8FAFC",
+                          border: "1px solid #CBD5E1",
+                          borderRadius: 10,
+                          display: "flex",
+                          flexDirection: "column",
+                          overflow: "hidden",
+                          position: "relative"
+                        }}>
+                          {/* PDF Overlay Header Bar */}
+                          <div style={{
+                            background: "linear-gradient(135deg, #0F172A, #1E293B)",
+                            color: "#FFFFFF", padding: "8px 14px",
+                            display: "flex", alignItems: "center", justifyContent: "space-between",
+                            fontSize: "12px", zIndex: 5, boxShadow: "0 2px 8px rgba(0,0,0,0.15)"
+                          }}>
+                            <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
+                              <span style={{ fontWeight: 750, color: "#60A5FA", display: "inline-flex", alignItems: "center", gap: 5 }}>
+                                <span style={{ width: 8, height: 8, borderRadius: "50%", background: "#10B981", boxShadow: "0 0 8px #10B981" }} />
+                                Original Document View + Proofreading Overlay
                               </span>
-                              <span style={{ fontSize: 10.5, color: "var(--text-muted)", fontWeight: 500 }}>
-                                Page {issue.page_number || 1}
+                              <span style={{ color: "#475569" }}>|</span>
+                              <span style={{ color: "#E2E8F0", fontSize: 11.5 }}>
+                                {visibleIssues.length} active finding{visibleIssues.length === 1 ? "" : "s"} highlighted
                               </span>
                             </div>
 
-                            <p style={{ margin: "4px 0", fontSize: 13, fontWeight: 600, color: "var(--text-primary)", lineHeight: 1.4 }}>
-                              {issue.reason}
-                            </p>
-
-                            {isSelected ? (
-                              <div style={{ marginTop: 10, display: "flex", flexDirection: "column", gap: 8 }}>
-                                <div style={{ fontSize: 11.5, color: "var(--text-secondary)", lineHeight: 1.35 }}>
-                                  <strong>Why it matters:</strong> Review spelling, phrasing, or dictionary compliance guidelines.
-                                </div>
-
-                                <div style={{ 
-                                  display: "flex", alignItems: "center", gap: 6, 
-                                  background: "var(--bg-page)", border: "1px solid var(--border)",
-                                  padding: "6px 10px", borderRadius: 6, fontSize: 12
-                                }}>
-                                  <span style={{ textDecoration: "line-through", color: "var(--red)" }}>{issue.original_text}</span>
-                                  <span style={{ color: "var(--text-muted)" }}>➔</span>
-                                  <span style={{ color: "var(--green)", fontWeight: 700 }}>{issue.suggested_text}</span>
-                                </div>
-
-                                {issueDecisions[idx] === undefined ? (
-                                  <div style={{ display: "flex", gap: 8, marginTop: 2 }}>
-                                    <button
-                                      style={{
-                                        flex: 1, padding: "5px 10px", borderRadius: 6,
-                                        border: "1px solid var(--border)", background: "var(--bg-card)",
-                                        color: "var(--text-secondary)", fontSize: 11.5, fontWeight: 600,
-                                        cursor: "pointer"
-                                      }}
-                                      onClick={(e) => {
-                                        e.stopPropagation();
-                                        rejectIssue(idx);
-                                      }}
-                                    >
-                                      Reject
-                                    </button>
-                                    <button
-                                      style={{
-                                        flex: 1, padding: "5px 10px", borderRadius: 6,
-                                        border: "none", background: "var(--brand)",
-                                        color: "white", fontSize: 11.5, fontWeight: 650,
-                                        cursor: "pointer"
-                                      }}
-                                      onClick={(e) => {
-                                        e.stopPropagation();
-                                        acceptIssue(idx);
-                                      }}
-                                    >
-                                      Accept
-                                    </button>
-                                  </div>
-                                ) : (
-                                  <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginTop: 2 }}>
-                                    <span style={{
-                                      fontSize: 11.5, fontWeight: 700,
-                                      color: issueDecisions[idx] === "accepted" ? "var(--green)" : "var(--text-muted)"
-                                    }}>
-                                      {issueDecisions[idx] === "accepted" ? "✓ Accepted" : "✕ Rejected"}
-                                    </span>
-                                    <button
-                                      style={{
-                                        padding: "3px 8px", borderRadius: 6, border: "1px solid var(--border)",
-                                        background: "var(--bg-card)", color: "var(--text-secondary)",
-                                        fontSize: 11, fontWeight: 600, cursor: "pointer"
-                                      }}
-                                      onClick={(e) => {
-                                        e.stopPropagation();
-                                        undoDecision(idx);
-                                      }}
-                                    >
-                                      Undo
-                                    </button>
-                                  </div>
-                                )}
-                              </div>
-                            ) : (
-                              <div style={{ fontSize: 11.5, color: "var(--text-secondary)", marginTop: 4, borderTop: "1px solid var(--border)", paddingTop: 4, display: "flex", gap: 6, alignItems: "center" }}>
-                                <span style={{ textDecoration: "line-through", color: "var(--text-muted)" }}>{issue.original_text}</span>
-                                <span>➔</span>
-                                <span style={{ color: "var(--green)", fontWeight: 650 }}>{issue.suggested_text}</span>
-                              </div>
-                            )}
+                            {/* Clickable Overlay Issue Badges */}
+                            <div style={{ display: "flex", alignItems: "center", gap: 6, overflowX: "auto", maxWidth: "55%" }}>
+                              {visibleIssues.slice(0, 8).map((iss) => {
+                                const idx = iss.originalIndex;
+                                const isSelected = activeIssueIdx === idx;
+                                const isSpelling = isSpellingIssue(iss);
+                                const isDecided = issueDecisions[idx] !== undefined;
+                                const bg = isDecided
+                                  ? (issueDecisions[idx] === "accepted" ? "#10B981" : "#94A3B8")
+                                  : isSpelling ? "linear-gradient(135deg, #D97706, #B45309)" : "linear-gradient(135deg, #DC2626, #B91C1C)";
+                                return (
+                                  <button
+                                    key={idx}
+                                    onClick={() => handleSelectIssue(idx)}
+                                    style={{
+                                      background: isSelected ? bg : isDecided ? "rgba(255,255,255,0.1)" : "rgba(255,255,255,0.18)",
+                                      color: "#FFFFFF",
+                                      border: isSelected ? "1.5px solid #FFFFFF" : "1px solid rgba(255,255,255,0.25)",
+                                      borderRadius: "5px",
+                                      padding: "3px 8px",
+                                      fontSize: "11px",
+                                      fontWeight: 700,
+                                      cursor: "pointer",
+                                      whiteSpace: "nowrap",
+                                      textDecoration: isDecided ? "line-through" : "none",
+                                      opacity: isDecided ? 0.6 : 1
+                                    }}
+                                    title={`Click to focus issue #${idx + 1}: ${iss.reason || iss.issue_type}`}
+                                  >
+                                    {isSpelling ? "🔤" : "✍️"} {iss.original_text ? `"${iss.original_text.slice(0, 12)}"` : `#${idx + 1}`}
+                                  </button>
+                                );
+                              })}
+                            </div>
                           </div>
-                        );
-                      })
+
+                          {/* PDF Document View */}
+                          <iframe
+                            src={`/api/documents/${id}/file#toolbar=1`}
+                            title="Original Document View with Proofreading Highlights Overlay"
+                            style={{
+                              width: "100%", height: "100%", flex: 1, border: "none", background: "#FFFFFF"
+                            }}
+                          />
+                        </div>
+
+                        {/* 2. Right Focused Review Panel (400px Width - Requirements 4 & 5) */}
+                        {(() => {
+                          const currentIssue = activeIssueIdx !== null ? (doc?.issues || [])[activeIssueIdx] : visibleIssues[0];
+                          const activeIdx = activeIssueIdx !== null ? activeIssueIdx : visibleIssues[0]?.originalIndex;
+                          const isDecided = activeIdx !== undefined && issueDecisions[activeIdx] !== undefined;
+
+                          const handlePrev = () => {
+                            if (visibleIssues.length === 0) return;
+                            const pos = visibleIssues.findIndex(i => i.originalIndex === activeIdx);
+                            if (pos > 0) {
+                              handleSelectIssue(visibleIssues[pos - 1].originalIndex);
+                            } else {
+                              handleSelectIssue(visibleIssues[visibleIssues.length - 1].originalIndex);
+                            }
+                          };
+
+                          const handleNext = () => {
+                            if (visibleIssues.length === 0) return;
+                            const pos = visibleIssues.findIndex(i => i.originalIndex === activeIdx);
+                            if (pos >= 0 && pos < visibleIssues.length - 1) {
+                              handleSelectIssue(visibleIssues[pos + 1].originalIndex);
+                            } else {
+                              handleSelectIssue(visibleIssues[0].originalIndex);
+                            }
+                          };
+
+                          const handleAccept = async () => {
+                            if (activeIdx === undefined) return;
+                            const iss = (doc?.issues || [])[activeIdx];
+                            const issueId = iss?.issue_id || activeIdx;
+                            setIssueDecisions(prev => ({ ...prev, [activeIdx]: "accepted" }));
+                            try {
+                              await updateIssueStatus(id, issueId, "accepted");
+                            } catch (e) {
+                              console.error("Failed to update issue status: ", e);
+                            }
+                            handleNext();
+                          };
+
+                          const handleReject = async () => {
+                            if (activeIdx === undefined) return;
+                            const iss = (doc?.issues || [])[activeIdx];
+                            const issueId = iss?.issue_id || activeIdx;
+                            setIssueDecisions(prev => ({ ...prev, [activeIdx]: "rejected" }));
+                            try {
+                              await updateIssueStatus(id, issueId, "rejected");
+                            } catch (e) {
+                              console.error("Failed to update issue status: ", e);
+                            }
+                            handleNext();
+                          };
+
+                          const handleIgnore = async () => {
+                            if (activeIdx === undefined) return;
+                            const iss = (doc?.issues || [])[activeIdx];
+                            const issueId = iss?.issue_id || activeIdx;
+                            setIssueDecisions(prev => ({ ...prev, [activeIdx]: "ignored" }));
+                            try {
+                              await updateIssueStatus(id, issueId, "ignored");
+                            } catch (e) {
+                              console.error("Failed to update issue status: ", e);
+                            }
+                            handleNext();
+                          };
+
+                          return (
+                            <div style={{
+                              width: "400px", flexShrink: 0,
+                              background: "var(--bg-card)", border: "1px solid var(--border)",
+                              borderRadius: 10, padding: "16px", display: "flex", flexDirection: "column",
+                              gap: 14, sticky: "top", top: 80, maxHeight: "calc(100vh - 180px)",
+                              overflowY: "auto", boxShadow: "var(--shadow-card)"
+                            }}>
+                              {currentIssue ? (
+                                <>
+                                  {/* Header & Prev/Next Issue Navigation */}
+                                  <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", borderBottom: "1px solid var(--border)", paddingBottom: 10 }}>
+                                    <div>
+                                      <span style={{ fontSize: 11, fontWeight: 750, color: "var(--brand)", textTransform: "uppercase", letterSpacing: 0.5 }}>
+                                        Interactive Review Panel
+                                      </span>
+                                      <h4 style={{ margin: "2px 0 0", fontSize: 14, fontWeight: 700, color: "var(--text-primary)" }}>
+                                        Issue #{(activeIdx !== undefined ? activeIdx : 0) + 1} of {(doc?.issues || []).length}
+                                      </h4>
+                                    </div>
+
+                                    {/* Issue Navigation Buttons */}
+                                    <div style={{ display: "flex", gap: 6 }}>
+                                      <button
+                                        onClick={handlePrev}
+                                        style={{
+                                          background: "var(--bg-page)", border: "1px solid var(--border)", borderRadius: 6,
+                                          padding: "4px 9px", fontSize: 11.5, fontWeight: 700, cursor: "pointer", color: "var(--text-secondary)"
+                                        }}
+                                        title="Previous Issue"
+                                      >
+                                        ← Prev
+                                      </button>
+                                      <button
+                                        onClick={handleNext}
+                                        style={{
+                                          background: "var(--bg-page)", border: "1px solid var(--border)", borderRadius: 6,
+                                          padding: "4px 9px", fontSize: 11.5, fontWeight: 700, cursor: "pointer", color: "var(--text-secondary)"
+                                        }}
+                                        title="Next Issue"
+                                      >
+                                        Next →
+                                      </button>
+                                    </div>
+                                  </div>
+
+                                  {/* Issue Category & Confidence Badge */}
+                                  <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
+                                    <span style={{
+                                      fontSize: 11, fontWeight: 800, padding: "3px 10px", borderRadius: 999,
+                                      background: isSpellingIssue(currentIssue) ? "var(--amber-light)" : "var(--red-light)",
+                                      color: isSpellingIssue(currentIssue) ? "var(--amber)" : "var(--red)",
+                                      textTransform: "uppercase", letterSpacing: 0.5
+                                    }}>
+                                      {isSpellingIssue(currentIssue) ? "🔤 Spelling Mistake" : "✍️ Grammar & Writing"}
+                                    </span>
+                                    <span style={{ fontSize: 11, fontWeight: 650, color: "var(--text-muted)" }}>
+                                      Confidence: High ({Math.round((currentIssue.final_confidence || currentIssue.confidence || 0.85) * 100)}%)
+                                    </span>
+                                  </div>
+
+                                  {/* Diff Box: Original vs Suggested Correction */}
+                                  <div style={{ background: "var(--bg-page)", border: "1px solid var(--border)", borderRadius: 8, padding: 12 }}>
+                                    <div style={{ fontSize: 10.5, fontWeight: 700, color: "var(--text-muted)", textTransform: "uppercase", marginBottom: 3 }}>
+                                      Original Text
+                                    </div>
+                                    <div style={{ fontSize: 13.5, color: "var(--red)", textDecoration: "line-through", fontWeight: 600, marginBottom: 10 }}>
+                                      {currentIssue.original_text || "Original snippet"}
+                                    </div>
+
+                                    <div style={{ fontSize: 10.5, fontWeight: 700, color: "var(--text-muted)", textTransform: "uppercase", marginBottom: 3 }}>
+                                      Suggested Correction
+                                    </div>
+                                    <div style={{ fontSize: 14, color: "var(--green)", fontWeight: 750 }}>
+                                      {currentIssue.suggested_text || "Suggested snippet"}
+                                    </div>
+                                  </div>
+
+                                  {/* Explanation / Insights */}
+                                  <div style={{ background: "rgba(108, 92, 231, 0.05)", border: "1px solid rgba(108, 92, 231, 0.2)", borderRadius: 8, padding: 12 }}>
+                                    <div style={{ fontSize: 10.5, fontWeight: 700, color: "var(--brand)", textTransform: "uppercase", marginBottom: 3 }}>
+                                      Explanation & Insights
+                                    </div>
+                                    <p style={{ margin: 0, fontSize: 12.5, color: "var(--text-primary)", lineHeight: 1.45 }}>
+                                      {currentIssue.reason || "Proofreading analysis detected potential text quality improvement."}
+                                    </p>
+                                    {currentIssue.protected_reason && (
+                                      <div style={{ marginTop: 6, fontSize: 11, color: "var(--amber)", fontWeight: 600 }}>
+                                        Note: {currentIssue.protected_reason}
+                                      </div>
+                                    )}
+                                  </div>
+
+                                  {/* Decision status if already reviewed */}
+                                  {isDecided && (
+                                    <div style={{
+                                      textAlign: "center", padding: "6px 12px", borderRadius: 6, fontSize: 12, fontWeight: 700,
+                                      background: issueDecisions[activeIdx] === "accepted" ? "var(--green-light)" : issueDecisions[activeIdx] === "rejected" ? "var(--red-light)" : "var(--border)",
+                                      color: issueDecisions[activeIdx] === "accepted" ? "var(--green)" : issueDecisions[activeIdx] === "rejected" ? "var(--red)" : "var(--text-muted)"
+                                    }}>
+                                      Status: {issueDecisions[activeIdx].toUpperCase()}
+                                    </div>
+                                  )}
+
+                                  {/* Action Buttons: Accept / Reject / Ignore / Add to Dict */}
+                                  <div style={{ display: "flex", flexDirection: "column", gap: 8, marginTop: 4 }}>
+                                    <div style={{ display: "flex", gap: 8 }}>
+                                      <button
+                                        style={{
+                                          flex: 1, background: "linear-gradient(135deg, #10B981, #059669)", color: "#FFFFFF",
+                                          border: "none", borderRadius: 7, padding: "10px", fontSize: 13, fontWeight: 750,
+                                          cursor: "pointer", boxShadow: "0 2px 8px rgba(16, 185, 129, 0.25)"
+                                        }}
+                                        onClick={handleAccept}
+                                      >
+                                        ✓ Accept
+                                      </button>
+                                      <button
+                                        style={{
+                                          flex: 1, background: "transparent", color: "var(--red)",
+                                          border: "1px solid var(--red)", borderRadius: 7, padding: "10px", fontSize: 13, fontWeight: 750,
+                                          cursor: "pointer"
+                                        }}
+                                        onClick={handleReject}
+                                      >
+                                        ✕ Reject
+                                      </button>
+                                    </div>
+
+                                    <div style={{ display: "flex", gap: 8 }}>
+                                      <button
+                                        style={{
+                                          flex: 1, background: "var(--bg-page)", color: "var(--text-secondary)",
+                                          border: "1px solid var(--border)", borderRadius: 6, padding: "7px", fontSize: 11.5, fontWeight: 600,
+                                          cursor: "pointer"
+                                        }}
+                                        onClick={handleIgnore}
+                                      >
+                                        Ignore Issue
+                                      </button>
+                                      <button
+                                        style={{
+                                          flex: 1, background: "var(--brand-light)", color: "var(--brand)",
+                                          border: "1px solid var(--brand)", borderRadius: 6, padding: "7px", fontSize: 11.5, fontWeight: 600,
+                                          cursor: "pointer"
+                                        }}
+                                        onClick={() => {
+                                          if (currentIssue.original_text) {
+                                            saveProtectedTerms([currentIssue.original_text]);
+                                            handleIgnore();
+                                          }
+                                        }}
+                                      >
+                                        + Add To Dictionary
+                                      </button>
+                                    </div>
+                                  </div>
+                                </>
+                              ) : (
+                                <div style={{ textAlign: "center", padding: "40px 16px" }}>
+                                  <span style={{ fontSize: 32 }}>🎉</span>
+                                  <h4 style={{ margin: "8px 0 4px", fontSize: 15, fontWeight: 700, color: "var(--text-primary)" }}>
+                                    All Proofreading Issues Reviewed
+                                  </h4>
+                                  <p style={{ fontSize: 12, color: "var(--text-secondary)" }}>
+                                    All detected spelling and grammar issues have been reviewed or approved.
+                                  </p>
+                                </div>
+                              )}
+                            </div>
+                          );
+                        })()}
+                      </div>
                     )}
                   </div>
-                </div>
+                ) : activeTab === "assistant" ? (
+                  /* Embedded AI Assistant Chat Panel */
+                  !(doc?.rag_ready || doc?.rag_status === "completed" || doc?.status === "completed") ? (
+                    <div style={{ background: "var(--bg-card)", border: "1px solid var(--border)", borderRadius: 12, padding: 40, textAlign: "center" }}>
+                      <div style={{ fontSize: 36, marginBottom: 12 }}>🔒</div>
+                      <h3 style={{ margin: 0, fontSize: 18, fontWeight: 700, color: "var(--text-primary)" }}>AI Assistant is Locked</h3>
+                      <p style={{ fontSize: 13, color: "var(--text-secondary)", maxWidth: 500, margin: "8px auto 16px" }}>
+                        Knowledge Index Creation (Stage 5) is currently processing or pending. The AI Assistant will unlock automatically once indexing completes.
+                      </p>
+                      <button style={styles.backBtn} onClick={() => handleTabChange("overview")}>Return to Overview</button>
+                    </div>
+                  ) : (
+                    <div style={{ background: "var(--bg-card)", border: "1px solid var(--border)", borderRadius: 12, padding: 16, minHeight: 500 }}>
+                      <Assistant onSelectPage={(page) => {
+                        setActiveTab("proofreading");
+                        if (doc && doc.issues) {
+                          const firstIssueIdx = (doc.issues || []).filter(Boolean).findIndex(i => i.page_number === page);
+                          if (firstIssueIdx !== -1) {
+                            handleSelectIssue(firstIssueIdx);
+                          }
+                        }
+                      }} />
+                    </div>
+                  )
+                ) : activeTab === "analysis" || activeTab === "context" ? (
+                  /* Context Analysis Report Dashboard */
+                  !(doc?.context_analysis_ready || doc?.context_analysis_status === "completed" || doc?.status === "completed") ? (
+                    <div style={{ background: "var(--bg-card)", border: "1px solid var(--border)", borderRadius: 12, padding: 40, textAlign: "center" }}>
+                      <div style={{ fontSize: 36, marginBottom: 12 }}>🔒</div>
+                      <h3 style={{ margin: 0, fontSize: 18, fontWeight: 700, color: "var(--text-primary)" }}>Ambiguity Analysis is Locked</h3>
+                      <p style={{ fontSize: 13, color: "var(--text-secondary)", maxWidth: 500, margin: "8px auto 16px" }}>
+                        Consistency & Contradiction Review (Stage 6) is currently processing or pending. Ambiguity Analysis will unlock automatically once stage 6 completes.
+                      </p>
+                      <button style={styles.backBtn} onClick={() => handleTabChange("overview")}>Return to Overview</button>
+                    </div>
+                  ) : (
+                    <div style={{ background: "var(--bg-card)", border: "1px solid var(--border)", borderRadius: 12, padding: 20, minHeight: 500 }}>
+                      <ContextAnalysis id={id} onShowInDocument={handleShowInDocument} />
+                    </div>
+                  )
+                ) : activeTab === "comparative" || activeTab === "comparative-analysis" ? (
+                  /* Executive Comparative Analysis Workspace */
+                  !(doc?.comparative_analysis_ready || doc?.comparative_analysis_status === "completed" || doc?.status === "completed") ? (
+                    <div style={{ background: "var(--bg-card)", border: "1px solid var(--border)", borderRadius: 12, padding: 40, textAlign: "center" }}>
+                      <div style={{ fontSize: 36, marginBottom: 12 }}>🔒</div>
+                      <h3 style={{ margin: 0, fontSize: 18, fontWeight: 700, color: "var(--text-primary)" }}>Comparative Analysis is Locked</h3>
+                      <p style={{ fontSize: 13, color: "var(--text-secondary)", maxWidth: 500, margin: "8px auto 16px" }}>
+                        Competitive Benchmark Analysis (Stage 7) is currently processing or pending. Comparative Analysis will unlock automatically once stage 7 completes.
+                      </p>
+                      <button style={styles.backBtn} onClick={() => handleTabChange("overview")}>Return to Overview</button>
+                    </div>
+                  ) : (
+                    <div style={{ background: "var(--bg-card)", border: "1px solid var(--border)", borderRadius: 12, padding: 20, minHeight: 500 }}>
+                      <ComparativeAnalysisView
+                        id={id}
+                        data={comparativeData}
+                        isRunning={
+                          !(comparativeData?.company_profile || comparativeData?.data?.company_profile || comparativeData?.comparative_analysis) &&
+                          (comparativeLoading || doc?.comparative_analysis_status === "running")
+                        }
+                        currentStage={doc?.current_stage || "Competitive Benchmark Analysis"}
+                        onRerun={() => {
+                          setComparativeLoading(true);
+                          fetchComparativeAnalysis(id).then(res => {
+                            setComparativeData(res);
+                            setComparativeLoading(false);
+                          }).catch(() => setComparativeLoading(false));
+                        }}
+                      />
+                    </div>
+                  )
+                ) : (
+                  /* Executive Reports Page */
+                  !(doc?.reports_ready || doc?.status === "completed") ? (
+                    <div style={{ background: "var(--bg-card)", border: "1px solid var(--border)", borderRadius: 12, padding: 40, textAlign: "center" }}>
+                      <div style={{ fontSize: 36, marginBottom: 12 }}>🔒</div>
+                      <h3 style={{ margin: 0, fontSize: 18, fontWeight: 700, color: "var(--text-primary)" }}>Executive Reports are Locked</h3>
+                      <p style={{ fontSize: 13, color: "var(--text-secondary)", maxWidth: 500, margin: "8px auto 16px" }}>
+                        Executive Insights Report Generation (Stage 8) is currently processing or pending. Executive Reports will unlock automatically once stage 8 completes.
+                      </p>
+                      <button style={styles.backBtn} onClick={() => handleTabChange("overview")}>Return to Overview</button>
+                    </div>
+                  ) : (
+                    <div style={{ background: "var(--bg-card)", border: "1px solid var(--border)", borderRadius: 12, padding: 20, minHeight: 500 }}>
+                      <Reports activeDocId={id} />
+                    </div>
+                  )
+                )}
               </div>
-            )}
-          </div>
-        ) : activeTab === "assistant" ? (
-          /* Embedded AI Assistant Chat Panel */
-          <div style={{ background: "var(--bg-card)", border: "1px solid var(--border)", borderRadius: 12, padding: 16, minHeight: 500 }}>
-            <Assistant onSelectPage={(page) => {
-              setActiveTab("proofreading");
-              if (doc && doc.issues) {
-                const firstIssueIdx = (doc.issues || []).filter(Boolean).findIndex(i => i.page_number === page);
-                if (firstIssueIdx !== -1) {
-                  handleSelectIssue(firstIssueIdx);
-                }
-              }
-            }} />
-          </div>
-        ) : activeTab === "analysis" || activeTab === "context" ? (
-          /* Context Analysis Report Dashboard */
-          <div style={{ background: "var(--bg-card)", border: "1px solid var(--border)", borderRadius: 12, padding: 20, minHeight: 500 }}>
-            <ContextAnalysis id={id} onShowInDocument={handleShowInDocument} />
-          </div>
-        ) : activeTab === "comparative" || activeTab === "comparative-analysis" ? (
-          /* Executive Comparative Analysis Workspace */
-          <div style={{ background: "var(--bg-card)", border: "1px solid var(--border)", borderRadius: 12, padding: 20, minHeight: 500 }}>
-            <ComparativeAnalysisView
-              id={id}
-              data={comparativeData}
-              isRunning={
-                !(comparativeData?.company_profile || comparativeData?.data?.company_profile || comparativeData?.comparative_analysis) &&
-                (comparativeLoading || doc?.comparative_analysis_status === "running")
-              }
-              currentStage={doc?.current_stage || "Stage 10: Comparative Analysis"}
-              onRerun={() => {
-                setComparativeLoading(true);
-                fetchComparativeAnalysis(id).then(res => {
-                  setComparativeData(res);
-                  setComparativeLoading(false);
-                }).catch(() => setComparativeLoading(false));
-              }}
-            />
-          </div>
-        ) : (
-          /* Executive Reports Page */
-          <div style={{ background: "var(--bg-card)", border: "1px solid var(--border)", borderRadius: 12, padding: 20, minHeight: 500 }}>
-            <Reports activeDocId={id} />
-          </div>
-        )}
 
-
-      {/* 4. Footer legend bar */}
-      <div style={styles.footerBar}>
-        <div style={styles.legendGroup}>
-          <div style={styles.legendItem}>
-            <span style={{ ...styles.dot, background: "var(--amber)" }} />
-            <span>{spellingCount} spelling pending</span>
-          </div>
-          <div style={styles.legendItem}>
-            <span style={{ ...styles.dot, background: "var(--red)" }} />
-            <span>{grammarCount} grammar pending</span>
-          </div>
-          {totalChecked > 0 && (
-            <div style={styles.legendItem}>
-              <span style={{ ...styles.dot, background: "var(--green)" }} />
-              <span>{acceptedCount} accepted, {rejectedCount} rejected</span>
+              {/* Right Panel: Fixed Enterprise Document Details Sidebar (27% width, sticky, non-proofreading tabs) */}
+              {!isProofreadTab && (
+                <WorkspaceSidebar
+                  doc={doc}
+                  stages={getTimelineStages(doc)}
+                  overallProgress={doc.overall_progress !== undefined ? doc.overall_progress : Math.round(doc.progress_percentage || 0)}
+                  onRefresh={() => {
+                    fetchDocument(id).then(data => { if (data) setDoc(data); });
+                  }}
+                  onViewRawText={() => setRawTextOpen(true)}
+                  onOpenAssistant={() => handleTabChange("assistant")}
+                  onDownloadOriginal={handleDownloadOriginal}
+                  onRetryStage={handleRetryStage}
+                />
+              )}
             </div>
-          )}
-          {doc.protected_terms?.length > 0 && (
-            <div style={styles.legendItem}>
-              <span style={{ ...styles.dot, background: "var(--brand)" }} />
-              <span>{doc.protected_terms.length} protected</span>
-            </div>
-          )}
-        </div>
-
-        {doc.protected_terms?.length > 0 && (
-          <button style={styles.whitelistBtn} onClick={handleOpenProtectedTerms}>
-            View protected terms
-          </button>
-        )}
-      </div>
+          );
+        })()}
 
       {/* Protected Terms Modal */}
       {protectedOpen && (

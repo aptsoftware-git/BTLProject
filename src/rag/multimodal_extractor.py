@@ -449,6 +449,11 @@ class MultimodalExtractor:
             pipeline_options.do_ocr = self.enable_ocr
             pipeline_options.do_table_structure = self.enable_table_extraction
             pipeline_options.generate_picture_images = self.enable_image_extraction
+            try:
+                from docling.datamodel.pipeline_options import RapidOcrOptions
+                pipeline_options.ocr_options = RapidOcrOptions()
+            except ImportError:
+                pass
             
             converter = DocumentConverter(
                 format_options={
@@ -596,11 +601,13 @@ class MultimodalExtractor:
                     
                     # Smart VLM Skip Filter
                     is_decorative = False
+                    # Smart filtering: skip VLM for decorative, small icons, logos, or minor graphics
                     if new_png_path.exists():
                         try:
+                            file_size_kb = new_png_path.stat().st_size / 1024.0
                             with Image.open(new_png_path) as pil_img:
                                 w, h = pil_img.size
-                                if w < 50 or h < 50 or (w * h) < 2500:
+                                if w < 120 or h < 120 or (w * h) < 15000 or file_size_kb < 8.0:
                                     is_decorative = True
                         except Exception:
                             pass

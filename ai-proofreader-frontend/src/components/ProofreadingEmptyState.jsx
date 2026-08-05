@@ -67,7 +67,7 @@ export default function ProofreadingEmptyState() {
                 <div
                   key={doc.id}
                   style={styles.row}
-                  onClick={() => navigate(`/documents/${doc.id}`)}
+                  onClick={() => navigate(`/documents/${doc.id}?tab=proofreading`)}
                 >
                   <div style={styles.rowInfo}>
                     <p style={styles.filename}>{doc.filename}</p>

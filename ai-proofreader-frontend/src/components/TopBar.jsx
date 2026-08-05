@@ -13,12 +13,34 @@ export default function TopBar({ userInitial = "S" }) {
   const [activeDoc, setActiveDoc] = useState(null);
 
   useEffect(() => {
-    const updateActiveDoc = () => {
+    const updateActiveDoc = (evt) => {
       const id = localStorage.getItem("currentlyOpenDocId");
       const name = localStorage.getItem("currentlyOpenDocName");
       const pages = localStorage.getItem("currentlyOpenDocPages");
+      const status = localStorage.getItem("currentlyOpenDocStatus") || "pending";
+      let flags = {};
+      try {
+        const rawFlags = localStorage.getItem("currentlyOpenDocFlags");
+        if (rawFlags) flags = JSON.parse(rawFlags);
+      } catch (e) {}
+
+      if (evt && evt.detail) {
+        const detail = evt.detail;
+        flags = {
+          upload_ready: detail.upload_ready,
+          document_viewer_ready: detail.document_viewer_ready || detail.extraction_ready,
+          spell_ready: detail.spell_ready,
+          grammar_ready: detail.grammar_ready,
+          proofreading_ready: detail.proofreading_ready || detail.spell_ready || detail.grammar_ready || detail.status === "completed",
+          rag_ready: detail.rag_ready || detail.rag_status === "completed" || detail.status === "completed",
+          context_analysis_ready: detail.context_analysis_ready || detail.context_analysis_status === "completed" || detail.status === "completed",
+          comparative_analysis_ready: detail.comparative_analysis_ready || detail.comparative_analysis_status === "completed" || detail.status === "completed",
+          reports_ready: detail.reports_ready || detail.status === "completed"
+        };
+      }
+
       if (id && name) {
-        setActiveDoc({ id, name, pages });
+        setActiveDoc({ id, name, pages, status, flags });
       } else {
         setActiveDoc(null);
       }
@@ -94,7 +116,7 @@ export default function TopBar({ userInitial = "S" }) {
   };
 
   const queryParams = new URLSearchParams(location.search);
-  const activeTab = queryParams.get("tab") || "overview";
+  const activeTab = queryParams.get("tab") || "proofreading";
 
   const isProofreadActive = activeTab === "proofreading" && location.pathname.includes("/documents");
   const isAssistantActive = activeTab === "assistant" && location.pathname.includes("/documents");
@@ -102,7 +124,7 @@ export default function TopBar({ userInitial = "S" }) {
   const isComparativeActive = (activeTab === "comparative" || activeTab === "comparative-analysis") && location.pathname.includes("/documents");
   const isReportsActive = activeTab === "reports" && location.pathname.includes("/documents");
 
-  let assessmentText = "Under Review";
+  let assessmentText = "In Progress";
   let badgeColor = "var(--amber)";
   let badgeBg = "var(--amber-light)";
   
@@ -129,9 +151,17 @@ export default function TopBar({ userInitial = "S" }) {
   }
 
   const handleNavTab = (tab) => {
-    if (activeDoc) {
+    if (activeDoc && activeDoc.id) {
       navigate(`/documents/${activeDoc.id}?tab=${tab}`);
       window.dispatchEvent(new Event("activeDocChanged"));
+    } else {
+      const storedId = localStorage.getItem("currentlyOpenDocId");
+      if (storedId) {
+        navigate(`/documents/${storedId}?tab=${tab}`);
+        window.dispatchEvent(new Event("activeDocChanged"));
+      } else {
+        navigate("/");
+      }
     }
   };
 
@@ -145,7 +175,7 @@ export default function TopBar({ userInitial = "S" }) {
       <header style={styles.bar}>
         <div style={{ display: "flex", alignItems: "center", gap: 16 }}>
           <p onClick={() => navigate("/")} style={{ ...styles.title, cursor: "pointer" }}>
-            AI Document Intelligence Platform
+            Corporate Document Intelligence Platform 
           </p>
         </div>
         <div style={styles.actions}>
@@ -198,10 +228,10 @@ export default function TopBar({ userInitial = "S" }) {
               <div style={{ ...styles.dropdown, right: 0 }}>
                 <p style={styles.dropdownHeader}>User Account</p>
                 <div style={styles.dropdownContent}>
-                  <button style={styles.menuItem} onClick={() => alert("Profile Coming soon")}>Profile</button>
-                  <button style={styles.menuItem} onClick={() => alert("Settings page")}>Settings</button>
+                  <button style={styles.menuItem} onClick={() => { setAvatarOpen(false); navigate("/settings"); }}>Profile</button>
+                  <button style={styles.menuItem} onClick={() => { setAvatarOpen(false); navigate("/settings"); }}>Settings</button>
                   <hr style={styles.hr} />
-                  <button style={{ ...styles.menuItem, color: "var(--red)" }} onClick={() => console.log("Sign out triggered")}>Sign out</button>
+                  <button style={{ ...styles.menuItem, color: "var(--red)" }} onClick={() => { setAvatarOpen(false); navigate("/"); }}>Sign out</button>
                 </div>
               </div>
             )}
@@ -214,9 +244,13 @@ export default function TopBar({ userInitial = "S" }) {
       {activeDoc && (
         <div style={styles.subBar}>
           <div style={{ display: "flex", alignItems: "center", gap: 10, overflow: "hidden" }}>
-            <div style={{ display: "flex", alignItems: "center", gap: 6, color: "var(--text-secondary)", flexShrink: 0 }}>
+            <div 
+              style={{ display: "flex", alignItems: "center", gap: 6, color: "var(--text-secondary)", flexShrink: 0, cursor: "pointer" }}
+              onClick={() => handleNavTab("overview")}
+              title="Click to view Document Overview"
+            >
               <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
-              <strong style={{ fontSize: 12.5, color: "var(--text-primary)", maxWidth: 160, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }} title={activeDoc.name}>
+              <strong style={{ fontSize: 12.5, color: "var(--brand)", maxWidth: 160, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }} title={activeDoc.name}>
                 {activeDoc.name}
               </strong>
               <span style={{ fontSize: 11, color: "var(--text-muted)" }}>({activeDoc.pages} Pages)</span>
@@ -253,65 +287,99 @@ export default function TopBar({ userInitial = "S" }) {
               Workspace Tab:
             </span>
 
-            <button
-              onClick={() => handleNavTab("proofreading")}
-              style={{
-                ...styles.navLink,
-                backgroundColor: isProofreadActive ? "var(--brand-light)" : "transparent",
-                color: isProofreadActive ? "var(--brand)" : "var(--text-secondary)",
-                fontWeight: isProofreadActive ? 700 : 500
-              }}
-            >
-              Proofread
-            </button>
+            {(() => {
+              const flags = activeDoc?.flags || {};
+              const isCompleted = activeDoc?.status === "completed";
+              const isProofreadReady = flags.proofreading_ready || flags.spell_ready || flags.grammar_ready || isCompleted;
+              const isAssistantReady = flags.rag_ready || isCompleted;
+              const isAnalysisReady = flags.context_analysis_ready || isCompleted;
+              const isComparativeReady = flags.comparative_analysis_ready || isCompleted;
+              const isReportsReady = flags.reports_ready || isCompleted;
 
-            <button
-              onClick={() => handleNavTab("assistant")}
-              style={{
-                ...styles.navLink,
-                backgroundColor: isAssistantActive ? "var(--brand-light)" : "transparent",
-                color: isAssistantActive ? "var(--brand)" : "var(--text-secondary)",
-                fontWeight: isAssistantActive ? 700 : 500
-              }}
-            >
-              Ask AI
-            </button>
+              return (
+                <>
+                  <button
+                    onClick={() => isProofreadReady && handleNavTab("proofreading")}
+                    title={isProofreadReady ? "Proofread Document" : "Locked: Waiting for Language & Spelling Review (Stage 3)"}
+                    disabled={!isProofreadReady}
+                    style={{
+                      ...styles.navLink,
+                      backgroundColor: isProofreadActive ? "var(--brand-light)" : "transparent",
+                      color: isProofreadActive ? "var(--brand)" : isProofreadReady ? "var(--text-secondary)" : "var(--text-muted)",
+                      fontWeight: isProofreadActive ? 700 : 500,
+                      opacity: isProofreadReady ? 1 : 0.5,
+                      cursor: isProofreadReady ? "pointer" : "not-allowed"
+                    }}
+                  >
+                    Proofread {!isProofreadReady && "🔒"}
+                  </button>
 
-            <button
-              onClick={() => handleNavTab("analysis")}
-              style={{
-                ...styles.navLink,
-                backgroundColor: isAnalysisActive ? "var(--brand-light)" : "transparent",
-                color: isAnalysisActive ? "var(--brand)" : "var(--text-secondary)",
-                fontWeight: isAnalysisActive ? 700 : 500
-              }}
-            >
-              Context Analysis
-            </button>
+                  <button
+                    onClick={() => isAssistantReady && handleNavTab("assistant")}
+                    title={isAssistantReady ? "Ask AI Assistant" : "Locked: Waiting for Knowledge Index Creation (Stage 5)"}
+                    disabled={!isAssistantReady}
+                    style={{
+                      ...styles.navLink,
+                      backgroundColor: isAssistantActive ? "var(--brand-light)" : "transparent",
+                      color: isAssistantActive ? "var(--brand)" : isAssistantReady ? "var(--text-secondary)" : "var(--text-muted)",
+                      fontWeight: isAssistantActive ? 700 : 500,
+                      opacity: isAssistantReady ? 1 : 0.5,
+                      cursor: isAssistantReady ? "pointer" : "not-allowed"
+                    }}
+                  >
+                    Ask AI {!isAssistantReady && "🔒"}
+                  </button>
 
-            <button
-              onClick={() => handleNavTab("comparative")}
-              style={{
-                ...styles.navLink,
-                backgroundColor: isComparativeActive ? "var(--brand-light)" : "transparent",
-                color: isComparativeActive ? "var(--brand)" : "var(--text-secondary)",
-                fontWeight: isComparativeActive ? 700 : 500
-              }}
-            >
-              Comparative Analysis
-            </button>
+                  <button
+                    onClick={() => isAnalysisReady && handleNavTab("analysis")}
+                    title={isAnalysisReady ? "Ambiguity Analysis" : "Locked: Waiting for Consistency & Contradiction Review (Stage 6)"}
+                    disabled={!isAnalysisReady}
+                    style={{
+                      ...styles.navLink,
+                      backgroundColor: isAnalysisActive ? "var(--brand-light)" : "transparent",
+                      color: isAnalysisActive ? "var(--brand)" : isAnalysisReady ? "var(--text-secondary)" : "var(--text-muted)",
+                      fontWeight: isAnalysisActive ? 700 : 500,
+                      opacity: isAnalysisReady ? 1 : 0.5,
+                      cursor: isAnalysisReady ? "pointer" : "not-allowed"
+                    }}
+                  >
+                    Ambiguity Analysis {!isAnalysisReady && "🔒"}
+                  </button>
 
-            <button
-              onClick={() => handleNavTab("reports")}
-              style={{
-                ...styles.navLink,
-                backgroundColor: isReportsActive ? "var(--brand-light)" : "transparent",
-                color: isReportsActive ? "var(--brand)" : "var(--text-secondary)",
-                fontWeight: isReportsActive ? 700 : 500
-              }}
-            >
-              Reports
-            </button>
+                  <button
+                    onClick={() => isComparativeReady && handleNavTab("comparative")}
+                    title={isComparativeReady ? "Comparative Analysis" : "Locked: Waiting for Competitive Benchmark Analysis (Stage 7)"}
+                    disabled={!isComparativeReady}
+                    style={{
+                      ...styles.navLink,
+                      backgroundColor: isComparativeActive ? "var(--brand-light)" : "transparent",
+                      color: isComparativeActive ? "var(--brand)" : isComparativeReady ? "var(--text-secondary)" : "var(--text-muted)",
+                      fontWeight: isComparativeActive ? 700 : 500,
+                      opacity: isComparativeReady ? 1 : 0.5,
+                      cursor: isComparativeReady ? "pointer" : "not-allowed"
+                    }}
+                  >
+                    Comparative Analysis {!isComparativeReady && "🔒"}
+                  </button>
+
+                  <button
+                    onClick={() => isReportsReady && handleNavTab("reports")}
+                    title={isReportsReady ? "Reports Page" : "Locked: Waiting for Executive Insights Report (Stage 8)"}
+                    disabled={!isReportsReady}
+                    style={{
+                      ...styles.navLink,
+                      backgroundColor: isReportsActive ? "var(--brand-light)" : "transparent",
+                      color: isReportsActive ? "var(--brand)" : isReportsReady ? "var(--text-secondary)" : "var(--text-muted)",
+                      fontWeight: isReportsActive ? 700 : 500,
+                      opacity: isReportsReady ? 1 : 0.5,
+                      cursor: isReportsReady ? "pointer" : "not-allowed"
+                    }}
+                  >
+                    Reports {!isReportsReady && "🔒"}
+                  </button>
+                </>
+              );
+            })()}
 
             <button
               onClick={handleTriggerExport}

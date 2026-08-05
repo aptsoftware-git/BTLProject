@@ -24,6 +24,7 @@ NOISE_DOMAINS = {
     "grandviewresearch.com", "gartner.com", "forrester.com", "idc.com", "statista.com",
     "imarcgroup.com", "marketsandmarkets.com", "mordorintelligence.com",
     "fortunebusinessinsights.com", "technavio.com", "verifiedmarketresearch.com",
+    "futuremarketinsights.com", "factmr.com", "constructionworld.in", "reanin.com", "ensun.io",
     "economictimes.indiatimes.com", "moneycontrol.com", "livemint.com"
 }
 
@@ -31,7 +32,8 @@ NOISE_PATH_KEYWORDS = [
     "/blog/", "/blogs/", "/news/", "/article/", "/press-release/", "/press/",
     "/careers/", "/jobs/", "/job/", "/vacancy/", ".pdf", "/pdf/", "/top-",
     "/best-", "/list-", "/directory/", "/ranking/", "/comparison/", "/vs/", "/reviews/",
-    "/market-report/", "/industry-report/", "/company-profile/", "/profile/"
+    "/market-report/", "/industry-report/", "/company-profile/", "/profile/",
+    "epc-companies", "top-10", "top-5"
 ]
 
 INVALID_COMPETITOR_TYPES = [
@@ -49,7 +51,8 @@ NON_COMPETITOR_KEYWORDS = [
     "dnb", "owler", "tracxn", "yellowpages", "statista", "gartner",
     "forrester", "idc", "imarc", "mordor", "technavio", "grandview",
     "company profile pages", "market reports", "research sources", "directories",
-    "businessline", "construction world"
+    "businessline", "construction world", "future market insights", "factmr",
+    "marketsandmarkets", "epc companies in india", "reanin", "ensun"
 ]
 
 
