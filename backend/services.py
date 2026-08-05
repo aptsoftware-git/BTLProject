@@ -458,7 +458,8 @@ def recover_stuck_jobs_on_startup():
         logging.getLogger("backend").error("Failed startup stuck job recovery: %s", exc)
 
 
-threading.Thread(target=recover_stuck_jobs_on_startup, daemon=True).start()
+# Automatic startup job recovery disabled per user configuration
+# threading.Thread(target=recover_stuck_jobs_on_startup, daemon=True).start()
 
 
 def get_all_jobs() -> list[Dict[str, Any]]:

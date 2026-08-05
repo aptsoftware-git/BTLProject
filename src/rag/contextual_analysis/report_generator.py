@@ -128,9 +128,9 @@ class ReportGenerator:
             ))
 
         total = len(mapped_issues)
-        high = sum(1 for i in mapped_issues if i.severity == "High")
-        med = sum(1 for i in mapped_issues if i.severity == "Medium")
-        low = sum(1 for i in mapped_issues if i.severity == "Low")
+        high = sum(1 for i in mapped_issues if str(i.severity).upper() in ("HIGH", "CRITICAL"))
+        med = sum(1 for i in mapped_issues if str(i.severity).upper() == "MEDIUM")
+        low = sum(1 for i in mapped_issues if str(i.severity).upper() == "LOW")
         
         categories_distribution = {cat: 0 for cat in standard_categories}
         for i in mapped_issues:

@@ -75,6 +75,7 @@ class SentenceSplitter:
                             text=text,
                             start_offset=start,
                             end_offset=end,
+                            bbox=paragraph.bbox,
                         )
                     )
                     sentence_counter += 1
@@ -92,6 +93,7 @@ class SentenceSplitter:
                             text=text,
                             start_offset=start,
                             end_offset=end,
+                            bbox=paragraph.bbox,
                         )
                     )
                     sentence_counter += 1

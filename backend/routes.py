@@ -795,14 +795,19 @@ async def get_document(job_id: str):
             backend_logger.warning("Error reading summary.csv for job %s: %s", job_id, exc)
     response_data["reports"] = reports
 
-    # Load raw_text
+    # Load raw_text with fallback paths
     raw_text = ""
-    raw_text_path = job_dir / "03_preprocessed" / "normalized_text.txt"
-    if raw_text_path.exists():
-        try:
-            raw_text = raw_text_path.read_text(encoding="utf-8")
-        except Exception as exc:
-            backend_logger.warning("Error reading normalized_text.txt for job %s: %s", job_id, exc)
+    for rel_path in ["03_preprocessed/normalized_text.txt", "02_filtered/filtered_text.txt", "01_raw/raw_text.txt"]:
+        raw_text_path = job_dir / rel_path
+        if raw_text_path.exists():
+            try:
+                txt = raw_text_path.read_text(encoding="utf-8")
+                if txt and txt.strip():
+                    raw_text = txt
+                    break
+            except Exception as exc:
+                backend_logger.warning("Error reading %s for job %s: %s", rel_path, job_id, exc)
+    response_data["raw_text"] = raw_text
     return response_data
 
 

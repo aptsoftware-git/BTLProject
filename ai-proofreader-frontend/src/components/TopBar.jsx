@@ -290,92 +290,100 @@ export default function TopBar({ userInitial = "S" }) {
             {(() => {
               const flags = activeDoc?.flags || {};
               const isCompleted = activeDoc?.status === "completed";
+              const isProcessing = activeDoc?.status === "processing" || activeDoc?.status === "pending";
+
               const isProofreadReady = flags.proofreading_ready || flags.spell_ready || flags.grammar_ready || isCompleted;
               const isAssistantReady = flags.rag_ready || isCompleted;
               const isAnalysisReady = flags.context_analysis_ready || isCompleted;
               const isComparativeReady = flags.comparative_analysis_ready || isCompleted;
               const isReportsReady = flags.reports_ready || isCompleted;
 
+              const isProofreadRunning = !isProofreadReady && isProcessing;
+              const isAssistantRunning = !isAssistantReady && isProcessing;
+              const isAnalysisRunning = !isAnalysisReady && isProcessing;
+              const isComparativeRunning = !isComparativeReady && isProcessing;
+              const isReportsRunning = !isReportsReady && isProcessing;
+
               return (
                 <>
                   <button
                     onClick={() => isProofreadReady && handleNavTab("proofreading")}
-                    title={isProofreadReady ? "Proofread Document" : "Locked: Waiting for Language & Spelling Review (Stage 3)"}
+                    title={isProofreadReady ? "Proofread Workspace Ready (Stage 3 & 4)" : isProofreadRunning ? "Stage 3 Language Review Running..." : "Locked: Available after Language & Spelling Review (Stage 3)"}
                     disabled={!isProofreadReady}
                     style={{
                       ...styles.navLink,
                       backgroundColor: isProofreadActive ? "var(--brand-light)" : "transparent",
-                      color: isProofreadActive ? "var(--brand)" : isProofreadReady ? "var(--text-secondary)" : "var(--text-muted)",
-                      fontWeight: isProofreadActive ? 700 : 500,
-                      opacity: isProofreadReady ? 1 : 0.5,
+                      color: isProofreadActive ? "var(--brand)" : isProofreadReady ? "var(--text-primary)" : isProofreadRunning ? "var(--amber)" : "var(--text-muted)",
+                      fontWeight: isProofreadActive ? 750 : 600,
+                      opacity: isProofreadReady ? 1 : 0.65,
                       cursor: isProofreadReady ? "pointer" : "not-allowed"
                     }}
                   >
-                    Proofread {!isProofreadReady && "🔒"}
+                    Proofread 
                   </button>
 
                   <button
                     onClick={() => isAssistantReady && handleNavTab("assistant")}
-                    title={isAssistantReady ? "Ask AI Assistant" : "Locked: Waiting for Knowledge Index Creation (Stage 5)"}
+                    title={isAssistantReady ? "Ask AI Assistant Ready (Stage 5)" : isAssistantRunning ? "Stage 5 Knowledge Indexing Running..." : "Locked: Available after Knowledge Index Creation (Stage 5)"}
                     disabled={!isAssistantReady}
                     style={{
                       ...styles.navLink,
                       backgroundColor: isAssistantActive ? "var(--brand-light)" : "transparent",
-                      color: isAssistantActive ? "var(--brand)" : isAssistantReady ? "var(--text-secondary)" : "var(--text-muted)",
-                      fontWeight: isAssistantActive ? 700 : 500,
-                      opacity: isAssistantReady ? 1 : 0.5,
+                      color: isAssistantActive ? "var(--brand)" : isAssistantReady ? "var(--text-primary)" : isAssistantRunning ? "var(--amber)" : "var(--text-muted)",
+                      fontWeight: isAssistantActive ? 750 : 600,
+                      opacity: isAssistantReady ? 1 : 0.65,
                       cursor: isAssistantReady ? "pointer" : "not-allowed"
                     }}
                   >
-                    Ask AI {!isAssistantReady && "🔒"}
+                    Ask AI 
                   </button>
 
                   <button
                     onClick={() => isAnalysisReady && handleNavTab("analysis")}
-                    title={isAnalysisReady ? "Ambiguity Analysis" : "Locked: Waiting for Consistency & Contradiction Review (Stage 6)"}
+                    title={isAnalysisReady ? "Ambiguity Analysis Ready (Stage 6)" : isAnalysisRunning ? "Stage 6 Consistency Review Running..." : "Locked: Available after Consistency & Contradiction Review (Stage 6)"}
                     disabled={!isAnalysisReady}
                     style={{
                       ...styles.navLink,
                       backgroundColor: isAnalysisActive ? "var(--brand-light)" : "transparent",
-                      color: isAnalysisActive ? "var(--brand)" : isAnalysisReady ? "var(--text-secondary)" : "var(--text-muted)",
-                      fontWeight: isAnalysisActive ? 700 : 500,
-                      opacity: isAnalysisReady ? 1 : 0.5,
+                      color: isAnalysisActive ? "var(--brand)" : isAnalysisReady ? "var(--text-primary)" : isAnalysisRunning ? "var(--amber)" : "var(--text-muted)",
+                      fontWeight: isAnalysisActive ? 750 : 600,
+                      opacity: isAnalysisReady ? 1 : 0.65,
                       cursor: isAnalysisReady ? "pointer" : "not-allowed"
                     }}
                   >
-                    Ambiguity Analysis {!isAnalysisReady && "🔒"}
+                    Ambiguity Analysis 
                   </button>
 
                   <button
                     onClick={() => isComparativeReady && handleNavTab("comparative")}
-                    title={isComparativeReady ? "Comparative Analysis" : "Locked: Waiting for Competitive Benchmark Analysis (Stage 7)"}
+                    title={isComparativeReady ? "Comparative Analysis Ready (Stage 7)" : isComparativeRunning ? "Stage 7 Benchmark Analysis Running..." : "Locked: Available after Competitive Benchmark Analysis (Stage 7)"}
                     disabled={!isComparativeReady}
                     style={{
                       ...styles.navLink,
                       backgroundColor: isComparativeActive ? "var(--brand-light)" : "transparent",
-                      color: isComparativeActive ? "var(--brand)" : isComparativeReady ? "var(--text-secondary)" : "var(--text-muted)",
-                      fontWeight: isComparativeActive ? 700 : 500,
-                      opacity: isComparativeReady ? 1 : 0.5,
+                      color: isComparativeActive ? "var(--brand)" : isComparativeReady ? "var(--text-primary)" : isComparativeRunning ? "var(--amber)" : "var(--text-muted)",
+                      fontWeight: isComparativeActive ? 750 : 600,
+                      opacity: isComparativeReady ? 1 : 0.65,
                       cursor: isComparativeReady ? "pointer" : "not-allowed"
                     }}
                   >
-                    Comparative Analysis {!isComparativeReady && "🔒"}
+                    Comparative Analysis
                   </button>
 
                   <button
                     onClick={() => isReportsReady && handleNavTab("reports")}
-                    title={isReportsReady ? "Reports Page" : "Locked: Waiting for Executive Insights Report (Stage 8)"}
+                    title={isReportsReady ? "Executive Reports Ready (Stage 8)" : isReportsRunning ? "Stage 8 Report Generation Running..." : "Locked: Available after Executive Insights Report (Stage 8)"}
                     disabled={!isReportsReady}
                     style={{
                       ...styles.navLink,
                       backgroundColor: isReportsActive ? "var(--brand-light)" : "transparent",
-                      color: isReportsActive ? "var(--brand)" : isReportsReady ? "var(--text-secondary)" : "var(--text-muted)",
-                      fontWeight: isReportsActive ? 700 : 500,
-                      opacity: isReportsReady ? 1 : 0.5,
+                      color: isReportsActive ? "var(--brand)" : isReportsReady ? "var(--text-primary)" : isReportsRunning ? "var(--amber)" : "var(--text-muted)",
+                      fontWeight: isReportsActive ? 750 : 600,
+                      opacity: isReportsReady ? 1 : 0.65,
                       cursor: isReportsReady ? "pointer" : "not-allowed"
                     }}
                   >
-                    Reports {!isReportsReady && "🔒"}
+                    Reports 
                   </button>
                 </>
               );

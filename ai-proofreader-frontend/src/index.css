@@ -41,36 +41,40 @@
   --shadow-card: none;
 }
 
-mark.spelling {
+mark.spelling, mark.sev-low, mark.sev-medium {
   background-color: #FEF3C7 !important; /* Soft Amber */
   color: #92400E !important;
-  border-bottom: 2px solid #D97706 !important;
-  padding: 1px 3px !important;
+  border-bottom: 2.5px solid #D97706 !important;
+  padding: 2px 4px !important;
   border-radius: 4px !important;
   cursor: pointer !important;
+  font-weight: 700 !important;
   outline: none !important;
   transition: all 0.2s ease;
 }
-mark.spelling:hover, mark.spelling.active-highlight {
+mark.spelling:hover, mark.spelling.active-highlight, mark.sev-low:hover, mark.sev-medium:hover {
   background-color: #FDE68A !important;
+  box-shadow: 0 0 0 2.5px #D97706 !important;
 }
 
-mark.grammar {
+mark.grammar, mark.sev-high {
   background-color: #FEE2E2 !important; /* Soft Red */
   color: #991B1B !important;
-  border-bottom: 2px solid #DC2626 !important;
-  padding: 1px 3px !important;
+  border-bottom: 2.5px solid #DC2626 !important;
+  padding: 2px 4px !important;
   border-radius: 4px !important;
   cursor: pointer !important;
+  font-weight: 700 !important;
   outline: none !important;
   transition: all 0.2s ease;
 }
-mark.grammar:hover, mark.grammar.active-highlight {
+mark.grammar:hover, mark.grammar.active-highlight, mark.sev-high:hover {
   background-color: #FCA5A5 !important;
+  box-shadow: 0 0 0 2.5px #DC2626 !important;
 }
 
 mark.active-glow {
-  outline: 2px solid var(--brand) !important;
+  outline: 2.5px solid var(--brand) !important;
   outline-offset: 1px !important;
 }
 

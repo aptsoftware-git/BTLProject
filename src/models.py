@@ -42,6 +42,8 @@ class LayoutBlock:
     page: int
     text: str
     block_type: BlockType
+    bbox: Optional[Dict[str, Any]] = None
+    element_id: Optional[str] = None
 
 
 @dataclass
@@ -59,6 +61,7 @@ class Sentence:
     # reads these two fields directly rather than re-deriving them.
     doc_char_start: Optional[int] = None
     doc_char_end: Optional[int] = None
+    bbox: Optional[Dict[str, Any]] = None
 
 
 @dataclass
@@ -72,6 +75,8 @@ class Paragraph:
     # that need a *document-level* character offset (protected-terms spans,
     # annotator highlighting) don't have to re-derive it themselves.
     doc_char_start: Optional[int] = None
+    bbox: Optional[Dict[str, Any]] = None
+    element_id: Optional[str] = None
 
 
 @dataclass
@@ -172,6 +177,8 @@ class Candidate:
     source: SourceAgent
     reason: str
     confidence: float = 0.5
+    page_number: int = 1
+    bbox: Optional[Dict[str, Any]] = None
 
 
 @dataclass
@@ -186,6 +193,7 @@ class MergedIssue(ValidatedIssue):
     final_confidence: float = 0.5
     contributing_sources: List[SourceAgent] = field(default_factory=list)
     severity: str = "medium"
+    issue_id: Optional[str] = None
 
 
 @dataclass

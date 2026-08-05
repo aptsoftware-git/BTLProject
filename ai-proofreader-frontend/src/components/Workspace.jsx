@@ -273,9 +273,60 @@ const WorkspaceSidebar = ({
 }) => {
   if (!doc) return null;
 
+  const [isRefreshing, setIsRefreshing] = useState(false);
+
+  const isCompleted = doc.status === "completed";
   const isProcessing = doc.status === "processing" || doc.status === "pending";
   const isFailed = doc.status === "failed";
-  const currentStageName = doc.current_stage || (doc.status === "completed" ? "Executive Insights Report" : "Stage 1: Document Uploaded");
+
+  const isExtractionReady = doc.document_viewer_ready || doc.extraction_ready || (doc.raw_text && doc.raw_text.length > 0) || isCompleted;
+  const isAssistantReady = doc.rag_ready || doc.rag_status === "completed" || isCompleted;
+
+  // Calculate live overall progress accurately from flags if missing/0
+  const computedProgress = () => {
+    if (isCompleted) return 100;
+    if (doc.overall_progress !== undefined && doc.overall_progress > 0) return doc.overall_progress;
+    if (doc.progress_percentage !== undefined && doc.progress_percentage > 0) return Math.round(doc.progress_percentage);
+    
+    if (doc.reports_ready) return 100;
+    if (doc.comparative_analysis_ready || doc.comparative_analysis_status === "completed") return 87;
+    if (doc.context_analysis_ready || doc.context_analysis_status === "completed") return 75;
+    if (doc.rag_ready || doc.rag_status === "completed") return 62;
+    if (doc.grammar_ready || doc.proofreading_ready) return 50;
+    if (doc.spell_ready) return 37;
+    if (doc.document_viewer_ready || doc.extraction_ready) return 25;
+    if (doc.upload_ready) return 12;
+    return 0;
+  };
+
+  const activeProgress = computedProgress();
+
+  // Clean human-readable stage name calculation
+  const getStageDisplayName = () => {
+    if (isCompleted) return "Stage 8: Executive Insights Report (Completed)";
+    if (doc.current_stage && doc.current_stage !== "Completed" && doc.current_stage !== "completed") {
+      if (typeof doc.current_stage === "number") {
+        const stageObj = REQUIRED_8_STAGES.find(s => s.id === doc.current_stage);
+        return `Stage ${doc.current_stage}: ${stageObj ? stageObj.name : "Processing"}`;
+      }
+      return String(doc.current_stage);
+    }
+    if (doc.context_analysis_ready) return "Stage 7: Competitive Benchmark Analysis";
+    if (doc.rag_ready) return "Stage 6: Consistency & Contradiction Review";
+    if (doc.proofreading_ready || doc.grammar_ready) return "Stage 5: Knowledge Index Creation";
+    if (doc.spell_ready) return "Stage 4: Grammar & Writing Quality Review";
+    if (doc.document_viewer_ready || doc.extraction_ready) return "Stage 3: Language & Spelling Review";
+    if (doc.upload_ready) return "Stage 2: Document Content Extraction";
+    return "Stage 1: Document Uploaded";
+  };
+
+  const stageNameDisplay = getStageDisplayName();
+
+  const handleRefreshClick = async () => {
+    setIsRefreshing(true);
+    if (onRefresh) await onRefresh();
+    setTimeout(() => setIsRefreshing(false), 600);
+  };
 
   const sidebarActionStyle = {
     display: "flex",
@@ -342,89 +393,29 @@ const WorkspaceSidebar = ({
             <span style={{ color: "var(--text-secondary)" }}>Status:</span>
             <span style={{
               fontSize: 10.5, fontWeight: 750, padding: "2px 8px", borderRadius: 4,
-              background: doc.status === "completed" ? "var(--green-light)" : isFailed ? "var(--red-light)" : "var(--amber-light)",
-              color: doc.status === "completed" ? "var(--green)" : isFailed ? "var(--red)" : "var(--amber)"
+              background: isCompleted ? "var(--green-light)" : isFailed ? "var(--red-light)" : "var(--amber-light)",
+              color: isCompleted ? "var(--green)" : isFailed ? "var(--red)" : "var(--amber)"
             }}>
-              {doc.status === "completed" ? "Completed" : isFailed ? "Failed" : "Processing"}
+              {isCompleted ? "Completed" : isFailed ? "Failed" : "Processing"}
             </span>
           </div>
 
           <div style={{ display: "flex", flexDirection: "column", gap: 2, marginTop: 2 }}>
             <span style={{ color: "var(--text-secondary)", fontSize: 11 }}>Current Stage:</span>
-            <strong style={{ color: "var(--brand)", fontSize: 11.5, lineHeight: 1.3 }}>{currentStageName}</strong>
+            <strong style={{ color: "var(--brand)", fontSize: 11.5, lineHeight: 1.3 }}>{stageNameDisplay}</strong>
           </div>
 
           <div style={{ marginTop: 4 }}>
             <div style={{ display: "flex", justifyContent: "space-between", fontSize: 11, fontWeight: 700, marginBottom: 4 }}>
               <span>Pipeline Progress</span>
-              <span style={{ color: "var(--brand)" }}>{overallProgress}%</span>
+              <span style={{ color: "var(--brand)" }}>{activeProgress}%</span>
             </div>
             <div style={{ width: "100%", height: 6, background: "var(--border)", borderRadius: 3, overflow: "hidden" }}>
-              <div style={{ width: `${overallProgress}%`, height: "100%", background: "var(--brand)", transition: "width 0.3s ease" }} />
+              <div style={{ width: `${activeProgress}%`, height: "100%", background: "var(--brand)", transition: "width 0.3s ease" }} />
             </div>
           </div>
         </div>
       </div>
-
-      {/* SECTION 2: PIPELINE STAGES (8 STAGES COLOR CODED) */}
-      <div style={{ borderBottom: "1px solid var(--border)", paddingBottom: 14 }}>
-        <h4 style={{ margin: "0 0 10px", fontSize: 13.5, fontWeight: 750, color: "var(--text-primary)", display: "flex", alignItems: "center", gap: 6 }}>
-          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="var(--brand)" strokeWidth="2.5"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
-          Pipeline Stages (8)
-        </h4>
-
-        <div style={{ display: "flex", flexDirection: "column", gap: 5 }}>
-          {stages.map((st, idx) => {
-            const isComp = st.status === "Completed";
-            const isRun = st.status === "Running";
-            const isFail = st.status === "Failed";
-
-            return (
-              <div key={idx} style={{
-                display: "flex", alignItems: "center", justifyContent: "space-between",
-                padding: "5px 7px", borderRadius: 6,
-                background: isRun ? "rgba(108, 92, 231, 0.08)" : isComp ? "rgba(34, 197, 94, 0.05)" : "transparent",
-                border: isRun ? "1px solid rgba(108, 92, 231, 0.2)" : "1px solid transparent"
-              }}>
-                <div style={{ display: "flex", alignItems: "center", gap: 6, overflow: "hidden" }}>
-                  <span style={{
-                    width: 17, height: 17, borderRadius: "50%",
-                    background: isComp ? "var(--green-light)" : isRun ? "var(--brand-light)" : isFail ? "var(--red-light)" : "var(--border)",
-                    color: isComp ? "var(--green)" : isRun ? "var(--brand)" : isFail ? "var(--red)" : "var(--text-muted)",
-                    fontSize: 9.5, fontWeight: 800, display: "inline-flex", alignItems: "center", justifyContent: "center", flexShrink: 0
-                  }}>
-                    {idx + 1}
-                  </span>
-                  <span style={{ fontSize: 11, fontWeight: isRun ? 700 : 500, color: "var(--text-primary)", whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>
-                    {st.label}
-                  </span>
-                </div>
-
-                <span style={{
-                  fontSize: 9.5, fontWeight: 750, padding: "2px 5px", borderRadius: 4, flexShrink: 0,
-                  background: isComp ? "#E4F9EC" : isRun ? "#EEECFB" : isFail ? "#FEE2E2" : "#F1F5F9",
-                  color: isComp ? "#22C55E" : isRun ? "#6C5CE7" : isFail ? "#EF4444" : "#64748B"
-                }}>
-                  {isComp ? "✓ Done" : isRun ? "⟳ Active" : isFail ? "⚠ Failed" : "Queued"}
-                </span>
-              </div>
-            );
-          })}
-        </div>
-      </div>
-
-      {/* SECTION 3: CURRENT PROCESSING STATUS (If processing) */}
-      {isProcessing && (
-        <div style={{ background: "#EEECFB", border: "1px solid rgba(108,92,231,0.2)", borderRadius: 8, padding: 10 }}>
-          <div style={{ display: "flex", alignItems: "center", gap: 6, fontSize: 11.5, fontWeight: 700, color: "var(--brand)" }}>
-            <span style={{ width: 8, height: 8, borderRadius: "50%", background: "var(--brand)", animation: "pulse 1.2s infinite" }} />
-            Live Processing Activity
-          </div>
-          <p style={{ margin: "4px 0 0", fontSize: 11, color: "#1E293B" }}>
-            {currentStageName}
-          </p>
-        </div>
-      )}
 
       {/* SECTION 4: QUICK ACTIONS */}
       <div>
@@ -434,24 +425,44 @@ const WorkspaceSidebar = ({
         </h4>
 
         <div style={{ display: "flex", flexDirection: "column", gap: 6 }}>
-          <button onClick={onRefresh} style={sidebarActionStyle}>
-            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><path d="M21.5 2v6h-6M21.34 15.57a10 10 0 11-.57-8.38l5.67-5.67"/></svg>
-            Refresh Status
+          <button onClick={handleRefreshClick} style={sidebarActionStyle}>
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" style={{ transform: isRefreshing ? "rotate(180deg)" : "none", transition: "transform 0.3s" }}>
+              <path d="M21.5 2v6h-6M21.34 15.57a10 10 0 11-.57-8.38l5.67-5.67"/>
+            </svg>
+            {isRefreshing ? "Updating Status..." : "✓ Refresh Status"}
           </button>
 
-          <button onClick={onViewRawText} style={sidebarActionStyle}>
+          <button
+            onClick={() => isExtractionReady && onViewRawText()}
+            disabled={!isExtractionReady}
+            style={{
+              ...sidebarActionStyle,
+              opacity: isExtractionReady ? 1 : 0.5,
+              cursor: isExtractionReady ? "pointer" : "not-allowed"
+            }}
+            title={isExtractionReady ? "View Extracted Text (Stage 2 Ready)" : "🔒 Available after Stage 2 Document Content Extraction"}
+          >
             <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><polyline points="10 9 9 9 8 9"/></svg>
-            View Extracted Text
+            {isExtractionReady ? "✓ View Extracted Text" : "🔒 View Extracted Text"}
           </button>
 
-          <button onClick={onOpenAssistant} style={sidebarActionStyle}>
+          <button
+            onClick={() => isAssistantReady && onOpenAssistant()}
+            disabled={!isAssistantReady}
+            style={{
+              ...sidebarActionStyle,
+              opacity: isAssistantReady ? 1 : 0.5,
+              cursor: isAssistantReady ? "pointer" : "not-allowed"
+            }}
+            title={isAssistantReady ? "Ask AI Assistant (Stage 5 Ready)" : "🔒 Available after Stage 5 Knowledge Index Creation"}
+          >
             <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
-            Ask AI Assistant
+            {isAssistantReady ? "✓ Ask AI Assistant" : "🔒 Ask AI Assistant"}
           </button>
 
-          <button onClick={onDownloadOriginal} style={sidebarActionStyle}>
+          <button onClick={onDownloadOriginal} style={sidebarActionStyle} title="Download Original PDF Document">
             <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
-            Download Original
+            ✓ Download Original
           </button>
 
           {isFailed && (
@@ -494,6 +505,7 @@ export default function Workspace() {
   const [zoomLevel, setZoomLevel] = useState(100);
   const [currentPage, setCurrentPage] = useState(1);
   const [documentViewMode, setDocumentViewMode] = useState("pdfOverlay");
+  const [docCanvasMode, setDocCanvasMode] = useState("highlighted");
   const [isIssuesDrawerOpen, setIsIssuesDrawerOpen] = useState(true);
   const [isDocInfoOpen, setIsDocInfoOpen] = useState(false);
   const [comparativeData, setComparativeData] = useState(null);
@@ -528,15 +540,7 @@ export default function Workspace() {
     return () => window.removeEventListener("openDownloadModal", handleOpenModal);
   }, []);
 
-  // Synchronize activeTab with URL search query parameter (?tab=...)
-  useEffect(() => {
-    const params = new URLSearchParams(location.search);
-    const tabParam = params.get("tab");
-    if (tabParam) {
-      console.log("[Workspace Runtime] Syncing activeTab from URL parameter:", tabParam);
-      setActiveTab(tabParam);
-    }
-  }, [location.search]);
+
 
   const [activeIssueIdx, setActiveIssueIdx] = useState(null);
   const [issueDecisions, setIssueDecisions] = useState({});
@@ -573,18 +577,49 @@ export default function Workspace() {
     setReRunningPipeline(true);
     try {
       await retryJobStage(id, "all");
-      const data = await fetchDocument(id);
-      if (data) {
-        setDoc(data);
-      }
+      setDoc((prev) => (prev ? { ...prev, status: "processing" } : prev));
+
+      let attempts = 0;
+      const pollInterval = setInterval(async () => {
+        attempts += 1;
+        try {
+          const freshData = await fetchDocument(id);
+          if (freshData) {
+            setDoc(freshData);
+            if (freshData.status === "completed" || freshData.status === "failed" || attempts >= 25) {
+              clearInterval(pollInterval);
+              setReRunningPipeline(false);
+            }
+          }
+        } catch (e) {
+          console.error("Polling error during re-run:", e);
+        }
+      }, 1500);
+
       setActiveTab("proofreading");
       setProofSubTab("annotated");
     } catch (err) {
       console.error("Failed to re-run proofreading pipeline:", err);
-    } finally {
       setReRunningPipeline(false);
     }
   };
+
+  // Auto-poll document status while document processing is in progress
+  useEffect(() => {
+    if (!id || !doc) return;
+    if (doc.status === "completed" || doc.status === "failed") return;
+
+    const interval = setInterval(async () => {
+      try {
+        const fresh = await fetchDocument(id);
+        if (fresh) setDoc(fresh);
+      } catch (e) {
+        console.error("Auto-poll status error:", e);
+      }
+    }, 2000);
+
+    return () => clearInterval(interval);
+  }, [id, doc?.status]);
 
   // Synchronize document DOM highlights (fallback mode when annotatedHtml is rendered)
   useEffect(() => {
@@ -733,7 +768,7 @@ export default function Workspace() {
 
           if (data.raw_text) {
             setIssueDecisions({});
-          } else if (data.annotated_html && !annotatedHtml) {
+          } else if (data.annotated_html) {
             const parser = new DOMParser();
             const htmlDoc = parser.parseFromString(data.annotated_html, "text/html");
             const marks = htmlDoc.querySelectorAll("mark");
@@ -751,8 +786,11 @@ export default function Workspace() {
               } else {
                 if (mark) {
                   mark.setAttribute("data-issue-idx", String(idx));
+                  mark.setAttribute("id", `doc-issue-mark-${idx}`);
+                  const isSpelling = isSpellingIssue(issue);
                   const severity = issue.severity || "medium";
-                  mark.className = `sev-${severity} pending-highlight`;
+                  mark.className = `${isSpelling ? "spelling" : "grammar"} sev-${severity} pending-highlight`;
+                  mark.setAttribute("title", `[Issue #${idx + 1}] Click to select: ${issue.reason || issue.issue_type}`);
                 }
               }
             });
@@ -835,7 +873,8 @@ export default function Workspace() {
 
   useEffect(() => {
     const params = new URLSearchParams(location.search);
-    const tabVal = params.get("tab") || "overview";
+    const tabVal = params.get("tab") || "proofreading";
+    console.log("[Workspace Runtime] Syncing activeTab from URL parameter:", tabVal);
     setActiveTab(tabVal);
   }, [location.search]);
 
@@ -1375,6 +1414,152 @@ export default function Workspace() {
     return { ...doc.issues[activeIssueIdx], originalIndex: activeIssueIdx };
   }, [activeIssueIdx, doc]);
 
+  const getIssueCategoryInfo = (issue) => {
+    if (!issue) return { cat: "grammar", label: "Grammar Error", bg: "#FEE2E2", border: "#DC2626", color: "#991B1B" };
+    const type = (issue.issue_type || issue.category || issue.type || "").toLowerCase();
+
+    if (type.includes("spell") || type.includes("typo")) {
+      return { cat: "spelling", label: "Spelling Error", bg: "#FEF3C7", border: "#D97706", color: "#92400E" };
+    }
+    if (type.includes("style") || type.includes("clarity") || type.includes("readability") || type.includes("conciseness")) {
+      return { cat: "style", label: "Style Suggestion", bg: "#E0F2FE", border: "#0284C7", color: "#075985" };
+    }
+    if (type.includes("consist") || type.includes("context") || type.includes("term")) {
+      return { cat: "consistency", label: "Consistency Issue", bg: "#F3E8FF", border: "#9333EA", color: "#6B21A8" };
+    }
+    return { cat: "grammar", label: "Grammar Error", bg: "#FEE2E2", border: "#DC2626", color: "#991B1B" };
+  };
+
+  const renderHighlightedDocumentContent = () => {
+    if (!doc) return null;
+
+    if (doc.raw_text) {
+      const issues = doc.issues || [];
+      const validIssues = [];
+
+      issues.forEach((iss, idx) => {
+        if (!iss) return;
+        let start = iss.char_start;
+        let end = iss.char_end;
+
+        if ((start === undefined || end === undefined) && iss.original_text) {
+          const pos = doc.raw_text.indexOf(iss.original_text);
+          if (pos !== -1) {
+            start = pos;
+            end = pos + iss.original_text.length;
+          }
+        }
+
+        if (start !== undefined && end !== undefined && start >= 0 && end <= doc.raw_text.length) {
+          validIssues.push({ ...iss, originalIndex: idx, char_start: start, char_end: end });
+        }
+      });
+
+      validIssues.sort((a, b) => a.char_start - b.char_start);
+
+      if (validIssues.length === 0) {
+        return (
+          <div style={{ whiteSpace: "pre-wrap", fontFamily: "Inter, sans-serif", fontSize: 15, lineHeight: 1.85, color: "#1E293B" }}>
+            {doc.raw_text}
+          </div>
+        );
+      }
+
+      const elements = [];
+      let cursor = 0;
+
+      validIssues.forEach((issue) => {
+        const start = issue.char_start;
+        const end = issue.char_end;
+
+        if (start < cursor || start > doc.raw_text.length) return;
+
+        if (start > cursor) {
+          elements.push(
+            <span key={`txt-${cursor}`}>
+              {doc.raw_text.slice(cursor, start)}
+            </span>
+          );
+        }
+
+        const idx = issue.originalIndex;
+        const isSelected = activeIssueIdx === idx;
+        const decision = issueDecisions[idx];
+        const info = getIssueCategoryInfo(issue);
+
+        if (decision === "accepted") {
+          // Accept: Update document text live with suggested correction, remove highlight
+          elements.push(
+            <span key={`iss-acc-${idx}`} id={`doc-issue-mark-${idx}`} style={{ fontWeight: 650, color: "#059669", background: "#ECFDF5", padding: "0 2px", borderRadius: 3 }}>
+              {issue.suggested_text || issue.original_text || doc.raw_text.slice(start, end)}
+            </span>
+          );
+        } else if (decision === "rejected" || decision === "ignored") {
+          // Reject: Keep original text, remove highlight
+          elements.push(
+            <span key={`iss-rej-${idx}`} id={`doc-issue-mark-${idx}`}>
+              {issue.original_text || doc.raw_text.slice(start, end)}
+            </span>
+          );
+        } else {
+          // Pending Finding: Render color-coded highlight with wavy underline and compact tooltip
+          elements.push(
+            <mark
+              key={`iss-mark-${idx}`}
+              id={`doc-issue-mark-${idx}`}
+              onClick={() => handleSelectIssue(idx)}
+              style={{
+                backgroundColor: isSelected ? (info.cat === "spelling" ? "#FDE68A" : info.cat === "style" ? "#BAE6FD" : info.cat === "consistency" ? "#E9D5FF" : "#FCA5A5") : info.bg,
+                borderBottom: `2.5px wavy ${info.border}`,
+                color: info.color,
+                padding: "2px 6px",
+                borderRadius: "4px",
+                fontWeight: isSelected ? 850 : 700,
+                cursor: "pointer",
+                boxShadow: isSelected ? `0 0 0 3px ${info.border}, 0 2px 10px rgba(0,0,0,0.15)` : "0 1px 2px rgba(0,0,0,0.05)",
+                transition: "all 0.15s ease-in-out",
+                margin: "0 1px",
+                display: "inline-block"
+              }}
+              title={info.label}
+            >
+              {issue.original_text || doc.raw_text.slice(start, end)}
+            </mark>
+          );
+        }
+
+        cursor = end;
+      });
+
+      if (cursor < doc.raw_text.length) {
+        elements.push(<span key={`txt-end`}>{doc.raw_text.slice(cursor)}</span>);
+      }
+
+      return (
+        <div style={{ whiteSpace: "pre-wrap", fontFamily: "Inter, sans-serif", fontSize: 15, lineHeight: 1.85, color: "#1E293B" }}>
+          {elements}
+        </div>
+      );
+    }
+
+    if (annotatedHtml) {
+      return (
+        <div
+          ref={textContainerRef}
+          className="annotated-document-canvas"
+          style={{ fontFamily: "Inter, sans-serif", fontSize: 15, lineHeight: 1.85, color: "#1E293B" }}
+          dangerouslySetInnerHTML={{ __html: annotatedHtml }}
+        />
+      );
+    }
+
+    return (
+      <div style={{ padding: 40, textAlign: "center", color: "var(--text-muted)", fontSize: 14 }}>
+        No document text available to display highlights.
+      </div>
+    );
+  };
+
   if (error) {
     return (
       <div style={styles.centerContainer}>
@@ -1437,6 +1622,13 @@ export default function Workspace() {
   const acceptedCount = Object.values(issueDecisions).filter(v => v === "accepted").length;
   const rejectedCount = Object.values(issueDecisions).filter(v => v === "rejected").length;
   const totalChecked = acceptedCount + rejectedCount;
+
+  const isCompleted = doc?.status === "completed";
+  const isProofreadUnlocked = doc?.proofreading_ready || doc?.spell_ready || doc?.grammar_ready || isCompleted;
+  const isAmbiguityUnlocked = doc?.context_analysis_ready || doc?.context_analysis_status === "completed" || isCompleted;
+  const isAiAssistantUnlocked = doc?.rag_ready || doc?.rag_status === "completed" || isCompleted;
+  const isComparativeUnlocked = doc?.comparative_analysis_ready || doc?.comparative_analysis_status === "completed" || isCompleted;
+  const isReportsUnlocked = doc?.reports_ready || isCompleted;
 
   const publicationStatus = (issues.length - acceptedCount) === 0 ? "Ready for Publication" : (issues.length - acceptedCount) <= 3 ? "Requires Minor Revision" : "Requires Major Revision";
 
@@ -1546,8 +1738,9 @@ export default function Workspace() {
               }}
               disabled={!isProofreadUnlocked}
               onClick={() => isProofreadUnlocked && handleTabChange("proofreading")}
+              title={isProofreadUnlocked ? "View Proofreading (Stage 3 & 4 Ready)" : "🔒 Available after Stage 3 Language & Spelling Review"}
             >
-              {isProofreadUnlocked ? "View Proofreading →" : "🔒 Proofreading Locked"}
+              {isProofreadUnlocked ? "✓ View Proofreading →" : "🔒 Proofreading Locked"}
             </button>
           </div>
 
@@ -1576,8 +1769,9 @@ export default function Workspace() {
               }}
               disabled={!isAmbiguityUnlocked}
               onClick={() => isAmbiguityUnlocked && handleTabChange("analysis")}
+              title={isAmbiguityUnlocked ? "View Ambiguity Analysis (Stage 6 Ready)" : "🔒 Available after Stage 6 Consistency & Contradiction Review"}
             >
-              {isAmbiguityUnlocked ? "View Ambiguity Analysis →" : "🔒 Ambiguity Analysis Locked"}
+              {isAmbiguityUnlocked ? "✓ View Ambiguity Analysis →" : "🔒 Ambiguity Analysis Locked"}
             </button>
           </div>
 
@@ -1606,8 +1800,9 @@ export default function Workspace() {
               }}
               disabled={!isAiAssistantUnlocked}
               onClick={() => isAiAssistantUnlocked && handleTabChange("assistant")}
+              title={isAiAssistantUnlocked ? "Ask AI Assistant (Stage 5 Ready)" : "🔒 Available after Stage 5 Knowledge Index Creation"}
             >
-              {isAiAssistantUnlocked ? "Ask AI Assistant →" : "🔒 AI Assistant Locked"}
+              {isAiAssistantUnlocked ? "✓ Ask AI Assistant →" : "🔒 AI Assistant Locked"}
             </button>
           </div>
 
@@ -1636,8 +1831,9 @@ export default function Workspace() {
               }}
               disabled={!isComparativeUnlocked}
               onClick={() => isComparativeUnlocked && handleTabChange("comparative")}
+              title={isComparativeUnlocked ? "View Comparative Analysis (Stage 7 Ready)" : "🔒 Available after Stage 7 Competitive Benchmark Analysis"}
             >
-              {isComparativeUnlocked ? "View Comparative Analysis →" : "🔒 Comparative Analysis Locked"}
+              {isComparativeUnlocked ? "✓ View Comparative Analysis →" : "🔒 Comparative Analysis Locked"}
             </button>
           </div>
         </div>
@@ -1747,21 +1943,44 @@ export default function Workspace() {
             </button>
             {isActionsDropdownOpen && (
               <div style={styles.actionsDropdownMenu}>
-                <button style={styles.dropdownMenuItem} onClick={() => { setIsActionsDropdownOpen(false); handleTabChange("assistant"); }}>
+                <button
+                  style={{ ...styles.dropdownMenuItem, opacity: isAiAssistantUnlocked ? 1 : 0.5, cursor: isAiAssistantUnlocked ? "pointer" : "not-allowed" }}
+                  disabled={!isAiAssistantUnlocked}
+                  onClick={() => { if (isAiAssistantUnlocked) { setIsActionsDropdownOpen(false); handleTabChange("assistant"); } }}
+                  title={isAiAssistantUnlocked ? "Open AI Assistant (Stage 5 Ready)" : "🔒 Available after Stage 5 Knowledge Index Creation"}
+                >
                   <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" style={{ marginRight: 8 }}><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
-                  Open AI Assistant
+                  {isAiAssistantUnlocked ? "✓ Open AI Assistant" : "🔒 Open AI Assistant"}
                 </button>
-                <button style={styles.dropdownMenuItem} onClick={() => { setIsActionsDropdownOpen(false); handleTabChange("reports"); }}>
+
+                <button
+                  style={{ ...styles.dropdownMenuItem, opacity: isReportsUnlocked ? 1 : 0.5, cursor: isReportsUnlocked ? "pointer" : "not-allowed" }}
+                  disabled={!isReportsUnlocked}
+                  onClick={() => { if (isReportsUnlocked) { setIsActionsDropdownOpen(false); handleTabChange("reports"); } }}
+                  title={isReportsUnlocked ? "Open Executive Report (Stage 8 Ready)" : "🔒 Available after Stage 8 Executive Insights Report"}
+                >
                   <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" style={{ marginRight: 8 }}><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
-                  Open Executive Report
+                  {isReportsUnlocked ? "✓ Open Executive Report" : "🔒 Open Executive Report"}
                 </button>
-                <button style={styles.dropdownMenuItem} onClick={() => { setIsActionsDropdownOpen(false); setIsDownloadModalOpen(true); }}>
+
+                <button
+                  style={{ ...styles.dropdownMenuItem, opacity: isReportsUnlocked ? 1 : 0.5, cursor: isReportsUnlocked ? "pointer" : "not-allowed" }}
+                  disabled={!isReportsUnlocked}
+                  onClick={() => { if (isReportsUnlocked) { setIsActionsDropdownOpen(false); setIsDownloadModalOpen(true); } }}
+                  title={isReportsUnlocked ? "Download Reports (Stage 8 Ready)" : "🔒 Available after Stage 8 Executive Insights Report"}
+                >
                   <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" style={{ marginRight: 8 }}><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
-                  Download Reports
+                  {isReportsUnlocked ? "✓ Download Reports" : "🔒 Download Reports"}
                 </button>
-                <button style={styles.dropdownMenuItem} onClick={() => { setIsActionsDropdownOpen(false); handleDownloadCorrected(); }}>
+
+                <button
+                  style={{ ...styles.dropdownMenuItem, opacity: isProofreadUnlocked ? 1 : 0.5, cursor: isProofreadUnlocked ? "pointer" : "not-allowed" }}
+                  disabled={!isProofreadUnlocked}
+                  onClick={() => { if (isProofreadUnlocked) { setIsActionsDropdownOpen(false); handleDownloadCorrected(); } }}
+                  title={isProofreadUnlocked ? "Download Clean Document (Stage 3 Ready)" : "🔒 Available after Stage 3 Language & Spelling Review"}
+                >
                   <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" style={{ marginRight: 8 }}><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/><polyline points="17 21 17 13 7 13 7 21"/><polyline points="7 3 7 8 15 8"/></svg>
-                  Download Clean Document
+                  {isProofreadUnlocked ? "✓ Download Clean Document" : "🔒 Download Clean Document"}
                 </button>
               </div>
             )}
@@ -1796,31 +2015,10 @@ export default function Workspace() {
                     }}>
                       {/* Left: Mode Switcher */}
                       <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
-                        <div style={{
-                          display: "flex", background: "#F1F5F9", padding: "3px", borderRadius: 8, border: "1px solid #CBD5E1", gap: 2
-                        }}>
-                          <button
-                            style={{
-                              background: proofSubTab !== "corrected" ? "linear-gradient(135deg, #6C5CE7, #5B4DCC)" : "transparent",
-                              border: "none", borderRadius: 6, padding: "6px 14px", fontSize: 12, fontWeight: 750,
-                              color: proofSubTab !== "corrected" ? "#FFFFFF" : "var(--text-secondary)", cursor: "pointer",
-                              boxShadow: proofSubTab !== "corrected" ? "0 2px 6px rgba(108, 92, 231, 0.3)" : "none"
-                            }}
-                            onClick={() => setProofSubTab("annotated")}
-                          >
-                            ✏️ Interactive Review
-                          </button>
-                          <button
-                            style={{
-                              background: proofSubTab === "corrected" ? "linear-gradient(135deg, #6C5CE7, #5B4DCC)" : "transparent",
-                              border: "none", borderRadius: 6, padding: "6px 14px", fontSize: 12, fontWeight: 750,
-                              color: proofSubTab === "corrected" ? "#FFFFFF" : "var(--text-secondary)", cursor: "pointer",
-                              boxShadow: proofSubTab === "corrected" ? "0 2px 6px rgba(108, 92, 231, 0.3)" : "none"
-                            }}
-                            onClick={() => setProofSubTab("corrected")}
-                          >
-                            ✨ Clean Preview
-                          </button>
+                        <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+                          <span style={{ fontSize: 13, fontWeight: 750, color: "var(--brand)" }}>
+                            ✏️ Interactive Proofreading Workspace
+                          </span>
                         </div>
                       </div>
 
@@ -1865,37 +2063,10 @@ export default function Workspace() {
                       </button>
                     </div>
 
-                    {proofSubTab === "corrected" ? (
-                      /* Clean Preview View */
-                      <div style={{ display: "flex", flexDirection: "column", gap: 12, background: "var(--bg-card)", border: "1px solid var(--border)", borderRadius: 10, padding: 20 }}>
-                        <div style={styles.editorToolbar}>
-                          <div>
-                            <h3 style={{ margin: 0, fontSize: 16, fontWeight: 700, color: "var(--text-primary)" }}>✨ Clean Document Output Preview</h3>
-                            <p style={{ margin: "2px 0 0", fontSize: 12, color: "var(--text-secondary)" }}>Clean document preview with all accepted corrections applied directly.</p>
-                          </div>
-                          <button style={styles.downloadBtn} onClick={handleDownloadCorrected}>
-                            Download Clean Document
-                          </button>
-                        </div>
-                        <div style={{ ...styles.editorPanel, minHeight: 500, padding: 24, background: "#FFFFFF", borderRadius: 8, border: "1px solid #E2E8F0" }}>
-                          {doc.raw_text ? (
-                            <div style={{ ...styles.textView, whiteSpace: "pre-wrap" }}>
-                              {buildDecidedText(doc.raw_text, doc.issues, issueDecisions)}
-                            </div>
-                          ) : (
-                            <div 
-                              style={{ ...styles.textView, ...styles.correctedText }}
-                              className="clean-corrected-view"
-                              dangerouslySetInnerHTML={{ __html: getParagraphBody(annotatedHtml) }}
-                            />
-                          )}
-                        </div>
-                      </div>
-                    ) : (
-                      /* Full-Width Interactive Review (Original Document PDF + Annotation Overlay + Right Review Panel) */
-                      <div style={{ display: "flex", gap: 16, width: "100%", minHeight: "calc(100vh - 210px)", alignItems: "stretch" }}>
+                    {/* Full-Width Interactive Review (Interactive Document Canvas + Right Review Panel) */}
+                    <div style={{ display: "flex", gap: 16, width: "100%", minHeight: "calc(100vh - 210px)", alignItems: "stretch" }}>
                         
-                        {/* 1. Original Document Primary View + Proofreading Annotation Overlay (calc(100% - 400px) width) */}
+                        {/* 1. Single Continuous Document Review Surface */}
                         <div style={{
                           flex: "1 1 calc(100% - 400px)",
                           minWidth: 0,
@@ -1907,68 +2078,34 @@ export default function Workspace() {
                           overflow: "hidden",
                           position: "relative"
                         }}>
-                          {/* PDF Overlay Header Bar */}
+                          {/* Document View Header Bar */}
                           <div style={{
                             background: "linear-gradient(135deg, #0F172A, #1E293B)",
-                            color: "#FFFFFF", padding: "8px 14px",
+                            color: "#FFFFFF", padding: "10px 16px",
                             display: "flex", alignItems: "center", justifyContent: "space-between",
                             fontSize: "12px", zIndex: 5, boxShadow: "0 2px 8px rgba(0,0,0,0.15)"
                           }}>
                             <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
-                              <span style={{ fontWeight: 750, color: "#60A5FA", display: "inline-flex", alignItems: "center", gap: 5 }}>
+                              <span style={{ fontWeight: 750, color: "#60A5FA", display: "inline-flex", alignItems: "center", gap: 6 }}>
                                 <span style={{ width: 8, height: 8, borderRadius: "50%", background: "#10B981", boxShadow: "0 0 8px #10B981" }} />
-                                Original Document View + Proofreading Overlay
+                                Document Review Surface
                               </span>
                               <span style={{ color: "#475569" }}>|</span>
-                              <span style={{ color: "#E2E8F0", fontSize: 11.5 }}>
+                              <span style={{ color: "#E2E8F0", fontSize: 12 }}>
                                 {visibleIssues.length} active finding{visibleIssues.length === 1 ? "" : "s"} highlighted
                               </span>
                             </div>
-
-                            {/* Clickable Overlay Issue Badges */}
-                            <div style={{ display: "flex", alignItems: "center", gap: 6, overflowX: "auto", maxWidth: "55%" }}>
-                              {visibleIssues.slice(0, 8).map((iss) => {
-                                const idx = iss.originalIndex;
-                                const isSelected = activeIssueIdx === idx;
-                                const isSpelling = isSpellingIssue(iss);
-                                const isDecided = issueDecisions[idx] !== undefined;
-                                const bg = isDecided
-                                  ? (issueDecisions[idx] === "accepted" ? "#10B981" : "#94A3B8")
-                                  : isSpelling ? "linear-gradient(135deg, #D97706, #B45309)" : "linear-gradient(135deg, #DC2626, #B91C1C)";
-                                return (
-                                  <button
-                                    key={idx}
-                                    onClick={() => handleSelectIssue(idx)}
-                                    style={{
-                                      background: isSelected ? bg : isDecided ? "rgba(255,255,255,0.1)" : "rgba(255,255,255,0.18)",
-                                      color: "#FFFFFF",
-                                      border: isSelected ? "1.5px solid #FFFFFF" : "1px solid rgba(255,255,255,0.25)",
-                                      borderRadius: "5px",
-                                      padding: "3px 8px",
-                                      fontSize: "11px",
-                                      fontWeight: 700,
-                                      cursor: "pointer",
-                                      whiteSpace: "nowrap",
-                                      textDecoration: isDecided ? "line-through" : "none",
-                                      opacity: isDecided ? 0.6 : 1
-                                    }}
-                                    title={`Click to focus issue #${idx + 1}: ${iss.reason || iss.issue_type}`}
-                                  >
-                                    {isSpelling ? "🔤" : "✍️"} {iss.original_text ? `"${iss.original_text.slice(0, 12)}"` : `#${idx + 1}`}
-                                  </button>
-                                );
-                              })}
-                            </div>
                           </div>
 
-                          {/* PDF Document View */}
-                          <iframe
-                            src={`/api/documents/${id}/file#toolbar=1`}
-                            title="Original Document View with Proofreading Highlights Overlay"
-                            style={{
-                              width: "100%", height: "100%", flex: 1, border: "none", background: "#FFFFFF"
-                            }}
-                          />
+                          {/* Single Scrollable Document Canvas */}
+                          <div style={{ flex: 1, overflowY: "auto", padding: 24, background: "#F1F5F9" }}>
+                            <div style={{
+                              background: "#FFFFFF", borderRadius: 8, border: "1px solid #CBD5E1",
+                              padding: "40px 48px", minHeight: 650, boxShadow: "0 4px 20px rgba(0,0,0,0.06)", margin: "0 auto", maxWidth: 900
+                            }}>
+                              {renderHighlightedDocumentContent()}
+                            </div>
+                          </div>
                         </div>
 
                         {/* 2. Right Focused Review Panel (400px Width - Requirements 4 & 5) */}
@@ -2209,9 +2346,8 @@ export default function Workspace() {
                           );
                         })()}
                       </div>
-                    )}
-                  </div>
-                ) : activeTab === "assistant" ? (
+                    </div>
+                  ) : activeTab === "assistant" ? (
                   /* Embedded AI Assistant Chat Panel */
                   !(doc?.rag_ready || doc?.rag_status === "completed" || doc?.status === "completed") ? (
                     <div style={{ background: "var(--bg-card)", border: "1px solid var(--border)", borderRadius: 12, padding: 40, textAlign: "center" }}>
@@ -2319,6 +2455,45 @@ export default function Workspace() {
             </div>
           );
         })()}
+
+      {/* Extracted Raw Text View Modal */}
+      {rawTextOpen && (
+        <div style={styles.modalOverlay} onClick={() => setRawTextOpen(false)}>
+          <div style={{ ...styles.modalCard, maxWidth: 850, width: "100%" }} onClick={(e) => e.stopPropagation()}>
+            <div style={styles.modalHeader}>
+              <div>
+                <h3 style={styles.modalTitle}>📄 Extracted Document Text</h3>
+                <p style={styles.modalSubtitle}>
+                  Raw text output extracted during Stage 2 (Document Content Extraction)
+                </p>
+              </div>
+              <button style={styles.modalCloseBtn} onClick={() => setRawTextOpen(false)}>
+                &times;
+              </button>
+            </div>
+            
+            <div style={{ padding: "16px 20px", maxHeight: "60vh", overflowY: "auto", background: "var(--bg-app, #F8FAFC)", borderRadius: 8, border: "1px solid var(--border, #E2E8F0)", margin: "16px 0" }}>
+              <pre style={{ margin: 0, whiteSpace: "pre-wrap", fontFamily: "monospace", fontSize: 12.5, lineHeight: 1.6, color: "var(--text-primary, #1E293B)" }}>
+                {doc?.raw_text || "No extracted text available for this document."}
+              </pre>
+            </div>
+            
+            <div style={{ ...styles.modalFooter, display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+              <button
+                className="btn-premium-solid"
+                onClick={() => {
+                  navigator.clipboard.writeText(doc?.raw_text || "");
+                }}
+              >
+                📋 Copy Extracted Text
+              </button>
+              <button style={styles.modalCancelBtn} onClick={() => setRawTextOpen(false)}>
+                Close
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* Protected Terms Modal */}
       {protectedOpen && (
