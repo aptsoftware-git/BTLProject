@@ -109,7 +109,8 @@ class MergeAgent:
         all_sources = {i.source for i in group}
         
         # Calculate dynamic confidence
-        final_conf = self.calculate_confidence(agreeing_sources, best.issue_type.value if best.issue_type else None)
+        issue_type_val = best.issue_type.value if hasattr(best.issue_type, "value") else str(best.issue_type) if best.issue_type else None
+        final_conf = self.calculate_confidence(agreeing_sources, issue_type_val)
         
         # If the candidate was marked as protected, force confidence to 0
         if best.is_protected:

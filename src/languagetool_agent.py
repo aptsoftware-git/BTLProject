@@ -62,6 +62,8 @@ class LanguageToolAgent:
                         source=SourceAgent.LANGUAGETOOL,
                         reason=m.message,
                         confidence=0.75,
+                        page_number=sentence.page,
+                        bbox=sentence.bbox,
                     ))
             except Exception:
                 pass

@@ -51,11 +51,11 @@ class Annotator:
         cursor = 0
         for issue in issues_sorted:
             parts.append(escape(self.full_text[cursor:issue.char_start]))
-            css_class = _css_class(issue.severity)
-            border = "agreed" if issue.agreement_count > 1 else "single"
-            sources = ", ".join(sorted(s.value for s in issue.contributing_sources)) or issue.source.value
+            def _val(x):
+                return x.value if hasattr(x, "value") else str(x) if x else ""
+            sources = ", ".join(sorted(_val(s) for s in issue.contributing_sources)) or _val(issue.source)
             tooltip = (
-                f"Issue Type: {issue.issue_type.value.title()}\n"
+                f"Issue Type: {_val(issue.issue_type).title()}\n"
                 f"Original: {issue.original_text}\n"
                 f"Suggestion: {issue.suggested_text}\n"
                 f"Reason: {issue.reason}\n"

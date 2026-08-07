@@ -252,18 +252,36 @@ class MultimodalExtractor:
                 if page_idx >= doc.page_count:
                     break
                 page = doc[page_idx]
-                text = page.get_text("text") or ""
-                paragraphs = text.split("\n\n")
+                page_num = page_idx + 1
+
+                # Extract layout blocks (x0, y0, x1, y1, text, block_no, block_type)
+                # block_type == 0 is text, block_type == 1 is image/vector graphic
+                blocks = page.get_text("blocks") or []
                 
-                for p_idx, p_text in enumerate(paragraphs):
-                    p_text = p_text.strip()
-                    if not p_text:
+                b_idx = 0
+                for b in blocks:
+                    if len(b) < 7:
+                        continue
+                    x0, y0, x1, y1, b_text, b_no, b_type = b[:7]
+                    
+                    # Ignore image blocks, graphics, and cover artwork
+                    if b_type == 1:
                         continue
                     
-                    ref_id = f"#/texts/fallback_{page_idx}_{p_idx}"
+                    p_text = (b_text or "").strip()
+                    if not p_text or len(p_text) < 2:
+                        continue
+
+                    # Filter cover page decorative headers / image titles on Page 1 if short
+                    if page_num == 1 and len(p_text) < 15 and not p_text.endswith("."):
+                        continue
+                    
+                    ref_id = f"#/texts/fallback_{page_idx}_{b_idx}"
+                    b_idx += 1
+
                     meta = ElementMetadata(
-                        page_number=page_idx + 1,
-                        bbox=None,
+                        page_number=page_num,
+                        bbox=BoundingBox(x0=x0, y0=y0, x1=x1, y1=y1),
                         image_id=None,
                         table_id=None,
                         caption_id=None,
@@ -740,6 +758,10 @@ class MultimodalExtractor:
                 logger.info(f"Saved structured_document.json copy to {legacy_doc_path}")
             except Exception as save_err:
                 logger.error(f"Failed to save structured_document.json copy: {save_err}")
+
+        # Finalize knowledge objects outputs (JSON, HTML, Markdown)
+        if output_dir:
+            agent._finalize_outputs(doc_id, output_dir, master_structured_doc)
 
         # Ingestion Completed
         self._update_job_status(doc_id, "Ingestion Completed", 100.0, total_pages, total_pages, batch_size, total_batches, total_batches, "0s")

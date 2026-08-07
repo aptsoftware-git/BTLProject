@@ -192,7 +192,8 @@ class SpellAgent:
                     reason="SymSpell fallback suggestion",
 
                     confidence=0.40,
-
+                    page_number=sentence.page,
+                    bbox=sentence.bbox,
                 )
 
             )

@@ -196,8 +196,22 @@ class StageOrchestrator:
                     logger.warning("Stage %s attempt %d/%d did not complete cleanly (%s). Automatically retrying...", stage_id, attempt, max_retries, stage_obj.get("errors") if stage_obj else "unknown")
                     time.sleep(attempt * 1.0)
 
+    def run_stage_1_upload(self) -> None:
+        stage_id = "stage_1_upload"
+        logger.info("START Stage 1")
+        try:
+            self.update_stage_state(stage_id, "Completed", output_location="data/input/")
+            job = self.get_job()
+            if job:
+                job["upload_ready"] = True
+                self.save_job()
+            logger.info("END Stage 1")
+        except Exception as exc:
+            logger.exception("PIPELINE FAILURE")
+            raise
+
     def execute_all_stages(self) -> None:
-        """Executes stages 2 through 8 independently with automatic retry on failure."""
+        """Executes stages 1 through 8 independently with automatic retry on failure."""
         job = self.get_job()
         if not job:
             logger.error("Job %s not found in memory/disk during execution", self.job_id)
@@ -207,6 +221,9 @@ class StageOrchestrator:
         self.save_job()
 
         logger.info("Starting stage orchestration for job %s (%s)", self.job_id, job.get("filename"))
+
+        # Stage 1: Document Uploaded
+        self.run_stage_1_upload()
 
         # Stage 2: Document Extraction
         self._run_stage_with_auto_retry(self.run_stage_2_extraction, "stage_2_extraction")
@@ -276,6 +293,7 @@ class StageOrchestrator:
     # ------------------------------------------------------------------
     def run_stage_2_extraction(self) -> None:
         stage_id = "stage_2_extraction"
+        logger.info("START Stage 2")
         doc_json = self.job_dir / "structured_document.json"
         raw_txt = self.job_dir / "01_raw" / "raw_text.txt"
         sentences_json = self.job_dir / "04_sentences" / "sentences.json"
@@ -289,6 +307,7 @@ class StageOrchestrator:
                 job["extraction_ready"] = True
                 job["document_viewer_ready"] = True
                 self.save_job()
+            logger.info("END Stage 2")
             return
 
         start_time = datetime.now()
@@ -367,13 +386,14 @@ class StageOrchestrator:
                 self.save_job()
 
             logger.info("Stage 2 (Extraction) completed in %.2fs for job %s", duration, self.job_id)
+            logger.info("END Stage 2")
 
         except Exception as exc:
             end_time = datetime.now()
             duration = round((end_time - start_time).total_seconds(), 2)
             error_msg = f"{str(exc)}\n{traceback.format_exc()}"
             self.update_stage_state(stage_id, "Failed", end_time=end_time.isoformat(), duration=duration, errors=error_msg)
-            logger.error("Stage 2 (Extraction) failed for job %s: %s", self.job_id, exc)
+            logger.exception("PIPELINE FAILURE in Stage 2 for job %s: %s", self.job_id, exc)
 
     # ------------------------------------------------------------------
     # Stage 3: Spell Checking

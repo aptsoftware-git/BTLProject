@@ -343,23 +343,59 @@ def queue_job(job_id: str, force: bool = False) -> Dict[str, Any]:
 
 
 def delete_stage_output_cache(job_id: str, stage_id: str = "all") -> None:
-    """Removes cached output files for specified stage to ensure fresh execution."""
+    """Removes cached output files for specified stage(s) to ensure fresh execution."""
     job_dir = get_job_dir(job_id)
-    if stage_id in ("all", "stage_6_context", "context"):
+    import shutil
+
+    sid = str(stage_id).lower()
+
+    # Stage 2: Extraction
+    if sid in ("all", "stage_2_extraction", "extraction", "2"):
+        (job_dir / "structured_document.json").unlink(missing_ok=True)
+        for folder in ["01_raw", "02_filtered", "03_preprocessed", "04_sentences", "05_protected_terms"]:
+            shutil.rmtree(job_dir / folder, ignore_errors=True)
+
+    # Stage 3: Spell
+    if sid in ("all", "stage_2_extraction", "extraction", "2", "stage_3_spell", "spell", "3"):
+        shutil.rmtree(job_dir / "06_spell", ignore_errors=True)
+
+    # Stage 4: Grammar
+    if sid in ("all", "stage_2_extraction", "extraction", "2", "stage_3_spell", "spell", "3", "stage_4_grammar", "grammar", "4"):
+        (job_dir / "report.json").unlink(missing_ok=True)
+        (job_dir / "annotated_original.html").unlink(missing_ok=True)
+        (job_dir / "corrected_document.html").unlink(missing_ok=True)
+        for folder in ["07_grammar", "08_validation", "09_semantic"]:
+            shutil.rmtree(job_dir / folder, ignore_errors=True)
+
+        dec_path = job_dir / "10_final" / "decisions.json"
+        dec_content = dec_path.read_text(encoding="utf-8") if dec_path.exists() else None
+        shutil.rmtree(job_dir / "10_final", ignore_errors=True)
+        if dec_content:
+            (job_dir / "10_final").mkdir(parents=True, exist_ok=True)
+            (job_dir / "10_final" / "decisions.json").write_text(dec_content, encoding="utf-8")
+
+    # Stage 5: RAG
+    if sid in ("all", "stage_2_extraction", "extraction", "2", "stage_5_rag", "rag", "5"):
+        (job_dir / "document_chunks.json").unlink(missing_ok=True)
+        for folder in ["03_knowledge_objects", "06_chunks"]:
+            shutil.rmtree(job_dir / folder, ignore_errors=True)
+
+    # Stage 6: Context Analysis
+    if sid in ("all", "stage_2_extraction", "extraction", "2", "stage_3_spell", "spell", "3", "stage_4_grammar", "grammar", "4", "stage_6_context", "context", "6"):
         (job_dir / "report.json").unlink(missing_ok=True)
         (job_dir / "business_report.html").unlink(missing_ok=True)
         (job_dir / "09_reports" / "consistency_report.html").unlink(missing_ok=True)
         (job_dir / "09_reports" / "consistency_report.json").unlink(missing_ok=True)
-        import shutil
         for folder in ["06_context_analysis", "07_semantic_clustering", "09_semantic_clusters", "10_claim_extraction", "11_chunk_reasoning", "12_cluster_reasoning", "13_claude_input", "14_claude_verification", "15_final_report"]:
             shutil.rmtree(job_dir / folder, ignore_errors=True)
-    if stage_id in ("all", "stage_7_comparative", "comparative"):
-        comp_dir = job_dir / "comparative_analysis"
-        if comp_dir.exists():
-            import shutil
-            shutil.rmtree(comp_dir, ignore_errors=True)
+
+    # Stage 7: Comparative Analysis
+    if sid in ("all", "stage_2_extraction", "extraction", "2", "stage_6_context", "context", "6", "stage_7_comparative", "comparative", "7"):
+        shutil.rmtree(job_dir / "comparative_analysis", ignore_errors=True)
         (job_dir / "09_reports" / "comparative_report.html").unlink(missing_ok=True)
-    if stage_id in ("all", "stage_8_reports", "reports"):
+
+    # Stage 8: Executive Reports
+    if sid in ("all", "stage_2_extraction", "extraction", "2", "stage_4_grammar", "grammar", "4", "stage_6_context", "context", "6", "stage_7_comparative", "comparative", "7", "stage_8_reports", "reports", "8"):
         (job_dir / "business_report.html").unlink(missing_ok=True)
         (job_dir / "09_reports" / "final_report.html").unlink(missing_ok=True)
         (job_dir / "15_final_report" / "final_report.json").unlink(missing_ok=True)
@@ -367,20 +403,56 @@ def delete_stage_output_cache(job_id: str, stage_id: str = "all") -> None:
 
 
 def retry_job_stage(job_id: str, stage_id: str = "all") -> Dict[str, Any]:
-    """Resets a failed or specific stage to pending and triggers background re-execution."""
+    """Resets a failed or specific stage and its downstream dependencies to pending and triggers background re-execution."""
     job = get_job(job_id)
     if not job:
         raise ValueError(f"Job '{job_id}' not found.")
 
+    sid = str(stage_id).lower()
     delete_stage_output_cache(job_id, stage_id)
 
     if "stages" not in job or not job["stages"]:
         job["stages"] = initialize_job_stages(job.get("created_at"))
 
-    for s in job["stages"]:
-        if stage_id == "all" or s["stage_id"] == stage_id or s["name"].lower() == stage_id.lower():
+    stage_index_map = {
+        "stage_1_upload": 0, "upload": 0, "1": 0,
+        "stage_2_extraction": 1, "extraction": 1, "2": 1,
+        "stage_3_spell": 2, "spell": 2, "3": 2,
+        "stage_4_grammar": 3, "grammar": 3, "4": 3,
+        "stage_5_rag": 4, "rag": 4, "5": 4,
+        "stage_6_context": 5, "context": 5, "6": 5,
+        "stage_7_comparative": 6, "comparative": 6, "7": 6,
+        "stage_8_reports": 7, "reports": 7, "8": 7,
+    }
+
+    target_idx = stage_index_map.get(sid, None)
+
+    for idx, s in enumerate(job["stages"]):
+        if sid == "all" or target_idx is None or idx >= target_idx or s["stage_id"] == stage_id or s["name"].lower() == sid:
             s["status"] = "Pending"
             s["errors"] = None
+
+    if target_idx is not None:
+        if target_idx <= 1:
+            job["extraction_ready"] = False
+            job["document_viewer_ready"] = False
+        if target_idx <= 2:
+            job["spell_ready"] = False
+        if target_idx <= 3:
+            job["grammar_ready"] = False
+            job["proofreading_ready"] = False
+            job["proofreading_status"] = "pending"
+        if target_idx <= 4:
+            job["rag_ready"] = False
+            job["rag_status"] = "pending"
+        if target_idx <= 5:
+            job["context_analysis_ready"] = False
+            job["context_analysis_status"] = "pending"
+        if target_idx <= 6:
+            job["comparative_analysis_ready"] = False
+            job["comparative_analysis_status"] = "pending"
+        if target_idx <= 7:
+            job["reports_ready"] = False
 
     job["status"] = "pending"
     job["error"] = None
@@ -388,6 +460,12 @@ def retry_job_stage(job_id: str, stage_id: str = "all") -> Dict[str, Any]:
 
     queue_job(job_id, force=True)
     return job
+
+
+def rerun_proofreading_job(job_id: str) -> Dict[str, Any]:
+    """Re-runs proofreading pipeline (Stage 3 & Stage 4) preserving extraction & RAG."""
+    return retry_job_stage(job_id, stage_id="stage_3_spell")
+
 
 
 def run_context_analysis_inline(job_id: str, job_dir: Path) -> None:
@@ -458,8 +536,8 @@ def recover_stuck_jobs_on_startup():
         logging.getLogger("backend").error("Failed startup stuck job recovery: %s", exc)
 
 
-# Automatic startup job recovery disabled per user configuration
-# threading.Thread(target=recover_stuck_jobs_on_startup, daemon=True).start()
+# Automatic startup job recovery enabled
+threading.Thread(target=recover_stuck_jobs_on_startup, daemon=True).start()
 
 
 def get_all_jobs() -> list[Dict[str, Any]]:

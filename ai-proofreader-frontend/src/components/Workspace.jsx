@@ -5,6 +5,7 @@ import Assistant from "./Assistant";
 import ContextAnalysis from "./ContextAnalysis";
 import Reports from "./Reports";
 import ComparativeAnalysisView from "./ComparativeAnalysisView";
+import PDFReviewWorkspace from "./PDFReviewWorkspace";
 
 
 const buildDecidedText = (rawText, issues, decisions) => {
@@ -242,15 +243,27 @@ const StagePipelineCard = ({ doc, onRetryStage }) => {
                 )}
               </div>
 
-              {isFailed && onRetryStage && (
+              {onRetryStage && (isCompleted || isFailed) && !isRunning && (
                 <button
                   style={{
-                    marginTop: 6, background: "var(--red)", color: "white", border: "none",
-                    borderRadius: 4, padding: "4px 8px", fontSize: 10.5, fontWeight: 700, cursor: "pointer"
+                    marginTop: 6,
+                    background: isFailed ? "var(--red)" : "var(--brand-light)",
+                    color: isFailed ? "white" : "var(--brand)",
+                    border: isFailed ? "none" : "1px solid var(--brand)",
+                    borderRadius: 4,
+                    padding: "4px 8px",
+                    fontSize: 10.5,
+                    fontWeight: 700,
+                    cursor: "pointer",
+                    display: "flex",
+                    alignItems: "center",
+                    justifyContent: "center",
+                    gap: 4
                   }}
                   onClick={() => onRetryStage(st.stage_id)}
+                  title={`Click to rerun ${st.label}`}
                 >
-                  Retry Stage
+                  <span>🔄</span> {isFailed ? "Retry Stage" : "Rerun Stage"}
                 </button>
               )}
             </div>
@@ -560,14 +573,55 @@ export default function Workspace() {
   const isSpellingIssue = (issue) => issue && (issue.issue_type === "spelling" || issue.issue_type === "punctuation");
   const isGrammarIssue = (issue) => issue && (issue.issue_type !== "spelling" && issue.issue_type !== "punctuation");
 
+  const updateDocWithLocalStorage = (data) => {
+    if (!data) return;
+    setDoc(data);
+    localStorage.setItem("currentlyOpenDocId", data.id || data.job_id);
+    localStorage.setItem("currentlyOpenDocName", data.filename || "Document");
+    localStorage.setItem("currentlyOpenDocPages", data.total_pages || data.pages || 1);
+    localStorage.setItem("currentlyOpenDocStatus", data.status || "pending");
+    localStorage.setItem("currentlyOpenDocIssuesCount", (data.issues || []).length);
+    localStorage.setItem("currentlyOpenDocConsistencyIssues", data.context_analysis_issues_count || 0);
+    localStorage.setItem("currentlyOpenDocFlags", JSON.stringify({
+      upload_ready: data.upload_ready,
+      document_viewer_ready: data.document_viewer_ready || data.extraction_ready,
+      spell_ready: data.spell_ready,
+      grammar_ready: data.grammar_ready,
+      proofreading_ready: data.proofreading_ready || data.spell_ready || data.grammar_ready || data.status === "completed",
+      rag_ready: data.rag_ready || data.rag_status === "completed" || data.status === "completed",
+      context_analysis_ready: data.context_analysis_ready || data.context_analysis_status === "completed" || data.status === "completed",
+      comparative_analysis_ready: data.comparative_analysis_ready || data.comparative_analysis_status === "completed" || data.status === "completed",
+      reports_ready: data.reports_ready || data.status === "completed"
+    }));
+    window.dispatchEvent(new CustomEvent("activeDocChanged", { detail: data }));
+  };
+
   const handleRetryStage = async (stageId = "all") => {
-    if (!id) return;
+    if (!id || reRunningPipeline) return;
+    setReRunningPipeline(true);
     try {
       await retryJobStage(id, stageId);
-      const data = await fetchDocument(id);
-      if (data) setDoc(data);
+      setDoc((prev) => (prev ? { ...prev, status: "processing" } : prev));
+
+      let attempts = 0;
+      const pollInterval = setInterval(async () => {
+        attempts += 1;
+        try {
+          const freshData = await fetchDocument(id);
+          if (freshData) {
+            updateDocWithLocalStorage(freshData);
+            if (freshData.status === "completed" || freshData.status === "failed" || attempts >= 30) {
+              clearInterval(pollInterval);
+              setReRunningPipeline(false);
+            }
+          }
+        } catch (e) {
+          console.error("Polling error during stage rerun:", e);
+        }
+      }, 1500);
     } catch (err) {
-      console.error("Failed to retry stage:", err);
+      console.error("Failed to retry/rerun stage:", err);
+      setReRunningPipeline(false);
     }
   };
 
@@ -585,8 +639,8 @@ export default function Workspace() {
         try {
           const freshData = await fetchDocument(id);
           if (freshData) {
-            setDoc(freshData);
-            if (freshData.status === "completed" || freshData.status === "failed" || attempts >= 25) {
+            updateDocWithLocalStorage(freshData);
+            if (freshData.status === "completed" || freshData.status === "failed" || attempts >= 30) {
               clearInterval(pollInterval);
               setReRunningPipeline(false);
             }
@@ -725,6 +779,10 @@ export default function Workspace() {
       }
       try {
         const data = await fetchDocument(id);
+        if (data) {
+          console.log("response.issues.length", data.issues?.length);
+          console.log("statistics", data.statistics);
+        }
         
         if (!active) return;
         if (!data) {
@@ -733,27 +791,7 @@ export default function Workspace() {
           return;
         }
 
-        setDoc(data);
-        if (data) {
-          localStorage.setItem("currentlyOpenDocId", data.id);
-          localStorage.setItem("currentlyOpenDocName", data.filename || "Document");
-          localStorage.setItem("currentlyOpenDocPages", data.total_pages || data.pages || 1);
-          localStorage.setItem("currentlyOpenDocStatus", data.status || "pending");
-          localStorage.setItem("currentlyOpenDocIssuesCount", (data.issues || []).length);
-          localStorage.setItem("currentlyOpenDocConsistencyIssues", data.context_analysis_issues_count || 0);
-          localStorage.setItem("currentlyOpenDocFlags", JSON.stringify({
-            upload_ready: data.upload_ready,
-            document_viewer_ready: data.document_viewer_ready || data.extraction_ready,
-            spell_ready: data.spell_ready,
-            grammar_ready: data.grammar_ready,
-            proofreading_ready: data.proofreading_ready || data.spell_ready || data.grammar_ready || data.status === "completed",
-            rag_ready: data.rag_ready || data.rag_status === "completed" || data.status === "completed",
-            context_analysis_ready: data.context_analysis_ready || data.context_analysis_status === "completed" || data.status === "completed",
-            comparative_analysis_ready: data.comparative_analysis_ready || data.comparative_analysis_status === "completed" || data.status === "completed",
-            reports_ready: data.reports_ready || data.status === "completed"
-          }));
-          window.dispatchEvent(new CustomEvent("activeDocChanged", { detail: data }));
-        }
+        updateDocWithLocalStorage(data);
 
         // Process HTML/State as soon as proofreading is ready or document completed
         const isProofreadingAvailable = data && (
@@ -2004,350 +2042,19 @@ export default function Workspace() {
                     {renderResultsOverview()}
                   </div>
                 ) : isProofreadTab ? (
-                  <div style={{ display: "flex", flexDirection: "column", gap: 14, width: "100%" }}>
-                    
-                    {/* Live Statistics & Mode Selector Banner */}
-                    <div style={{
-                      display: "flex", justifyContent: "space-between", alignItems: "center",
-                      background: "var(--bg-card)", border: "1px solid var(--border)",
-                      borderRadius: 10, padding: "10px 16px", boxShadow: "var(--shadow-card)",
-                      flexWrap: "wrap", gap: 10
-                    }}>
-                      {/* Left: Mode Switcher */}
-                      <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
-                        <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
-                          <span style={{ fontSize: 13, fontWeight: 750, color: "var(--brand)" }}>
-                            ✏️ Interactive Proofreading Workspace
-                          </span>
-                        </div>
-                      </div>
-
-                      {/* Middle: Live Proofreading Statistics Counter */}
-                      {(() => {
-                        const totalCount = issues.length;
-                        const openCount = visibleIssues.filter(i => issueDecisions[i.originalIndex] === undefined).length;
-                        const accCount = Object.values(issueDecisions).filter(v => v === "accepted").length;
-                        const rejCount = Object.values(issueDecisions).filter(v => v === "rejected").length;
-
-                        return (
-                          <div style={{ display: "flex", alignItems: "center", gap: 16, fontSize: 12, fontWeight: 650 }}>
-                            <span style={{ color: "var(--text-secondary)" }}>
-                              Total Issues: <strong style={{ color: "var(--text-primary)" }}>{totalCount}</strong>
-                            </span>
-                            <span style={{ color: "var(--amber)" }}>
-                              Open: <strong style={{ background: "var(--amber-light)", padding: "2px 6px", borderRadius: 4 }}>{openCount}</strong>
-                            </span>
-                            <span style={{ color: "var(--green)" }}>
-                              Accepted: <strong style={{ background: "var(--green-light)", padding: "2px 6px", borderRadius: 4 }}>{accCount}</strong>
-                            </span>
-                            <span style={{ color: "var(--red)" }}>
-                              Rejected: <strong style={{ background: "var(--red-light)", padding: "2px 6px", borderRadius: 4 }}>{rejCount}</strong>
-                            </span>
-                          </div>
-                        );
-                      })()}
-
-                      {/* Right: Re-run Pipeline Button */}
-                      <button
-                        style={{
-                          background: reRunningPipeline ? "#F1F5F9" : "linear-gradient(135deg, #0F172A, #1E293B)",
-                          color: "#FFFFFF", border: "none", borderRadius: 7, padding: "6px 14px",
-                          fontSize: 12, fontWeight: 700, cursor: reRunningPipeline ? "not-allowed" : "pointer",
-                          boxShadow: "0 2px 6px rgba(0,0,0,0.18)"
-                        }}
-                        disabled={reRunningPipeline}
-                        onClick={handleReRunProofreadPipeline}
-                        title="Re-run proofreading pipeline across current document with latest rules"
-                      >
-                        {reRunningPipeline ? "⏳ Re-running Pipeline..." : "↻ Re-run Pipeline"}
-                      </button>
-                    </div>
-
-                    {/* Full-Width Interactive Review (Interactive Document Canvas + Right Review Panel) */}
-                    <div style={{ display: "flex", gap: 16, width: "100%", minHeight: "calc(100vh - 210px)", alignItems: "stretch" }}>
-                        
-                        {/* 1. Single Continuous Document Review Surface */}
-                        <div style={{
-                          flex: "1 1 calc(100% - 400px)",
-                          minWidth: 0,
-                          background: "#F8FAFC",
-                          border: "1px solid #CBD5E1",
-                          borderRadius: 10,
-                          display: "flex",
-                          flexDirection: "column",
-                          overflow: "hidden",
-                          position: "relative"
-                        }}>
-                          {/* Document View Header Bar */}
-                          <div style={{
-                            background: "linear-gradient(135deg, #0F172A, #1E293B)",
-                            color: "#FFFFFF", padding: "10px 16px",
-                            display: "flex", alignItems: "center", justifyContent: "space-between",
-                            fontSize: "12px", zIndex: 5, boxShadow: "0 2px 8px rgba(0,0,0,0.15)"
-                          }}>
-                            <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
-                              <span style={{ fontWeight: 750, color: "#60A5FA", display: "inline-flex", alignItems: "center", gap: 6 }}>
-                                <span style={{ width: 8, height: 8, borderRadius: "50%", background: "#10B981", boxShadow: "0 0 8px #10B981" }} />
-                                Document Review Surface
-                              </span>
-                              <span style={{ color: "#475569" }}>|</span>
-                              <span style={{ color: "#E2E8F0", fontSize: 12 }}>
-                                {visibleIssues.length} active finding{visibleIssues.length === 1 ? "" : "s"} highlighted
-                              </span>
-                            </div>
-                          </div>
-
-                          {/* Single Scrollable Document Canvas */}
-                          <div style={{ flex: 1, overflowY: "auto", padding: 24, background: "#F1F5F9" }}>
-                            <div style={{
-                              background: "#FFFFFF", borderRadius: 8, border: "1px solid #CBD5E1",
-                              padding: "40px 48px", minHeight: 650, boxShadow: "0 4px 20px rgba(0,0,0,0.06)", margin: "0 auto", maxWidth: 900
-                            }}>
-                              {renderHighlightedDocumentContent()}
-                            </div>
-                          </div>
-                        </div>
-
-                        {/* 2. Right Focused Review Panel (400px Width - Requirements 4 & 5) */}
-                        {(() => {
-                          const currentIssue = activeIssueIdx !== null ? (doc?.issues || [])[activeIssueIdx] : visibleIssues[0];
-                          const activeIdx = activeIssueIdx !== null ? activeIssueIdx : visibleIssues[0]?.originalIndex;
-                          const isDecided = activeIdx !== undefined && issueDecisions[activeIdx] !== undefined;
-
-                          const handlePrev = () => {
-                            if (visibleIssues.length === 0) return;
-                            const pos = visibleIssues.findIndex(i => i.originalIndex === activeIdx);
-                            if (pos > 0) {
-                              handleSelectIssue(visibleIssues[pos - 1].originalIndex);
-                            } else {
-                              handleSelectIssue(visibleIssues[visibleIssues.length - 1].originalIndex);
-                            }
-                          };
-
-                          const handleNext = () => {
-                            if (visibleIssues.length === 0) return;
-                            const pos = visibleIssues.findIndex(i => i.originalIndex === activeIdx);
-                            if (pos >= 0 && pos < visibleIssues.length - 1) {
-                              handleSelectIssue(visibleIssues[pos + 1].originalIndex);
-                            } else {
-                              handleSelectIssue(visibleIssues[0].originalIndex);
-                            }
-                          };
-
-                          const handleAccept = async () => {
-                            if (activeIdx === undefined) return;
-                            const iss = (doc?.issues || [])[activeIdx];
-                            const issueId = iss?.issue_id || activeIdx;
-                            setIssueDecisions(prev => ({ ...prev, [activeIdx]: "accepted" }));
-                            try {
-                              await updateIssueStatus(id, issueId, "accepted");
-                            } catch (e) {
-                              console.error("Failed to update issue status: ", e);
-                            }
-                            handleNext();
-                          };
-
-                          const handleReject = async () => {
-                            if (activeIdx === undefined) return;
-                            const iss = (doc?.issues || [])[activeIdx];
-                            const issueId = iss?.issue_id || activeIdx;
-                            setIssueDecisions(prev => ({ ...prev, [activeIdx]: "rejected" }));
-                            try {
-                              await updateIssueStatus(id, issueId, "rejected");
-                            } catch (e) {
-                              console.error("Failed to update issue status: ", e);
-                            }
-                            handleNext();
-                          };
-
-                          const handleIgnore = async () => {
-                            if (activeIdx === undefined) return;
-                            const iss = (doc?.issues || [])[activeIdx];
-                            const issueId = iss?.issue_id || activeIdx;
-                            setIssueDecisions(prev => ({ ...prev, [activeIdx]: "ignored" }));
-                            try {
-                              await updateIssueStatus(id, issueId, "ignored");
-                            } catch (e) {
-                              console.error("Failed to update issue status: ", e);
-                            }
-                            handleNext();
-                          };
-
-                          return (
-                            <div style={{
-                              width: "400px", flexShrink: 0,
-                              background: "var(--bg-card)", border: "1px solid var(--border)",
-                              borderRadius: 10, padding: "16px", display: "flex", flexDirection: "column",
-                              gap: 14, sticky: "top", top: 80, maxHeight: "calc(100vh - 180px)",
-                              overflowY: "auto", boxShadow: "var(--shadow-card)"
-                            }}>
-                              {currentIssue ? (
-                                <>
-                                  {/* Header & Prev/Next Issue Navigation */}
-                                  <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", borderBottom: "1px solid var(--border)", paddingBottom: 10 }}>
-                                    <div>
-                                      <span style={{ fontSize: 11, fontWeight: 750, color: "var(--brand)", textTransform: "uppercase", letterSpacing: 0.5 }}>
-                                        Interactive Review Panel
-                                      </span>
-                                      <h4 style={{ margin: "2px 0 0", fontSize: 14, fontWeight: 700, color: "var(--text-primary)" }}>
-                                        Issue #{(activeIdx !== undefined ? activeIdx : 0) + 1} of {(doc?.issues || []).length}
-                                      </h4>
-                                    </div>
-
-                                    {/* Issue Navigation Buttons */}
-                                    <div style={{ display: "flex", gap: 6 }}>
-                                      <button
-                                        onClick={handlePrev}
-                                        style={{
-                                          background: "var(--bg-page)", border: "1px solid var(--border)", borderRadius: 6,
-                                          padding: "4px 9px", fontSize: 11.5, fontWeight: 700, cursor: "pointer", color: "var(--text-secondary)"
-                                        }}
-                                        title="Previous Issue"
-                                      >
-                                        ← Prev
-                                      </button>
-                                      <button
-                                        onClick={handleNext}
-                                        style={{
-                                          background: "var(--bg-page)", border: "1px solid var(--border)", borderRadius: 6,
-                                          padding: "4px 9px", fontSize: 11.5, fontWeight: 700, cursor: "pointer", color: "var(--text-secondary)"
-                                        }}
-                                        title="Next Issue"
-                                      >
-                                        Next →
-                                      </button>
-                                    </div>
-                                  </div>
-
-                                  {/* Issue Category & Confidence Badge */}
-                                  <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
-                                    <span style={{
-                                      fontSize: 11, fontWeight: 800, padding: "3px 10px", borderRadius: 999,
-                                      background: isSpellingIssue(currentIssue) ? "var(--amber-light)" : "var(--red-light)",
-                                      color: isSpellingIssue(currentIssue) ? "var(--amber)" : "var(--red)",
-                                      textTransform: "uppercase", letterSpacing: 0.5
-                                    }}>
-                                      {isSpellingIssue(currentIssue) ? "🔤 Spelling Mistake" : "✍️ Grammar & Writing"}
-                                    </span>
-                                    <span style={{ fontSize: 11, fontWeight: 650, color: "var(--text-muted)" }}>
-                                      Confidence: High ({Math.round((currentIssue.final_confidence || currentIssue.confidence || 0.85) * 100)}%)
-                                    </span>
-                                  </div>
-
-                                  {/* Diff Box: Original vs Suggested Correction */}
-                                  <div style={{ background: "var(--bg-page)", border: "1px solid var(--border)", borderRadius: 8, padding: 12 }}>
-                                    <div style={{ fontSize: 10.5, fontWeight: 700, color: "var(--text-muted)", textTransform: "uppercase", marginBottom: 3 }}>
-                                      Original Text
-                                    </div>
-                                    <div style={{ fontSize: 13.5, color: "var(--red)", textDecoration: "line-through", fontWeight: 600, marginBottom: 10 }}>
-                                      {currentIssue.original_text || "Original snippet"}
-                                    </div>
-
-                                    <div style={{ fontSize: 10.5, fontWeight: 700, color: "var(--text-muted)", textTransform: "uppercase", marginBottom: 3 }}>
-                                      Suggested Correction
-                                    </div>
-                                    <div style={{ fontSize: 14, color: "var(--green)", fontWeight: 750 }}>
-                                      {currentIssue.suggested_text || "Suggested snippet"}
-                                    </div>
-                                  </div>
-
-                                  {/* Explanation / Insights */}
-                                  <div style={{ background: "rgba(108, 92, 231, 0.05)", border: "1px solid rgba(108, 92, 231, 0.2)", borderRadius: 8, padding: 12 }}>
-                                    <div style={{ fontSize: 10.5, fontWeight: 700, color: "var(--brand)", textTransform: "uppercase", marginBottom: 3 }}>
-                                      Explanation & Insights
-                                    </div>
-                                    <p style={{ margin: 0, fontSize: 12.5, color: "var(--text-primary)", lineHeight: 1.45 }}>
-                                      {currentIssue.reason || "Proofreading analysis detected potential text quality improvement."}
-                                    </p>
-                                    {currentIssue.protected_reason && (
-                                      <div style={{ marginTop: 6, fontSize: 11, color: "var(--amber)", fontWeight: 600 }}>
-                                        Note: {currentIssue.protected_reason}
-                                      </div>
-                                    )}
-                                  </div>
-
-                                  {/* Decision status if already reviewed */}
-                                  {isDecided && (
-                                    <div style={{
-                                      textAlign: "center", padding: "6px 12px", borderRadius: 6, fontSize: 12, fontWeight: 700,
-                                      background: issueDecisions[activeIdx] === "accepted" ? "var(--green-light)" : issueDecisions[activeIdx] === "rejected" ? "var(--red-light)" : "var(--border)",
-                                      color: issueDecisions[activeIdx] === "accepted" ? "var(--green)" : issueDecisions[activeIdx] === "rejected" ? "var(--red)" : "var(--text-muted)"
-                                    }}>
-                                      Status: {issueDecisions[activeIdx].toUpperCase()}
-                                    </div>
-                                  )}
-
-                                  {/* Action Buttons: Accept / Reject / Ignore / Add to Dict */}
-                                  <div style={{ display: "flex", flexDirection: "column", gap: 8, marginTop: 4 }}>
-                                    <div style={{ display: "flex", gap: 8 }}>
-                                      <button
-                                        style={{
-                                          flex: 1, background: "linear-gradient(135deg, #10B981, #059669)", color: "#FFFFFF",
-                                          border: "none", borderRadius: 7, padding: "10px", fontSize: 13, fontWeight: 750,
-                                          cursor: "pointer", boxShadow: "0 2px 8px rgba(16, 185, 129, 0.25)"
-                                        }}
-                                        onClick={handleAccept}
-                                      >
-                                        ✓ Accept
-                                      </button>
-                                      <button
-                                        style={{
-                                          flex: 1, background: "transparent", color: "var(--red)",
-                                          border: "1px solid var(--red)", borderRadius: 7, padding: "10px", fontSize: 13, fontWeight: 750,
-                                          cursor: "pointer"
-                                        }}
-                                        onClick={handleReject}
-                                      >
-                                        ✕ Reject
-                                      </button>
-                                    </div>
-
-                                    <div style={{ display: "flex", gap: 8 }}>
-                                      <button
-                                        style={{
-                                          flex: 1, background: "var(--bg-page)", color: "var(--text-secondary)",
-                                          border: "1px solid var(--border)", borderRadius: 6, padding: "7px", fontSize: 11.5, fontWeight: 600,
-                                          cursor: "pointer"
-                                        }}
-                                        onClick={handleIgnore}
-                                      >
-                                        Ignore Issue
-                                      </button>
-                                      <button
-                                        style={{
-                                          flex: 1, background: "var(--brand-light)", color: "var(--brand)",
-                                          border: "1px solid var(--brand)", borderRadius: 6, padding: "7px", fontSize: 11.5, fontWeight: 600,
-                                          cursor: "pointer"
-                                        }}
-                                        onClick={() => {
-                                          if (currentIssue.original_text) {
-                                            saveProtectedTerms([currentIssue.original_text]);
-                                            handleIgnore();
-                                          }
-                                        }}
-                                      >
-                                        + Add To Dictionary
-                                      </button>
-                                    </div>
-                                  </div>
-                                </>
-                              ) : (
-                                <div style={{ textAlign: "center", padding: "40px 16px" }}>
-                                  <span style={{ fontSize: 32 }}>🎉</span>
-                                  <h4 style={{ margin: "8px 0 4px", fontSize: 15, fontWeight: 700, color: "var(--text-primary)" }}>
-                                    All Proofreading Issues Reviewed
-                                  </h4>
-                                  <p style={{ fontSize: 12, color: "var(--text-secondary)" }}>
-                                    All detected spelling and grammar issues have been reviewed or approved.
-                                  </p>
-                                </div>
-                              )}
-                            </div>
-                          );
-                        })()}
-                      </div>
-                    </div>
-                  ) : activeTab === "assistant" ? (
+                  <PDFReviewWorkspace
+                    docId={id}
+                    documentData={doc}
+                    issues={doc?.issues || []}
+                    onIssueDecisionChange={(issueId, decision) => {
+                      setIssueDecisions((prev) => ({ ...prev, [issueId]: decision }));
+                    }}
+                    onRefreshDocument={async () => {
+                      const updated = await fetchDocument(id);
+                      setDoc(updated);
+                    }}
+                  />
+                ) : activeTab === "assistant" ? (
                   /* Embedded AI Assistant Chat Panel */
                   !(doc?.rag_ready || doc?.rag_status === "completed" || doc?.status === "completed") ? (
                     <div style={{ background: "var(--bg-card)", border: "1px solid var(--border)", borderRadius: 12, padding: 40, textAlign: "center" }}>

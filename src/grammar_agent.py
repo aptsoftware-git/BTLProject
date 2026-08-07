@@ -201,8 +201,12 @@ class GrammarAgent:
             if span is None:
                 continue
             start, end = span
+            sent_id = sentence_id_for_offset_lookup(paragraph_doc_offset + start)
+            sent_obj = sentence_id_for_offset_lookup(paragraph_doc_offset + start, return_object=True) if hasattr(sentence_id_for_offset_lookup, "__code__") and "return_object" in sentence_id_for_offset_lookup.__code__.co_varnames else None
+            page_num = getattr(sent_obj, "page", 1) if sent_obj else 1
+            bbox_val = getattr(sent_obj, "bbox", None) if sent_obj else None
             candidates.append(Candidate(
-                sentence_id=sentence_id_for_offset_lookup(paragraph_doc_offset + start),
+                sentence_id=sent_id,
                 char_start=paragraph_doc_offset + start,
                 char_end=paragraph_doc_offset + end,
                 original_text=original,
@@ -211,6 +215,8 @@ class GrammarAgent:
                 source=SourceAgent.LLM,
                 reason=err.get("reason", ""),
                 confidence=0.7,
+                page_number=page_num,
+                bbox=bbox_val,
             ))
         return candidates
 

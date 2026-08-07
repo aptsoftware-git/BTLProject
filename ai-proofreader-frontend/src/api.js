@@ -317,4 +317,21 @@ export function fetchRecommendations(jobId) {
   return request(`/reports/${jobId}/recommendations`);
 }
 
+export async function exportCorrectedPdf(jobId, acceptedIssueIds = [], decisions = {}) {
+  const url = `${API_BASE}/documents/${jobId}/export-pdf`;
+  const response = await fetch(url, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ accepted_issue_ids: acceptedIssueIds, decisions })
+  });
+  if (!response.ok) {
+    throw new Error(`Failed to export PDF: ${response.statusText}`);
+  }
+  return response.blob();
+}
+
+export function rerunProofreading(jobId) {
+  return request(`/documents/${jobId}/rerun-proofreading`, { method: "POST" });
+}
+
 export { API_BASE as API_BASE_URL };

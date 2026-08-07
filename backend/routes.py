@@ -198,6 +198,37 @@ async def retry_job(job_id: str, stage_id: str = "all") -> JobStatusResponse:
         )
 
 
+def _normalize_issue_metadata(raw_issues: list) -> list:
+    normalized = []
+    for idx, item in enumerate(raw_issues):
+        if not isinstance(item, dict):
+            continue
+        issue = dict(item)
+        issue["issue_id"] = issue.get("issue_id") or f"issue_{idx + 1}"
+        page = issue.get("page")
+        if page is None:
+            page = issue.get("page_number", 1)
+        try:
+            page_val = int(page) if page is not None else 1
+        except Exception:
+            page_val = 1
+        if page_val < 1:
+            page_val = 1
+        issue["page"] = page_val
+        issue["page_number"] = page_val
+        bbox = issue.get("bbox")
+        if isinstance(bbox, dict):
+            x0 = bbox.get("x0", bbox.get("l", 0.0))
+            y0 = bbox.get("y0", bbox.get("t", 0.0))
+            x1 = bbox.get("x1", bbox.get("r", 0.0))
+            y1 = bbox.get("y1", bbox.get("b", 0.0))
+            issue["bbox"] = {"x0": float(x0), "y0": float(y0), "x1": float(x1), "y1": float(y1)}
+        else:
+            issue["bbox"] = {"x0": 0.0, "y0": 0.0, "x1": 0.0, "y1": 0.0}
+        normalized.append(issue)
+    return normalized
+
+
 @router.get(
     "/results/{job_id}",
     response_model=ResultsResponse,
@@ -227,15 +258,17 @@ async def get_results(job_id: str) -> ResultsResponse:
     job_dir = get_job_dir(job_id)
     
     # 1. Load Issues
-    issues = []
+    raw_issues = []
     report_path = job_dir / "10_final" / "report.json"
     if report_path.exists():
         try:
             with open(report_path, "r", encoding="utf-8") as f:
                 report_data = json.load(f)
-                issues = report_data.get("issues", [])
+                raw_issues = report_data.get("issues", [])
         except Exception as exc:
             backend_logger.warning("Error reading report.json for job %s: %s", job_id, exc)
+
+    issues = _normalize_issue_metadata(raw_issues)
 
     # 2. Load Protected Terms
     protected_terms = []
@@ -646,6 +679,7 @@ async def upload_and_start_document(file: UploadFile = File(...)):
     summary="Get details of a document/job",
 )
 async def get_document(job_id: str):
+    from backend.services import get_job, get_job_dir, save_job_metadata, backend_logger
     job = get_job(job_id)
     if not job:
         raise HTTPException(
@@ -731,22 +765,77 @@ async def get_document(job_id: str):
             pass
 
     report_path = job_dir / "10_final" / "report.json"
+    root_report_path = job_dir / "report.json"
+
+    backend_logger.info("Loading proofreading report from: %s", report_path.resolve())
+    backend_logger.info("10_final report exists: %s", report_path.exists())
+    backend_logger.info("Root report exists: %s", root_report_path.exists())
+
+    # 1. Primary Proofreading Source: 10_final/report.json
     if report_path.exists():
         try:
             with open(report_path, "r", encoding="utf-8") as f:
                 report_data = json.load(f)
-                issues = report_data.get("issues", [])
-                for idx, issue in enumerate(issues):
-                    if isinstance(issue, dict):
-                        issue_id_str = str(issue.get("issue_id", idx))
-                        if issue_id_str in decisions:
-                            issue["status"] = decisions[issue_id_str]
-                        elif str(idx) in decisions:
-                            issue["status"] = decisions[str(idx)]
+                raw_issues = report_data.get("issues", [])
+                if raw_issues:
+                    issues = raw_issues
         except Exception as exc:
-            backend_logger.warning("Error reading report.json for job %s: %s", job_id, exc)
+            backend_logger.warning("Error reading 10_final/report.json for job %s: %s", job_id, exc)
+
+    # 2. Unified Fallback: root job_dir/report.json (if valid proofreading report)
+    if not issues and root_report_path.exists():
+        try:
+            with open(root_report_path, "r", encoding="utf-8") as f:
+                report_data = json.load(f)
+                raw_issues = report_data.get("issues", [])
+                if raw_issues and isinstance(raw_issues, list) and len(raw_issues) > 0:
+                    first_item = raw_issues[0]
+                    if isinstance(first_item, dict) and ("original_text" in first_item or "suggested_text" in first_item):
+                        issues = raw_issues
+                        # Automatically persist unified copy to 10_final/report.json
+                        try:
+                            final_dir = job_dir / "10_final"
+                            final_dir.mkdir(parents=True, exist_ok=True)
+                            with open(report_path, "w", encoding="utf-8") as f_out:
+                                json.dump(report_data, f_out, indent=2)
+                        except Exception:
+                            pass
+        except Exception as exc:
+            backend_logger.warning("Error reading root report.json for job %s: %s", job_id, exc)
+
+    # STRICT RULE: Never fall back to raw candidates (accepted.json, grammar_candidates.json, spell_candidates.json)
+
+    # Normalize issues metadata (ensuring issue_id, page, bbox)
+    issues = _normalize_issue_metadata(issues)
+    backend_logger.info("Issue count loaded: %s", len(issues))
+
+    report_exists = report_path.exists() or root_report_path.exists()
+    print("[RUNTIME LOG] Report exists:", report_exists)
+    print("[RUNTIME LOG] Issues returned:", len(issues))
+    print("[RUNTIME LOG] First issue:", issues[0] if issues else None)
+
+    # Apply decisions to issues
+    for idx, issue in enumerate(issues):
+        if isinstance(issue, dict):
+            issue_id_str = str(issue.get("issue_id", f"issue_{idx + 1}"))
+            if issue_id_str in decisions:
+                issue["status"] = decisions[issue_id_str]
+            elif str(idx) in decisions:
+                issue["status"] = decisions[str(idx)]
+
     response_data["issues"] = issues
     response_data["decisions"] = decisions
+
+    # Synchronize statistics with actual issues payload
+    stats = dict(job.get("result")) if isinstance(job.get("result"), dict) else {}
+    stats["total_issues"] = len(issues)
+    stats["accepted"] = sum(1 for v in decisions.values() if v == "accepted")
+    stats["rejected"] = sum(1 for v in decisions.values() if v == "rejected")
+    response_data["statistics"] = stats
+
+    # Ensure in-memory and disk metadata result stay synchronized
+    job["result"] = stats
+    save_job_metadata(job_id)
 
     # Load Protected Terms
     protected_terms = []
@@ -793,6 +882,15 @@ async def get_document(job_id: str):
             reports["summary.csv"] = summary_path.read_text(encoding="utf-8")
         except Exception as exc:
             backend_logger.warning("Error reading summary.csv for job %s: %s", job_id, exc)
+
+    rep_json_path = job_dir / "10_final" / "report.json"
+    if rep_json_path.exists():
+        try:
+            reports["report.json"] = rep_json_path.read_text(encoding="utf-8")
+        except Exception as exc:
+            backend_logger.warning("Error reading report.json into reports dict for job %s: %s", job_id, exc)
+
+    response_data["reports"] = reports
     response_data["reports"] = reports
 
     # Load raw_text with fallback paths
@@ -847,6 +945,7 @@ async def get_document_issues(job_id: str):
         except Exception as exc:
             backend_logger.warning("Error reading report.json for job %s: %s", job_id, exc)
 
+    issues = _normalize_issue_metadata(issues)
     return {"job_id": job_id, "issues": issues, "decisions": decisions}
 
 
@@ -1706,25 +1805,116 @@ async def get_cache_metadata_endpoint(job_id: str):
     return cache_mgr.get_metadata()
 
 
-@router.post("/jobs/{job_id}/regenerate", summary="Regenerate specified pipeline stage or full document")
-async def regenerate_job_stage(job_id: str, stage: str = "all"):
-    from src.rag.cache_manager import DocumentCacheManager
+@router.post(
+    "/documents/{job_id}/export-pdf",
+    summary="Export corrected PDF using accepted proofreading issues",
+)
+async def export_corrected_pdf(job_id: str, payload: dict = {}):
     job = get_job(job_id)
     if not job:
-        raise HTTPException(status_code=404, detail="Job not found")
-        
-    doc_hash = job.get("doc_hash")
-    if doc_hash:
-        cache_mgr = DocumentCacheManager(doc_hash, job.get("filename", "unknown"))
-        if stage and stage != "all":
-            cache_mgr.invalidate_stage(stage)
-        else:
-            meta = cache_mgr.get_metadata()
-            meta["completed_stages"] = []
-            cache_mgr._write_json(cache_mgr.metadata_path, meta)
+        raise HTTPException(status_code=404, detail=f"Job '{job_id}' not found.")
 
-    queue_job(job_id)
-    return {"status": "queued", "job_id": job_id, "regenerating_stage": stage}
+    job_dir = get_job_dir(job_id)
+    accepted_ids = set(payload.get("accepted_issue_ids", []))
+    decisions = payload.get("decisions", {})
+
+    # 1. Load Issues
+    raw_issues = []
+    report_path = job_dir / "10_final" / "report.json"
+    if report_path.exists():
+        try:
+            with open(report_path, "r", encoding="utf-8") as f:
+                report_data = json.load(f)
+                raw_issues = report_data.get("issues", [])
+        except Exception as exc:
+            backend_logger.warning("Error reading report.json for export PDF: %s", exc)
+
+    issues = _normalize_issue_metadata(raw_issues)
+
+    # Filter accepted issues
+    accepted_issues = []
+    for idx, iss in enumerate(issues):
+        iid = iss.get("issue_id") or f"issue_{idx + 1}"
+        if iid in accepted_ids or decisions.get(str(idx)) == "accepted" or decisions.get(iid) == "accepted":
+            accepted_issues.append(iss)
+
+    # Locate input document PDF
+    input_dir = ROOT_DIR / "data" / "input"
+    orig_pdf = None
+    if input_dir.exists():
+        for child in input_dir.iterdir():
+            if child.name.startswith(job_id) and child.suffix.lower() == ".pdf":
+                orig_pdf = child
+                break
+
+    output_pdf_path = job_dir / "10_final" / "corrected_document.pdf"
+
+    try:
+        import fitz
+        if orig_pdf and orig_pdf.exists():
+            doc = fitz.open(orig_pdf)
+            for iss in accepted_issues:
+                page_idx = max(0, int(iss.get("page", 1)) - 1)
+                if page_idx < len(doc):
+                    page = doc[page_idx]
+                    orig = iss.get("original_text", "")
+                    sug = iss.get("suggested_text", "")
+                    if orig:
+                        rects = page.search_for(orig)
+                        for rect in rects:
+                            page.add_redact_annot(rect, text=sug, fontsize=10)
+                        page.apply_redactions()
+            output_pdf_path.parent.mkdir(parents=True, exist_ok=True)
+            doc.save(str(output_pdf_path))
+            doc.close()
+        else:
+            # Fallback: create fresh PDF from text
+            doc = fitz.open()
+            page = doc.new_page()
+            text_path = job_dir / "03_preprocessed" / "normalized_text.txt"
+            raw_text = text_path.read_text(encoding="utf-8") if text_path.exists() else "Corrected Document"
+            
+            # Apply corrections to text
+            corrected_text = raw_text
+            for iss in sorted(accepted_issues, key=lambda x: x.get("char_start", 0), reverse=True):
+                cs, ce = iss.get("char_start"), iss.get("char_end")
+                if cs is not None and ce is not None and 0 <= cs <= ce <= len(corrected_text):
+                    corrected_text = corrected_text[:cs] + iss.get("suggested_text", "") + corrected_text[ce:]
+            
+            page.insert_textbox(fitz.Rect(50, 50, 550, 780), corrected_text[:4000])
+            output_pdf_path.parent.mkdir(parents=True, exist_ok=True)
+            doc.save(str(output_pdf_path))
+            doc.close()
+
+        clean_filename = f"corrected_{job.get('filename', 'document.pdf')}"
+        return FileResponse(
+            path=output_pdf_path,
+            media_type="application/pdf",
+            filename=clean_filename,
+        )
+    except Exception as exc:
+        backend_logger.error("Failed to generate export PDF for job %s: %s", job_id, exc)
+        raise HTTPException(status_code=500, detail=f"PDF Export failed: {str(exc)}")
+
+
+@router.post(
+    "/documents/{job_id}/rerun-proofreading",
+    summary="Re-run only proofreading pipeline preserving extraction & RAG",
+)
+async def rerun_proofreading_endpoint(job_id: str):
+    from backend.services import rerun_proofreading_job
+    job = get_job(job_id)
+    if not job:
+        raise HTTPException(status_code=404, detail=f"Job '{job_id}' not found.")
+
+    try:
+        res = rerun_proofreading_job(job_id)
+        return res
+    except Exception as exc:
+        backend_logger.error("Rerun proofreading failed for job %s: %s", job_id, exc)
+        raise HTTPException(status_code=500, detail=f"Rerun proofreading failed: {str(exc)}")
+
+
 
 
 
