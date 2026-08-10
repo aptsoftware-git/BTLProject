@@ -21,55 +21,17 @@ from collections import Counter
 
 logger = logging.getLogger("pipeline")
 
-# Phase 4: Business Taxonomy (12 Executive Categories)
-TAXONOMY_CATEGORIES = {
-    "Numerical Inconsistency",
-    "Cross-Reference Error",
-    "Undefined Term",
-    "Undefined Acronym",
-    "Unsupported Claim",
-    "Policy Conflict",
-    "Governance Inconsistency",
-    "Compliance Risk",
-    "Regulatory Risk",
-    "Missing Evidence",
-    "Business Logic Conflict",
-    "Contradictory Statement",
-}
+# Business taxonomy is defined ONCE, centrally, in ambiguity_taxonomy.py --
+# this used to be a separate, independently-maintained 12-category set with
+# its own legacy-string mapping, which drifted out of sync with the
+# taxonomy enforced everywhere else in the pipeline (see the audit that
+# found four different, unaligned category lists). Both names are kept as
+# aliases here since other modules in this codebase still import
+# TAXONOMY_CATEGORIES/CATEGORY_MAPPINGS by these names.
+from src.rag.ambiguity_taxonomy import APPROVED_CATEGORIES, normalize_category as _normalize_category_shared
 
-# Mapping legacy / raw LLM category strings to the 12 standard business categories
-CATEGORY_MAPPINGS = {
-    "vague wording": "Undefined Term",
-    "Writing Clarity": "Undefined Term",
-    "undefined terminology": "Undefined Term",
-    "Undefined Term": "Undefined Term",
-    "undefined acronym": "Undefined Acronym",
-    "acronym definition": "Undefined Acronym",
-    "Acronym Definition": "Undefined Acronym",
-    "policy conflict": "Policy Conflict",
-    "Policy Conflict": "Policy Conflict",
-    "contradiction": "Contradictory Statement",
-    "Contradictory Statements": "Contradictory Statement",
-    "Contradictory Statement": "Contradictory Statement",
-    "numerical ambiguity": "Numerical Inconsistency",
-    "Numerical Mismatch": "Numerical Inconsistency",
-    "Numerical Consistency": "Numerical Inconsistency",
-    "temporal ambiguity": "Contradictory Statement",
-    "Reference Conflict": "Cross-Reference Error",
-    "Cross-Reference Mismatch": "Cross-Reference Error",
-    "weak instructions": "Business Logic Conflict",
-    "pronoun ambiguity": "Undefined Term",
-    "Compliance Risk": "Compliance Risk",
-    "Regulatory Risk": "Regulatory Risk",
-    "Governance Inconsistency": "Governance Inconsistency",
-    "Business Logic Conflict": "Business Logic Conflict",
-    "Unsupported Claim": "Unsupported Claim",
-    "Data Quality": "Numerical Inconsistency",
-    "Missing Evidence": "Missing Evidence",
-    "Market Overlap": "Business Logic Conflict",
-    "Duplicate Info": "Contradictory Statement",
-    "Incomplete Info": "Missing Evidence",
-}
+TAXONOMY_CATEGORIES = set(APPROVED_CATEGORIES)
+CATEGORY_MAPPINGS = {c: c for c in APPROVED_CATEGORIES}
 
 # PART 1: Suppressed Terms, Section Headers, Contact Details, Standalone Entities & Boilerplate Sections
 SUPPRESSED_EXACT_PATTERNS = {
@@ -199,71 +161,63 @@ class FindingRelevanceFilter:
 
         return False
 
-    def normalize_category(self, raw_category: str, quote: str = "", explanation: str = "") -> str:
-        """Phase 4 & Issue 9: Maps raw category strings. Enforces strict Policy Conflict rules (requires contradiction evidence)."""
-        cat = CATEGORY_MAPPINGS.get(raw_category, "Undefined Term")
-        if cat == "Policy Conflict":
-            text_block = (quote + " " + explanation).lower()
-            # Issue 9: Require explicit section contradiction evidence for Policy Conflict
-            if not any(kw in text_block for kw in ["whereas", "contradict", "conflicts with", "section a", "section b", "differs from"]):
-                return "Governance Inconsistency"
-        return cat
+    def normalize_category(self, raw_category: str, quote: str = "", explanation: str = "") -> Optional[str]:
+        """Maps a raw category string onto the single shared Ambiguity Analysis
+        taxonomy (src/rag/ambiguity_taxonomy.py). Returns None if the raw
+        category doesn't map to an approved category (e.g. grammar/spelling/
+        style) -- by the time findings reach this filter they should
+        already have been gated upstream (final_report_generator.py), so
+        this is a defense-in-depth check, not the primary enforcement
+        point."""
+        return _normalize_category_shared(raw_category)
 
     def generate_specific_business_impact(self, category: str, title: str = "", text: str = "") -> str:
         """Phase 5: Generates category-specific business impacts."""
-        cat_lower = category.lower()
+        cat_lower = (category or "").lower()
 
         if "numerical" in cat_lower:
             return "May affect financial reporting accuracy and stakeholder trust."
-        if "acronym" in cat_lower:
-            return "May cause interpretation inconsistencies among readers."
-        if "cross-reference" in cat_lower or "reference" in cat_lower:
+        if "unit" in cat_lower or "measurement" in cat_lower:
+            return "Inconsistent unit basis may cause the value to be misread or miscalculated downstream."
+        if "date" in cat_lower or "timeline" in cat_lower:
+            return "Conflicting dates/deadlines create scheduling or compliance risk."
+        if "cross-reference" in cat_lower or "contradiction" in cat_lower and "cross" in cat_lower:
             return "May reduce document traceability during audits and reviews."
-        if "unsupported" in cat_lower:
-            return "Unsubstantiated statement creates credibility risk during regulatory or investor audit."
-        if "policy" in cat_lower:
-            return "May create compliance exposure and departmental misalignment."
-        if "governance" in cat_lower:
-            return "Inconsistent governance rules create operational execution risk across units."
-        if "compliance" in cat_lower:
-            return "Statutory or internal compliance gap introduces potential audit penalty."
-        if "regulatory" in cat_lower:
-            return "Non-aligned regulatory statement introduces statutory exposure."
-        if "missing evidence" in cat_lower:
-            return "Missing empirical evidence weakens document authority and audit readiness."
-        if "logic" in cat_lower:
-            return "Logical inconsistency in business rules introduces operational errors."
-        if "contradictory" in cat_lower:
+        if "pronoun" in cat_lower or "entity-reference" in cat_lower:
+            return "Reader may misattribute the statement to the wrong entity or section."
+        if "terminology" in cat_lower:
+            return "Inconsistent terminology creates interpretation ambiguity among readers."
+        if "structural" in cat_lower or "convention" in cat_lower:
+            return "Structural inconsistency reduces document navigability and professional polish."
+        if "missing" in cat_lower or "conflicting context" in cat_lower:
+            return "Missing prerequisite context weakens the claim's credibility during review."
+        if "internal factual" in cat_lower or "contradictory" in cat_lower or "contradiction" in cat_lower:
             return "Conflicting disclosures degrade executive clarity and audit reliability."
         return "Operational execution deviation & stakeholder ambiguity."
 
     def generate_specific_recommendation(self, category: str, title: str = "", text: str = "") -> str:
         """Phase 6: Generates category-specific actionable recommendations."""
-        cat_lower = category.lower()
+        cat_lower = (category or "").lower()
 
-        if "acronym" in cat_lower:
-            return "Define the acronym at its first occurrence and use it consistently thereafter."
         if "numerical" in cat_lower:
             return "Reconcile the reported values across referenced sections and update the source figures."
-        if "unsupported" in cat_lower:
-            return "Add supporting evidence, references, or metrics to substantiate the claim."
-        if "cross-reference" in cat_lower or "reference" in cat_lower:
+        if "unit" in cat_lower or "measurement" in cat_lower:
+            return "Standardize the unit/scale basis and re-verify the reported value."
+        if "date" in cat_lower or "timeline" in cat_lower:
+            return "Confirm the correct date/deadline and update all conflicting references."
+        if "cross-reference" in cat_lower:
             return "Correct section, note, and page cross-references across all document chapters."
-        if "policy" in cat_lower:
-            return "Harmonize policy language across departments to establish a single authoritative rule."
-        if "governance" in cat_lower:
-            return "Align governance directives across operational chapters."
-        if "compliance" in cat_lower:
-            return "Remediate compliance clause to satisfy statutory audit standards."
-        if "regulatory" in cat_lower:
-            return "Align disclosure text with regulatory mandate."
-        if "missing evidence" in cat_lower:
-            return "Provide empirical supporting data, citations, or audit notes."
-        if "logic" in cat_lower:
-            return "Reconcile business rule logic across process descriptions."
-        if "contradictory" in cat_lower:
+        if "pronoun" in cat_lower or "entity-reference" in cat_lower:
+            return "Replace the ambiguous pronoun/reference with an explicit noun or entity name."
+        if "terminology" in cat_lower:
+            return "Standardize terminology to a single term across the document."
+        if "structural" in cat_lower or "convention" in cat_lower:
+            return "Align numbering, headings, and formatting to a single document convention."
+        if "missing" in cat_lower or "conflicting context" in cat_lower:
+            return "Add the missing context or definition the claim depends on."
+        if "internal factual" in cat_lower or "contradictory" in cat_lower or "contradiction" in cat_lower:
             return "Reconcile contradictory statements into a unified authoritative narrative."
-        return "Add explicit definition in glossary or at first occurrence in text."
+        return "Review source document to reconcile conflicting statements."
 
     def calculate_severity(
         self,
@@ -276,20 +230,25 @@ class FindingRelevanceFilter:
         quote: str = ""
     ) -> str:
         """Assigns 4-tier severity (CRITICAL, HIGH, MEDIUM, LOW)."""
+        cat_lower = (category or "").lower()
         text_block = (title + " " + quote + " " + explanation + " " + impact + " " + category).lower()
 
         if any(w in text_block for w in ["regulatory audit failure", "legal liability", "contract breach", "penalty", "statutory violation", "gender", "statutory disclosure", "board appointment", "secretarial audit", "companies act", "director"]):
             return "CRITICAL"
-        if category in ("Regulatory Risk", "Compliance Risk", "Regulatory Disclosure Gap") or ("statutory" in text_block and occurrence_count > 1):
+        if "statutory" in text_block and occurrence_count > 1:
             return "CRITICAL"
 
-        if category in ("Contradictory Statements", "Contradictory Statement", "Numerical Consistency", "Numerical Inconsistency", "Policy Conflict", "Strategic Risk") or any(w in text_block for w in ["financial mismatch", "contradiction", "discrepancy", "policy conflict", "revenue"]):
+        if (
+            "internal factual" in cat_lower or "contradiction" in cat_lower
+            or "numerical" in cat_lower or "unit" in cat_lower or "measurement" in cat_lower
+            or any(w in text_block for w in ["financial mismatch", "contradiction", "discrepancy", "policy conflict", "revenue"])
+        ):
             return "HIGH"
 
-        if category in ("Operational Ambiguity", "Cross-Reference Mismatch", "Cross-Reference Error", "Missing Evidence", "Market Positioning Conflict", "Incomplete Information", "Undefined Acronym"):
+        if "cross-reference" in cat_lower or "date" in cat_lower or "timeline" in cat_lower or "missing" in cat_lower:
             return "MEDIUM"
 
-        if category in ("Acronym Definition", "Data Quality", "Duplicate Information", "Document Structure", "Naming Inconsistency", "Formatting Inconsistency", "Undefined Term"):
+        if "structural" in cat_lower or "convention" in cat_lower or "terminology" in cat_lower or "pronoun" in cat_lower:
             return "LOW"
 
         return "MEDIUM"
@@ -439,8 +398,16 @@ class FindingRelevanceFilter:
                 continue
 
             # Category Normalization & Specific Impact / Recommendation
-            raw_cat = f.get("category") or f.get("type") or f.get("business_category") or "Undefined Term"
+            raw_cat = f.get("category") or f.get("type") or f.get("business_category")
             category = self.normalize_category(raw_cat, quote, explanation)
+            if category is None:
+                # Not in the approved Ambiguity Analysis taxonomy (e.g. a
+                # grammar/spelling/style label) -- should already have been
+                # gated out upstream, but never let an unmapped category
+                # reach the report as a defaulted/fabricated bucket.
+                self.transparency_stats["claude_rejections"] += 1
+                logger.debug(f"[FILTER] Dropping finding with unmapped category '{raw_cat}': {title}")
+                continue
             f["category"] = category
             f["business_impact"] = self.generate_specific_business_impact(category, title, explanation)
             f["recommendation"] = self.generate_specific_recommendation(category, title, explanation)

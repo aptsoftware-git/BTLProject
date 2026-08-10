@@ -5,56 +5,112 @@ import {
   API_BASE_URL 
 } from "../api";
 
-const CATEGORY_MAPPINGS = {
-  "Lexical Ambiguity": "Ambiguities",
-  "Referential Ambiguity": "Ambiguities",
-  "Ambiguous Reference": "Ambiguities",
-  "vague wording": "Ambiguities",
-  "pronoun ambiguity": "Ambiguities",
-  "temporal ambiguity": "Ambiguities",
-  "undefined terminology": "Ambiguities",
-  "Undefined Term": "Ambiguities",
-  "Undefined Acronym": "Ambiguities",
-  "Grammar Errors": "Grammar Issues",
-  "Grammar Error": "Grammar Issues",
-  "Spelling Errors": "Spelling Issues",
-  "Spelling Error": "Spelling Issues",
-  "Writing Style Issues": "Writing Clarity",
-  "Writing Quality": "Writing Clarity",
-  "Terminology Inconsistency": "Terminology",
-  "Inconsistent Terminology": "Terminology",
-  "Policy Conflict": "Policy Conflicts",
-  "Policy Conflicts": "Policy Conflicts",
-  "Numerical Conflict": "Numerical Issues",
-  "Numerical Inconsistency": "Numerical Issues",
-  "numerical ambiguity": "Numerical Issues",
-  "Temporal Conflict": "Contradictions",
-  "Contradictory Statement": "Contradictions",
-  "Contradictions": "Contradictions",
-  "Broken Reference": "Writing Clarity",
-  "Duplicate Guidance": "Contradictions",
-  "Missing Information": "Writing Clarity"
+export const APPROVED_CATEGORIES = [
+  "Cross-reference / contradiction",
+  "Numerical inconsistency",
+  "Pronoun / entity-reference ambiguity",
+  "Terminology inconsistency",
+  "Date / timeline inconsistency",
+  "Unit / measurement inconsistency",
+  "Internal factual contradiction",
+  "Structural / convention inconsistency",
+  "Missing / conflicting context",
+];
+
+const EXCLUDED_CATEGORIES = new Set([
+  "grammar issue", "grammar error", "grammar errors", "grammar",
+  "spelling issue", "spelling error", "spelling errors", "spelling",
+  "writing clarity", "writing quality", "writing style issues", "clarity",
+  "vague wording", "vague qualifier", "generic wording", "ambiguities", "style", "stylistic",
+  "undefined term", "undefined acronym", "acronym definition",
+]);
+
+const ALIASES = {
+  "possible contradiction": "Cross-reference / contradiction",
+  "contradictory statement": "Cross-reference / contradiction",
+  "contradictory statements": "Cross-reference / contradiction",
+  "contradiction": "Cross-reference / contradiction",
+  "contradictions": "Cross-reference / contradiction",
+  "cross-reference issue": "Cross-reference / contradiction",
+  "cross-reference inconsistency": "Cross-reference / contradiction",
+  "cross-reference error": "Cross-reference / contradiction",
+  "reference inconsistency": "Cross-reference / contradiction",
+  "reference conflict": "Cross-reference / contradiction",
+  "cross-reference mismatch": "Cross-reference / contradiction",
+  "broken reference": "Cross-reference / contradiction",
+  "cross-reference / contradiction": "Cross-reference / contradiction",
+
+  "numeric inconsistency": "Numerical inconsistency",
+  "numerical inconsistency": "Numerical inconsistency",
+  "cross-chunk numerical inconsistency": "Numerical inconsistency",
+  "numerical conflict": "Numerical inconsistency",
+  "numerical mismatch": "Numerical inconsistency",
+  "numerical ambiguity": "Numerical inconsistency",
+  "numerical consistency": "Numerical inconsistency",
+  "data quality": "Numerical inconsistency",
+
+  "pronoun ambiguity": "Pronoun / entity-reference ambiguity",
+  "referential ambiguity": "Pronoun / entity-reference ambiguity",
+  "ambiguous reference": "Pronoun / entity-reference ambiguity",
+  "pronoun / entity-reference ambiguity": "Pronoun / entity-reference ambiguity",
+
+  "terminology conflict": "Terminology inconsistency",
+  "terminology issue": "Terminology inconsistency",
+  "terminology inconsistency": "Terminology inconsistency",
+  "inconsistent terminology": "Terminology inconsistency",
+
+  "date conflicts": "Date / timeline inconsistency",
+  "date conflict": "Date / timeline inconsistency",
+  "temporal ambiguity": "Date / timeline inconsistency",
+  "temporal conflict": "Date / timeline inconsistency",
+  "date / timeline inconsistency": "Date / timeline inconsistency",
+
+  "unit inconsistency": "Unit / measurement inconsistency",
+  "unit / measurement inconsistency": "Unit / measurement inconsistency",
+  "formatting inconsistency": "Unit / measurement inconsistency",
+
+  "policy conflict": "Internal factual contradiction",
+  "policy conflicts": "Internal factual contradiction",
+  "policy inconsistency": "Internal factual contradiction",
+  "governance inconsistency": "Internal factual contradiction",
+  "business logic conflict": "Internal factual contradiction",
+  "duplicate guidance": "Internal factual contradiction",
+  "internal factual contradiction": "Internal factual contradiction",
+
+  "structural inconsistency": "Structural / convention inconsistency",
+  "convention inconsistency": "Structural / convention inconsistency",
+  "structural / convention inconsistency": "Structural / convention inconsistency",
+
+  "missing context": "Missing / conflicting context",
+  "missing information": "Missing / conflicting context",
+  "missing evidence": "Missing / conflicting context",
+  "unsupported claim": "Missing / conflicting context",
+  "missing / conflicting context": "Missing / conflicting context",
 };
 
-export default function ContextAnalysis({ id }) {
+export function normalizeAmbiguityCategory(rawCat) {
+  if (!rawCat) return null;
+  const key = String(rawCat).trim().toLowerCase();
+  if (EXCLUDED_CATEGORIES.has(key)) return null;
+  for (const c of APPROVED_CATEGORIES) {
+    if (c.toLowerCase() === key) return c;
+  }
+  return ALIASES[key] || null;
+}
+
+export default function ContextAnalysis({ id, doc: propDoc, onShowInDocument }) {
   const [loading, setLoading] = useState(true);
   const [running, setRunning] = useState(false);
   const [error, setError] = useState(null);
   const [docProgress, setDocProgress] = useState(null);
   
-  const [clustersReport, setClustersReport] = useState(null);
-  const [claimsReport, setClaimsReport] = useState(null);
-  const [chunkReport, setChunkReport] = useState(null);
-  const [clusterReport, setClusterReport] = useState(null);
-  const [claudeReport, setClaudeReport] = useState(null);
   const [finalReport, setFinalReport] = useState(null);
+  const [claudeReport, setClaudeReport] = useState(null);
 
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedCategory, setSelectedCategory] = useState("ALL");
   const [selectedSeverity, setSelectedSeverity] = useState("ALL");
-  
-  const [expandedCards, setExpandedCards] = useState({});
-  const [showTechDetails, setShowTechDetails] = useState(false);
+  const [showRejected, setShowRejected] = useState(false);
 
   useEffect(() => {
     let active = true;
@@ -66,30 +122,28 @@ export default function ContextAnalysis({ id }) {
         if (!active) return;
         setDocProgress(docData);
 
-        const isContextComplete = docData.context_analysis_status === "completed";
+        const isContextComplete = docData.context_analysis_status === "completed" || docData.status === "completed";
         const isContextRunning = docData.context_analysis_status === "running" || docData.context_analysis_status === "pending";
 
         if (isContextComplete) {
           setRunning(false);
-          await fetchAllReports();
+          await fetchReports();
         } else if (isContextRunning) {
           setRunning(true);
           timerId = setTimeout(checkStatus, 2500);
         } else if (docData.context_analysis_ready) {
           setRunning(false);
-          await fetchAllReports();
+          await fetchReports();
         } else if (docData.context_analysis_status === "failed") {
           setRunning(false);
-          setError("Audit execution failed: " + (docData.error || "Check engine log."));
+          setError("Ambiguity analysis pipeline encountered an error.");
         } else {
           setRunning(true);
           await runContextAnalysis(id).catch(() => {});
           timerId = setTimeout(checkStatus, 2500);
         }
       } catch (err) {
-        if (active) {
-          setError("Connection error: " + err.message);
-        }
+        if (active) setError("Connection error: " + err.message);
       } finally {
         if (active) setLoading(false);
       }
@@ -103,42 +157,29 @@ export default function ContextAnalysis({ id }) {
     };
   }, [id]);
 
-  const fetchAllReports = async () => {
+  const fetchReports = async () => {
     try {
       const fetchJson = async (url) => {
         const res = await fetch(url);
         if (!res.ok) return null;
         return res.json();
       };
-      
-      const [clusters, claims, chunk, cluster, claude, final] = await Promise.all([
-        fetchJson(`${API_BASE_URL}/reports/${id}/semantic-clusters`),
-        fetchJson(`${API_BASE_URL}/reports/${id}/claim-extraction`),
-        fetchJson(`${API_BASE_URL}/reports/${id}/chunk-reasoning`),
-        fetchJson(`${API_BASE_URL}/reports/${id}/cluster-reasoning`),
-        fetchJson(`${API_BASE_URL}/reports/${id}/claude-verification`),
-        fetchJson(`${API_BASE_URL}/reports/${id}/final-report`)
+
+      const [final, claude] = await Promise.all([
+        fetchJson(`${API_BASE_URL}/reports/${id}/final-report`),
+        fetchJson(`${API_BASE_URL}/reports/${id}/claude-verification`)
       ]);
 
-      if (clusters) setClustersReport(clusters);
-      if (claims) setClaimsReport(claims);
-      if (chunk) setChunkReport(chunk);
-      if (cluster) setClusterReport(cluster);
-      if (claude) setClaudeReport(claude);
       if (final) setFinalReport(final);
+      if (claude) setClaudeReport(claude);
     } catch (e) {
-      console.error("Error fetching pipeline sub-reports", e);
+      console.error("Error fetching ambiguity reports", e);
     }
   };
 
-  const handleGenerate = async () => {
+  const handleRerun = async () => {
     setRunning(true);
     setError(null);
-    setFinalReport(null);
-    setClaudeReport(null);
-    setChunkReport(null);
-    setClusterReport(null);
-    setClaimsReport(null);
     try {
       await runContextAnalysis(id);
       const docData = await fetchDocument(id);
@@ -149,571 +190,889 @@ export default function ContextAnalysis({ id }) {
     }
   };
 
-  const PLACEHOLDER_PATTERNS = [
-    "the model processes", "example text", "sample content", "placeholder", "lorem ipsum", "internal test",
-    "in this chunk", "claims made in this chunk", "unrelated to the provided text", "from the given text",
-    "validation or disvalidation", "information provided in the table", "based on information provided",
-    "no direct evidence", "the claims and entities", "claims and entities in this chunk",
-    "seem unrelated to the provided text", "do not have direct evidence", "reference any specific business"
-  ];
+  // --------------------------------------------------------------------------
+  // Data Mapping: Extract verified findings grounded in approved 9-taxonomy
+  // --------------------------------------------------------------------------
+  const { verifiedFindings, rejectedFindings, summaryMetrics } = useMemo(() => {
+    let rawFindings = [];
+    let rawRejected = [];
 
-  const isPlaceholderText = (text) => {
-    if (!text) return false;
-    const lower = String(text).toLowerCase();
-    return PLACEHOLDER_PATTERNS.some(p => lower.includes(p));
-  };
+    const finalData = finalReport?.data || finalReport;
+    const claudeData = claudeReport?.data || claudeReport;
 
-  const consolidatedFindings = useMemo(() => {
-    let rawItems = [];
-
-    if (finalReport?.data?.findings && finalReport.data.findings.length > 0) {
-      rawItems = finalReport.data.findings.map((f, idx) => {
-        const rawCat = f.category || f.business_category || "Writing Clarity";
-        const cat = CATEGORY_MAPPINGS[rawCat] || rawCat;
-        const sev = strUpper(f.severity || "MEDIUM");
-        const confPct = f.confidence_pct ?? (f.confidence != null ? (f.confidence <= 1 ? Math.round(f.confidence * 100) : f.confidence) : 85);
-        const rScore = f.risk_score ?? (sev === "CRITICAL" ? 9 : (sev === "HIGH" ? 7 : (sev === "MEDIUM" ? 5 : 2)));
-        const mat = f.materiality || (sev === "CRITICAL" || sev === "HIGH" ? "Material" : (sev === "MEDIUM" ? "Moderate" : "Informational"));
-        
-        return {
-          ...f,
-          finding_id: f.finding_id || `finding_${String(idx + 1).padStart(3, "0")}`,
-          category: cat,
-          severity: sev,
-          materiality: mat,
-          risk_score: rScore,
-          confidence_pct: confPct,
-          finding_status: f.finding_status || "Verified",
-          confidence_reason: f.confidence_reason || "Direct textual evidence verified across document passages.",
-          risk_reason: f.risk_reason || "Identified during document consistency and quality assurance audit.",
-          highlighted_ambiguity: f.highlighted_ambiguity || f.quote || f.suspected_text || "",
-          claude_explanation: f.claude_explanation || f.reason || f.explanation || "Passage contains ambiguous phrasing affecting clarity.",
-          affected_pages: f.affected_pages || f.locations || [f.page_number || f.page || 1],
-          audit_traceability: f.audit_traceability || "Verified by Independent AI Validation Layer"
-        };
-      });
-    } else if (claudeReport?.data?.verified_findings) {
-      const confirmed = claudeReport.data.verified_findings.filter(f => f.status === "confirmed" || f.status === "Verified");
-      let idx = 1;
-      rawItems = confirmed.map(f => {
-        const rawCat = f.business_category || "Writing Clarity";
-        const cat = CATEGORY_MAPPINGS[rawCat] || rawCat;
-        const location = f.page ? `Page ${f.page}` : (f.section ? `Section: ${f.section}` : "Document Section");
-        const sev = strUpper(f.severity || "MEDIUM");
-        const confPct = f.confidence_pct ?? (f.confidence != null ? (f.confidence <= 1 ? Math.round(f.confidence * 100) : f.confidence) : 85);
-        const rScore = f.risk_score ?? (sev === "CRITICAL" ? 9 : (sev === "HIGH" ? 7 : (sev === "MEDIUM" ? 5 : 2)));
-        const mat = f.materiality || (sev === "CRITICAL" || sev === "HIGH" ? "Material" : (sev === "MEDIUM" ? "Moderate" : "Informational"));
-
-        return {
-          finding_id: f.issue_id || `finding_${idx++}`,
-          title: f.title || `${cat} in ${location}`,
-          severity: sev,
-          materiality: mat,
-          risk_score: rScore,
-          confidence_pct: confPct,
-          category: cat,
-          location_display: location,
-          page_number: f.page || 1,
-          section_heading: f.section || "Introduction",
-          highlighted_ambiguity: f.highlighted_ambiguity || f.quote || f.suspected_text || "",
-          original_chunk: f.original_chunk || f.quote || "",
-          claude_explanation: f.reason || f.explanation || "Passage contains ambiguous phrasing affecting clarity.",
-          business_impact: f.business_impact || "Operational execution deviation & stakeholder ambiguity.",
-          recommended_resolution: f.recommendation || f.suggested_resolution || "Revise sentence structure to state explicit operational parameters.",
-          evidence: f.evidence || [],
-          affected_pages: [f.page || 1],
-          finding_status: "Verified",
-          confidence_reason: f.confidence_reason || "Direct textual evidence verified across document passages.",
-          risk_reason: f.risk_reason || "Identified during document consistency and quality assurance audit.",
-          audit_traceability: "Verified by Independent AI Validation Layer",
-          internal_reference: f.chunk_id || f.issue_id || "chunk_001"
-        };
-      });
+    if (finalData && Array.isArray(finalData.findings)) {
+      rawFindings = finalData.findings;
+    } else if (claudeData && Array.isArray(claudeData.verified_findings)) {
+      rawFindings = claudeData.verified_findings.filter(f => f.status === "confirmed" || f.status === "Verified");
     }
 
-    // Step 1: Filter out placeholder text
-    const cleanItems = rawItems.filter(item => {
-      const textBlock = `${item.title || ""} ${item.highlighted_ambiguity || ""} ${item.claude_explanation || ""}`;
-      return !isPlaceholderText(textBlock);
+    if (finalData && Array.isArray(finalData.rejected_findings)) {
+      rawRejected = finalData.rejected_findings;
+    }
+
+    const verified = [];
+    const rejectedTracked = [...rawRejected];
+
+    rawFindings.forEach((f, idx) => {
+      const rawCat = f.category || f.business_category || f.ambiguity_category || "";
+      const normCat = normalizeAmbiguityCategory(rawCat);
+
+      if (!normCat) {
+        // Out of scope category (grammar, spelling, vague wording, etc.) -> Filter out
+        rejectedTracked.push({
+          ...f,
+          status: "rejected",
+          reject_reason: `category '${rawCat || 'unmapped'}' is not in the approved Ambiguity Analysis taxonomy`
+        });
+        return;
+      }
+
+      // Check evidence quote & page
+      let quote = f.highlighted_ambiguity || f.quote || f.suspected_text || "";
+      let pageNum = f.page_number || f.page || 1;
+      let evidenceArr = Array.isArray(f.evidence) ? f.evidence : [];
+
+      if (!quote && evidenceArr.length > 0) {
+        const firstEv = evidenceArr[0];
+        quote = firstEv.quote || firstEv.quote_a || firstEv.text || "";
+        if (firstEv.page || firstEv.page_a) pageNum = firstEv.page || firstEv.page_a;
+      }
+
+      let affectedPages = Array.isArray(f.affected_pages) && f.affected_pages.length > 0
+        ? f.affected_pages
+        : [pageNum];
+
+      const sevRaw = String(f.severity || "MEDIUM").toUpperCase();
+      const severity = ["CRITICAL", "HIGH", "MEDIUM", "LOW"].includes(sevRaw) ? sevRaw : "MEDIUM";
+
+      verified.push({
+        finding_id: f.finding_id || `ambiguity_${idx + 1}`,
+        title: f.title || `${normCat} on Page ${pageNum}`,
+        category: normCat,
+        severity: severity,
+        explanation: f.explanation || f.claude_explanation || f.why_claude_flagged_it || f.reason || "Contextual ambiguity identified across document passages.",
+        highlighted_ambiguity: quote,
+        page_number: pageNum,
+        affected_pages: affectedPages,
+        section_heading: f.section_heading || f.section || null,
+        evidence: evidenceArr,
+        suggested_resolution: f.suggested_resolution || f.recommended_resolution || f.recommendation || null,
+        business_impact: f.business_impact || f.why_it_matters || null,
+        is_cross_reference: Boolean(f.is_cross_reference || evidenceArr.length > 1 || (evidenceArr[0] && evidenceArr[0].location_b))
+      });
     });
 
-    // Step 2: Semantic Deduplication & Location Aggregation
-    const deduplicatedMap = new Map();
-    cleanItems.forEach(item => {
-      const cat = item.category || "General";
-      const textStem = (item.highlighted_ambiguity || item.title || "").trim().toLowerCase().slice(0, 35);
-      const key = `${cat}::${textStem}`;
+    // Deduplicate findings by category + quote/title stem & merge pages
+    const dedupeMap = new Map();
+    verified.forEach(item => {
+      const stem = (item.highlighted_ambiguity || item.title).toLowerCase().trim().slice(0, 40);
+      const key = `${item.category}::${stem}`;
 
-      if (!deduplicatedMap.has(key)) {
-        deduplicatedMap.set(key, { ...item, aggregated_locations: [item.location_display || `Page ${item.page_number || 1}`] });
+      if (!dedupeMap.has(key)) {
+        dedupeMap.set(key, { ...item, pages_set: new Set(item.affected_pages) });
       } else {
-        const existing = deduplicatedMap.get(key);
-        const loc = item.location_display || `Page ${item.page_number || 1}`;
-        if (!existing.aggregated_locations.includes(loc)) {
-          existing.aggregated_locations.push(loc);
-        }
-        if (existing.aggregated_locations.length > 1) {
-          existing.location_display = `Multiple Locations (${existing.aggregated_locations.slice(0, 3).join(", ")})`;
-        }
+        const existing = dedupeMap.get(key);
+        item.affected_pages.forEach(p => existing.pages_set.add(p));
       }
     });
 
-    const result = Array.from(deduplicatedMap.values());
+    const finalVerified = Array.from(dedupeMap.values()).map(item => ({
+      ...item,
+      affected_pages: Array.from(item.pages_set).sort((a, b) => a - b)
+    }));
 
-    // Step 3: Priority Sorting (Severity -> Risk Score -> Confidence Pct)
-    const SEV_RANK = { "CRITICAL": 0, "HIGH": 1, "MEDIUM": 2, "LOW": 3 };
-    result.sort((a, b) => {
-      const sA = SEV_RANK[strUpper(a.severity)] ?? 4;
-      const sB = SEV_RANK[strUpper(b.severity)] ?? 4;
-      if (sA !== sB) return sA - sB;
-      const rA = Number(a.risk_score || 0);
-      const rB = Number(b.risk_score || 0);
-      if (rA !== rB) return rB - rA;
-      const cA = Number(a.confidence_pct || 0);
-      const cB = Number(b.confidence_pct || 0);
-      return cB - cA;
+    // Sort by Severity: CRITICAL -> HIGH -> MEDIUM -> LOW
+    const SEV_RANK = { CRITICAL: 0, HIGH: 1, MEDIUM: 2, LOW: 3 };
+    finalVerified.sort((a, b) => (SEV_RANK[a.severity] ?? 4) - (SEV_RANK[b.severity] ?? 4));
+
+    // Calculate Summary Metrics
+    const sevBreakdown = { CRITICAL: 0, HIGH: 0, MEDIUM: 0, LOW: 0 };
+    const categoriesSet = new Set();
+    const pagesSet = new Set();
+
+    finalVerified.forEach(f => {
+      sevBreakdown[f.severity] = (sevBreakdown[f.severity] || 0) + 1;
+      categoriesSet.add(f.category);
+      f.affected_pages.forEach(p => pagesSet.add(p));
     });
 
-    return result;
-  }, [finalReport, claudeReport, chunkReport, clusterReport]);
-
-  function strUpper(val) {
-    return String(val || "").toUpperCase();
-  }
-
-  function getConfidenceLevel(pct) {
-    if (pct >= 90) return "Very High";
-    if (pct >= 80) return "High";
-    if (pct >= 70) return "Medium";
-    return "Low";
-  }
-
-  function getRiskTier(score) {
-    if (score >= 9) return "Critical Risk";
-    if (score >= 7) return "High Risk";
-    if (score >= 4) return "Medium Risk";
-    return "Low Risk";
-  }
-
-  const funnelData = useMemo(() => {
-    let potential = finalReport?.data?.executive_summary?.potential_findings || claimsReport?.data?.claims?.length || chunkReport?.data?.chunks?.length || 15;
-    let verified = finalReport?.data?.executive_summary?.ai_verified_findings || claudeReport?.data?.verified_findings?.filter(f => f.status === "confirmed" || f.status === "Verified")?.length || consolidatedFindings.length;
-    let rejected = finalReport?.data?.executive_summary?.rejected_findings || claudeReport?.data?.verified_findings?.filter(f => f.status === "rejected" || f.status === "false_positive")?.length || Math.max(0, potential - verified);
-    let executive = finalReport?.data?.executive_summary?.executive_findings || consolidatedFindings.length;
-
-    if (potential < verified + rejected) {
-      potential = verified + rejected;
-    }
-
-    const rejectionSummary = finalReport?.data?.executive_summary?.rejection_summary || [
-      { reason: "Pronoun ambiguity (unanchored)", count: Math.min(rejected, 4) },
-      { reason: "Generic wording / vague qualifier", count: Math.max(0, rejected - 4) }
-    ];
-
-    const overallRisk = finalReport?.data?.executive_summary?.overall_risk_rating ||
-      (consolidatedFindings.some(f => strUpper(f.severity) === "CRITICAL") ? "CRITICAL" :
-      (consolidatedFindings.some(f => strUpper(f.severity) === "HIGH") ? "HIGH" :
-      (consolidatedFindings.length > 0 ? "MEDIUM" : "LOW")));
-
-    const rawSevBreakdown = finalReport?.data?.executive_summary?.severity_breakdown;
-    const hasValidSevBreakdown = rawSevBreakdown && (
-      (rawSevBreakdown.CRITICAL || 0) + (rawSevBreakdown.HIGH || 0) + (rawSevBreakdown.MEDIUM || 0) + (rawSevBreakdown.LOW || 0) > 0
-    );
-
-    const sevBreakdown = hasValidSevBreakdown ? {
-      CRITICAL: rawSevBreakdown.CRITICAL || 0,
-      HIGH: rawSevBreakdown.HIGH || 0,
-      MEDIUM: rawSevBreakdown.MEDIUM || 0,
-      LOW: rawSevBreakdown.LOW || 0
-    } : {
-      CRITICAL: consolidatedFindings.filter(f => strUpper(f.severity) === "CRITICAL").length,
-      HIGH: consolidatedFindings.filter(f => strUpper(f.severity) === "HIGH").length,
-      MEDIUM: consolidatedFindings.filter(f => strUpper(f.severity) === "MEDIUM").length,
-      LOW: consolidatedFindings.filter(f => strUpper(f.severity) === "LOW").length
-    };
-
     return {
-      potential_findings: potential,
-      ai_verified_findings: verified,
-      rejected_findings: rejected,
-      executive_findings: executive,
-      rejection_summary: rejectionSummary,
-      overall_risk_rating: overallRisk,
-      severity_breakdown: sevBreakdown
+      verifiedFindings: finalVerified,
+      rejectedFindings: rejectedTracked,
+      summaryMetrics: {
+        totalVerified: finalVerified.length,
+        sevBreakdown,
+        categoriesCount: categoriesSet.size,
+        pagesCount: pagesSet.size,
+        availableCategories: Array.from(categoriesSet)
+      }
     };
-  }, [finalReport, claudeReport, claimsReport, chunkReport, consolidatedFindings]);
+  }, [finalReport, claudeReport]);
 
+  // Dynamic Filtering
   const filteredFindings = useMemo(() => {
-    return consolidatedFindings.filter(f => {
-      const matchSev = (selectedSeverity === "ALL") || (strUpper(f.severity) === strUpper(selectedSeverity));
-      const matchCat = (selectedCategory === "ALL") || (f.category === selectedCategory);
-      
-      const search = searchTerm.toLowerCase().trim();
-      const matchSearch = !search ||
-        (f.title || "").toLowerCase().includes(search) ||
-        (f.location_display || "").toLowerCase().includes(search) ||
-        (f.highlighted_ambiguity || "").toLowerCase().includes(search) ||
-        (f.claude_explanation || "").toLowerCase().includes(search) ||
-        (f.recommended_resolution || "").toLowerCase().includes(search);
+    return verifiedFindings.filter(f => {
+      const matchSev = selectedSeverity === "ALL" || f.severity === selectedSeverity;
+      const matchCat = selectedCategory === "ALL" || f.category === selectedCategory;
+
+      const q = searchTerm.toLowerCase().trim();
+      const matchSearch = !q ||
+        f.title.toLowerCase().includes(q) ||
+        f.category.toLowerCase().includes(q) ||
+        f.explanation.toLowerCase().includes(q) ||
+        (f.highlighted_ambiguity && f.highlighted_ambiguity.toLowerCase().includes(q)) ||
+        (f.suggested_resolution && f.suggested_resolution.toLowerCase().includes(q));
 
       return matchSev && matchCat && matchSearch;
     });
-  }, [consolidatedFindings, selectedSeverity, selectedCategory, searchTerm]);
+  }, [verifiedFindings, selectedSeverity, selectedCategory, searchTerm]);
+
+  const isPipelineRunning = running || (docProgress && (docProgress.context_analysis_status === "running" || docProgress.context_analysis_status === "pending"));
 
   if (loading) {
     return (
       <div style={styles.centerContainer}>
         <div style={styles.spinner} />
-        <p style={{ marginTop: 16, fontSize: 13.5, color: "var(--text-secondary)" }}>Retrieving audit records...</p>
-      </div>
-    );
-  }
-
-  if (running) {
-    const curStage = docProgress?.current_stage || docProgress?.context_analysis_stage || "AI Validation Engine Review";
-    const estTime = docProgress?.estimated_remaining_time || "1 minute";
-
-    const stagesList = [
-      { num: 1, name: "Extraction" },
-      { num: 2, name: "Chunking" },
-      { num: 3, name: "Embeddings" },
-      { num: 4, name: "Proofreading" },
-      { num: 5, name: "RAG" },
-      { num: 6, name: "Consistency Scan" },
-      { num: 7, name: "AI Validation Engine Review" },
-      { num: 8, name: "Executive Report Generation" },
-    ];
-
-    const lower = curStage.toLowerCase();
-    let curIdx = 6;
-    if (lower.includes("stage 8") || lower.includes("final report")) curIdx = 7;
-    else if (lower.includes("stage 7") || lower.includes("validation")) curIdx = 6;
-    else if (lower.includes("stage 6") || lower.includes("ambiguity")) curIdx = 5;
-
-    return (
-      <div style={styles.runningContainer}>
-        <div style={styles.activeCard}>
-          <div style={styles.activeHeader}>
-            <div style={styles.activeBadge}>⏳ RUNNING PIPELINE</div>
-            <h2 style={styles.activeTitle}>{curStage}</h2>
-            <div style={styles.statusBox}>
-              <div style={styles.statusLabel}>Status</div>
-              <div style={styles.statusVal}>AI Validation Engine is reviewing candidate findings.</div>
-            </div>
-          </div>
-        </div>
+        <p style={{ marginTop: 14, fontSize: 13, color: "var(--text-secondary)" }}>Loading Contextual Ambiguity Audit...</p>
       </div>
     );
   }
 
   return (
-    <div style={styles.auditWrapper}>
-      
-      {/* Header */}
-      <div style={styles.auditHeader}>
-        <div>
-          <h2 style={styles.auditTitle}>Contextual Consistency & Ambiguity Audit</h2>
-          <p style={styles.auditSubtitle}>Automated Consistency Scan + Independent AI Validation Layer</p>
+    <div style={styles.container}>
+      {/* ---------------------------------------------------- */}
+      {/* 1. Compact Processing Banner                        */}
+      {/* ---------------------------------------------------- */}
+      {isPipelineRunning && (
+        <div style={styles.progressBanner}>
+          <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
+            <span style={styles.pulseDot} />
+            <strong style={{ fontSize: 13, color: "var(--amber)" }}>
+              Stage 6 Contextual Ambiguity Review in Progress
+            </strong>
+            <span style={{ fontSize: 12, color: "var(--text-secondary)" }}>
+              ({docProgress?.overall_progress || Math.round(docProgress?.progress_percentage || 70)}% complete)
+            </span>
+          </div>
+
+          <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
+            <span style={{ fontSize: 11.5, color: "var(--text-muted)" }}>
+              Est. Remaining: {docProgress?.estimated_remaining_time || "~1 min"}
+            </span>
+            <button onClick={handleRerun} style={styles.retryBtn}>
+              ↻ Re-trigger
+            </button>
+          </div>
         </div>
-        <button style={styles.primBtn} onClick={handleGenerate}>
-          ↻ Re-run Audit Pipeline
+      )}
+
+      {/* ---------------------------------------------------- */}
+      {/* 2. Workspace Header                                  */}
+      {/* ---------------------------------------------------- */}
+      <div style={styles.header}>
+        <div>
+          <h2 style={styles.title}>Contextual Ambiguity Analysis</h2>
+          <p style={styles.subtitle}>
+            Audits cross-chunk contradictions, numerical mismatches, and structural conflicts across document clauses.
+          </p>
+        </div>
+        <button onClick={handleRerun} style={styles.rerunBtn}>
+          ↻ Re-run Analysis
         </button>
       </div>
 
-      {/* Executive Summary Card & Overall Risk Badge */}
-      <div style={styles.execSummaryGrid}>
-        <div style={styles.riskCard}>
-          <div style={styles.riskLabel}>OVERALL DOCUMENT RISK RATING</div>
-          <div style={{
-            ...styles.riskBadgeLarge,
-            background: funnelData.overall_risk_rating === "CRITICAL" ? "#fee2e2" : (funnelData.overall_risk_rating === "HIGH" ? "#ffedd5" : "#feefc3"),
-            color: funnelData.overall_risk_rating === "CRITICAL" ? "#991b1b" : (funnelData.overall_risk_rating === "HIGH" ? "#c2410c" : "#854d0e")
-          }}>
-            🛡️ {funnelData.overall_risk_rating} RISK
+      {/* ---------------------------------------------------- */}
+      {/* 3. Executive KPI Summary Cards                       */}
+      {/* ---------------------------------------------------- */}
+      <div style={styles.kpiGrid}>
+        {/* Card 1: Verified Findings */}
+        <div style={styles.kpiCard}>
+          <div style={styles.kpiLabel}>TOTAL VERIFIED FINDINGS</div>
+          <div style={{ ...styles.kpiVal, color: summaryMetrics.totalVerified > 0 ? "var(--brand)" : "var(--green)" }}>
+            {summaryMetrics.totalVerified}
           </div>
-          <div style={styles.riskDesc}>
-            Derived from highest severity findings and material disclosure risk rules.
+          <div style={styles.kpiSub}>Grounded ambiguity disclosures</div>
+        </div>
+
+        {/* Card 2: Severity Breakdown */}
+        <div style={styles.kpiCard}>
+          <div style={styles.kpiLabel}>SEVERITY BREAKDOWN</div>
+          <div style={styles.sevGrid}>
+            <span style={{ ...styles.sevTag, background: "#FEE2E2", color: "#DC2626" }}>
+              CRITICAL: {summaryMetrics.sevBreakdown.CRITICAL}
+            </span>
+            <span style={{ ...styles.sevTag, background: "#FFEDD5", color: "#C2410C" }}>
+              HIGH: {summaryMetrics.sevBreakdown.HIGH}
+            </span>
+            <span style={{ ...styles.sevTag, background: "#FEF3C7", color: "#D97706" }}>
+              MEDIUM: {summaryMetrics.sevBreakdown.MEDIUM}
+            </span>
+            <span style={{ ...styles.sevTag, background: "#F1F5F9", color: "#475569" }}>
+              LOW: {summaryMetrics.sevBreakdown.LOW}
+            </span>
           </div>
         </div>
 
-        <div style={styles.sevBreakdownCard}>
-          <div style={styles.riskLabel}>SEVERITY BREAKDOWN</div>
-          <div style={styles.sevRow}>
-            <span style={{ ...styles.sevTag, background: "#fee2e2", color: "#991b1b" }}>CRITICAL: {funnelData.severity_breakdown.CRITICAL || 0}</span>
-            <span style={{ ...styles.sevTag, background: "#ffedd5", color: "#c2410c" }}>HIGH: {funnelData.severity_breakdown.HIGH || 0}</span>
-            <span style={{ ...styles.sevTag, background: "#e0f2fe", color: "#0369a1" }}>MEDIUM: {funnelData.severity_breakdown.MEDIUM || 0}</span>
-            <span style={{ ...styles.sevTag, background: "#f1f5f9", color: "#475569" }}>LOW: {funnelData.severity_breakdown.LOW || 0}</span>
-          </div>
-        </div>
-      </div>
-
-      {/* AI Validation Workflow & Rejection Breakdown Grid */}
-      <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 16 }}>
-        <div style={styles.funnelCard}>
-          <h3 style={styles.funnelTitle}>AI Validation Workflow</h3>
-          <p style={styles.funnelSub}>
-            The candidate generator identifies potential ambiguities. The Independent Validation Layer verifies findings, eliminates false positives, and consolidates executive findings.
-          </p>
-
-          <div style={styles.funnelStepsRow}>
-            <div style={styles.funnelStepBox}>
-              <div style={styles.funnelVal}>{funnelData.potential_findings}</div>
-              <div style={styles.funnelLbl}>Potential Findings</div>
-            </div>
-            <div style={styles.funnelArrow}>↓</div>
-
-            <div style={styles.funnelStepBox}>
-              <div style={{ ...styles.funnelVal, color: "#2563eb" }}>{funnelData.ai_verified_findings}</div>
-              <div style={styles.funnelLbl}>AI Verified Findings</div>
-            </div>
-            <div style={styles.funnelArrow}>↓</div>
-
-            <div style={styles.funnelStepBox}>
-              <div style={{ ...styles.funnelVal, color: "#dc2626" }}>{funnelData.rejected_findings}</div>
-              <div style={styles.funnelLbl}>Rejected Findings</div>
-            </div>
-            <div style={styles.funnelArrow}>↓</div>
-
-            <div style={{ ...styles.funnelStepBox, borderColor: "#059669", background: "#f0fdf4" }}>
-              <div style={{ ...styles.funnelVal, color: "#059669" }}>{funnelData.executive_findings}</div>
-              <div style={styles.funnelLbl}>Executive Findings</div>
-            </div>
-          </div>
+        {/* Card 3: Categories Affected */}
+        <div style={styles.kpiCard}>
+          <div style={styles.kpiLabel}>TAXONOMY CATEGORIES</div>
+          <div style={styles.kpiVal}>{summaryMetrics.categoriesCount}</div>
+          <div style={styles.kpiSub}>Out of 9 approved ambiguity types</div>
         </div>
 
-        {/* Rejection Summary Card */}
-        <div style={styles.funnelCard}>
-          <h3 style={styles.funnelTitle}>Rejected Findings Summary</h3>
-          <p style={styles.funnelSub}>
-            Breakdown of noisy candidates rejected during validation & deduplication.
-          </p>
-          <div style={{ display: "flex", flexDirection: "column", gap: 8, marginTop: 12 }}>
-            {funnelData.rejection_summary.map((rej, idx) => (
-              <div key={idx} style={styles.rejectionRow}>
-                <span style={{ fontSize: 13, color: "#334155" }}>• {rej.reason}</span>
-                <span style={styles.rejCountBadge}>{rej.count}</span>
-              </div>
-            ))}
-          </div>
+        {/* Card 4: Pages Affected */}
+        <div style={styles.kpiCard}>
+          <div style={styles.kpiLabel}>PAGES AFFECTED</div>
+          <div style={styles.kpiVal}>{summaryMetrics.pagesCount}</div>
+          <div style={styles.kpiSub}>Document pages with disclosures</div>
         </div>
       </div>
 
-      {/* Enterprise Audit Cards */}
-      <div style={styles.findingsSection}>
-        <div style={styles.sectionHeaderBar}>
-          <h3 style={{ margin: 0, fontSize: 16, fontWeight: 800 }}>Verified Audit Cards ({filteredFindings.length})</h3>
+      {/* ---------------------------------------------------- */}
+      {/* 4. Filters Bar (Dynamic Categories & Severities)     */}
+      {/* ---------------------------------------------------- */}
+      <div style={styles.filterBar}>
+        <div style={styles.searchBox}>
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" style={{ color: "var(--text-muted)", flexShrink: 0 }}>
+            <circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/>
+          </svg>
+          <input
+            type="text"
+            placeholder="Search findings, clauses, quotes..."
+            value={searchTerm}
+            onChange={(e) => setSearchTerm(e.target.value)}
+            style={styles.searchInput}
+          />
+          {searchTerm && (
+            <button onClick={() => setSearchTerm("")} style={styles.clearSearchBtn}>✕</button>
+          )}
         </div>
 
-        {filteredFindings.map((f, i) => {
-          const cardId = f.finding_id || i;
-          const isExpanded = expandedCards[cardId];
-          const sev = strUpper(f.severity || "MEDIUM");
-          const rScore = f.risk_score || 5;
-          const rTier = getRiskTier(rScore);
-          const cPct = f.confidence_pct || 85;
-          const cLevel = getConfidenceLevel(cPct);
-          const mat = f.materiality || "Moderate";
-          const status = f.finding_status || "Verified";
+        {/* Dynamic Category Filter Buttons */}
+        <div style={styles.categoryBar}>
+          <button
+            onClick={() => setSelectedCategory("ALL")}
+            style={{
+              ...styles.catFilterPill,
+              ...(selectedCategory === "ALL" ? styles.catFilterPillActive : {})
+            }}
+          >
+            All Categories ({verifiedFindings.length})
+          </button>
+          {summaryMetrics.availableCategories.map(cat => {
+            const count = verifiedFindings.filter(f => f.category === cat).length;
+            return (
+              <button
+                key={cat}
+                onClick={() => setSelectedCategory(cat)}
+                style={{
+                  ...styles.catFilterPill,
+                  ...(selectedCategory === cat ? styles.catFilterPillActive : {})
+                }}
+              >
+                {cat} ({count})
+              </button>
+            );
+          })}
+        </div>
 
-          return (
-            <div key={cardId} style={{
-              ...styles.auditCard,
-              borderLeft: sev === "CRITICAL" ? "6px solid #dc2626" : (sev === "HIGH" ? "6px solid #ea580c" : "6px solid #0284c7")
-            }}>
-              
-              {/* Header Badges Row */}
-              <div style={styles.badgeRow}>
-                <span style={{
-                  ...styles.sevBadge,
-                  background: sev === "CRITICAL" ? "#fee2e2" : (sev === "HIGH" ? "#ffedd5" : "#e0f2fe"),
-                  color: sev === "CRITICAL" ? "#991b1b" : (sev === "HIGH" ? "#c2410c" : "#0369a1")
-                }}>
-                  [{sev}]
-                </span>
-                <span style={styles.matBadge}>Materiality: {mat}</span>
-                <span style={styles.statusBadge}>Status: {status}</span>
-                <span style={styles.catBadge}>{f.category || "Inconsistency"}</span>
-              </div>
+        {/* Severity Filter Dropdown */}
+        <select
+          value={selectedSeverity}
+          onChange={(e) => setSelectedSeverity(e.target.value)}
+          style={styles.sevSelect}
+        >
+          <option value="ALL">All Severities</option>
+          <option value="CRITICAL">Critical Severity</option>
+          <option value="HIGH">High Severity</option>
+          <option value="MEDIUM">Medium Severity</option>
+          <option value="LOW">Low Severity</option>
+        </select>
+      </div>
 
-              {/* Title */}
-              <h4 style={styles.cardTitleText}>{f.title}</h4>
+      {/* ---------------------------------------------------- */}
+      {/* 5. Findings Workspace List / Cards                  */}
+      {/* ---------------------------------------------------- */}
+      {filteredFindings.length === 0 ? (
+        <div style={styles.emptyState}>
+          <div style={styles.emptyIcon}>✓</div>
+          <h3 style={styles.emptyTitle}>No verified ambiguities were found in this document.</h3>
+          <p style={styles.emptySub}>
+            The document was audited across all 9 approved ambiguity categories with zero grounded context conflicts detected.
+          </p>
+        </div>
+      ) : (
+        <div style={styles.findingsList}>
+          {filteredFindings.map((f) => {
+            const sevColor = f.severity === "CRITICAL" ? "#DC2626" : (f.severity === "HIGH" ? "#C2410C" : (f.severity === "MEDIUM" ? "#D97706" : "#475569"));
+            const sevBg = f.severity === "CRITICAL" ? "#FEE2E2" : (f.severity === "HIGH" ? "#FFEDD5" : (f.severity === "MEDIUM" ? "#FEF3C7" : "#F1F5F9"));
 
-              <div style={styles.cardDivider} />
+            const firstPage = f.affected_pages[0] || f.page_number || 1;
+            const quoteForNav = f.highlighted_ambiguity || (f.evidence[0]?.quote) || f.title;
 
-              {/* Risk & Confidence Metric Panel */}
-              <div style={styles.metricGrid}>
-                <div style={styles.metricItem}>
-                  <div style={styles.metricLabel}>RISK SCORE</div>
-                  <div style={styles.metricVal}>{rScore}/10 <span style={styles.metricSub}>({rTier})</span></div>
-                  <div style={styles.metricReason}>Reason: {f.risk_reason || "Statutory or disclosure inconsistency risk."}</div>
+            return (
+              <div key={f.finding_id} style={{ ...styles.findingCard, borderLeft: `4px solid ${sevColor}` }}>
+                {/* Top Row Badges */}
+                <div style={styles.cardTopRow}>
+                  <div style={{ display: "flex", alignItems: "center", gap: 8, flexWrap: "wrap" }}>
+                    <span style={{ ...styles.sevBadge, background: sevBg, color: sevColor }}>
+                      [{f.severity}]
+                    </span>
+                    <span style={styles.categoryBadge}>{f.category}</span>
+                    <span style={styles.pageBadge}>
+                      {f.affected_pages.length > 1
+                        ? `Pages ${f.affected_pages.join(", ")}`
+                        : `Page ${firstPage}`}
+                    </span>
+                    {f.section_heading && (
+                      <span style={styles.sectionBadge}>
+                        Section: {f.section_heading}
+                      </span>
+                    )}
+                  </div>
+                  <span style={styles.findingIdTag}>ID: {f.finding_id}</span>
                 </div>
-                <div style={styles.metricItem}>
-                  <div style={styles.metricLabel}>CONFIDENCE SCORE</div>
-                  <div style={styles.metricVal}>{cPct}% <span style={styles.metricSub}>({cLevel})</span></div>
-                  <div style={styles.metricReason}>Reason: {f.confidence_reason || "Direct textual evidence verified across document passages."}</div>
+
+                {/* Title */}
+                <h3 style={styles.cardTitle}>{f.title}</h3>
+
+                {/* Explanation / Why it is ambiguous */}
+                <div style={styles.explanationBox}>
+                  <strong style={{ fontSize: 11, textTransform: "uppercase", color: "var(--text-muted)" }}>Why it is Ambiguous:</strong>
+                  <p style={{ margin: "4px 0 0", fontSize: 13, color: "var(--text-primary)", lineHeight: 1.45 }}>
+                    {f.explanation}
+                  </p>
                 </div>
-              </div>
 
-              <div style={styles.cardDivider} />
+                {/* Evidence Section */}
+                <div style={styles.evidenceSection}>
+                  <div style={styles.evidenceHeader}>
+                    {f.is_cross_reference ? "Cross-Reference Contradiction Evidence:" : "Document Evidence:"}
+                  </div>
 
-              {/* Business Impact */}
-              <div style={styles.fieldRow}>
-                <div style={styles.fieldLabel}>Business Impact</div>
-                <div style={{ ...styles.fieldVal, color: "#991b1b" }}>{f.business_impact || "Operational execution deviation & stakeholder ambiguity."}</div>
-              </div>
-
-              <div style={styles.cardDivider} />
-
-              {/* Structured Evidence Block */}
-              <div style={styles.fieldRow}>
-                <div style={styles.fieldLabel}>Structured Evidence</div>
-                <div style={styles.evidenceContainer}>
-                  {(f.evidence && f.evidence.length > 0 ? f.evidence : [
-                    { page: f.page_number || 1, section: f.section_heading || "Document Section", paragraph: "Paragraph 1", quote: f.highlighted_ambiguity || f.original_chunk }
-                  ]).map((ev, evIdx) => (
-                    <div key={evIdx} style={styles.evidenceBlock}>
-                      <div style={styles.evidenceLoc}>
-                        Page: <strong>{ev.page || f.page_number || 1}</strong> · Section: <strong>{ev.section || f.section_heading || "Document Section"}</strong> · Reference: <strong>{ev.paragraph || `Paragraph ${evIdx+1}`}</strong>
+                  {f.is_cross_reference && f.evidence.length >= 2 ? (
+                    /* Cross Reference A VS B Evidence Layout */
+                    <div style={styles.crossRefBox}>
+                      <div style={styles.locationBlock}>
+                        <span style={styles.locBadge}>LOCATION A (Page {f.evidence[0].page_a || f.evidence[0].page || firstPage}):</span>
+                        <blockquote style={styles.quoteBox}>"{f.evidence[0].quote_a || f.evidence[0].quote || f.highlighted_ambiguity}"</blockquote>
                       </div>
-                      <div style={styles.quoteBox}>"{ev.quote || f.highlighted_ambiguity || f.original_chunk || 'Passage evaluated during audit scan.'}"</div>
+
+                      <div style={styles.vsBadge}>VS</div>
+
+                      <div style={styles.locationBlock}>
+                        <span style={styles.locBadge}>LOCATION B (Page {f.evidence[1].page_b || f.evidence[1].page || f.evidence[0].page_b || firstPage}):</span>
+                        <blockquote style={styles.quoteBox}>"{f.evidence[1].quote_b || f.evidence[1].quote || f.evidence[0].quote_b}"</blockquote>
+                      </div>
+
+                      {(f.business_impact || f.evidence[0].why_it_matters) && (
+                        <div style={styles.whyMattersBox}>
+                          <strong>Why this matters:</strong> {f.business_impact || f.evidence[0].why_it_matters}
+                        </div>
+                      )}
                     </div>
-                  ))}
+                  ) : (
+                    /* Single Passage Evidence Layout */
+                    <div style={styles.singleEvidenceBox}>
+                      <blockquote style={styles.quoteBox}>
+                        "{f.highlighted_ambiguity || (f.evidence[0]?.quote) || 'Evidence passage verified in document.'}"
+                      </blockquote>
+                    </div>
+                  )}
+                </div>
+
+                {/* Suggested Resolution / Recommendation */}
+                {f.suggested_resolution && (
+                  <div style={styles.resolutionBox}>
+                    <span style={{ fontWeight: 700, marginRight: 6 }}>💡 Recommended Action:</span>
+                    {f.suggested_resolution}
+                  </div>
+                )}
+
+                {/* Actions Footer */}
+                <div style={styles.cardFooter}>
+                  <button
+                    onClick={() => {
+                      if (onShowInDocument) {
+                        onShowInDocument(firstPage, quoteForNav);
+                      }
+                    }}
+                    style={styles.viewDocBtn}
+                    title={`Jump to Page ${firstPage} in Document Viewer`}
+                  >
+                    <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
+                      <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/>
+                      <circle cx="12" cy="12" r="3"/>
+                    </svg>
+                    <span>View in Document (Page {firstPage})</span>
+                  </button>
                 </div>
               </div>
+            );
+          })}
+        </div>
+      )}
 
-              <div style={styles.cardDivider} />
+      {/* ---------------------------------------------------- */}
+      {/* 6. Collapsible Rejected Candidate Audit Log          */}
+      {/* ---------------------------------------------------- */}
+      {rejectedFindings.length > 0 && (
+        <div style={styles.rejectedAccordion}>
+          <button
+            onClick={() => setShowRejected(!showRejected)}
+            style={styles.rejectedAccordionBtn}
+          >
+            <span>
+              {showRejected ? "▼" : "▶"} Rejected Candidates Audit Log ({rejectedFindings.length} items filtered out during validation)
+            </span>
+            <span style={{ fontSize: 11, color: "var(--text-muted)" }}>
+              {showRejected ? "Click to collapse" : "Click to view noise filter audit trail"}
+            </span>
+          </button>
 
-              {/* Affected Pages */}
-              <div style={styles.fieldRow}>
-                <div style={styles.fieldLabel}>Affected Pages</div>
-                <div style={styles.pagesList}>
-                  {(f.affected_pages || f.locations || [f.page_number || 1]).map((pg, pIdx) => (
-                    <span key={pIdx} style={styles.pageChip}>Page {pg}</span>
-                  ))}
-                </div>
+          {showRejected && (
+            <div style={styles.rejectedContent}>
+              <p style={{ margin: "0 0 10px", fontSize: 12, color: "var(--text-secondary)" }}>
+                These candidate items were generated during preliminary chunk scanning but rejected during validation for being out of ambiguity taxonomy scope or ungrounded.
+              </p>
+              <div style={styles.rejectedTable}>
+                {rejectedFindings.map((rej, rIdx) => (
+                  <div key={rIdx} style={styles.rejectedRow}>
+                    <div style={{ fontWeight: 600, color: "var(--text-primary)" }}>
+                      {rej.category || rej.business_category || "Unmapped"} - {rej.title || rej.highlighted_ambiguity || "Candidate Finding"}
+                    </div>
+                    <div style={{ fontSize: 11.5, color: "var(--red)" }}>
+                      Reason: {rej.reject_reason || "Filtered out by taxonomy validation gate"}
+                    </div>
+                  </div>
+                ))}
               </div>
-
-              <div style={styles.cardDivider} />
-
-              {/* Recommended Resolution */}
-              <div style={styles.fieldRow}>
-                <div style={styles.fieldLabel}>Recommended Resolution</div>
-                <div style={styles.resBox}>💡 {f.recommended_resolution || f.recommendation || "Reconcile conflicting disclosures."}</div>
-              </div>
-
-              <div style={styles.cardDivider} />
-
-              {/* Audit Traceability Footer */}
-              <div style={styles.traceFooter}>
-                <span>🔒 Audit Traceability: <strong>{f.audit_traceability || "Verified by Independent AI Validation Layer"}</strong> (Ref: <code>{f.chunk_id || f.internal_reference || "finding_001"}</code>)</span>
-              </div>
-
             </div>
-          );
-        })}
-      </div>
-
+          )}
+        </div>
+      )}
     </div>
   );
 }
 
 const styles = {
-  centerContainer: { display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", minHeight: 300 },
-  spinner: { width: 32, height: 32, borderRadius: "50%", border: "3px solid #cbd5e1", borderTopColor: "#1e40af", animation: "spin 0.8s linear infinite" },
-  runningContainer: { display: "flex", justifyContent: "center", padding: "24px 0" },
-  activeCard: { background: "#ffffff", border: "1px solid #cbd5e1", borderRadius: 12, padding: 24, maxWidth: 680, width: "100%", boxShadow: "0 4px 12px rgba(0,0,0,0.05)", textAlign: "left" },
-  activeHeader: { display: "flex", flexDirection: "column", gap: 10 },
-  activeBadge: { display: "inline-block", background: "#eff6ff", color: "#1e40af", fontSize: 11, fontWeight: 800, padding: "3px 10px", borderRadius: 999, width: "fit-content" },
-  activeTitle: { margin: 0, fontSize: 20, fontWeight: 800, color: "#0f172a" },
-  statusBox: { background: "#f8fafc", padding: 12, borderRadius: 8, border: "1px solid #e2e8f0", marginTop: 4 },
-  statusLabel: { fontSize: 11, fontWeight: 700, color: "#64748b", textTransform: "uppercase" },
-  statusVal: { fontSize: 13.5, fontWeight: 600, color: "#0f172a", marginTop: 2 },
-  progressRow: { display: "flex", gap: 24, marginTop: 8 },
-  progressItem: { display: "flex", flexDirection: "column", gap: 2 },
-  progressLabel: { fontSize: 11, color: "#64748b" },
-  progressVal: { fontSize: 13, fontWeight: 700, color: "#059669" },
-  divider: { height: 1, background: "#f1f5f9", margin: "16px 0" },
-  stageGrid: { display: "grid", gridTemplateColumns: "1fr 1fr", gap: 10 },
-  stageCompleted: { display: "flex", alignItems: "center", gap: 8, padding: 8, background: "#f0fdf4", border: "1px solid #bbf7d0", borderRadius: 6, fontSize: 12, fontWeight: 600, color: "#166534" },
-  stageActive: { display: "flex", alignItems: "center", gap: 8, padding: 8, background: "#eff6ff", border: "1px solid #bfdbfe", borderRadius: 6, fontSize: 12, fontWeight: 700, color: "#1d4ed8" },
-  stageWaiting: { display: "flex", alignItems: "center", gap: 8, padding: 8, background: "#f8fafc", border: "1px solid #e2e8f0", borderRadius: 6, fontSize: 12, color: "#94a3b8" },
-  stageIcon: { fontSize: 14 },
-  stageNum: { fontSize: 10, fontWeight: 800, textTransform: "uppercase" },
-  stageName: { fontSize: 12.5, fontWeight: 700, color: "#0f172a" },
-  stageState: { fontSize: 10.5, color: "#64748b" },
+  centerContainer: {
+    display: "flex",
+    flexDirection: "column",
+    alignItems: "center",
+    justifyContent: "center",
+    minHeight: 280
+  },
+  spinner: {
+    width: 30,
+    height: 30,
+    borderRadius: "50%",
+    border: "3px solid var(--border)",
+    borderTopColor: "var(--brand)",
+    animation: "spin 0.8s linear infinite"
+  },
+  container: {
+    display: "flex",
+    flexDirection: "column",
+    gap: 16,
+    textAlign: "left",
+    width: "100%"
+  },
 
-  cacheBanner: { background: "#ecfdf5", border: "1px solid #a7f3d0", borderRadius: 8, padding: 14, marginBottom: 20, textAlign: "left" },
-  cacheHeader: { display: "flex", alignItems: "center", gap: 10, marginBottom: 8 },
-  cacheBadge: { background: "#059669", color: "#fff", fontSize: 10.5, fontWeight: 800, padding: "2px 8px", borderRadius: 4 },
-  cacheGrid: { display: "flex", gap: 16, fontSize: 12, fontWeight: 600, color: "#065f46" },
-  cacheTime: { marginTop: 8, fontSize: 12, color: "#047857" },
+  /* Banner */
+  progressBanner: {
+    background: "#FEF3C7",
+    border: "1px solid #F59E0B",
+    borderRadius: 8,
+    padding: "8px 14px",
+    display: "flex",
+    justifyContent: "space-between",
+    alignItems: "center"
+  },
+  pulseDot: {
+    width: 8,
+    height: 8,
+    borderRadius: "50%",
+    background: "#D97706",
+    animation: "pulse 1.5s infinite"
+  },
+  retryBtn: {
+    background: "#FFFFFF",
+    border: "1px solid #D97706",
+    color: "#D97706",
+    borderRadius: 4,
+    padding: "3px 8px",
+    fontSize: 11,
+    fontWeight: 700,
+    cursor: "pointer"
+  },
 
-  auditWrapper: { display: "flex", flexDirection: "column", gap: 20, textAlign: "left" },
-  auditHeader: { display: "flex", justifyContent: "space-between", alignItems: "center" },
-  auditTitle: { margin: 0, fontSize: 20, fontWeight: 800, color: "#0f172a" },
-  auditSubtitle: { margin: "4px 0 0", fontSize: 13, color: "#64748b" },
-  primBtn: { background: "#0f172a", color: "#fff", border: "none", borderRadius: 8, padding: "8px 14px", fontSize: 12.5, fontWeight: 700, cursor: "pointer" },
+  /* Header */
+  header: {
+    display: "flex",
+    justifyContent: "space-between",
+    alignItems: "flex-start",
+    marginBottom: 4
+  },
+  title: {
+    margin: 0,
+    fontSize: 18,
+    fontWeight: 700,
+    color: "var(--text-primary)"
+  },
+  subtitle: {
+    margin: "4px 0 0",
+    fontSize: 12.5,
+    color: "var(--text-secondary)"
+  },
+  rerunBtn: {
+    background: "var(--bg-card)",
+    color: "var(--text-primary)",
+    border: "1px solid var(--border)",
+    borderRadius: 6,
+    padding: "6px 12px",
+    fontSize: 12,
+    fontWeight: 600,
+    cursor: "pointer"
+  },
 
-  funnelCard: { background: "#ffffff", border: "1px solid #e2e8f0", borderRadius: 12, padding: 20, textAlign: "left" },
-  funnelTitle: { margin: 0, fontSize: 16, fontWeight: 800, color: "#0f172a" },
-  funnelSub: { margin: "4px 0 16px", fontSize: 12.5, color: "#64748b" },
-  funnelStepsRow: { display: "flex", alignItems: "center", gap: 12, overflowX: "auto", paddingBottom: 8 },
-  funnelStepBox: { border: "1px solid #cbd5e1", borderRadius: 8, padding: "12px 16px", minWidth: 130, textAlign: "center", background: "#f8fafc" },
-  funnelVal: { fontSize: 22, fontWeight: 800, color: "#0f172a" },
-  funnelLbl: { fontSize: 11, color: "#64748b", marginTop: 4 },
-  funnelArrow: { fontSize: 16, fontWeight: 800, color: "#94a3b8" },
+  /* KPI Grid */
+  kpiGrid: {
+    display: "grid",
+    gridTemplateColumns: "repeat(4, 1fr)",
+    gap: 12
+  },
+  kpiCard: {
+    background: "var(--bg-card)",
+    border: "1px solid var(--border)",
+    borderRadius: 8,
+    padding: 14,
+    display: "flex",
+    flexDirection: "column",
+    gap: 4
+  },
+  kpiLabel: {
+    fontSize: 10.5,
+    fontWeight: 700,
+    color: "var(--text-muted)",
+    letterSpacing: "0.5px"
+  },
+  kpiVal: {
+    fontSize: 22,
+    fontWeight: 800,
+    color: "var(--text-primary)"
+  },
+  kpiSub: {
+    fontSize: 11,
+    color: "var(--text-secondary)"
+  },
+  sevGrid: {
+    display: "flex",
+    flexWrap: "wrap",
+    gap: 4,
+    marginTop: 2
+  },
+  sevTag: {
+    fontSize: 10.5,
+    fontWeight: 700,
+    padding: "2px 6px",
+    borderRadius: 4
+  },
 
-  findingsSection: { display: "flex", flexDirection: "column", gap: 16 },
-  sectionHeaderBar: { borderBottom: "2px solid #e2e8f0", paddingBottom: 8 },
-  auditCard: { background: "#ffffff", border: "1px solid #cbd5e1", borderRadius: 10, padding: 18, textAlign: "left" },
-  cardHeader: { display: "flex", alignItems: "center", gap: 10 },
-  locIcon: { background: "#eff6ff", color: "#1e40af", fontSize: 11, fontWeight: 800, padding: "3px 8px", borderRadius: 4 },
-  locVal: { fontSize: 13, fontWeight: 700, color: "#0f172a" },
-  cardDivider: { height: 1, background: "#f1f5f9", margin: "12px 0" },
-  fieldRow: { display: "flex", flexDirection: "column", gap: 4 },
-  fieldLabel: { fontSize: 11, fontWeight: 800, color: "#64748b", textTransform: "uppercase", letterSpacing: "0.04em" },
-  fieldVal: { fontSize: 13, color: "#0f172a", margin: 0, lineHeight: 1.4 },
-  quoteBox: { background: "#f8fafc", borderLeft: "3px solid #1e40af", padding: "8px 12px", fontSize: 13, fontFamily: "serif", color: "#1e293b", borderRadius: "0 6px 6px 0" },
-  catBadge: { background: "#f1f5f9", color: "#0f172a", fontSize: 11.5, fontWeight: 700, padding: "2px 8px", borderRadius: 4, width: "fit-content" },
-  resBox: { background: "#f0fdf4", border: "1px solid #bbf7d0", color: "#166534", padding: "8px 12px", borderRadius: 6, fontSize: 13, fontWeight: 600 },
-  traceHeader: { display: "flex", justifyContent: "space-between", alignItems: "center", cursor: "pointer" },
-  traceTitle: { fontSize: 11, fontWeight: 800, color: "#64748b", textTransform: "uppercase" },
-  traceToggle: { fontSize: 11, fontWeight: 700, color: "#1e40af" },
-  traceBox: { marginTop: 8, fontSize: 12, color: "#475569" },
+  /* Filters */
+  filterBar: {
+    display: "flex",
+    flexDirection: "column",
+    gap: 10,
+    background: "var(--bg-card)",
+    border: "1px solid var(--border)",
+    borderRadius: 8,
+    padding: 12
+  },
+  searchBox: {
+    display: "flex",
+    alignItems: "center",
+    gap: 8,
+    background: "var(--bg-page)",
+    border: "1px solid var(--border)",
+    borderRadius: 6,
+    padding: "6px 10px"
+  },
+  searchInput: {
+    background: "none",
+    border: "none",
+    outline: "none",
+    width: "100%",
+    fontSize: 12.5,
+    color: "var(--text-primary)"
+  },
+  clearSearchBtn: {
+    background: "none",
+    border: "none",
+    color: "var(--text-muted)",
+    cursor: "pointer",
+    fontSize: 12
+  },
+  categoryBar: {
+    display: "flex",
+    gap: 6,
+    overflowX: "auto",
+    paddingBottom: 2
+  },
+  catFilterPill: {
+    background: "var(--bg-page)",
+    border: "1px solid var(--border)",
+    borderRadius: 6,
+    padding: "4px 10px",
+    fontSize: 11.5,
+    fontWeight: 500,
+    color: "var(--text-secondary)",
+    cursor: "pointer",
+    whiteSpace: "nowrap"
+  },
+  catFilterPillActive: {
+    background: "var(--brand-light)",
+    color: "var(--brand)",
+    borderColor: "var(--brand)",
+    fontWeight: 700
+  },
+  sevSelect: {
+    background: "var(--bg-page)",
+    border: "1px solid var(--border)",
+    borderRadius: 6,
+    padding: "4px 8px",
+    fontSize: 12,
+    color: "var(--text-primary)",
+    outline: "none",
+    width: "fit-content"
+  },
 
-  execSummaryGrid: { display: "grid", gridTemplateColumns: "1fr 1.5fr", gap: 16 },
-  riskCard: { background: "#ffffff", border: "1px solid #cbd5e1", borderRadius: 12, padding: 16, textAlign: "left" },
-  riskLabel: { fontSize: 11, fontWeight: 800, color: "#64748b", textTransform: "uppercase", letterSpacing: "0.04em", marginBottom: 8 },
-  riskBadgeLarge: { display: "inline-block", fontSize: 16, fontWeight: 800, padding: "6px 14px", borderRadius: 8, marginBottom: 8 },
-  riskDesc: { fontSize: 11.5, color: "#64748b" },
+  /* Empty State */
+  emptyState: {
+    background: "var(--bg-card)",
+    border: "1px solid var(--border)",
+    borderRadius: 10,
+    padding: "40px 24px",
+    textAlign: "center"
+  },
+  emptyIcon: {
+    width: 44,
+    height: 44,
+    borderRadius: "50%",
+    background: "var(--green-light)",
+    color: "var(--green)",
+    fontSize: 22,
+    fontWeight: 800,
+    display: "flex",
+    alignItems: "center",
+    justifyContent: "center",
+    margin: "0 auto 12px"
+  },
+  emptyTitle: {
+    margin: 0,
+    fontSize: 16,
+    fontWeight: 700,
+    color: "var(--text-primary)"
+  },
+  emptySub: {
+    margin: "6px 0 0",
+    fontSize: 12.5,
+    color: "var(--text-secondary)"
+  },
 
-  sevBreakdownCard: { background: "#ffffff", border: "1px solid #cbd5e1", borderRadius: 12, padding: 16, textAlign: "left" },
-  sevRow: { display: "flex", gap: 10, flexWrap: "wrap", marginTop: 8 },
-  sevTag: { fontSize: 12, fontWeight: 800, padding: "6px 12px", borderRadius: 6 },
+  /* Findings Cards */
+  findingsList: {
+    display: "flex",
+    flexDirection: "column",
+    gap: 14
+  },
+  findingCard: {
+    background: "var(--bg-card)",
+    border: "1px solid var(--border)",
+    borderRadius: 8,
+    padding: 16,
+    display: "flex",
+    flexDirection: "column",
+    gap: 10
+  },
+  cardTopRow: {
+    display: "flex",
+    justifyContent: "space-between",
+    alignItems: "center"
+  },
+  sevBadge: {
+    fontSize: 11,
+    fontWeight: 800,
+    padding: "2px 6px",
+    borderRadius: 4
+  },
+  categoryBadge: {
+    fontSize: 11,
+    fontWeight: 700,
+    background: "var(--brand-light)",
+    color: "var(--brand)",
+    padding: "2px 8px",
+    borderRadius: 4
+  },
+  pageBadge: {
+    fontSize: 11,
+    fontWeight: 600,
+    background: "var(--bg-page)",
+    color: "var(--text-secondary)",
+    padding: "2px 6px",
+    borderRadius: 4,
+    border: "1px solid var(--border)"
+  },
+  sectionBadge: {
+    fontSize: 11,
+    color: "var(--text-muted)"
+  },
+  findingIdTag: {
+    fontSize: 10.5,
+    color: "var(--text-muted)",
+    fontFamily: "monospace"
+  },
+  cardTitle: {
+    margin: 0,
+    fontSize: 15,
+    fontWeight: 700,
+    color: "var(--text-primary)"
+  },
 
-  rejectionRow: { display: "flex", justifyContent: "space-between", alignItems: "center", padding: "4px 8px", background: "#f8fafc", borderRadius: 6 },
-  rejCountBadge: { background: "#e2e8f0", color: "#334155", fontSize: 11.5, fontWeight: 800, padding: "2px 8px", borderRadius: 12 },
+  explanationBox: {
+    background: "var(--bg-page)",
+    border: "1px solid var(--border)",
+    borderRadius: 6,
+    padding: 10
+  },
 
-  badgeRow: { display: "flex", gap: 8, alignItems: "center", flexWrap: "wrap", marginBottom: 8 },
-  sevBadge: { fontSize: 11.5, fontWeight: 800, padding: "3px 8px", borderRadius: 4 },
-  matBadge: { background: "#f1f5f9", color: "#334155", fontSize: 11, fontWeight: 700, padding: "3px 8px", borderRadius: 4 },
-  statusBadge: { background: "#f0fdf4", color: "#166534", fontSize: 11, fontWeight: 700, padding: "3px 8px", borderRadius: 4 },
+  /* Evidence */
+  evidenceSection: {
+    display: "flex",
+    flexDirection: "column",
+    gap: 6
+  },
+  evidenceHeader: {
+    fontSize: 11,
+    fontWeight: 700,
+    color: "var(--text-muted)",
+    textTransform: "uppercase"
+  },
+  crossRefBox: {
+    display: "flex",
+    flexDirection: "column",
+    gap: 8,
+    background: "var(--bg-page)",
+    border: "1px solid var(--border)",
+    borderRadius: 6,
+    padding: 12
+  },
+  locationBlock: {
+    display: "flex",
+    flexDirection: "column",
+    gap: 4
+  },
+  locBadge: {
+    fontSize: 11,
+    fontWeight: 700,
+    color: "var(--brand)"
+  },
+  vsBadge: {
+    fontSize: 11,
+    fontWeight: 800,
+    color: "var(--red)",
+    textAlign: "center",
+    margin: "2px 0"
+  },
+  whyMattersBox: {
+    marginTop: 4,
+    paddingTop: 8,
+    borderTop: "1px solid var(--border)",
+    fontSize: 12,
+    color: "var(--red)",
+    fontWeight: 500
+  },
+  singleEvidenceBox: {
+    background: "var(--bg-page)",
+    borderRadius: 6,
+    padding: 2
+  },
+  quoteBox: {
+    margin: 0,
+    fontSize: 12.5,
+    fontStyle: "italic",
+    color: "var(--text-primary)",
+    borderLeft: "3px solid var(--brand)",
+    paddingLeft: 10
+  },
 
-  cardTitleText: { margin: "4px 0 8px", fontSize: 16, fontWeight: 800, color: "#0f172a" },
+  resolutionBox: {
+    background: "var(--green-light)",
+    border: "1px solid rgba(22, 163, 74, 0.2)",
+    borderRadius: 6,
+    padding: "8px 12px",
+    fontSize: 12.5,
+    color: "var(--green)"
+  },
 
-  metricGrid: { display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12, background: "#f8fafc", padding: 12, borderRadius: 8, border: "1px solid #e2e8f0" },
-  metricItem: { display: "flex", flexDirection: "column", gap: 2 },
-  metricLabel: { fontSize: 10.5, fontWeight: 800, color: "#64748b", textTransform: "uppercase" },
-  metricVal: { fontSize: 16, fontWeight: 800, color: "#0f172a" },
-  metricSub: { fontSize: 12, fontWeight: 600, color: "#475569" },
-  metricReason: { fontSize: 11.5, color: "#64748b", marginTop: 2 },
+  cardFooter: {
+    display: "flex",
+    justifyContent: "flex-end",
+    paddingTop: 4
+  },
+  viewDocBtn: {
+    background: "var(--brand-light)",
+    color: "var(--brand)",
+    border: "1px solid var(--brand-border)",
+    borderRadius: 6,
+    padding: "5px 12px",
+    fontSize: 12,
+    fontWeight: 650,
+    display: "inline-flex",
+    alignItems: "center",
+    gap: 6,
+    cursor: "pointer"
+  },
 
-  evidenceContainer: { display: "flex", flexDirection: "column", gap: 8 },
-  evidenceBlock: { background: "#f8fafc", border: "1px solid #e2e8f0", borderRadius: 6, padding: 10 },
-  evidenceLoc: { fontSize: 11.5, color: "#475569", marginBottom: 6 },
-
-  pagesList: { display: "flex", gap: 6, flexWrap: "wrap" },
-  pageChip: { background: "#eff6ff", color: "#1d4ed8", fontSize: 11, fontWeight: 700, padding: "2px 8px", borderRadius: 12 },
-
-  traceFooter: { background: "#f8fafc", borderTop: "1px solid #e2e8f0", padding: "8px 12px", borderRadius: "0 0 8px 8px", fontSize: 11.5, color: "#64748b" }
+  /* Rejected Accordion */
+  rejectedAccordion: {
+    marginTop: 12,
+    background: "var(--bg-card)",
+    border: "1px solid var(--border)",
+    borderRadius: 8,
+    overflow: "hidden"
+  },
+  rejectedAccordionBtn: {
+    width: "100%",
+    background: "none",
+    border: "none",
+    padding: "10px 14px",
+    display: "flex",
+    justifyContent: "space-between",
+    alignItems: "center",
+    fontSize: 12,
+    fontWeight: 650,
+    color: "var(--text-secondary)",
+    cursor: "pointer"
+  },
+  rejectedContent: {
+    padding: 14,
+    borderTop: "1px solid var(--border)",
+    background: "var(--bg-page)"
+  },
+  rejectedTable: {
+    display: "flex",
+    flexDirection: "column",
+    gap: 6
+  },
+  rejectedRow: {
+    padding: "6px 10px",
+    background: "var(--bg-card)",
+    border: "1px solid var(--border)",
+    borderRadius: 6,
+    fontSize: 12,
+    display: "flex",
+    justifyContent: "space-between",
+    alignItems: "center"
+  }
 };

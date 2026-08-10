@@ -62,12 +62,13 @@ class AmbiguityClusterAnalyzer:
         findings = []
         issue_idx = 0
         
-        # 1. Terminology inconsistency checks across chunks
+        # 1. Terminology inconsistency checks across chunks -- genuine
+        # naming-variant pairs only (NOT misspellings, which are
+        # Proofreading's territory, not an "ambiguity"/terminology finding).
         terms_by_root = {
-            "library": ["library", "libary", "libaries", "libarys"],
-            "environment": ["environment", "enviroment"],
-            "librarian": ["librarian", "librerian"],
-            "information": ["information", "informations"]
+            "AI system": ["ai system", "ai platform", "ai solution"],
+            "company": ["the company", "the corporation", "the organization"],
+            "customer": ["customer", "client", "end-user"],
         }
         for root, variations in terms_by_root.items():
             found_vars = {}
@@ -75,7 +76,7 @@ class AmbiguityClusterAnalyzer:
                 cid = ch["chunk_id"]
                 text = ch["text"]
                 for v in variations:
-                    if re.search(rf"\b{v}\b", text, re.IGNORECASE):
+                    if re.search(rf"\b{re.escape(v)}\b", text, re.IGNORECASE):
                         found_vars[cid] = v
                         break
             if len(found_vars) > 1:
@@ -87,16 +88,16 @@ class AmbiguityClusterAnalyzer:
                             "chunk_id": cid,
                             "quote": var
                         })
-                    
+
                     findings.append({
                         "issue_id": f"{cluster_id}_issue_{issue_idx:03d}",
                         "type": "Terminology inconsistency",
                         "severity": "Medium",
-                        "description": f"Inconsistent spelling of the term '{root}' across chunks in the cluster.",
-                        "reason": f"Chunks use different spelling variants: {', '.join(distinct_vars)}.",
+                        "description": f"Inconsistent naming for '{root}' across chunks in the cluster.",
+                        "reason": f"Chunks use different terms for the same concept: {', '.join(distinct_vars)}.",
                         "evidence": evidence,
                         "affected_claims": [],
-                        "suggested_resolution": f"Standardize all references to use the correct spelling: '{root}'.",
+                        "suggested_resolution": f"Standardize all references to use one term for '{root}'.",
                         "requires_claude_verification": False,
                         "confidence": 0.90
                     })
@@ -137,7 +138,7 @@ class AmbiguityClusterAnalyzer:
                         
                     findings.append({
                         "issue_id": f"{cluster_id}_issue_{issue_idx:03d}",
-                        "type": "Cross-chunk numerical inconsistency",
+                        "type": "Numerical inconsistency",
                         "severity": "High",
                         "description": f"Conflicting values for numerical type '{unit}' found within the same topic cluster.",
                         "reason": f"Value varies between chunks (e.g. {', '.join(set(str(occ[1]) for occ in occurrences))}).",
@@ -161,7 +162,7 @@ class AmbiguityClusterAnalyzer:
             # Let's flag a generic potential policy duplicate/inconsistency
             findings.append({
                 "issue_id": f"{cluster_id}_issue_{issue_idx:03d}",
-                "type": "Duplicate guidance",
+                "type": "Internal factual contradiction",
                 "severity": "Low",
                 "description": "Multiple mandatory obligations expressed within the same topic community.",
                 "reason": "Chunks contain multiple 'must' or 'shall' statements which may overlap or repeat policies.",
@@ -238,41 +239,75 @@ class AmbiguityClusterAnalyzer:
             logger.warning("Ollama connection failed. Falling back to deterministic cluster-level analyzer.")
             
         cluster_reasonings = []
-        
+
         system_prompt = (
             "You are a precise semantic cluster-level conflict analyzer.\n"
             "Compare the member chunks, extractions, and validations within the provided cluster community.\n"
-            "Identify cross-chunk contradictions, policy inconsistencies, terminology differences, and broken references.\n"
+            "Identify cross-chunk contradictions, terminology differences, and broken references.\n"
+            "Only report a conflict between two chunks if they refer to the SAME entity, SAME metric, "
+            "SAME reporting period/date, and SAME unit basis -- a value that legitimately differs across "
+            "different periods, entities, or unit scales (e.g. FY2023 vs FY2024, or 1.2 crore vs 12 million) "
+            "is NOT a conflict.\n"
+            "Do NOT report grammar, spelling, writing style, or vague-wording issues -- those are out of scope.\n"
             "Return the analysis STRICTLY as a single JSON object matching the requested schema.\n"
             "Do NOT include markdown fences, comments, or conversational text."
         )
 
+        # A single-member cluster has nothing to cross-compare, and a cluster
+        # whose combined text is trivially short/free of policy/claim signal
+        # is unlikely to hold a real cross-chunk conflict -- skip the LLM
+        # call for those (mirrors the fast-path gate already used by
+        # ambiguity_extractor.py / ambiguity_chunk_analyzer.py) and only
+        # queue genuinely substantive clusters for the LLM.
+        policy_keywords = {"must", "shall", "required", "mandatory", "policy", "prohibited", "condition", "unless", "except"}
+
+        fallback_results = []
+        llm_clusters = []  # (cluster_id, topic, member_chunks)
+
         for cluster in clusters:
             cluster_id = cluster["cluster_id"]
             topic = cluster["topic_summary"]
-            
-            # Compile all cluster chunk inputs
+
+            # Compile cluster chunk inputs, trimmed to what cross-chunk
+            # comparison actually needs (claims + a bounded text excerpt,
+            # not the full Phase-2A extraction/validation payload) -- this
+            # keeps the per-cluster prompt small, which matters directly for
+            # CPU-only inference speed since this phase's prompts are the
+            # largest of any Stage-6 sub-pipeline.
             member_chunks = []
+            combined_words = 0
+            has_policy_kw = False
             for cid in cluster.get("chunk_ids", []):
-                # Retrieve original text, claims, validated claims, and extraction details
                 ch_ext = chunks_map.get(cid, {})
-                ch_reason = chunk_reasoning_map.get(cid, {})
-                
+                text = ch_ext.get("text", "")
+                combined_words += len(text.split())
+                if not has_policy_kw and any(kw in text.lower() for kw in policy_keywords):
+                    has_policy_kw = True
                 member_chunks.append({
                     "chunk_id": cid,
-                    "text": ch_ext.get("text", ""),
+                    "text": text[:1200],
                     "page": ch_ext.get("page", 1),
                     "heading_path": ch_ext.get("heading_path", "Root"),
-                    "extraction": ch_ext.get("extraction", {}),
-                    "validated_claims": ch_reason.get("claim_validation", []),
-                    "chunk_level_ambiguities": ch_reason.get("ambiguities", [])
+                    "claims": ch_ext.get("extraction", {}).get("claims", []),
                 })
-                
+
             if not member_chunks:
                 continue
-                
-            if ollama_active:
-                prompt = f"""Perform cluster-level reasoning and compare these semantically related chunks.
+
+            use_fast_path = (
+                not ollama_active
+                or len(member_chunks) < 2
+                or (combined_words < 60 and not has_policy_kw)
+            )
+            if use_fast_path:
+                fallback_results.append(self._analyze_fallback_cluster(cluster_id, topic, member_chunks))
+            else:
+                llm_clusters.append((cluster_id, topic, member_chunks))
+
+        cluster_reasonings.extend(fallback_results)
+
+        def _process_cluster(cluster_id: str, topic: str, member_chunks: List[dict]) -> dict:
+            prompt = f"""Perform cluster-level reasoning and compare these semantically related chunks.
 Cluster ID: {cluster_id}
 Topic: {topic}
 
@@ -280,13 +315,14 @@ Member Chunks:
 {json.dumps(member_chunks, indent=2)}
 
 Tasks:
-1. Compare numerical values, percentages, dates, and deadlines across these chunks to identify contradictions.
-2. Search for policy inconsistencies or conflicting rules.
-3. Check for evolving terminology (spelling variations, wordings) referring to the same concept.
-4. Identify duplicates or broken cross-references.
+1. Compare numerical values, percentages, dates, and deadlines across these chunks -- ONLY flag a contradiction if they describe the SAME entity, metric, period, and unit; a legitimate period-over-period change or a unit/scale conversion (crore vs million, kg vs lbs) is NOT a contradiction.
+2. Search for policy/factual inconsistencies where two statements cannot both be true.
+3. Check for genuinely different terminology (different names) referring to the same concept -- NOT spelling variants or typos.
+4. Identify broken or contradictory cross-references, and missing context a claim depends on.
 
 Return the findings strictly as a single JSON object.
 Do NOT include markdown fences, comments, or explanations.
+Do NOT report grammar, spelling, style, or vague-wording issues.
 
 Requested JSON Schema:
 {{
@@ -295,7 +331,7 @@ Requested JSON Schema:
     "cluster_findings": [
         {{
             "issue_id": "{cluster_id}_issue_000",
-            "type": "Cross-chunk numerical inconsistency|Policy inconsistency|Terminology inconsistency|Cross-reference inconsistency|Duplicate guidance|Missing Context",
+            "type": "Cross-reference / contradiction|Numerical inconsistency|Pronoun / entity-reference ambiguity|Terminology inconsistency|Date / timeline inconsistency|Unit / measurement inconsistency|Internal factual contradiction|Structural / convention inconsistency|Missing / conflicting context",
             "severity": "Low|Medium|High|Critical",
             "description": "statement summarizing conflict",
             "reason": "why this is inconsistent",
@@ -319,20 +355,36 @@ Requested JSON Schema:
     "overall_confidence": 0.92
 }}
 """
-                try:
-                    logger.info(f"Running LLM Cluster Reasoning for cluster: {cluster_id}")
-                    resp = self.ollama_client.generate(
-                        model=self.model_name,
-                        prompt=prompt,
-                        system=system_prompt
-                    )
-                    parsed = self._clean_and_parse_json(resp)
-                    cluster_reasonings.append(parsed)
-                except Exception as e:
-                    logger.error(f"Failed LLM cluster reasoning for {cluster_id}: {e}. Falling back to rule-based.")
-                    cluster_reasonings.append(self._analyze_fallback_cluster(cluster_id, topic, member_chunks))
-            else:
-                cluster_reasonings.append(self._analyze_fallback_cluster(cluster_id, topic, member_chunks))
+            try:
+                logger.info(f"Running LLM Cluster Reasoning for cluster: {cluster_id}")
+                resp = self.ollama_client.generate(
+                    model=self.model_name,
+                    prompt=prompt,
+                    system=system_prompt
+                )
+                return self._clean_and_parse_json(resp)
+            except Exception as e:
+                logger.error(f"Failed LLM cluster reasoning for {cluster_id}: {e}. Falling back to rule-based.")
+                return self._analyze_fallback_cluster(cluster_id, topic, member_chunks)
+
+        if llm_clusters:
+            max_workers = max(1, min(getattr(self.config, "context_max_workers", 8), len(llm_clusters)))
+            logger.info(
+                "Starting LLM Cluster Reasoning for %d candidate cluster(s) with %d worker(s)...",
+                len(llm_clusters), max_workers
+            )
+            from concurrent.futures import ThreadPoolExecutor, as_completed
+            with ThreadPoolExecutor(max_workers=max_workers) as executor:
+                futures = {
+                    executor.submit(_process_cluster, cid, topic, members): cid
+                    for cid, topic, members in llm_clusters
+                }
+                for fut in as_completed(futures):
+                    cid = futures[fut]
+                    try:
+                        cluster_reasonings.append(fut.result())
+                    except Exception as exc:
+                        logger.warning("Error in cluster reasoning thread for %s: %s", cid, exc)
 
         # Ensure output directory exists
         reason_dir = job_dir / "12_cluster_reasoning"

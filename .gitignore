@@ -98,3 +98,6 @@ data/output/
 data/cache/ 
 
 md_files/
+debug_metadata_direct.py
+debug_metadata_trace.py
+debug_output.txt

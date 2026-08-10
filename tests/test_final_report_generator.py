@@ -21,16 +21,29 @@ def test_final_report_generator_run(tmp_path):
     job_dir = tmp_path / "job_test_exec"
     claude_dir = job_dir / "14_claude_verification"
     claude_dir.mkdir(parents=True, exist_ok=True)
+    chunks_dir = job_dir / "06_chunks"
+    chunks_dir.mkdir(parents=True, exist_ok=True)
+
+    # An Ambiguity Analysis finding must be grounded: its evidence quote
+    # must be a real substring of the cited chunk's actual text (see
+    # src/rag/ambiguity_grounding_gate.py).
+    with open(chunks_dir / "document_chunks.json", "w", encoding="utf-8") as f:
+        json.dump({"chunks": [{
+            "metadata": {"chunk_id": "chunk_0001", "page_number": 3, "heading": "Delivery Timelines"},
+            "text": "Deliverables will be completed promptly, per Section 3 of the agreement."
+        }]}, f)
 
     claude_response = {
         "overall_document_risk": "Medium",
         "verified_findings": [
             {
+                # In-scope, in-taxonomy, grounded finding -- must survive
+                # every gate and reach the final report.
                 "issue_id": "test_amb_001",
                 "status": "confirmed",
-                "business_category": "Writing Clarity",
+                "business_category": "Missing / conflicting context",
                 "severity": "High",
-                "reason": "Vague deadline specified in contract section.",
+                "reason": "Vague deadline specified in contract section, with no defined date elsewhere in the document.",
                 "recommendation": "Specify exact calendar date for deliverable.",
                 "page": 3,
                 "section": "Delivery Timelines",
@@ -41,6 +54,10 @@ def test_final_report_generator_run(tmp_path):
                 ]
             },
             {
+                # Out-of-scope (Proofreading, not Ambiguity Analysis) --
+                # must be rejected by the category taxonomy gate regardless
+                # of what Claude labeled it, per
+                # src/rag/ambiguity_taxonomy.py.
                 "issue_id": "test_amb_002",
                 "status": "confirmed",
                 "business_category": "Grammar Issue",
@@ -78,7 +95,11 @@ def test_final_report_generator_run(tmp_path):
         assert data["publication_status"]["label"] in [
             "Ready for Publication", "Requires Minor Revision", "Compliance Review Recommended", "Requires Major Revision", "Editorial Review Required"
         ]
-        assert len(data["findings"]) == 2
+        # Only the in-scope, grounded finding reaches the report; the
+        # Grammar Issue finding is rejected as out of taxonomy scope.
+        assert len(data["findings"]) == 1
+        assert data["findings"][0]["category"] == "Missing / conflicting context"
+        assert any(r.get("issue_id") == "test_amb_002" for r in data["rejected_findings"])
         assert "action_plan" in data
         assert "phase_1_immediate" in data["action_plan"]
         assert "validation_summary" in data

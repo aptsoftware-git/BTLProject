@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef, useMemo } from "react";
 import { useParams, useNavigate, useLocation } from "react-router-dom";
-import { fetchDocument, fetchPreferences, fetchComparativeAnalysis, retryJobStage } from "../api";
+import { fetchDocument, fetchPreferences, fetchComparativeAnalysis, retryJobStage, validateJobOutputs, regenerateProofreadingReport, rerunStage, rerunFromStage, repairJob, resumeJob, restartJob, deleteJob } from "../api";
 import Assistant from "./Assistant";
 import ContextAnalysis from "./ContextAnalysis";
 import Reports from "./Reports";
@@ -98,7 +98,7 @@ const getTimelineStages = (doc) => {
         duration: st.duration,
         errors: st.errors,
         output_location: st.output_location,
-        state: st.status === "Completed" ? "completed" : st.status === "Running" ? "active" : st.status === "Failed" ? "failed" : "pending"
+        state: st.status === "Completed" ? "completed" : st.status === "Running" ? "active" : (st.status === "Failed" || st.status === "Blocked") ? "failed" : "pending"
       };
     });
   }
@@ -127,6 +127,87 @@ const getTimelineStages = (doc) => {
       state: status === "Completed" ? "completed" : status === "Running" ? "active" : status === "Failed" ? "failed" : "pending"
     };
   });
+};
+
+const StageDependencyLockScreen = ({ stageNumber, stageName, featureName, doc, onBack, onRefresh }) => {
+  const overallProgress = doc?.overall_progress !== undefined ? doc.overall_progress : Math.round(doc?.progress_percentage || 0);
+  const stages = getTimelineStages(doc);
+  const estTime = doc?.estimated_remaining_time || "~2-4 minutes";
+
+  return (
+    <div style={{ background: "var(--bg-card)", border: "1px solid var(--border)", borderRadius: 12, padding: "32px 24px", maxWidth: "800px", margin: "0 auto", textAlign: "center", boxShadow: "var(--shadow-card)" }}>
+      <div style={{ background: "#fef3c7", border: "1px solid #fde68a", borderRadius: 12, padding: "20px 24px", marginBottom: 24 }}>
+        <div style={{ fontSize: 32, marginBottom: 6 }}>⏳</div>
+        <h3 style={{ margin: 0, fontSize: 17, fontWeight: 800, color: "#92400e" }}>
+          Waiting For Stage {stageNumber}: {stageName} Completion
+        </h3>
+        <p style={{ margin: "6px 0 0", fontSize: 13, color: "#b45309" }}>
+          {featureName} is currently locked because it depends on Stage {stageNumber}. It will unlock automatically once Stage {stageNumber} completes.
+        </p>
+      </div>
+
+      <div style={{ background: "var(--bg-main)", border: "1px solid var(--border)", borderRadius: 10, padding: 20, textAlign: "left", marginBottom: 20 }}>
+        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 8 }}>
+          <span style={{ fontSize: 13, fontWeight: 700, color: "var(--text-primary)" }}>Current Pipeline Progress</span>
+          <span style={{ fontSize: 14, fontWeight: 800, color: "var(--brand)" }}>{overallProgress}% Complete</span>
+        </div>
+
+        <div style={{ width: "100%", height: 8, background: "var(--border)", borderRadius: 4, overflow: "hidden", marginBottom: 14 }}>
+          <div style={{ width: `${overallProgress}%`, height: "100%", background: "var(--brand)", transition: "width 0.4s ease" }} />
+        </div>
+
+        <div style={{ display: "flex", justifyContent: "space-between", fontSize: 12, color: "var(--text-secondary)", marginBottom: 16 }}>
+          <span><strong>Running Stage:</strong> {doc?.current_stage || "Processing..."}</span>
+          <span><strong>Estimated Unlock:</strong> {estTime}</span>
+        </div>
+
+        <div style={{ fontSize: 12, fontWeight: 700, color: "var(--text-primary)", marginBottom: 8 }}>
+          Dependency Chain Status:
+        </div>
+
+        <div style={{ border: "1px solid var(--border)", borderRadius: 8, overflow: "hidden" }}>
+          {stages.map((st, idx) => {
+            const isTarget = idx + 1 === stageNumber;
+            return (
+              <div key={st.stage_id || idx} style={{
+                display: "flex", justifyContent: "space-between", alignItems: "center",
+                padding: "8px 12px", borderBottom: idx < stages.length - 1 ? "1px solid var(--border)" : "none",
+                background: isTarget ? "rgba(108, 92, 231, 0.08)" : st.status === "Completed" ? "rgba(34, 197, 94, 0.04)" : "#ffffff"
+              }}>
+                <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+                  <span style={{
+                    width: 18, height: 18, borderRadius: "50%",
+                    background: st.status === "Completed" ? "var(--green-light)" : st.status === "Running" ? "var(--brand-light)" : "var(--border)",
+                    color: st.status === "Completed" ? "var(--green)" : st.status === "Running" ? "var(--brand)" : "var(--text-muted)",
+                    display: "inline-flex", alignItems: "center", justifyContent: "center", fontSize: 10, fontWeight: 800
+                  }}>
+                    {idx + 1}
+                  </span>
+                  <span style={{ fontSize: 12, fontWeight: isTarget ? 700 : 600, color: "var(--text-primary)" }}>{st.label}</span>
+                </div>
+                <span style={{
+                  fontSize: 10, fontWeight: 700, padding: "2px 6px", borderRadius: 4,
+                  background: st.status === "Completed" ? "var(--green-light)" : st.status === "Running" ? "var(--brand-light)" : "var(--border)",
+                  color: st.status === "Completed" ? "var(--green)" : st.status === "Running" ? "var(--brand)" : "var(--text-muted)"
+                }}>
+                  {st.status === "Pending" ? `Waiting for Stage ${idx}` : st.status}
+                </span>
+              </div>
+            );
+          })}
+        </div>
+      </div>
+
+      <div style={{ display: "flex", gap: 10, justifyContent: "center" }}>
+        <button style={styles.backBtn} onClick={onBack}>Return to Overview</button>
+        {onRefresh && (
+          <button style={{ ...styles.backBtn, background: "var(--brand-light)", color: "var(--brand)", border: "1px solid var(--brand)" }} onClick={onRefresh}>
+            🔄 Refresh Status
+          </button>
+        )}
+      </div>
+    </div>
+  );
 };
 
 const StagePipelineCard = ({ doc, onRetryStage }) => {
@@ -170,7 +251,7 @@ const StagePipelineCard = ({ doc, onRetryStage }) => {
         {stages.map((st, idx) => {
           const isCompleted = st.status === "Completed";
           const isRunning = st.status === "Running";
-          const isFailed = st.status === "Failed";
+          const isFailed = st.status === "Failed" || st.status === "Blocked";
 
           return (
             <div key={st.stage_id || idx} style={{
@@ -445,45 +526,12 @@ const WorkspaceSidebar = ({
             {isRefreshing ? "Updating Status..." : "✓ Refresh Status"}
           </button>
 
-          <button
-            onClick={() => isExtractionReady && onViewRawText()}
-            disabled={!isExtractionReady}
-            style={{
-              ...sidebarActionStyle,
-              opacity: isExtractionReady ? 1 : 0.5,
-              cursor: isExtractionReady ? "pointer" : "not-allowed"
-            }}
-            title={isExtractionReady ? "View Extracted Text (Stage 2 Ready)" : "🔒 Available after Stage 2 Document Content Extraction"}
-          >
-            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><polyline points="10 9 9 9 8 9"/></svg>
-            {isExtractionReady ? "✓ View Extracted Text" : "🔒 View Extracted Text"}
-          </button>
+          
 
-          <button
-            onClick={() => isAssistantReady && onOpenAssistant()}
-            disabled={!isAssistantReady}
-            style={{
-              ...sidebarActionStyle,
-              opacity: isAssistantReady ? 1 : 0.5,
-              cursor: isAssistantReady ? "pointer" : "not-allowed"
-            }}
-            title={isAssistantReady ? "Ask AI Assistant (Stage 5 Ready)" : "🔒 Available after Stage 5 Knowledge Index Creation"}
-          >
-            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
-            {isAssistantReady ? "✓ Ask AI Assistant" : "🔒 Ask AI Assistant"}
-          </button>
+          
 
-          <button onClick={onDownloadOriginal} style={sidebarActionStyle} title="Download Original PDF Document">
-            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
-            ✓ Download Original
-          </button>
-
-          {isFailed && (
-            <button onClick={() => onRetryStage("all")} style={{ ...sidebarActionStyle, background: "var(--red-light)", color: "var(--red)", border: "1px solid rgba(239,68,68,0.2)" }}>
-              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><path d="M1 4v6h6M23 20v-6h-6"/><path d="M20.49 9A9 9 0 0 0 5.64 5.64L1 10m22 4l-4.64 4.36A9 9 0 0 1 3.51 15"/></svg>
-              Re-run Analysis
-            </button>
-          )}
+          
+          
         </div>
       </div>
 
@@ -549,9 +597,53 @@ export default function Workspace() {
 
   useEffect(() => {
     const handleOpenModal = () => setIsDownloadModalOpen(true);
+    const handleDownloadClean = () => handleDownloadCorrected();
+    const handleValidate = async () => {
+      try {
+        const res = await validateJobOutputs(id);
+        alert(`[JOB OUTPUT VALIDATION]\nHighest Completed Stage: ${res.highest_completed_stage}\nMissing Outputs: ${res.missing_outputs.length > 0 ? res.missing_outputs.join(", ") : "None (All Complete)"}\nRecommended Recovery Stage: Stage ${res.recommended_recovery_stage}`);
+      } catch (err) {
+        alert(`Validation failed: ${err.message}`);
+      }
+    };
+    const handleRegenerate = async () => {
+      try {
+        setReRunningPipeline(true);
+        await regenerateProofreadingReport(id);
+        if (handleRetryStage) await handleRetryStage("stage_4_grammar");
+        else window.location.reload();
+      } catch (err) {
+        alert(`Report regeneration failed: ${err.message}`);
+      } finally {
+        setReRunningPipeline(false);
+      }
+    };
+    const handleRepair = async () => {
+      try {
+        setReRunningPipeline(true);
+        await repairJob(id);
+        if (handleRetryStage) await handleRetryStage("stage_4_grammar");
+        else window.location.reload();
+      } catch (err) {
+        alert(`Job repair failed: ${err.message}`);
+      } finally {
+        setReRunningPipeline(false);
+      }
+    };
+
     window.addEventListener("openDownloadModal", handleOpenModal);
-    return () => window.removeEventListener("openDownloadModal", handleOpenModal);
-  }, []);
+    window.addEventListener("downloadCleanDoc", handleDownloadClean);
+    window.addEventListener("validateOutputs", handleValidate);
+    window.addEventListener("regenerateReport", handleRegenerate);
+    window.addEventListener("repairJob", handleRepair);
+    return () => {
+      window.removeEventListener("openDownloadModal", handleOpenModal);
+      window.removeEventListener("downloadCleanDoc", handleDownloadClean);
+      window.removeEventListener("validateOutputs", handleValidate);
+      window.removeEventListener("regenerateReport", handleRegenerate);
+      window.removeEventListener("repairJob", handleRepair);
+    };
+  }, [id]);
 
 
 
@@ -658,23 +750,6 @@ export default function Workspace() {
     }
   };
 
-  // Auto-poll document status while document processing is in progress
-  useEffect(() => {
-    if (!id || !doc) return;
-    if (doc.status === "completed" || doc.status === "failed") return;
-
-    const interval = setInterval(async () => {
-      try {
-        const fresh = await fetchDocument(id);
-        if (fresh) setDoc(fresh);
-      } catch (e) {
-        console.error("Auto-poll status error:", e);
-      }
-    }, 2000);
-
-    return () => clearInterval(interval);
-  }, [id, doc?.status]);
-
   // Synchronize document DOM highlights (fallback mode when annotatedHtml is rendered)
   useEffect(() => {
     if (!textContainerRef.current || doc?.raw_text) return;
@@ -779,11 +854,7 @@ export default function Workspace() {
       }
       try {
         const data = await fetchDocument(id);
-        if (data) {
-          console.log("response.issues.length", data.issues?.length);
-          console.log("statistics", data.statistics);
-        }
-        
+
         if (!active) return;
         if (!data) {
           setError("Document not found or backend service unreachable.");
@@ -839,19 +910,16 @@ export default function Workspace() {
         }
 
         setLoading(false);
-        
-        // Dynamic Real-Time Stage Polling: Poll every 1.5s as long as any stage is Running, Pending, or processing
-        const hasRunningOrPendingStage = Array.isArray(data.stages) && data.stages.some(
-          st => st.status === "Running" || st.status === "Pending" || st.status === "queued" || st.status === "processing"
-        );
-        const isPipelineIncomplete = data.status === "processing" ||
-                                     data.status === "pending" ||
-                                     data.status === "uploaded" ||
-                                     (data.progress_percentage || 0) < 100 ||
-                                     hasRunningOrPendingStage ||
-                                     data.comparative_analysis_status === "running";
 
-        if (data && isPipelineIncomplete && data.status !== "failed") {
+        // Poll every 1.5s only while the job itself is still processing.
+        // The top-level job status is the single source of truth for when to
+        // stop polling — the per-stage `stages[]` array can be stale/out of
+        // sync across reruns (e.g. a stage stuck at "Running" even though the
+        // job as a whole finished), so it must never be used to keep polling
+        // alive once the job has reached a terminal state.
+        const isTerminal = data.status === "completed" || data.status === "completed_with_warnings" || data.status === "failed" || data.status === "recoverable";
+
+        if (data && !isTerminal) {
           timerId = setTimeout(load, 1500);
         }
       } catch (err) {
@@ -917,7 +985,7 @@ export default function Workspace() {
   }, [location.search]);
 
   useEffect(() => {
-    if ((activeTab === "comparative" || activeTab === "comparative-analysis") && id) {
+    if ((activeTab === "comparative" || activeTab === "comparative-analysis" || activeTab === "benchmarking") && id) {
       let isMounted = true;
       let timerId = null;
 
@@ -1752,126 +1820,90 @@ export default function Workspace() {
         
         <div style={styles.overviewGrid}>
           {/* Card 1: Proofreading */}
-          <div style={{ ...styles.overviewCard, opacity: isProofreadUnlocked ? 1 : 0.85 }}>
+          <div style={styles.overviewCard}>
             <div style={styles.overviewCardTop}>
               <span style={{
                 ...styles.cardBadge,
-                backgroundColor: !isProofreadUnlocked ? "var(--amber-light)" : totalIssues === 0 ? "var(--green-light)" : totalIssues <= 10 ? "var(--amber-light)" : "var(--red-light)",
-                color: !isProofreadUnlocked ? "var(--amber)" : totalIssues === 0 ? "var(--green)" : totalIssues <= 10 ? "var(--amber)" : "var(--red)"
+                backgroundColor: totalIssues === 0 ? "var(--green-light)" : totalIssues <= 10 ? "var(--amber-light)" : "var(--red-light)",
+                color: totalIssues === 0 ? "var(--green)" : totalIssues <= 10 ? "var(--amber)" : "var(--red)"
               }}>
-                {!isProofreadUnlocked ? "Stage 3/4 Processing..." : totalIssues === 0 ? "Ready for Publication" : `${totalIssues} Issues Found`}
+                {totalIssues === 0 ? "Ready for Publication" : `${totalIssues} Issues Found`}
               </span>
               <h3 style={styles.overviewCardTitle}>Proofreading & Quality</h3>
             </div>
             <p style={styles.overviewCardDesc}>
-              {isProofreadUnlocked
-                ? "Spelling and structural grammar verification flags typographical bugs and formatting errors."
-                : "Language, spelling & writing quality review runs in Stages 3 & 4."}
+              Spelling and structural grammar verification flags typographical bugs and formatting errors.
             </p>
             <button
-              style={{
-                ...styles.overviewCardBtn,
-                opacity: isProofreadUnlocked ? 1 : 0.6,
-                cursor: isProofreadUnlocked ? "pointer" : "not-allowed"
-              }}
-              disabled={!isProofreadUnlocked}
-              onClick={() => isProofreadUnlocked && handleTabChange("proofreading")}
-              title={isProofreadUnlocked ? "View Proofreading (Stage 3 & 4 Ready)" : "🔒 Available after Stage 3 Language & Spelling Review"}
+              style={{ ...styles.overviewCardBtn, cursor: "pointer", opacity: 1 }}
+              onClick={() => handleTabChange("proofreading")}
+              title="View Proofreading Workspace"
             >
-              {isProofreadUnlocked ? "✓ View Proofreading →" : "🔒 Proofreading Locked"}
+              ✓ View Proofreading →
             </button>
           </div>
 
           {/* Card 2: Ambiguity Analysis */}
-          <div style={{ ...styles.overviewCard, opacity: isAmbiguityUnlocked ? 1 : 0.85 }}>
+          <div style={styles.overviewCard}>
             <div style={styles.overviewCardTop}>
               <span style={{
                 ...styles.cardBadge,
-                backgroundColor: !isAmbiguityUnlocked ? "var(--amber-light)" : consistencyIssues === 0 ? "var(--green-light)" : "var(--amber-light)",
-                color: !isAmbiguityUnlocked ? "var(--amber)" : consistencyIssues === 0 ? "var(--green)" : "var(--amber)"
+                backgroundColor: consistencyIssues === 0 ? "var(--green-light)" : "var(--amber-light)",
+                color: consistencyIssues === 0 ? "var(--green)" : "var(--amber)"
               }}>
-                {!isAmbiguityUnlocked ? "Stage 6 Pending..." : consistencyIssues === 0 ? "0 Conflicts Found" : `${consistencyIssues} Conflicts Mapped`}
+                {consistencyIssues === 0 ? "0 Conflicts Found" : `${consistencyIssues} Conflicts Mapped`}
               </span>
               <h3 style={styles.overviewCardTitle}>Ambiguity Analysis</h3>
             </div>
             <p style={styles.overviewCardDesc}>
-              {isAmbiguityUnlocked
-                ? "Audits conflicting sections, numerical mismatches, and undefined acronyms across clauses."
-                : "Consistency and contradiction auditing will evaluate numerical mismatches and acronym conflicts in Stage 6."}
+              Audits conflicting sections, numerical mismatches, and undefined acronyms across clauses.
             </p>
             <button
-              style={{
-                ...styles.overviewCardBtn,
-                opacity: isAmbiguityUnlocked ? 1 : 0.6,
-                cursor: isAmbiguityUnlocked ? "pointer" : "not-allowed"
-              }}
-              disabled={!isAmbiguityUnlocked}
-              onClick={() => isAmbiguityUnlocked && handleTabChange("analysis")}
-              title={isAmbiguityUnlocked ? "View Ambiguity Analysis (Stage 6 Ready)" : "🔒 Available after Stage 6 Consistency & Contradiction Review"}
+              style={{ ...styles.overviewCardBtn, cursor: "pointer", opacity: 1 }}
+              onClick={() => handleTabChange("analysis")}
+              title="View Ambiguity Analysis Workspace"
             >
-              {isAmbiguityUnlocked ? "✓ View Ambiguity Analysis →" : "🔒 Ambiguity Analysis Locked"}
+              ✓ View Ambiguity Analysis →
             </button>
           </div>
 
           {/* Card 3: AI Assistant */}
-          <div style={{ ...styles.overviewCard, opacity: isAiAssistantUnlocked ? 1 : 0.85 }}>
+          <div style={styles.overviewCard}>
             <div style={styles.overviewCardTop}>
-              <span style={{
-                ...styles.cardBadge,
-                backgroundColor: !isAiAssistantUnlocked ? "var(--amber-light)" : "var(--brand-light)",
-                color: !isAiAssistantUnlocked ? "var(--amber)" : "var(--brand)"
-              }}>
-                {!isAiAssistantUnlocked ? "Stage 5 Indexing..." : "Interactive Q&A Ready"}
+              <span style={{ ...styles.cardBadge, backgroundColor: "var(--brand-light)", color: "var(--brand)" }}>
+                Interactive Q&A Active
               </span>
               <h3 style={styles.overviewCardTitle}>AI Assistant</h3>
             </div>
             <p style={styles.overviewCardDesc}>
-              {isAiAssistantUnlocked
-                ? "Ask questions across document text, financial tables, and verified domain knowledge."
-                : "Knowledge Index Creation must complete in Stage 5 before AI document Q&A becomes available."}
+              Ask questions across document text, financial tables, and verified domain knowledge.
             </p>
             <button
-              style={{
-                ...styles.overviewCardBtn,
-                opacity: isAiAssistantUnlocked ? 1 : 0.6,
-                cursor: isAiAssistantUnlocked ? "pointer" : "not-allowed"
-              }}
-              disabled={!isAiAssistantUnlocked}
-              onClick={() => isAiAssistantUnlocked && handleTabChange("assistant")}
-              title={isAiAssistantUnlocked ? "Ask AI Assistant (Stage 5 Ready)" : "🔒 Available after Stage 5 Knowledge Index Creation"}
+              style={{ ...styles.overviewCardBtn, cursor: "pointer", opacity: 1 }}
+              onClick={() => handleTabChange("assistant")}
+              title="Open AI Assistant"
             >
-              {isAiAssistantUnlocked ? "✓ Ask AI Assistant →" : "🔒 AI Assistant Locked"}
+              ✓ Ask AI Assistant →
             </button>
           </div>
 
           {/* Card 4: Comparative Analysis */}
-          <div style={{ ...styles.overviewCard, opacity: isComparativeUnlocked ? 1 : 0.85 }}>
+          <div style={styles.overviewCard}>
             <div style={styles.overviewCardTop}>
-              <span style={{
-                ...styles.cardBadge,
-                backgroundColor: !isComparativeUnlocked ? "var(--amber-light)" : "#EFF6FF",
-                color: !isComparativeUnlocked ? "var(--amber)" : "#2563EB"
-              }}>
-                {!isComparativeUnlocked ? "Stage 7 Pending..." : "Executive Benchmark Ready"}
+              <span style={{ ...styles.cardBadge, backgroundColor: "#EFF6FF", color: "#2563EB" }}>
+                Executive Benchmark Active
               </span>
               <h3 style={styles.overviewCardTitle}>Comparative Analysis</h3>
             </div>
             <p style={styles.overviewCardDesc}>
-              {isComparativeUnlocked
-                ? "Deloitte/McKinsey executive benchmarking comparing capabilities against market peers."
-                : "Competitive benchmark analysis against industry references runs in Stage 7."}
+              Deloitte/McKinsey executive benchmarking comparing capabilities against market peers.
             </p>
             <button
-              style={{
-                ...styles.overviewCardBtn,
-                opacity: isComparativeUnlocked ? 1 : 0.6,
-                cursor: isComparativeUnlocked ? "pointer" : "not-allowed"
-              }}
-              disabled={!isComparativeUnlocked}
-              onClick={() => isComparativeUnlocked && handleTabChange("comparative")}
-              title={isComparativeUnlocked ? "View Comparative Analysis (Stage 7 Ready)" : "🔒 Available after Stage 7 Competitive Benchmark Analysis"}
+              style={{ ...styles.overviewCardBtn, cursor: "pointer", opacity: 1 }}
+              onClick={() => handleTabChange("comparative")}
+              title="View Comparative Analysis Workspace"
             >
-              {isComparativeUnlocked ? "✓ View Comparative Analysis →" : "🔒 Comparative Analysis Locked"}
+              ✓ View Comparative Analysis →
             </button>
           </div>
         </div>
@@ -1891,140 +1923,17 @@ export default function Workspace() {
       primaryStatusText = "Ready for Publishing";
       badgeColor = "var(--green)";
       badgeBg = "var(--green-light)";
-    } else if (totalIssuesCount <= 5 && totalConsistencyCount === 0) {
-      primaryStatusText = "Needs Minor Revision";
-      badgeColor = "var(--green)";
-      badgeBg = "var(--green-light)";
-    } else if (totalIssuesCount <= 15) {
-      primaryStatusText = "Needs Review";
-      badgeColor = "var(--amber)";
-      badgeBg = "var(--amber-light)";
     } else {
-      primaryStatusText = "Requires Major Revision";
-      badgeColor = "var(--red)";
-      badgeBg = "var(--red-light)";
+      primaryStatusText = "Review Complete";
+      badgeColor = "var(--brand)";
+      badgeBg = "var(--brand-light)";
     }
   }
 
   return (
     <div style={styles.workspace}>
       
-      {/* 1. Header bar */}
-      <div style={styles.header}>
-        <div style={styles.titleCol}>
-          <div style={styles.iconBox}>
-            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z" /><path d="M14 2v6h6" /></svg>
-          </div>
-          <div>
-            <h2 style={styles.filename}>{doc.filename}</h2>
-            <div style={{ display: "flex", gap: 12, fontSize: 12.5, color: "var(--text-secondary)", marginTop: 2, alignItems: "center" }}>
-              <span>{doc.total_pages || doc.pages || 1} pages</span>
-              <span>•</span>
-              <span>Uploaded {doc.uploadedLabel || "Recently"}</span>
-              <span>•</span>
-              <span style={{ fontWeight: 650, color: doc.status === "completed" ? "var(--green)" : "var(--amber)" }}>
-                {doc.status === "completed" ? "✓ Scan Complete" : "⚠ In Progress"}
-              </span>
-            </div>
-            
-            {/* Persistent Document Context Header - Clean primary status */}
-            <div style={{ display: "flex", alignItems: "center", gap: 10, marginTop: 8, flexWrap: "wrap", position: "relative" }}>
-              <div 
-                style={{
-                  display: "inline-flex", alignItems: "center", gap: 6, cursor: "pointer",
-                  padding: "4px 10px", borderRadius: 6, background: badgeBg, color: badgeColor,
-                  fontSize: 12, fontWeight: 700, userSelect: "none"
-                }}
-                onClick={() => setStatusDetailsExpanded(!statusDetailsExpanded)}
-                title="Click to view detailed metrics breakdown"
-              >
-                <span>{primaryStatusText}</span>
-                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" style={{ transform: statusDetailsExpanded ? "rotate(180deg)" : "none", transition: "transform 0.15s" }}>
-                  <polyline points="6 9 12 15 18 9"/>
-                </svg>
-              </div>
 
-              {statusDetailsExpanded && (
-                <div style={{
-                  position: "absolute", top: 32, left: 0, zIndex: 10,
-                  background: "var(--bg-card)", border: "1px solid var(--border)",
-                  borderRadius: 8, padding: "12px 16px", minWidth: 240,
-                  boxShadow: "0 4px 12px rgba(0, 0, 0, 0.08)", display: "flex", flexDirection: "column", gap: 6
-                }}>
-                  <div style={{ fontSize: 11, fontWeight: 700, textTransform: "uppercase", color: "var(--text-muted)", borderBottom: "1px solid var(--border)", paddingBottom: 4 }}>
-                    Detailed Metrics Audit
-                  </div>
-                  <div style={{ display: "flex", justifyContent: "space-between", fontSize: 12 }}>
-                    <span>Writing Flags:</span>
-                    <strong>{totalIssuesCount}</strong>
-                  </div>
-                  <div style={{ display: "flex", justifyContent: "space-between", fontSize: 12 }}>
-                    <span>Consistency Issues:</span>
-                    <strong>{totalConsistencyCount}</strong>
-                  </div>
-                  <div style={{ display: "flex", justifyContent: "space-between", fontSize: 12 }}>
-                    <span>Protected Terms Checked:</span>
-                    <strong>{doc.protected_terms?.length || 0}</strong>
-                  </div>
-                </div>
-              )}
-            </div>
-          </div>
-        </div>
-
-        <div style={styles.actionCol}>
-          {/* Actions Dropdown */}
-          <div ref={actionsRef} style={{ position: "relative" }}>
-            <button className="btn-premium-solid" onClick={() => setIsActionsDropdownOpen(!isActionsDropdownOpen)}>
-              Actions
-              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" style={{ marginLeft: 6 }}><polyline points="6 9 12 15 18 9"/></svg>
-            </button>
-            {isActionsDropdownOpen && (
-              <div style={styles.actionsDropdownMenu}>
-                <button
-                  style={{ ...styles.dropdownMenuItem, opacity: isAiAssistantUnlocked ? 1 : 0.5, cursor: isAiAssistantUnlocked ? "pointer" : "not-allowed" }}
-                  disabled={!isAiAssistantUnlocked}
-                  onClick={() => { if (isAiAssistantUnlocked) { setIsActionsDropdownOpen(false); handleTabChange("assistant"); } }}
-                  title={isAiAssistantUnlocked ? "Open AI Assistant (Stage 5 Ready)" : "🔒 Available after Stage 5 Knowledge Index Creation"}
-                >
-                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" style={{ marginRight: 8 }}><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
-                  {isAiAssistantUnlocked ? "✓ Open AI Assistant" : "🔒 Open AI Assistant"}
-                </button>
-
-                <button
-                  style={{ ...styles.dropdownMenuItem, opacity: isReportsUnlocked ? 1 : 0.5, cursor: isReportsUnlocked ? "pointer" : "not-allowed" }}
-                  disabled={!isReportsUnlocked}
-                  onClick={() => { if (isReportsUnlocked) { setIsActionsDropdownOpen(false); handleTabChange("reports"); } }}
-                  title={isReportsUnlocked ? "Open Executive Report (Stage 8 Ready)" : "🔒 Available after Stage 8 Executive Insights Report"}
-                >
-                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" style={{ marginRight: 8 }}><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
-                  {isReportsUnlocked ? "✓ Open Executive Report" : "🔒 Open Executive Report"}
-                </button>
-
-                <button
-                  style={{ ...styles.dropdownMenuItem, opacity: isReportsUnlocked ? 1 : 0.5, cursor: isReportsUnlocked ? "pointer" : "not-allowed" }}
-                  disabled={!isReportsUnlocked}
-                  onClick={() => { if (isReportsUnlocked) { setIsActionsDropdownOpen(false); setIsDownloadModalOpen(true); } }}
-                  title={isReportsUnlocked ? "Download Reports (Stage 8 Ready)" : "🔒 Available after Stage 8 Executive Insights Report"}
-                >
-                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" style={{ marginRight: 8 }}><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
-                  {isReportsUnlocked ? "✓ Download Reports" : "🔒 Download Reports"}
-                </button>
-
-                <button
-                  style={{ ...styles.dropdownMenuItem, opacity: isProofreadUnlocked ? 1 : 0.5, cursor: isProofreadUnlocked ? "pointer" : "not-allowed" }}
-                  disabled={!isProofreadUnlocked}
-                  onClick={() => { if (isProofreadUnlocked) { setIsActionsDropdownOpen(false); handleDownloadCorrected(); } }}
-                  title={isProofreadUnlocked ? "Download Clean Document (Stage 3 Ready)" : "🔒 Available after Stage 3 Language & Spelling Review"}
-                >
-                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" style={{ marginRight: 8 }}><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/><polyline points="17 21 17 13 7 13 7 21"/><polyline points="7 3 7 8 15 8"/></svg>
-                  {isProofreadUnlocked ? "✓ Download Clean Document" : "🔒 Download Clean Document"}
-                </button>
-              </div>
-            )}
-          </div>
-        </div>
-      </div>
 
         {/* 3. Master-Detail Enterprise Workspace Split Layout (100% for Proofreading | 73%/27% for Overview and other tabs) */}
         {(() => {
@@ -2034,10 +1943,75 @@ export default function Workspace() {
           return (
             <div style={{ display: "flex", gap: 20, alignItems: "flex-start", width: "100%" }}>
               
-              {/* Main Left Workspace View (100% width when proofreading, 73% width otherwise) */}
-              <div style={{ flex: isProofreadTab ? "1 1 100%" : "1 1 73%", minWidth: 0, display: "flex", flexDirection: "column", gap: 16 }}>
+              {/* Main Left Workspace View (100% full width & maximum breathing room) */}
+              <div style={{ flex: "1 1 100%", width: "100%", minWidth: 0, display: "flex", flexDirection: "column", gap: 16 }}>
                 {activeTab === "overview" ? (
                   <div>
+                    {doc?.status === "recoverable" && (
+                      <div style={{
+                        background: "#fffbeb", border: "2px solid #f59e0b", borderRadius: 12,
+                        padding: "16px 20px", marginBottom: 20, display: "flex",
+                        justifyContent: "space-between", alignItems: "center", boxShadow: "0 4px 12px rgba(245, 158, 11, 0.15)"
+                      }}>
+                        <div>
+                          <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+                            <span style={{ background: "#f59e0b", color: "#ffffff", fontSize: 10, fontWeight: 800, padding: "2px 8px", borderRadius: 4, textTransform: "uppercase" }}>
+                              RECOVERABLE CHECKPOINT DETECTED
+                            </span>
+                            <h3 style={{ margin: 0, fontSize: 15, fontWeight: 800, color: "#92400e" }}>
+                              Processing Interrupted (Awaiting User Action)
+                            </h3>
+                          </div>
+                          <p style={{ margin: "4px 0 0", fontSize: 12, color: "#b45309" }}>
+                            Saved execution checkpoints exist on disk. Select an action below to proceed or restart.
+                          </p>
+                        </div>
+
+                        <div style={{ display: "flex", gap: 8 }}>
+                          <button
+                            onClick={async () => {
+                              try {
+                                await resumeJob(id);
+                                setDoc(await fetchDocument(id));
+                              } catch (e) {
+                                alert(`Resume failed: ${e.message}`);
+                              }
+                            }}
+                            style={{ background: "#166534", color: "#ffffff", border: "none", borderRadius: 6, padding: "8px 14px", fontWeight: 700, fontSize: 12, cursor: "pointer" }}
+                          >
+                            ▶ Resume Job
+                          </button>
+                          <button
+                            onClick={async () => {
+                              try {
+                                await restartJob(id);
+                                setDoc(await fetchDocument(id));
+                              } catch (e) {
+                                alert(`Restart failed: ${e.message}`);
+                              }
+                            }}
+                            style={{ background: "#d97706", color: "#ffffff", border: "none", borderRadius: 6, padding: "8px 14px", fontWeight: 700, fontSize: 12, cursor: "pointer" }}
+                          >
+                            ↺ Restart Job
+                          </button>
+                          <button
+                            onClick={async () => {
+                              if (confirm("Are you sure you want to delete this job?")) {
+                                try {
+                                  await deleteJob(id);
+                                  navigate("/recent");
+                                } catch (e) {
+                                  alert(`Delete failed: ${e.message}`);
+                                }
+                              }
+                            }}
+                            style={{ background: "#991b1b", color: "#ffffff", border: "none", borderRadius: 6, padding: "8px 14px", fontWeight: 700, fontSize: 12, cursor: "pointer" }}
+                          >
+                            🗑 Delete Job
+                          </button>
+                        </div>
+                      </div>
+                    )}
                     <StagePipelineCard doc={doc} onRetryStage={handleRetryStage} />
                     {renderResultsOverview()}
                   </div>
@@ -2045,120 +2019,52 @@ export default function Workspace() {
                   <PDFReviewWorkspace
                     docId={id}
                     documentData={doc}
-                    issues={doc?.issues || []}
-                    onIssueDecisionChange={(issueId, decision) => {
-                      setIssueDecisions((prev) => ({ ...prev, [issueId]: decision }));
-                    }}
                     onRefreshDocument={async () => {
                       const updated = await fetchDocument(id);
                       setDoc(updated);
                     }}
                   />
                 ) : activeTab === "assistant" ? (
-                  /* Embedded AI Assistant Chat Panel */
-                  !(doc?.rag_ready || doc?.rag_status === "completed" || doc?.status === "completed") ? (
-                    <div style={{ background: "var(--bg-card)", border: "1px solid var(--border)", borderRadius: 12, padding: 40, textAlign: "center" }}>
-                      <div style={{ fontSize: 36, marginBottom: 12 }}>🔒</div>
-                      <h3 style={{ margin: 0, fontSize: 18, fontWeight: 700, color: "var(--text-primary)" }}>AI Assistant is Locked</h3>
-                      <p style={{ fontSize: 13, color: "var(--text-secondary)", maxWidth: 500, margin: "8px auto 16px" }}>
-                        Knowledge Index Creation (Stage 5) is currently processing or pending. The AI Assistant will unlock automatically once indexing completes.
-                      </p>
-                      <button style={styles.backBtn} onClick={() => handleTabChange("overview")}>Return to Overview</button>
-                    </div>
-                  ) : (
-                    <div style={{ background: "var(--bg-card)", border: "1px solid var(--border)", borderRadius: 12, padding: 16, minHeight: 500 }}>
-                      <Assistant onSelectPage={(page) => {
-                        setActiveTab("proofreading");
-                        if (doc && doc.issues) {
-                          const firstIssueIdx = (doc.issues || []).filter(Boolean).findIndex(i => i.page_number === page);
-                          if (firstIssueIdx !== -1) {
-                            handleSelectIssue(firstIssueIdx);
-                          }
+                  <div style={{ background: "var(--bg-card)", border: "1px solid var(--border)", borderRadius: 12, padding: 16, minHeight: 500 }}>
+                    <Assistant propDoc={doc} onSelectPage={(page) => {
+                      setActiveTab("proofreading");
+                      if (doc && doc.issues) {
+                        const firstIssueIdx = (doc.issues || []).filter(Boolean).findIndex(i => i.page_number === page);
+                        if (firstIssueIdx !== -1) {
+                          handleSelectIssue(firstIssueIdx);
                         }
-                      }} />
-                    </div>
-                  )
+                      }
+                    }} />
+                  </div>
                 ) : activeTab === "analysis" || activeTab === "context" ? (
-                  /* Context Analysis Report Dashboard */
-                  !(doc?.context_analysis_ready || doc?.context_analysis_status === "completed" || doc?.status === "completed") ? (
-                    <div style={{ background: "var(--bg-card)", border: "1px solid var(--border)", borderRadius: 12, padding: 40, textAlign: "center" }}>
-                      <div style={{ fontSize: 36, marginBottom: 12 }}>🔒</div>
-                      <h3 style={{ margin: 0, fontSize: 18, fontWeight: 700, color: "var(--text-primary)" }}>Ambiguity Analysis is Locked</h3>
-                      <p style={{ fontSize: 13, color: "var(--text-secondary)", maxWidth: 500, margin: "8px auto 16px" }}>
-                        Consistency & Contradiction Review (Stage 6) is currently processing or pending. Ambiguity Analysis will unlock automatically once stage 6 completes.
-                      </p>
-                      <button style={styles.backBtn} onClick={() => handleTabChange("overview")}>Return to Overview</button>
-                    </div>
-                  ) : (
-                    <div style={{ background: "var(--bg-card)", border: "1px solid var(--border)", borderRadius: 12, padding: 20, minHeight: 500 }}>
-                      <ContextAnalysis id={id} onShowInDocument={handleShowInDocument} />
-                    </div>
-                  )
-                ) : activeTab === "comparative" || activeTab === "comparative-analysis" ? (
-                  /* Executive Comparative Analysis Workspace */
-                  !(doc?.comparative_analysis_ready || doc?.comparative_analysis_status === "completed" || doc?.status === "completed") ? (
-                    <div style={{ background: "var(--bg-card)", border: "1px solid var(--border)", borderRadius: 12, padding: 40, textAlign: "center" }}>
-                      <div style={{ fontSize: 36, marginBottom: 12 }}>🔒</div>
-                      <h3 style={{ margin: 0, fontSize: 18, fontWeight: 700, color: "var(--text-primary)" }}>Comparative Analysis is Locked</h3>
-                      <p style={{ fontSize: 13, color: "var(--text-secondary)", maxWidth: 500, margin: "8px auto 16px" }}>
-                        Competitive Benchmark Analysis (Stage 7) is currently processing or pending. Comparative Analysis will unlock automatically once stage 7 completes.
-                      </p>
-                      <button style={styles.backBtn} onClick={() => handleTabChange("overview")}>Return to Overview</button>
-                    </div>
-                  ) : (
-                    <div style={{ background: "var(--bg-card)", border: "1px solid var(--border)", borderRadius: 12, padding: 20, minHeight: 500 }}>
-                      <ComparativeAnalysisView
-                        id={id}
-                        data={comparativeData}
-                        isRunning={
-                          !(comparativeData?.company_profile || comparativeData?.data?.company_profile || comparativeData?.comparative_analysis) &&
-                          (comparativeLoading || doc?.comparative_analysis_status === "running")
-                        }
-                        currentStage={doc?.current_stage || "Competitive Benchmark Analysis"}
-                        onRerun={() => {
-                          setComparativeLoading(true);
-                          fetchComparativeAnalysis(id).then(res => {
-                            setComparativeData(res);
-                            setComparativeLoading(false);
-                          }).catch(() => setComparativeLoading(false));
-                        }}
-                      />
-                    </div>
-                  )
+                  <div style={{ background: "var(--bg-card)", border: "1px solid var(--border)", borderRadius: 12, padding: 20, minHeight: 500 }}>
+                    <ContextAnalysis id={id} onShowInDocument={handleShowInDocument} />
+                  </div>
+                ) : activeTab === "comparative" || activeTab === "comparative-analysis" || activeTab === "benchmarking" ? (
+                  <div style={{ background: "var(--bg-card)", border: "1px solid var(--border)", borderRadius: 12, padding: 20, minHeight: 500 }}>
+                    <ComparativeAnalysisView
+                      id={id}
+                      data={comparativeData}
+                      isRunning={
+                        !(comparativeData?.company_profile || comparativeData?.data?.company_profile || comparativeData?.comparative_analysis) &&
+                        (comparativeLoading || doc?.comparative_analysis_status === "running")
+                      }
+                      currentStage={doc?.current_stage || "Competitive Benchmark Analysis"}
+                      onRerun={() => {
+                        setComparativeLoading(true);
+                        fetchComparativeAnalysis(id).then(res => {
+                          setComparativeData(res);
+                          setComparativeLoading(false);
+                        }).catch(() => setComparativeLoading(false));
+                      }}
+                    />
+                  </div>
                 ) : (
-                  /* Executive Reports Page */
-                  !(doc?.reports_ready || doc?.status === "completed") ? (
-                    <div style={{ background: "var(--bg-card)", border: "1px solid var(--border)", borderRadius: 12, padding: 40, textAlign: "center" }}>
-                      <div style={{ fontSize: 36, marginBottom: 12 }}>🔒</div>
-                      <h3 style={{ margin: 0, fontSize: 18, fontWeight: 700, color: "var(--text-primary)" }}>Executive Reports are Locked</h3>
-                      <p style={{ fontSize: 13, color: "var(--text-secondary)", maxWidth: 500, margin: "8px auto 16px" }}>
-                        Executive Insights Report Generation (Stage 8) is currently processing or pending. Executive Reports will unlock automatically once stage 8 completes.
-                      </p>
-                      <button style={styles.backBtn} onClick={() => handleTabChange("overview")}>Return to Overview</button>
-                    </div>
-                  ) : (
-                    <div style={{ background: "var(--bg-card)", border: "1px solid var(--border)", borderRadius: 12, padding: 20, minHeight: 500 }}>
-                      <Reports activeDocId={id} />
-                    </div>
-                  )
+                  <div style={{ background: "var(--bg-card)", border: "1px solid var(--border)", borderRadius: 12, padding: 20, minHeight: 500 }}>
+                    <Reports activeDocId={id} doc={doc} />
+                  </div>
                 )}
               </div>
-
-              {/* Right Panel: Fixed Enterprise Document Details Sidebar (27% width, sticky, non-proofreading tabs) */}
-              {!isProofreadTab && (
-                <WorkspaceSidebar
-                  doc={doc}
-                  stages={getTimelineStages(doc)}
-                  overallProgress={doc.overall_progress !== undefined ? doc.overall_progress : Math.round(doc.progress_percentage || 0)}
-                  onRefresh={() => {
-                    fetchDocument(id).then(data => { if (data) setDoc(data); });
-                  }}
-                  onViewRawText={() => setRawTextOpen(true)}
-                  onOpenAssistant={() => handleTabChange("assistant")}
-                  onDownloadOriginal={handleDownloadOriginal}
-                  onRetryStage={handleRetryStage}
-                />
-              )}
             </div>
           );
         })()}

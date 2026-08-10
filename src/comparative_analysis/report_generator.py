@@ -202,7 +202,7 @@ class ComparativeReportGenerator:
         swot_payload = {
             "strengths": [
                 {
-                    "observation": s,
+                    "observation": s.title if hasattr(s, "title") else getattr(s, "observation", str(s)),
                     "evidence": "Annual Report & Verified Project Portfolio",
                     "business_impact": "High market differentiation and tender qualification",
                     "confidence": "High",

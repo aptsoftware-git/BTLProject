@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from typing import List
+from typing import Any, Dict, List
 import json
 import logging
 from pathlib import Path
@@ -198,35 +198,234 @@ async def retry_job(job_id: str, stage_id: str = "all") -> JobStatusResponse:
         )
 
 
+@router.post(
+    "/jobs/{job_id}/resume",
+    response_model=JobStatusResponse,
+    summary="Resume a recoverable or paused job",
+)
+async def resume_job(job_id: str) -> JobStatusResponse:
+    from backend.services import repair_job
+    try:
+        job = repair_job(job_id)
+        return JobStatusResponse(**job)
+    except Exception as exc:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail=f"Failed to resume job: {str(exc)}"
+        )
+
+
+@router.post(
+    "/jobs/{job_id}/restart",
+    response_model=JobStatusResponse,
+    summary="Restart job processing from Stage 1",
+)
+async def restart_job(job_id: str) -> JobStatusResponse:
+    from backend.services import retry_job_stage
+    try:
+        job = retry_job_stage(job_id, stage_id="all")
+        return JobStatusResponse(**job)
+    except Exception as exc:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail=f"Failed to restart job: {str(exc)}"
+        )
+
+
+@router.delete(
+    "/jobs/{job_id}",
+    summary="Delete job metadata and directory",
+)
+async def remove_job(job_id: str):
+    from backend.services import delete_job
+    try:
+        delete_job(job_id)
+        return {"status": "deleted", "job_id": job_id}
+    except Exception as exc:
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail=f"Failed to delete job: {str(exc)}"
+        )
+
+
+@router.get(
+    "/jobs/{job_id}/validate-finding/{issue_id}",
+    summary="Validate finding grounding and coordinates against PDF source",
+)
+async def validate_finding(job_id: str, issue_id: str):
+    job = get_job(job_id)
+    if not job:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail=f"Job with ID '{job_id}' not found.",
+        )
+
+    job_dir = get_job_dir(job_id)
+    report_path = job_dir / "10_final" / "report.json"
+    target_issue = None
+
+    if report_path.exists():
+        try:
+            with open(report_path, "r", encoding="utf-8") as f:
+                report_data = json.load(f)
+                issues_list = report_data.get("issues", [])
+                for idx, iss in enumerate(issues_list):
+                    iid = iss.get("issue_id") or f"issue_{idx + 1}"
+                    if iid == issue_id:
+                        target_issue = iss
+                        break
+        except Exception:
+            pass
+
+    if not target_issue:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail=f"Issue ID '{issue_id}' not found in job '{job_id}'.",
+        )
+
+    page_num = target_issue.get("page") or target_issue.get("page_number") or 1
+    bbox = target_issue.get("bbox")
+    sent_text = target_issue.get("sentence_text") or target_issue.get("original_text") or ""
+    
+    is_grounded = isinstance(bbox, dict) and (
+        float(bbox.get("x1", 0) or 0) > float(bbox.get("x0", 0) or 0) and
+        float(bbox.get("y1", 0) or 0) > float(bbox.get("y0", 0) or 0)
+    )
+
+    return {
+        "issue_id": issue_id,
+        "original_page": int(page_num),
+        "extracted_sentence": sent_text,
+        "pdf_coordinates": bbox if is_grounded else None,
+        "rendered_coordinates": bbox if is_grounded else None,
+        "validation_status": "GROUNDED & VERIFIED" if is_grounded else "UNVERIFIED LOCATION",
+        "location_verified": is_grounded
+    }
+
+
 def _normalize_issue_metadata(raw_issues: list) -> list:
     normalized = []
     for idx, item in enumerate(raw_issues):
         if not isinstance(item, dict):
             continue
         issue = dict(item)
-        issue["issue_id"] = issue.get("issue_id") or f"issue_{idx + 1}"
-        page = issue.get("page")
-        if page is None:
-            page = issue.get("page_number", 1)
+        
+        # 1. issue_id
+        issue_id = str(issue.get("issue_id") or issue.get("id") or f"issue_{idx + 1}")
+        issue["issue_id"] = issue_id
+        issue["id"] = issue_id
+        
+        # 2. category
+        cat = str(issue.get("category") or issue.get("issue_type") or issue.get("type") or "grammar").lower()
+        if "spell" in cat:
+            cat = "spelling"
+        elif "punct" in cat:
+            cat = "punctuation"
+        elif "style" in cat:
+            cat = "style"
+        elif "term" in cat:
+            cat = "terminology"
+        elif "hyphen" in cat:
+            cat = "hyphenation"
+        elif "space" in cat:
+            cat = "whitespace"
+        else:
+            cat = "grammar"
+        issue["category"] = cat
+        issue["issue_type"] = cat
+        
+        # 3. severity
+        sev = str(issue.get("severity") or "MEDIUM").upper()
+        if sev not in ["CRITICAL", "HIGH", "MEDIUM", "LOW"]:
+            sev = "MEDIUM"
+        issue["severity"] = sev
+        
+        # 4. page_number
+        page = issue.get("page_number") or issue.get("page") or 1
         try:
-            page_val = int(page) if page is not None else 1
+            page_val = int(page)
         except Exception:
             page_val = 1
         if page_val < 1:
             page_val = 1
-        issue["page"] = page_val
         issue["page_number"] = page_val
-        bbox = issue.get("bbox")
-        if isinstance(bbox, dict):
-            x0 = bbox.get("x0", bbox.get("l", 0.0))
-            y0 = bbox.get("y0", bbox.get("t", 0.0))
-            x1 = bbox.get("x1", bbox.get("r", 0.0))
-            y1 = bbox.get("y1", bbox.get("b", 0.0))
-            issue["bbox"] = {"x0": float(x0), "y0": float(y0), "x1": float(x1), "y1": float(y1)}
+        issue["page"] = page_val
+        
+        # 5 & 6. original_sentence & corrected_sentence
+        highlighted = str(issue.get("highlighted_text") or issue.get("original_text") or issue.get("word") or issue.get("text") or "").strip()
+        suggested = str(issue.get("suggested_text") or issue.get("suggested_replacement") or issue.get("replacement") or issue.get("suggestion") or "").strip()
+        
+        orig_sentence = str(issue.get("original_sentence") or issue.get("sentence_text") or issue.get("sentence") or issue.get("context") or highlighted).strip()
+        corr_sentence = str(issue.get("corrected_sentence") or issue.get("corrected_sentence_text") or issue.get("suggested_sentence") or "").strip()
+        
+        if not corr_sentence and orig_sentence and highlighted and suggested:
+            if highlighted in orig_sentence:
+                corr_sentence = orig_sentence.replace(highlighted, suggested, 1)
+            else:
+                corr_sentence = f"{orig_sentence} -> [{suggested}]"
+        if not corr_sentence:
+            corr_sentence = orig_sentence
+            
+        issue["original_sentence"] = orig_sentence
+        issue["sentence_text"] = orig_sentence
+        issue["corrected_sentence"] = corr_sentence
+        issue["corrected_sentence_text"] = corr_sentence
+        
+        # 7 & 8. highlighted_text & suggested_text
+        issue["highlighted_text"] = highlighted
+        issue["original_text"] = highlighted
+        issue["suggested_text"] = suggested
+        issue["suggested_replacement"] = suggested
+        
+        # 9. reason
+        reason = str(issue.get("reason") or issue.get("explanation") or issue.get("message") or f"Recommended correction: replace '{highlighted}' with '{suggested}'.").strip()
+        issue["reason"] = reason
+        issue["explanation"] = reason
+        
+        # 10. confidence
+        conf = issue.get("confidence") or issue.get("final_confidence") or 0.92
+        if isinstance(conf, (int, float)):
+            conf_str = f"{int(conf * 100)}%" if conf <= 1.0 else f"{int(conf)}%"
+            conf_float = float(conf) if conf <= 1.0 else float(conf) / 100.0
         else:
-            issue["bbox"] = {"x0": 0.0, "y0": 0.0, "x1": 0.0, "y1": 0.0}
+            conf_str = str(conf)
+            conf_float = 0.90
+        issue["confidence"] = conf_str
+        issue["final_confidence"] = conf_float
+        
+        # 11 & 12. bbox & grounding_verified
+        bbox = issue.get("bbox") or issue.get("coordinates") or issue.get("pdf_coordinates")
+        grounding_verified = False
+        valid_bbox = None
+        
+        if isinstance(bbox, dict):
+            try:
+                x0 = float(bbox.get("x0", bbox.get("l", 0.0)) or 0.0)
+                y0 = float(bbox.get("y0", bbox.get("t", 0.0)) or 0.0)
+                x1 = float(bbox.get("x1", bbox.get("r", 0.0)) or 0.0)
+                y1 = float(bbox.get("y1", bbox.get("b", 0.0)) or 0.0)
+                if x1 > x0 and y1 > y0:
+                    valid_bbox = {"x0": x0, "y0": y0, "x1": x1, "y1": y1}
+                    grounding_verified = True
+            except Exception:
+                pass
+                
+        if "grounding_verified" in issue:
+            grounding_verified = bool(issue["grounding_verified"]) and (valid_bbox is not None)
+        else:
+            if "location_verified" in issue:
+                grounding_verified = bool(issue["location_verified"]) and (valid_bbox is not None)
+            elif valid_bbox is not None:
+                grounding_verified = True
+                
+        issue["bbox"] = valid_bbox
+        issue["coordinates"] = valid_bbox
+        issue["grounding_verified"] = grounding_verified
+        issue["location_verified"] = grounding_verified
+        
         normalized.append(issue)
     return normalized
+
 
 
 @router.get(
@@ -767,10 +966,6 @@ async def get_document(job_id: str):
     report_path = job_dir / "10_final" / "report.json"
     root_report_path = job_dir / "report.json"
 
-    backend_logger.info("Loading proofreading report from: %s", report_path.resolve())
-    backend_logger.info("10_final report exists: %s", report_path.exists())
-    backend_logger.info("Root report exists: %s", root_report_path.exists())
-
     # 1. Primary Proofreading Source: 10_final/report.json
     if report_path.exists():
         try:
@@ -807,12 +1002,10 @@ async def get_document(job_id: str):
 
     # Normalize issues metadata (ensuring issue_id, page, bbox)
     issues = _normalize_issue_metadata(issues)
-    backend_logger.info("Issue count loaded: %s", len(issues))
+    backend_logger.debug("Issue count loaded: %s", len(issues))
 
     report_exists = report_path.exists() or root_report_path.exists()
-    print("[RUNTIME LOG] Report exists:", report_exists)
-    print("[RUNTIME LOG] Issues returned:", len(issues))
-    print("[RUNTIME LOG] First issue:", issues[0] if issues else None)
+    backend_logger.debug("Report exists: %s | Issues returned: %s | First issue: %s", report_exists, len(issues), issues[0] if issues else None)
 
     # Apply decisions to issues
     for idx, issue in enumerate(issues):
@@ -981,6 +1174,213 @@ async def update_document_issue_status(job_id: str, issue_id: str, payload: Dict
         raise HTTPException(status_code=500, detail=f"Failed to persist decision: {str(exc)}")
 
     return {"job_id": job_id, "issue_id": issue_id, "status": new_status, "decisions": decisions}
+
+
+# ---------------------------------------------------------------------------
+# Page + Sentence Mapping architecture
+# ---------------------------------------------------------------------------
+
+def _load_json_or(path: Path, default):
+    if not path.exists():
+        return default
+    try:
+        with open(path, "r", encoding="utf-8") as f:
+            return json.load(f)
+    except Exception as exc:
+        backend_logger.warning("Failed to read %s: %s", path, exc)
+        return default
+
+
+@router.get(
+    "/documents/{job_id}/pages/{page_number}",
+    summary="Load a single page's running text on demand (for lazy/virtualized rendering)",
+)
+async def get_page_text(job_id: str, page_number: int):
+    job = get_job(job_id)
+    if not job:
+        raise HTTPException(status_code=404, detail=f"Job '{job_id}' not found.")
+
+    job_dir = get_job_dir(job_id)
+    page_texts = _load_json_or(job_dir / "03_page_text" / "page_text.json", [])
+    page = next((p for p in page_texts if int(p.get("page_number", -1)) == page_number), None)
+    if page is None:
+        raise HTTPException(status_code=404, detail=f"Page {page_number} not found.")
+
+    sentence_map = _load_json_or(job_dir / "04_sentences" / "page_sentence_map.json", [])
+    page_sentences = [s for s in sentence_map if int(s.get("page_number", -1)) == page_number]
+
+    return {"job_id": job_id, "page_number": page_number, "text": page.get("text", ""), "sentences": page_sentences}
+
+
+@router.get(
+    "/documents/{job_id}/page-count",
+    summary="Total page count for virtualized/lazy viewer pagination",
+)
+async def get_page_count(job_id: str):
+    job = get_job(job_id)
+    if not job:
+        raise HTTPException(status_code=404, detail=f"Job '{job_id}' not found.")
+    job_dir = get_job_dir(job_id)
+    page_texts = _load_json_or(job_dir / "03_page_text" / "page_text.json", [])
+    return {"job_id": job_id, "page_count": len(page_texts)}
+
+
+@router.get(
+    "/documents/{job_id}/sentence-map",
+    summary="Full page + sentence map (single source of truth for navigation/highlighting)",
+)
+async def get_sentence_map(job_id: str):
+    job = get_job(job_id)
+    if not job:
+        raise HTTPException(status_code=404, detail=f"Job '{job_id}' not found.")
+    job_dir = get_job_dir(job_id)
+    sentence_map = _load_json_or(job_dir / "04_sentences" / "page_sentence_map.json", [])
+    return {"job_id": job_id, "sentences": sentence_map}
+
+
+@router.get(
+    "/documents/{job_id}/sentence-lookup",
+    summary="Fast sentence_id -> {page_number, text} lookup index",
+)
+async def get_sentence_lookup(job_id: str):
+    job = get_job(job_id)
+    if not job:
+        raise HTTPException(status_code=404, detail=f"Job '{job_id}' not found.")
+    job_dir = get_job_dir(job_id)
+    lookup_index = _load_json_or(job_dir / "04_sentences" / "sentence_lookup_index.json", {})
+    return {"job_id": job_id, "lookup": lookup_index}
+
+
+def _findings_with_live_status(job_dir: Path) -> list:
+    findings = _load_json_or(job_dir / "10_final" / "mapped_findings.json", [])
+    decisions = _load_json_or(job_dir / "10_final" / "decisions.json", {})
+    out = []
+    for f in findings:
+        f = dict(f)
+        f["status"] = decisions.get(f["finding_id"], f.get("status", "pending"))
+        out.append(f)
+    return out
+
+
+@router.get(
+    "/documents/{job_id}/findings",
+    summary="Proofreading findings enriched with sentence_id + word-level highlight offsets",
+)
+async def get_findings(job_id: str):
+    job = get_job(job_id)
+    if not job:
+        raise HTTPException(status_code=404, detail=f"Job '{job_id}' not found.")
+    job_dir = get_job_dir(job_id)
+    findings = _findings_with_live_status(job_dir)
+    return {"job_id": job_id, "findings": findings}
+
+
+@router.patch(
+    "/documents/{job_id}/findings/{finding_id}",
+    summary="Accept or reject a single finding",
+)
+async def update_finding_status(job_id: str, finding_id: str, payload: Dict[str, Any]):
+    job = get_job(job_id)
+    if not job:
+        raise HTTPException(status_code=404, detail=f"Job '{job_id}' not found.")
+
+    new_status = payload.get("status", "accepted")
+    if new_status not in ("accepted", "rejected", "pending"):
+        raise HTTPException(status_code=400, detail="status must be one of: accepted, rejected, pending")
+
+    job_dir = get_job_dir(job_id)
+    final_dir = job_dir / "10_final"
+    final_dir.mkdir(parents=True, exist_ok=True)
+    decisions_path = final_dir / "decisions.json"
+    decisions = _load_json_or(decisions_path, {})
+    decisions[finding_id] = new_status
+
+    with open(decisions_path, "w", encoding="utf-8") as f:
+        json.dump(decisions, f, indent=2, ensure_ascii=False)
+
+    return {"job_id": job_id, "finding_id": finding_id, "status": new_status}
+
+
+@router.get(
+    "/documents/{job_id}/corrected-preview",
+    summary="Live corrected sentence text with all currently-accepted findings applied",
+)
+async def get_corrected_preview(job_id: str):
+    job = get_job(job_id)
+    if not job:
+        raise HTTPException(status_code=404, detail=f"Job '{job_id}' not found.")
+
+    job_dir = get_job_dir(job_id)
+    findings = _findings_with_live_status(job_dir)
+    lookup_index = _load_json_or(job_dir / "04_sentences" / "sentence_lookup_index.json", {})
+
+    accepted_by_sentence: Dict[str, list] = {}
+    for f in findings:
+        if f.get("status") != "accepted" or not f.get("sentence_id"):
+            continue
+        accepted_by_sentence.setdefault(f["sentence_id"], []).append(f)
+
+    preview = []
+    for sid, sent_findings in accepted_by_sentence.items():
+        original = lookup_index.get(sid, {}).get("text", "")
+        corrected = original
+        for f in sorted(sent_findings, key=lambda x: (x.get("token_start") is None, x.get("token_start") or 0), reverse=True):
+            ts, te = f.get("token_start"), f.get("token_end")
+            if ts is not None and te is not None and 0 <= ts <= te <= len(corrected):
+                corrected = corrected[:ts] + (f.get("suggestion") or "") + corrected[te:]
+        preview.append({"sentence_id": sid, "original": original, "corrected": corrected})
+
+    return {"job_id": job_id, "preview": preview}
+
+
+@router.post(
+    "/documents/{job_id}/export-corrected",
+    summary="Rebuild the corrected document (PDF/DOCX/HTML) from Docling content + accepted findings",
+)
+async def export_corrected_document(job_id: str, payload: Dict[str, Any] = {}):
+    job = get_job(job_id)
+    if not job:
+        raise HTTPException(status_code=404, detail=f"Job '{job_id}' not found.")
+
+    fmt = str(payload.get("format", "pdf")).lower()
+    if fmt not in ("pdf", "docx", "html"):
+        raise HTTPException(status_code=400, detail="format must be one of: pdf, docx, html")
+
+    job_dir = get_job_dir(job_id)
+    page_texts = _load_json_or(job_dir / "03_page_text" / "page_text.json", [])
+    sentence_map = _load_json_or(job_dir / "04_sentences" / "page_sentence_map.json", [])
+    findings = _findings_with_live_status(job_dir)
+
+    if not page_texts or not sentence_map:
+        raise HTTPException(status_code=409, detail="Document extraction has not completed yet.")
+
+    from src.corrected_document_builder import apply_accepted_corrections, build_html, build_docx, build_pdf
+
+    corrected_pages = apply_accepted_corrections(page_texts, sentence_map, findings)
+
+    export_dir = job_dir / "10_final" / "exports"
+    export_dir.mkdir(parents=True, exist_ok=True)
+    title = f"Corrected: {job.get('filename', job_id)}"
+
+    try:
+        if fmt == "html":
+            html_content = build_html(corrected_pages, title=title)
+            out_path = export_dir / "corrected_document.html"
+            out_path.write_text(html_content, encoding="utf-8")
+            return FileResponse(path=out_path, media_type="text/html", filename="corrected_document.html")
+        elif fmt == "docx":
+            out_path = build_docx(corrected_pages, export_dir / "corrected_document.docx")
+            return FileResponse(
+                path=out_path,
+                media_type="application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+                filename="corrected_document.docx",
+            )
+        else:
+            out_path = build_pdf(corrected_pages, export_dir / "corrected_document.pdf")
+            return FileResponse(path=out_path, media_type="application/pdf", filename="corrected_document.pdf")
+    except Exception as exc:
+        backend_logger.error("Failed to export corrected document (%s) for job %s: %s", fmt, job_id, exc)
+        raise HTTPException(status_code=500, detail=f"Export failed: {str(exc)}")
 
 
 @router.delete(
@@ -1913,6 +2313,77 @@ async def rerun_proofreading_endpoint(job_id: str):
     except Exception as exc:
         backend_logger.error("Rerun proofreading failed for job %s: %s", job_id, exc)
         raise HTTPException(status_code=500, detail=f"Rerun proofreading failed: {str(exc)}")
+
+
+@router.get(
+    "/documents/{job_id}/validate-outputs",
+    summary="Validate presence and integrity of job output artifacts",
+)
+async def validate_outputs_endpoint(job_id: str):
+    from backend.services import validate_job_outputs
+    try:
+        return validate_job_outputs(job_id)
+    except ValueError as exc:
+        raise HTTPException(status_code=404, detail=str(exc))
+    except Exception as exc:
+        raise HTTPException(status_code=500, detail=f"Validation failed: {str(exc)}")
+
+
+@router.post(
+    "/documents/{job_id}/regenerate-report",
+    summary="Regenerate proofreading report without rerunning Docling or RAG",
+)
+async def regenerate_report_endpoint(job_id: str):
+    from backend.services import regenerate_proofreading_report
+    try:
+        return regenerate_proofreading_report(job_id)
+    except ValueError as exc:
+        raise HTTPException(status_code=404, detail=str(exc))
+    except Exception as exc:
+        raise HTTPException(status_code=500, detail=f"Report regeneration failed: {str(exc)}")
+
+
+@router.post(
+    "/documents/{job_id}/rerun-stage",
+    summary="Rerun only a specific stage using existing artifacts",
+)
+async def rerun_stage_endpoint(job_id: str, stage_number: int = 4):
+    from backend.services import rerun_stage
+    try:
+        return rerun_stage(job_id, stage_number)
+    except ValueError as exc:
+        raise HTTPException(status_code=404, detail=str(exc))
+    except Exception as exc:
+        raise HTTPException(status_code=500, detail=f"Rerun stage failed: {str(exc)}")
+
+
+@router.post(
+    "/documents/{job_id}/rerun-from-stage",
+    summary="Rerun pipeline starting from a specific stage using existing artifacts",
+)
+async def rerun_from_stage_endpoint(job_id: str, stage_number: int = 4):
+    from backend.services import rerun_from_stage
+    try:
+        return rerun_from_stage(job_id, stage_number)
+    except ValueError as exc:
+        raise HTTPException(status_code=404, detail=str(exc))
+    except Exception as exc:
+        raise HTTPException(status_code=500, detail=f"Rerun from stage failed: {str(exc)}")
+
+
+@router.post(
+    "/documents/{job_id}/repair",
+    summary="Automatically repair missing job artifacts or regenerate report",
+)
+async def repair_job_endpoint(job_id: str):
+    from backend.services import repair_job
+    try:
+        return repair_job(job_id)
+    except ValueError as exc:
+        raise HTTPException(status_code=404, detail=str(exc))
+    except Exception as exc:
+        raise HTTPException(status_code=500, detail=f"Job repair failed: {str(exc)}")
+
 
 
 

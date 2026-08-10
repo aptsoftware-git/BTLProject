@@ -364,6 +364,8 @@ def delete_stage_output_cache(job_id: str, stage_id: str = "all") -> None:
         (job_dir / "report.json").unlink(missing_ok=True)
         (job_dir / "annotated_original.html").unlink(missing_ok=True)
         (job_dir / "corrected_document.html").unlink(missing_ok=True)
+        (job_dir / "09_reports" / "report.json").unlink(missing_ok=True)
+        (job_dir / "09_reports" / "proofreading_report.json").unlink(missing_ok=True)
         for folder in ["07_grammar", "08_validation", "09_semantic"]:
             shutil.rmtree(job_dir / folder, ignore_errors=True)
 
@@ -380,8 +382,17 @@ def delete_stage_output_cache(job_id: str, stage_id: str = "all") -> None:
         for folder in ["03_knowledge_objects", "06_chunks"]:
             shutil.rmtree(job_dir / folder, ignore_errors=True)
 
-    # Stage 6: Context Analysis
-    if sid in ("all", "stage_2_extraction", "extraction", "2", "stage_3_spell", "spell", "3", "stage_4_grammar", "grammar", "4", "stage_6_context", "context", "6"):
+    # Stage 6: Context Analysis. Depends only on Stage 2 (extraction) and
+    # Stage 5 (RAG chunks) inputs -- none of ambiguity_extractor.py,
+    # ambiguity_chunk_analyzer.py, ambiguity_cluster_analyzer.py, or
+    # contextual_analysis/pipeline.py ever read Stage 3/4 output folders
+    # (06_spell/07_grammar/08_validation/09_semantic/10_final). Previously
+    # "stage_3_spell"/"stage_4_grammar" were included here too, so a plain
+    # "Rerun Proofreading" (which only targets Stage 3) silently wiped and
+    # forced a full redo of this multi-hour Stage 6 pipeline every time --
+    # removed since proofreading changes can never invalidate this stage's
+    # inputs.
+    if sid in ("all", "stage_2_extraction", "extraction", "2", "stage_6_context", "context", "6"):
         (job_dir / "report.json").unlink(missing_ok=True)
         (job_dir / "business_report.html").unlink(missing_ok=True)
         (job_dir / "09_reports" / "consistency_report.html").unlink(missing_ok=True)
@@ -467,6 +478,139 @@ def rerun_proofreading_job(job_id: str) -> Dict[str, Any]:
     return retry_job_stage(job_id, stage_id="stage_3_spell")
 
 
+def validate_job_outputs(job_id: str) -> Dict[str, Any]:
+    """Validates presence and integrity of stage output artifacts for a document job."""
+    job = get_job(job_id)
+    if not job:
+        raise ValueError(f"Job '{job_id}' not found.")
+
+    job_dir = get_job_dir(job_id)
+
+    stage_artifacts = {
+        "stage_1_upload": ["01_document", "metadata.json"],
+        "stage_2_extraction": ["structured_document.json", "04_sentences/sentences.json", "03_preprocessed/normalized_text.txt"],
+        "stage_3_spell": ["06_spell/spell_candidates.json"],
+        "stage_4_grammar": ["07_grammar/grammar_candidates.json", "10_final/report.json"],
+        "stage_5_rag": ["03_knowledge_objects/knowledge_objects.json"],
+        "stage_6_context": ["09_reports/consistency_report.html"],
+        "stage_7_comparative": ["comparative_analysis/comparative_report.html"],
+        "stage_8_reports": ["business_report.html"]
+    }
+
+    missing_outputs = []
+    existing_outputs = []
+    stage_statuses = {}
+    highest_completed = 1
+    recommended_recovery = 1
+
+    for stage_key, files in stage_artifacts.items():
+        stage_num = int(stage_key.split("_")[1])
+        all_exist = True
+        for f in files:
+            path = job_dir / f
+            if path.exists() and (path.is_dir() or path.stat().st_size > 0):
+                existing_outputs.append(f)
+            else:
+                all_exist = False
+                missing_outputs.append(f)
+
+        stage_statuses[stage_key] = all_exist
+        if all_exist:
+            highest_completed = max(highest_completed, stage_num)
+        elif recommended_recovery == 1:
+            recommended_recovery = stage_num
+
+    # Special check for proofreading report
+    report_missing = not (job_dir / "10_final" / "report.json").exists() and not (job_dir / "report.json").exists()
+
+    return {
+        "job_id": job_id,
+        "filename": job.get("filename"),
+        "status": job.get("status"),
+        "highest_completed_stage": highest_completed,
+        "recommended_recovery_stage": recommended_recovery if report_missing or missing_outputs else 8,
+        "missing_outputs": list(set(missing_outputs)),
+        "existing_outputs": list(set(existing_outputs)),
+        "is_valid": len(missing_outputs) == 0,
+        "stage_statuses": stage_statuses
+    }
+
+
+def safe_load_candidates(file_path: Path) -> List[dict]:
+    """Safely loads candidate JSON files, automatically repairing truncated trailing JSON if needed."""
+    if not file_path.exists():
+        return []
+    try:
+        with open(file_path, "r", encoding="utf-8") as f:
+            content = f.read().strip()
+        if not content:
+            return []
+        try:
+            res = json.loads(content)
+            return res if isinstance(res, list) else []
+        except json.JSONDecodeError:
+            # Try auto-repair by finding the last complete object bracket '}'
+            last_brace = content.rfind("}")
+            if last_brace != -1:
+                repaired = content[:last_brace+1] + "\n]"
+                try:
+                    res = json.loads(repaired)
+                    return res if isinstance(res, list) else []
+                except Exception:
+                    pass
+            return []
+    except Exception as exc:
+        logging.getLogger("backend").warning("Could not parse candidates file %s: %s", file_path, exc)
+        return []
+
+
+def regenerate_proofreading_report(job_id: str) -> Dict[str, Any]:
+    """Deprecated standalone report-rebuild path.
+
+    This used to reconstruct 10_final/report.json directly from existing
+    spell/grammar artifacts without going through finding_mapper, which left
+    10_final/mapped_findings.json - the file the Review UI actually reads -
+    stale or absent. There must be exactly one supported way to regenerate
+    proofreading output; redirect to the canonical rerun-proofreading
+    workflow (Stage 3 -> Stage 4 -> finding_mapper) instead of maintaining a
+    second, divergent code path.
+    """
+    job = get_job(job_id)
+    if not job:
+        raise ValueError(f"Job '{job_id}' not found.")
+
+    backend_logger = logging.getLogger("backend")
+    backend_logger.info(
+        "[JOB %s] regenerate_proofreading_report is deprecated; redirecting to rerun_proofreading_job",
+        job_id[:7]
+    )
+    return rerun_proofreading_job(job_id)
+
+
+def rerun_stage(job_id: str, stage_number: int | str) -> Dict[str, Any]:
+    """Reruns ONLY a single stage for job_id using existing artifacts."""
+    return retry_job_stage(job_id, stage_id=str(stage_number))
+
+
+def rerun_from_stage(job_id: str, stage_number: int | str) -> Dict[str, Any]:
+    """Skips preceding completed stages and reruns pipeline from stage_number onwards."""
+    return retry_job_stage(job_id, stage_id=str(stage_number))
+
+
+def repair_job(job_id: str) -> Dict[str, Any]:
+    """Validates outputs and automatically repairs missing artifacts or regenerates reports."""
+    validation = validate_job_outputs(job_id)
+    job_dir = get_job_dir(job_id)
+    
+    if "10_final/report.json" in validation.get("missing_outputs", []):
+        spell_exists = (job_dir / "06_spell" / "spell_candidates.json").exists()
+        sent_exists = (job_dir / "04_sentences" / "sentences.json").exists()
+        if spell_exists and sent_exists:
+            return regenerate_proofreading_report(job_id)
+
+    rec_stage = validation.get("recommended_recovery_stage", 4)
+    return rerun_from_stage(job_id, rec_stage)
+
 
 def run_context_analysis_inline(job_id: str, job_dir: Path) -> None:
     """Helper to execute stages 6, 7, and 8 with forced re-generation."""
@@ -481,19 +625,19 @@ def background_worker() -> None:
     global CURRENT_JOB_ID
     backend_logger = logging.getLogger("backend")
     backend_logger.info("Background stage orchestration worker thread started.")
-    
+
     while True:
         try:
             job_id = job_queue.get()
             if job_id is None:
                 break
-                
+
             job = get_job(job_id)
             if not job:
                 job_queue.task_done()
                 continue
-                
-            backend_logger.info("Processing job stage pipeline for %s (%s)", job_id, job["filename"])
+
+            backend_logger.info("[JOB %s] START Processing pipeline for (%s)", job_id[:7], job.get("filename"))
             CURRENT_JOB_ID = job_id
             job_dir = get_job_dir(job_id)
             input_path = Path(job["file_path"])
@@ -507,7 +651,7 @@ def background_worker() -> None:
                 job["status"] = "failed"
                 job["current_stage"] = "Failed"
                 job["error"] = f"{str(e)}\n{error_trace}"
-                backend_logger.error("Job %s failed in background worker: %s", job_id, e)
+                backend_logger.error("[JOB %s] FAILED background worker: %s", job_id[:7], e)
             finally:
                 job["completed_at"] = datetime.now().isoformat()
                 save_job_metadata(job_id)
@@ -523,20 +667,36 @@ worker_thread = threading.Thread(target=background_worker, daemon=True)
 worker_thread.start()
 
 
+def delete_job(job_id: str) -> None:
+    """Deletes job directory and removes job from memory."""
+    import shutil
+    if job_id in JOBS:
+        del JOBS[job_id]
+    job_dir = get_job_dir(job_id)
+    if job_dir.exists():
+        shutil.rmtree(job_dir, ignore_errors=True)
+
+
 def recover_stuck_jobs_on_startup():
-    """Recovers jobs that were left in 'processing' or 'pending' state when server was restarted."""
+    """Discovers jobs that were left in 'processing' or 'pending' state when server started
+    and marks them as 'recoverable' (awaiting user action), without automatically triggering execution."""
     try:
         time.sleep(1)
         all_jobs = get_all_jobs()
         for j in all_jobs:
-            if j.get("status") in ("processing", "pending") and j.get("job_id") != CURRENT_JOB_ID:
-                logging.getLogger("backend").info("Recovering stuck job %s from disk metadata, re-queuing...", j["job_id"])
-                queue_job(j["job_id"], force=True)
+            job_id = j.get("job_id")
+            if not job_id or len(job_id) < 20 or job_id.startswith("test_"):
+                continue
+            if j.get("status") in ("processing", "pending") and job_id != CURRENT_JOB_ID:
+                logging.getLogger("backend").info("[RECOVERY CHECKPOINT] Discovered recoverable job %s. Marking recoverable (awaiting user action).", job_id[:7])
+                j["status"] = "recoverable"
+                j["current_stage"] = "Recoverable Checkpoint Detected (Awaiting User Action)"
+                save_job_metadata(job_id)
     except Exception as exc:
-        logging.getLogger("backend").error("Failed startup stuck job recovery: %s", exc)
+        logging.getLogger("backend").error("Failed startup recoverable job discovery: %s", exc)
 
 
-# Automatic startup job recovery enabled
+# Startup job discovery enabled (marks recoverable, waits for user action)
 threading.Thread(target=recover_stuck_jobs_on_startup, daemon=True).start()
 
 
@@ -545,7 +705,7 @@ def get_all_jobs() -> list[Dict[str, Any]]:
     output_dir = ROOT_DIR / "data" / "output"
     if not output_dir.exists():
         return []
-    
+
     all_jobs = []
     for child in output_dir.iterdir():
         if child.is_dir():
@@ -553,7 +713,7 @@ def get_all_jobs() -> list[Dict[str, Any]]:
             job = get_job(job_id)
             if job:
                 all_jobs.append(job)
-    
+
     # Sort by created_at desc
     all_jobs.sort(key=lambda j: j.get("created_at", ""), reverse=True)
     return all_jobs
@@ -572,8 +732,9 @@ def run_context_analysis_bg(job_id: str, job_dir: Path) -> None:
                 job["context_analysis_status"] = "failed"
                 job["context_analysis_stage"] = f"Failed: {str(e)}"
                 save_job_metadata(job_id)
-            
+
     threading.Thread(target=worker, daemon=True).start()
+
 
 
 

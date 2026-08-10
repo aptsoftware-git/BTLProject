@@ -28,7 +28,7 @@ class StageStatusModel(BaseModel):
 class JobStatusResponse(BaseModel):
     job_id: str
     filename: str
-    status: str  # uploaded, pending, processing, completed, failed
+    status: str  # uploaded, pending, processing, completed, failed, recoverable
     current_stage: str
     progress_percentage: float
     overall_progress: Optional[int] = 0
@@ -45,6 +45,12 @@ class JobStatusResponse(BaseModel):
     context_analysis_ready: Optional[bool] = False
     comparative_analysis_ready: Optional[bool] = False
     reports_ready: Optional[bool] = False
+    current_batch: Optional[int] = None
+    total_batches: Optional[int] = None
+    current_page: Optional[int] = None
+    total_pages: Optional[int] = None
+    estimated_remaining_time: Optional[str] = None
+    activity_feed: Optional[List[Dict[str, Any]]] = None
     stages: Optional[List[StageStatusModel]] = []
 
 

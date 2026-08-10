@@ -17,8 +17,9 @@ from src.model_router import MODEL_ROUTER
 class AmbiguityChunkAnalyzer:
     """
     Phase 2B: Local LLM Chunk-Level Ambiguity Analyzer.
-    Validates extracted claims and flags ambiguities, vague wording,
-    pronoun ambiguity, and contradictions strictly within individual semantic chunks.
+    Validates extracted claims and flags pronoun/entity-reference ambiguity,
+    internal contradictions, and missing context strictly within individual
+    semantic chunks. Grammar/spelling/style findings are out of scope here.
     Writes outputs to 11_chunk_reasoning/.
     """
 
@@ -58,166 +59,35 @@ class AmbiguityChunkAnalyzer:
             raise
 
     def _analyze_fallback_chunk(self, chunk_id: str, text: str, claims: List[dict]) -> dict:
-        """Regex and dictionary-based fallback chunk analyzer when Ollama is offline."""
+        """Regex-based fallback chunk analyzer when Ollama is offline.
+
+        Scope note: this used to also flag spelling/grammar errors ("libary",
+        "dont", "goed") and generic vague-wording/approximation/temporal-
+        imprecision phrasing as "ambiguities". That is Proofreading's
+        territory, not Ambiguity Analysis, and has been removed -- this
+        fallback now only produces findings in the approved taxonomy
+        (pronoun/entity-reference ambiguity at chunk level; genuine
+        cross-chunk categories are the cluster analyzer's job).
+        """
         claim_validation = []
         ambiguities = []
-        
-        # Spelling/Grammar errors mapping for validation and ambiguities
-        error_rules = {
-            "goed": {"type": "vague wording", "severity": "High", "reason": "Incorrect verb tense formulation ('goed').", "rewrite": "went"},
-            "libary": {"type": "undefined terminology", "reason": "Misspelled word ('libary') causing lexical ambiguity.", "rewrite": "library", "severity": "Medium"},
-            "enviroment": {"type": "undefined terminology", "reason": "Misspelled word ('enviroment').", "rewrite": "environment", "severity": "Low"},
-            "librerian": {"type": "undefined terminology", "reason": "Misspelled word ('librerian').", "rewrite": "librarian", "severity": "Medium"},
-            "dont": {"type": "vague wording", "reason": "Grammatical contraction error ('dont').", "rewrite": "do not", "severity": "Low"},
-            "ten minute": {"type": "numerical ambiguity", "reason": "Incorrect pluralization for duration specifier ('ten minute').", "rewrite": "ten minutes", "severity": "Medium"},
-            "everydays": {"type": "temporal ambiguity", "reason": "Incorrect spelling of temporal qualifier ('everydays').", "rewrite": "every day", "severity": "Medium"},
-            "peoples": {"type": "vague wording", "reason": "Incorrect double pluralization ('peoples').", "rewrite": "people", "severity": "Low"},
-            "lifes": {"type": "undefined terminology", "reason": "Misspelled pluralization of life ('lifes').", "rewrite": "lives", "severity": "Medium"},
-            "childrens": {"type": "vague wording", "reason": "Incorrect pluralization spelling ('childrens').", "rewrite": "children", "severity": "Low"},
-            "alot": {"type": "vague wording", "reason": "Incorrect compounding of 'a lot'.", "rewrite": "a lot", "severity": "Low"},
-            "suppose to": {"type": "weak instructions", "reason": "Incorrect passive expression ('suppose to').", "rewrite": "supposed to", "severity": "Medium"},
-            "wasnt": {"type": "vague wording", "reason": "Grammatical contraction/spelling error ('wasnt').", "rewrite": "was not", "severity": "Low"},
-            "informations": {"type": "vague wording", "reason": "Incorrect pluralization of uncountable noun ('informations').", "rewrite": "information", "severity": "High"},
-            "worry": {"type": "vague wording", "reason": "Incorrect grammatical form for adjective ('worry').", "rewrite": "worried", "severity": "Medium"}
-        }
 
-        # 1. Validate Claims
+        # 1. Validate Claims (no spell-checking here -- see docstring)
         for c in claims:
             cid = c.get("claim_id")
             c_text = c.get("text", "")
-            
-            matched_err = None
-            for err, info in error_rules.items():
-                if err in c_text.lower():
-                    matched_err = err
-                    break
-            
-            if matched_err:
-                rule = error_rules[matched_err]
-                corrected_claim = c_text.replace(matched_err, rule["rewrite"]).replace(matched_err.title(), rule["rewrite"].title())
-                claim_validation.append({
-                    "claim_id": cid,
-                    "status": "partial",
-                    "reason": f"Claim contains spelling/lexical error: '{matched_err}' which distorts literal accuracy.",
-                    "improved_claim": corrected_claim,
-                    "confidence": 0.80
-                })
-            else:
-                claim_validation.append({
-                    "claim_id": cid,
-                    "status": "valid",
-                    "reason": "Claim is fully supported by text and grammatically correct.",
-                    "improved_claim": c_text,
-                    "confidence": 0.95
-                })
+            claim_validation.append({
+                "claim_id": cid,
+                "status": "valid",
+                "reason": "Claim is supported by the source chunk text.",
+                "improved_claim": c_text,
+                "confidence": 0.90
+            })
 
         # 2. Extract Ambiguities
         amb_idx = 0
-        
-        # 2a. Dict spelling/grammar error matches
-        for err, info in error_rules.items():
-            pattern = re.compile(rf"\b{err}\b", re.IGNORECASE)
-            match = pattern.search(text)
-            if match:
-                affected = [c.get("claim_id") for c in claims if err in c.get("text", "").lower()]
-                start_idx = max(0, match.start() - 30)
-                end_idx = min(len(text), match.end() + 30)
-                evidence = text[start_idx:end_idx].strip()
-                
-                ambiguities.append({
-                    "issue_id": f"{chunk_id}_amb_{amb_idx:03d}",
-                    "type": info["type"],
-                    "severity": info["severity"],
-                    "quote": match.group(0),
-                    "reason": info["reason"],
-                    "supporting_evidence": f"...{evidence}...",
-                    "suggested_rewrite": text.replace(match.group(0), info["rewrite"]),
-                    "affected_claims": affected,
-                    "confidence": 0.85
-                })
-                amb_idx += 1
 
-        # 2b. Vague Operational Qualifiers (Context-Aware Filtering)
-        vague_patterns = [
-            (r"\b(as soon as possible|asap)\b", "vague wording", "High", "Timeframe 'as soon as possible' lacks an explicit deadline or operational SLA."),
-            (r"\b(in a timely manner|timely manner|reasonable time|at earliest convenience)\b", "vague wording", "Medium", "Qualifying timeframe lacks a defined quantitative window or milestone target."),
-            (r"\b(subject to change|to be decided|tbd)\b", "vague wording", "Medium", "Operational directive relies on unspecified or variable schedule parameters."),
-            (r"\b(as appropriate|at discretion|discretionary)\b", "vague wording", "Medium", "Directive contains subjective qualifier lacking explicit measurable performance criteria.")
-        ]
-        for v_pat, v_type, v_sev, v_reason in vague_patterns:
-            matches = list(re.finditer(v_pat, text, re.IGNORECASE))
-            for m in matches[:1]:
-                q_text = m.group(0)
-                # Suppress generic boilerplate terms ("normal course", "standard procedure", "etc.")
-                if any(bp in text.lower() for bp in ["normal course of business", "standard operating procedure"]):
-                    continue
-                if not any(a["quote"].lower() == q_text.lower() for a in ambiguities):
-                    start_idx = max(0, m.start() - 25)
-                    end_idx = min(len(text), m.end() + 25)
-                    evidence = text[start_idx:end_idx].strip()
-                    ambiguities.append({
-                        "issue_id": f"{chunk_id}_amb_{amb_idx:03d}",
-                        "type": v_type,
-                        "severity": v_sev,
-                        "quote": q_text,
-                        "reason": v_reason,
-                        "supporting_evidence": f"...{evidence}...",
-                        "suggested_rewrite": "Specify precise quantitative parameters and concrete operational criteria.",
-                        "affected_claims": [c.get("claim_id") for c in claims if q_text.lower() in c.get("text", "").lower()],
-                        "confidence": 0.85,
-                        "detector_type": "vague_wording"
-                    })
-                    amb_idx += 1
-
-        # 2c. Numerical & Quantifier Ambiguity (Filtered)
-        num_patterns = [
-            (r"\b(approximately \d+|nearly \d+|about \d+|around \d+|up to \d+|\d+ or more)\b", "numerical ambiguity", "Medium", "Numerical specification contains approximate bounds rather than exact limits.")
-        ]
-        for n_pat, n_type, n_sev, n_reason in num_patterns:
-            matches = list(re.finditer(n_pat, text, re.IGNORECASE))
-            for m in matches[:1]:
-                q_text = m.group(0)
-                if not any(a["quote"].lower() == q_text.lower() for a in ambiguities):
-                    start_idx = max(0, m.start() - 25)
-                    end_idx = min(len(text), m.end() + 25)
-                    evidence = text[start_idx:end_idx].strip()
-                    ambiguities.append({
-                        "issue_id": f"{chunk_id}_amb_{amb_idx:03d}",
-                        "type": n_type,
-                        "severity": n_sev,
-                        "quote": q_text,
-                        "reason": n_reason,
-                        "supporting_evidence": f"...{evidence}...",
-                        "suggested_rewrite": "Provide exact numerical thresholds and measurable range bounds.",
-                        "affected_claims": [],
-                        "confidence": 0.82,
-                        "detector_type": "approximation"
-                    })
-                    amb_idx += 1
-
-        # 2d. Temporal Ambiguity (Filtered)
-        temp_matches = list(re.finditer(r"\b(in due course|future date|at a later date)\b", text, re.IGNORECASE))
-        for m in temp_matches[:1]:
-            q_text = m.group(0)
-            if not any(a["quote"].lower() == q_text.lower() for a in ambiguities):
-                start_idx = max(0, m.start() - 25)
-                end_idx = min(len(text), m.end() + 25)
-                evidence = text[start_idx:end_idx].strip()
-                ambiguities.append({
-                    "issue_id": f"{chunk_id}_amb_{amb_idx:03d}",
-                    "type": "temporal ambiguity",
-                    "severity": "Medium",
-                    "quote": q_text,
-                    "reason": f"Relative temporal descriptor '{q_text}' lacks explicit calendar dates or milestone references.",
-                    "supporting_evidence": f"...{evidence}...",
-                    "suggested_rewrite": "Specify precise dates, quarters, or milestone triggers.",
-                    "affected_claims": [],
-                    "confidence": 0.80,
-                    "detector_type": "temporal"
-                })
-                amb_idx += 1
-                
-        # 2e. Pronoun Ambiguity Check (Gated to structural ambiguity phrases)
+        # 2a. Pronoun Ambiguity Check (Gated to structural ambiguity phrases)
         pronoun_phrases = [r"\bthis section\b", r"\bthese policies\b", r"\bthey state\b", r"\bit requires\b", r"\bthis requirement\b"]
         for p_pat in pronoun_phrases:
             match = re.search(p_pat, text, re.IGNORECASE)
@@ -229,7 +99,7 @@ class AmbiguityChunkAnalyzer:
                 
                 ambiguities.append({
                     "issue_id": f"{chunk_id}_amb_{amb_idx:03d}",
-                    "type": "pronoun ambiguity",
+                    "type": "Pronoun / entity-reference ambiguity",
                     "severity": "Medium",
                     "quote": match.group(0),
                     "reason": f"Phrasing '{match.group(0)}' lacks a specific structural antecedent or section citation.",
@@ -301,6 +171,9 @@ class AmbiguityChunkAnalyzer:
         system_prompt = (
             "You are a precise document ambiguity and claim validation engine.\n"
             "Analyze ONLY the provided semantic chunk text. Do not make assumptions or extrapolate outside this text.\n"
+            "Only flag pronoun/entity-reference ambiguity, internal factual contradictions within this chunk, "
+            "or missing context a claim depends on. Do NOT report grammar, spelling, writing style, or vague-"
+            "wording issues -- those are out of scope and handled by a separate Proofreading review.\n"
             "Return the analysis STRICTLY as a single JSON object matching the requested schema.\n"
             "Do not include markdown fences, conversational text, or explanations."
         )
@@ -346,7 +219,7 @@ Return JSON schema matching:
 {{
     "chunk_id": "{chunk_id}",
     "claim_validation": [{{"claim_id": "string", "status": "valid|partial|incorrect", "reason": "string", "improved_claim": "string", "confidence": 0.95}}],
-    "ambiguities": [{{"issue_id": "{chunk_id}_amb_000", "type": "vague wording", "severity": "Low|Medium|High", "quote": "string", "reason": "string", "supporting_evidence": "string", "suggested_rewrite": "string", "affected_claims": [], "confidence": 0.90}}],
+    "ambiguities": [{{"issue_id": "{chunk_id}_amb_000", "type": "Pronoun / entity-reference ambiguity|Internal factual contradiction|Missing / conflicting context", "severity": "Low|Medium|High", "quote": "string", "reason": "string", "supporting_evidence": "string", "suggested_rewrite": "string", "affected_claims": [], "confidence": 0.90}}],
     "overall_chunk_risk": "Low|Medium|High",
     "overall_confidence": 0.92
 }}
@@ -390,9 +263,9 @@ Return JSON schema matching:
                 return [self._analyze_fallback_chunk(ch["chunk_id"], ch["text"], ch.get("extraction", {}).get("claims", [])) for ch in batch_chunks]
 
         if llm_chunks:
-            batch_size = 10
+            batch_size = getattr(self.config, "context_chunk_batch_size", 10)
             chunk_batches = [llm_chunks[i : i + batch_size] for i in range(0, len(llm_chunks), batch_size)]
-            max_workers = min(8, len(chunk_batches))
+            max_workers = max(1, min(getattr(self.config, "context_max_workers", 8), len(chunk_batches)))
             logger.info("Starting LLM Ambiguity Analysis for %d candidate chunks in %d batch(es)...", len(llm_chunks), len(chunk_batches))
             from concurrent.futures import ThreadPoolExecutor, as_completed
             with ThreadPoolExecutor(max_workers=max_workers) as executor:

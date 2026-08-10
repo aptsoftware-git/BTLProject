@@ -36,17 +36,9 @@ class ClaudeInputBuilder:
         cluster_reason_path = job_dir / "12_cluster_reasoning"
         
         # Load parsing metadata
-        file_name = "unknown"
-        chunks_json_path = chunk_path / "document_chunks.json"
-        if not chunks_json_path.exists():
-            chunks_json_path = job_dir / "document_chunks.json"
-        if chunks_json_path.exists():
-            try:
-                with open(chunks_json_path, "r", encoding="utf-8") as f:
-                    chunks_data = json.load(f)
-                    file_name = chunks_data.get("file_name", "unknown")
-            except Exception as e:
-                logger.error(f"Failed to read file name from chunks list: {e}")
+        from src.rag.chunk_utils import load_stage6_chunks
+        chunks_data = load_stage6_chunks(job_dir, doc_id=doc_id, materialize_cache=True)
+        file_name = chunks_data.get("file_name", "unknown")
 
         # Load 09_semantic_clusters/
         semantic_clusters = []
@@ -115,11 +107,29 @@ class ClaudeInputBuilder:
             logger.error(f"Failed to load cluster reasoning data: {e}")
 
         # 1. Build Consolidated JSON structure
+        total_pages_val = 1
+        meta_file = job_dir / "metadata.json"
+        if meta_file.exists():
+            try:
+                with open(meta_file, "r", encoding="utf-8") as fm:
+                    mdata = json.load(fm)
+                    if mdata.get("total_pages"):
+                        total_pages_val = int(mdata["total_pages"])
+            except Exception:
+                pass
+        if total_pages_val <= 1 and chunks_data.get("chunks"):
+            max_p = max((c.get("metadata", {}).get("page_number") or 1 for c in chunks_data["chunks"]), default=1)
+            if max_p > 1:
+                total_pages_val = max_p
+        if total_pages_val <= 1:
+            total_pages_val = retrieval_stats.get("total_pages", 1)
+
+        # 1. Build Consolidated JSON structure
         consolidated = {
             "document_information": {
                 "document_job_id": doc_id,
                 "file_name": file_name,
-                "total_pages": retrieval_stats.get("total_pages", 1),
+                "total_pages": total_pages_val,
                 "total_chunks": retrieval_stats.get("total_chunks", len(claims_data))
             },
             "processing_statistics": {

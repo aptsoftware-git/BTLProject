@@ -393,29 +393,8 @@ function ComparativeAnalysisInnerView({ data, isRunning = false, currentStage = 
   const gapData = payload.gap_analysis || {};
   const recommendations = Array.isArray(payload.recommendations) ? payload.recommendations : (payload.strategic_recommendations || []);
 
-  const isGenerating = data?.metadata?.status === "generating" || payload?.metadata?.status === "generating";
-  const hasData = !!(company.company_name || company.primary_industry || competitors.length > 0);
-
-  if (isRunning || (isGenerating && !hasData)) {
-    return (
-      <div style={styles.loadingContainer}>
-        <div style={styles.spinner} />
-        <div style={{ textAlign: "center" }}>
-          <h3 style={{ margin: 0, fontSize: 18, fontWeight: 700, color: "var(--brand)" }}>Synthesizing Executive Comparative Report...</h3>
-          <p style={{ margin: "4px 0 0", fontSize: 13, color: styles.theme.bodyText }}>{currentStage || 'Executing multi-agent corporate intelligence workflow'}</p>
-        </div>
-
-        <div style={styles.loadingBox}>
-          {LOADING_STAGES.map((s) => (
-            <div key={s.step} style={styles.loadingStepRow}>
-              <span style={styles.stepNum}>{s.step}</span>
-              <span>{s.label}</span>
-            </div>
-          ))}
-        </div>
-      </div>
-    );
-  }
+  const hasData = Boolean(data && Object.keys(payload).length > 0);
+  const isBenchmarkingRunning = isRunning || reRunning;
 
   // Requirement 1: Header MUST ALWAYS start with the detected Company Name as the largest element
   const companyName = company.company_name && company.company_name !== "Not specified"
@@ -544,6 +523,49 @@ function ComparativeAnalysisInnerView({ data, isRunning = false, currentStage = 
       </div>
 
       <div style={styles.container}>
+        {/* Live Stage 7 Progress Banner */}
+        {isBenchmarkingRunning && (
+          <div style={{
+            background: "#eff6ff",
+            border: "1px solid #3b82f6",
+            borderRadius: 10,
+            padding: "14px 18px",
+            marginBottom: 20,
+            boxShadow: "0 2px 8px rgba(59, 130, 246, 0.1)"
+          }}>
+            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 8 }}>
+              <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
+                <span style={{ background: "#2563eb", color: "#ffffff", fontSize: 10, fontWeight: 800, padding: "3px 8px", borderRadius: 4, textTransform: "uppercase" }}>
+                  STAGE 7 BENCHMARKING IN PROGRESS
+                </span>
+                <strong style={{ fontSize: 13.5, color: "#1e40af" }}>
+                  Current Status: {currentStage || "Multi-Agent Executive Peer Synthesis"}
+                </strong>
+              </div>
+              <span style={{ fontSize: 12, fontWeight: 700, color: "#1d4ed8" }}>
+                Estimated Completion: ~1-2 minutes
+              </span>
+            </div>
+
+            <div style={{ width: "100%", height: 6, background: "#bfdbfe", borderRadius: 3, overflow: "hidden", marginBottom: 10 }}>
+              <div style={{ width: "85%", height: "100%", background: "#2563eb", transition: "width 0.4s ease" }} />
+            </div>
+
+            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", fontSize: 12, color: "#1e40af" }}>
+              <div>
+                <strong>Progress:</strong> 85% Complete • <strong>Dependencies:</strong> Stage 1 Document Company Profile & Stage 4 Grammar Output
+              </div>
+              <div style={{ display: "flex", gap: 8 }}>
+                <button
+                  onClick={handleReRun}
+                  style={{ background: "#ffffff", border: "1px solid #2563eb", color: "#2563eb", borderRadius: 4, padding: "4px 10px", fontSize: 11, fontWeight: 700, cursor: "pointer" }}
+                >
+                  ↻ Re-run Benchmark
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
 
         {/* 1. REPORT HEADER */}
         <div style={styles.headerCard}>

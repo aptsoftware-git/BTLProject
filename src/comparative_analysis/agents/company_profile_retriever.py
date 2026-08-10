@@ -125,29 +125,31 @@ class CompanyProfileRetriever:
 
         # 2. Fallback / supplementary chunk loading if ChromaDB queries returned fewer chunks
         if len(chunk_map) < 3:
-            logger.info("Loading document chunks directly via Retriever file/ChromaDB fallback for %s", document_id)
+            logger.info("Loading document chunks directly via load_stage6_chunks fallback for %s", document_id)
             try:
-                fallback_chunks: List[DocumentChunk] = self.retriever._load_document_chunks(document_id)
+                from src.rag.chunk_utils import load_stage6_chunks
+                from src.config import ROOT_DIR
+                job_dir = ROOT_DIR / "data" / "output" / document_id
+                c_data = load_stage6_chunks(job_dir, doc_id=document_id)
+                fallback_chunks = c_data.get("chunks", [])
                 for idx, c in enumerate(fallback_chunks):
-                    cid = c.metadata.chunk_id if (c and c.metadata) else f"fallback_chunk_{idx}"
-                    text_norm = c.content.strip().lower()
+                    cid = (c.get("metadata") or {}).get("chunk_id") or f"fallback_chunk_{idx}"
+                    c_content = c.get("content") or c.get("text") or ""
+                    text_norm = c_content.strip().lower()
                     if cid not in chunk_map and text_norm not in seen_texts:
                         seen_texts.add(text_norm)
-                        # Check keyword match with business queries
+                        p_num = (c.get("metadata") or {}).get("page_number") or 1
                         matched_q = "General Overview"
                         for q in BUSINESS_QUERIES:
-                            if q.lower() in c.content.lower():
+                            if q.lower() in c_content.lower():
                                 matched_q = q
                                 break
                         
                         chunk_map[cid] = CompanyProfileChunk(
                             chunk_id=cid,
-                            text=c.content,
-                            metadata={
-                                "heading": getattr(c.metadata, "heading", None),
-                                "section": getattr(c.metadata, "section", None),
-                            },
-                            page_number=getattr(c.metadata, "page_number", 1),
+                            text=c_content,
+                            metadata=c.get("metadata") or {},
+                            page_number=p_num,
                             similarity_score=0.5,
                             query_matched=matched_q
                         )

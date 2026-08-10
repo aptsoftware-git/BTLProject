@@ -541,14 +541,11 @@ class Retriever:
         falling back to ChromaDB if the file does not exist.
         """
         output_dir = Path(self.config.chroma_db_dir).parent / "output" / document_id
-        chunks_file = output_dir / "document_chunks.json"
-        
-        if chunks_file.exists():
+        from src.rag.chunk_utils import load_stage6_chunks
+        data = load_stage6_chunks(output_dir, doc_id=document_id, materialize_cache=True)
+        if data.get("chunks"):
             try:
-                logger.info(f"Loading chunks from file: {chunks_file}")
-                with open(chunks_file, "r", encoding="utf-8") as f:
-                    data = json.load(f)
-                
+                logger.info(f"Loading chunks for document: {document_id}")
                 chunks = []
                 for c in data.get("chunks", []):
                     meta_data = c.get("metadata", {})

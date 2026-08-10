@@ -334,4 +334,88 @@ export function rerunProofreading(jobId) {
   return request(`/documents/${jobId}/rerun-proofreading`, { method: "POST" });
 }
 
+export function validateJobOutputs(jobId) {
+  return request(`/documents/${jobId}/validate-outputs`, { method: "GET" });
+}
+
+export function regenerateProofreadingReport(jobId) {
+  return request(`/documents/${jobId}/regenerate-report`, { method: "POST" });
+}
+
+export function rerunStage(jobId, stageNumber) {
+  return request(`/documents/${jobId}/rerun-stage?stage_number=${stageNumber}`, { method: "POST" });
+}
+
+export function rerunFromStage(jobId, stageNumber) {
+  return request(`/documents/${jobId}/rerun-from-stage?stage_number=${stageNumber}`, { method: "POST" });
+}
+
+export function repairJob(jobId) {
+  return request(`/documents/${jobId}/repair`, { method: "POST" });
+}
+
+export function resumeJob(jobId) {
+  return request(`/jobs/${jobId}/resume`, { method: "POST" });
+}
+
+export function restartJob(jobId) {
+  return request(`/jobs/${jobId}/restart`, { method: "POST" });
+}
+
+export function deleteJob(jobId) {
+  return request(`/jobs/${jobId}`, { method: "DELETE" });
+}
+
+export function validateFinding(jobId, issueId) {
+  return request(`/jobs/${jobId}/validate-finding/${issueId}`, { method: "GET" });
+}
+
+// ---------------------------------------------------------------------------
+// Page + Sentence Mapping architecture
+// ---------------------------------------------------------------------------
+
+export function fetchPageCount(jobId) {
+  return request(`/documents/${jobId}/page-count`);
+}
+
+export function fetchPageText(jobId, pageNumber) {
+  return request(`/documents/${jobId}/pages/${pageNumber}`);
+}
+
+export function fetchSentenceMap(jobId) {
+  return request(`/documents/${jobId}/sentence-map`);
+}
+
+export function fetchSentenceLookup(jobId) {
+  return request(`/documents/${jobId}/sentence-lookup`);
+}
+
+export function fetchFindings(jobId) {
+  return request(`/documents/${jobId}/findings`);
+}
+
+export function updateFindingStatus(jobId, findingId, statusValue) {
+  return request(`/documents/${jobId}/findings/${findingId}`, {
+    method: "PATCH",
+    body: JSON.stringify({ status: statusValue }),
+  });
+}
+
+export function fetchCorrectedPreview(jobId) {
+  return request(`/documents/${jobId}/corrected-preview`);
+}
+
+export async function exportCorrectedDocument(jobId, format = "pdf") {
+  const url = `${API_BASE}/documents/${jobId}/export-corrected`;
+  const response = await fetch(url, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ format }),
+  });
+  if (!response.ok) {
+    throw new Error(`Failed to export ${format.toUpperCase()}: ${response.statusText}`);
+  }
+  return response.blob();
+}
+
 export { API_BASE as API_BASE_URL };

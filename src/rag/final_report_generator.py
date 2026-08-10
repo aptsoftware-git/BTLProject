@@ -59,7 +59,7 @@ def _group_and_consolidate_findings(confirmed_findings: List[Dict[str, Any]], ch
     """
     grouped_map = {}
     for idx, f in enumerate(confirmed_findings, start=1):
-        raw_cat = f.get("business_category", "Writing Clarity")
+        raw_cat = f.get("business_category", "Internal factual contradiction")
         category = category_mappings.get(raw_cat, raw_cat)
         reason = (f.get("reason") or f.get("explanation") or "").strip()
         recommendation = (f.get("recommendation") or f.get("suggested_resolution") or "").strip()
@@ -303,56 +303,61 @@ class FinalReportGenerator:
 
         # Load chunk metadata & original chunk text
         chunk_map = {}
-        for chunk_file in [job_dir / "06_chunks" / "document_chunks.json", job_dir / "document_chunks.json"]:
-            if chunk_file.exists():
-                try:
-                    with open(chunk_file, "r", encoding="utf-8") as f:
-                        cd_data = json.load(f)
-                        chunks_list = cd_data.get("chunks", [])
-                        for chunk in chunks_list:
-                            meta = chunk.get("metadata", {})
-                            cid = meta.get("chunk_id") or chunk.get("chunk_id")
-                            if cid:
-                                chunk_map[cid] = {
-                                    "page_number": meta.get("page_number"),
-                                    "heading": meta.get("heading"),
-                                    "section": meta.get("section"),
-                                    "chunk_type": meta.get("chunk_type"),
-                                    "text": chunk.get("text") or chunk.get("content") or ""
-                                }
-                except Exception as e:
-                    logger.warning(f"Could not load chunk metadata map: {e}")
-                break
+        from src.rag.chunk_utils import load_stage6_chunks
+        cd_data = load_stage6_chunks(job_dir, doc_id=doc_id, materialize_cache=True)
+        chunks_list = cd_data.get("chunks", [])
+        for chunk in chunks_list:
+            meta = chunk.get("metadata", {})
+            cid = meta.get("chunk_id") or chunk.get("chunk_id")
+            if cid:
+                chunk_map[cid] = {
+                    "page_number": meta.get("page_number"),
+                    "heading": meta.get("heading"),
+                    "section": meta.get("section"),
+                    "chunk_type": meta.get("chunk_type"),
+                    "text": chunk.get("text") or chunk.get("content") or ""
+                }
 
-        category_mappings = {
-            "Lexical Ambiguity": "Writing Clarity",
-            "Referential Ambiguity": "Pronoun Ambiguity",
-            "Ambiguous Reference": "Pronoun Ambiguity",
-            "Grammar Errors": "Grammar Issue",
-            "Grammar Error": "Grammar Issue",
-            "Grammar Issue": "Grammar Issue",
-            "Spelling Errors": "Spelling Issue",
-            "Spelling Error": "Spelling Issue",
-            "Spelling Issue": "Spelling Issue",
-            "Writing Style Issues": "Writing Clarity",
-            "Writing Quality": "Writing Clarity",
-            "Ambiguities": "Writing Clarity",
-            "Terminology Inconsistency": "Terminology Issue",
-            "Undefined Term": "Undefined Term",
-            "Inconsistent Terminology": "Terminology Issue",
-            "Terminology Issue": "Terminology Issue",
-            "Policy Conflict": "Policy Conflict",
-            "Policy Conflicts": "Policy Conflict",
-            "Numerical Conflict": "Numerical Inconsistency",
-            "Numerical Inconsistency": "Numerical Inconsistency",
-            "Temporal Conflict": "Contradictory Statement",
-            "Contradictory Statement": "Contradictory Statement",
-            "Contradictions": "Contradictory Statement",
-            "Broken Reference": "Cross-reference Issue",
-            "Cross-reference Issue": "Cross-reference Issue",
-            "Duplicate Guidance": "Contradictory Statement",
-            "Missing Information": "Writing Clarity"
-        }
+        # Category taxonomy, evidence-grounding, and context-awareness gates
+        # -- all three are hard rejections, not warnings. A finding that
+        # fails any of them is moved into rejected_findings alongside
+        # Claude's own rejections, never silently dropped or defaulted into
+        # a fallback category.
+        from src.rag.ambiguity_taxonomy import normalize_category, APPROVED_CATEGORIES
+        from src.rag.ambiguity_grounding_gate import verify_evidence
+        from src.rag.ambiguity_context_filter import is_context_conflict_plausible
+
+        gated_confirmed_findings = []
+        for f in confirmed_findings:
+            raw_cat = f.get("business_category") or f.get("category")
+            canonical_cat = normalize_category(raw_cat)
+            if canonical_cat is None:
+                rejected_findings.append({
+                    **f, "status": "rejected",
+                    "reject_reason": f"category '{raw_cat}' is not in the approved Ambiguity Analysis taxonomy (out of scope, e.g. grammar/spelling/style)",
+                })
+                continue
+            f["business_category"] = canonical_cat
+            f["category"] = canonical_cat
+
+            grounded, ground_reason = verify_evidence(f, chunk_map)
+            if not grounded:
+                rejected_findings.append({**f, "status": "rejected", "reject_reason": f"ungrounded evidence: {ground_reason}"})
+                continue
+
+            plausible, context_reason = is_context_conflict_plausible(f)
+            if not plausible:
+                rejected_findings.append({**f, "status": "rejected", "reject_reason": f"context check failed: {context_reason}"})
+                continue
+
+            gated_confirmed_findings.append(f)
+
+        confirmed_findings = gated_confirmed_findings
+
+        # category_mappings is now identity-only: every finding reaching
+        # this point already has a canonical business_category assigned by
+        # the gate above.
+        category_mappings = {c: c for c in APPROVED_CATEGORIES}
 
         from src.rag.finding_filter import FindingRelevanceFilter
 

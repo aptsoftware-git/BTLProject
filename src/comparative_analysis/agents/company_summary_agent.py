@@ -26,11 +26,13 @@ _FAILED_MODELS = set()
 _WORKING_MODEL = None
 
 
+from src.comparative_analysis.utils.document_subject_resolver import DocumentSubjectResolver
+
 class CompanySummaryAgent:
     """
     Claude Business Understanding Agent.
     Executes a 2-Step Claude pipeline:
-      1. Dedicated Legal Company Name Identification stage
+      1. Dedicated Legal Company Name Identification stage (via DocumentSubjectResolver front-matter grounding)
       2. Synthesized Business Profile Generation stage (no raw chunk copying)
     Enforces frequency density keyword scoring, grounded self-correction, and pre-save validation.
     """
@@ -53,20 +55,33 @@ class CompanySummaryAgent:
     def _normalize_model_name(self, model: Optional[str]) -> str:
         return "claude-sonnet-4-6"
 
-    def summarize(self, profile: TargetCompanyProfile) -> CompanyProfile:
+    def summarize(self, profile: TargetCompanyProfile, resolved_identity: Optional[Dict[str, Any]] = None) -> CompanyProfile:
         global _WORKING_MODEL, _FAILED_MODELS
 
         logger.info("Claude Business Understanding Agent processing document_id %s", profile.document_id)
 
         all_text = "\n".join([c.text for c in profile.chunks if c and c.text]) if profile.chunks else ""
 
-        # Step 1: Identify legal company name
-        legal_company_name = self._identify_legal_company_name(all_text, profile.document_id)
-        logger.info("Identified legal company name: '%s'", legal_company_name)
+        # Step 1: Identify legal company name deterministically from front-matter / resolved_identity
+        if resolved_identity and resolved_identity.get("target_company"):
+            legal_company_name = resolved_identity["target_company"]
+        else:
+            chunk_dicts = [{"content": c.text, "text": c.text, "page_number": c.page_number} for c in profile.chunks] if profile.chunks else []
+            try:
+                id_obj = DocumentSubjectResolver.resolve_target_company(chunk_dicts, profile.document_id)
+                legal_company_name = id_obj["target_company"]
+                resolved_identity = id_obj
+            except Exception as e:
+                logger.warning("DocumentSubjectResolver failed in CompanySummaryAgent: %s. Using text fallback.", e)
+                legal_company_name = self._identify_legal_company_name(all_text, profile.document_id)
+                resolved_identity = {"target_company": legal_company_name, "evidence": "Fallback resolution", "page": 1, "source": "fallback"}
+
+        logger.info("Identified & locked legal company name: '%s'", legal_company_name)
 
         if not profile.chunks:
             logger.warning("No chunks provided to CompanySummaryAgent for document_id %s", profile.document_id)
             fallback = self._extract_fallback_profile(profile, legal_company_name)
+            fallback.company_name = legal_company_name
             return ProfileValidator.validate_and_clean(fallback)
 
         formatted_context_list = []
@@ -113,10 +128,14 @@ class CompanySummaryAgent:
         if raw_claude_response:
             company_profile = self._parse_json_response(raw_claude_response, legal_company_name)
             if company_profile:
+                company_profile.company_name = legal_company_name
+                company_profile.target_company_identity = resolved_identity
                 validated = self._validate_company_profile(company_profile, all_text)
                 return ProfileValidator.validate_and_clean(validated)
 
         fallback = self._extract_fallback_profile(profile, legal_company_name)
+        fallback.company_name = legal_company_name
+        fallback.target_company_identity = resolved_identity
         validated = self._validate_company_profile(fallback, all_text)
         return ProfileValidator.validate_and_clean(validated)
 

@@ -50,3 +50,16 @@ class RagConfig:
 
     # Defaults
     top_k_default: int = 5
+
+    # CPU-tuning knobs for the Context Analysis (Stage 6) sub-pipelines
+    # (ambiguity_extractor.py, ambiguity_chunk_analyzer.py,
+    # ambiguity_cluster_analyzer.py, contextual_analysis/pipeline.py).
+    # On a CPU-only, single-instance Ollama server these ThreadPoolExecutor
+    # worker counts don't parallelize actual inference -- Ollama serializes
+    # on one CPU worker -- so a high value just adds request-queueing
+    # overhead. Default stays high (assumes GPU/multi-instance Ollama);
+    # override CONTEXT_MAX_WORKERS=1 or 2 for CPU-only hosts.
+    context_max_workers: int = int(os.environ.get("CONTEXT_MAX_WORKERS", 8))
+    # Chunks bundled per LLM call in ambiguity_chunk_analyzer.py -- smaller
+    # batches mean smaller prompts and faster per-call CPU prefill/decode.
+    context_chunk_batch_size: int = int(os.environ.get("CONTEXT_CHUNK_BATCH_SIZE", 10))

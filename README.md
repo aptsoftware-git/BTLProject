@@ -332,6 +332,12 @@ Ensure that the model specified in your `.env` file is available.
 
 ---
 
+# Performance on CPU-Only Hosts
+
+The default `.env.example` model (`qwen2.5:32b`) assumes GPU-backed Ollama inference. On a CPU-only machine, use a small instruct model instead (e.g. `qwen2.5:3b-instruct`) and raise `OLLAMA_TIMEOUT_SECONDS` (see `.env.example` for the full list of CPU-tuning env vars: `OLLAMA_TIMEOUT_SECONDS`, `OLLAMA_NUM_THREAD`, `CONTEXT_MAX_WORKERS`, `CONTEXT_CHUNK_BATCH_SIZE`). A too-small default timeout against a large model is the most common cause of a proofreading run appearing to hang or take far longer than expected.
+
+---
+
 # Running the Application
 
 ## Start the Backend

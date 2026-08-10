@@ -44,6 +44,19 @@ _GREEK_SYMBOLS_RE = re.compile(
 _SCIENTIFIC_NOTATION_RE = re.compile(r"\b\d+(?:\.\d+)?[eE][+-]?\d+\b|\b\d+\^[-+]?\d+\b")
 _FILE_NAME_RE = re.compile(r"\b[\w\-]+\.[a-zA-Z0-9]{1,4}\b")
 
+# Indian/British-style dotted-initial address & name patterns, e.g. "N.M. Marg",
+# "M.G. Road", "Dr. B.R. Ambedkar" -- the capitalized word immediately after a
+# dotted-initials group is almost always a proper noun (road/person/place name),
+# but is short enough and rare enough that spaCy's small NER model regularly
+# misses it (see "N.M. Marg" false-positive spelling correction).
+_DOTTED_ABBREV_ADJACENT_RE = re.compile(r"\b(?:[A-Z]\.){1,4}\s*([A-Z][a-zA-Z]+)\b")
+
+# Common Indian address/locality suffix words -- a capitalized word directly
+# before one of these is almost always part of a place name, not a typo.
+_ADDRESS_SUFFIX_RE = re.compile(
+    r"\b([A-Z][a-zA-Z]+)\s+(?:Marg|Road|Rd\.?|Street|St\.?|Nagar|Chowk|Colony|Society|Estate|Vihar|Puram|Bagh|Circle)\b"
+)
+
 
 class ProtectedTermsBuilder:
     """Builds the list of document spans that downstream agents must never modify."""
@@ -73,15 +86,26 @@ class ProtectedTermsBuilder:
                             w = parts[0].lower()
                             try:
                                 freq = int(parts[1])
+                                self.dict_words.add(w)
+                                if freq > 10000000:
+                                    self.common_words.add(w)
                             except ValueError:
                                 continue
-                            self.dict_words.add(w)
-                            if freq > 10000000:  # Threshold for very common English words
-                                self.common_words.add(w)
             except Exception:
                 pass
 
-    def build(self, full_text: str) -> List[ProtectedTerm]:
+        # Load domain dictionary terms
+        self.domain_dict_terms = set()
+        domain_dict_path = ROOT_DIR / "data" / "domain_dictionary.json"
+        if domain_dict_path.exists():
+            try:
+                import json
+                with open(domain_dict_path, "r", encoding="utf-8") as f:
+                    self.domain_dict_terms = set(json.load(f))
+            except Exception:
+                pass
+
+    def build(self, full_text: str, job_dir: Optional[Path] = None) -> List[ProtectedTerm]:
         terms: List[ProtectedTerm] = []
         terms += self._named_entities(full_text)
         terms += self._regex_matches(full_text, _URL_RE, "URL")
@@ -109,12 +133,73 @@ class ProtectedTermsBuilder:
         # Custom person names
         terms += self._detect_person_names(full_text)
 
+        # Address/location terms adjacent to dotted abbreviations or known
+        # locality suffixes (e.g. "N.M. Marg", "M.G. Road") -- catches proper
+        # nouns too rare/short for spaCy's small NER model to tag reliably.
+        terms += self._detect_address_terms(full_text)
+
         # Pronouns
         terms += self._detect_pronouns(full_text)
+
+        # Domain Dictionary & Document Learned Terms
+        terms += self._domain_dictionary_terms(full_text)
+        terms += self._document_learned_vocabulary(full_text, job_dir)
 
         terms += self._explicit_whitelist(full_text)
         terms += self._auto_whitelist_repeated_tokens(full_text)
         return self._dedupe(terms)
+
+    def _domain_dictionary_terms(self, text: str) -> List[ProtectedTerm]:
+        out = []
+        for term in self.domain_dict_terms:
+            if not term or len(term) < 2:
+                continue
+            for m in re.finditer(r"\b" + re.escape(term) + r"\b", text, re.IGNORECASE):
+                out.append(ProtectedTerm(text=m.group(), char_start=m.start(), char_end=m.end(), reason="domain dictionary term"))
+        return out
+
+    def _document_learned_vocabulary(self, text: str, job_dir: Optional[Path] = None) -> List[ProtectedTerm]:
+        out = []
+        doc_words = set()
+        if job_dir:
+            sd_path = Path(job_dir) / "structured_document.json"
+            if sd_path.exists():
+                try:
+                    import json
+                    with open(sd_path, "r", encoding="utf-8") as f:
+                        data = json.load(f)
+                    for el in data.get("elements", []):
+                        el_text = el.get("text", "")
+                        for w in re.findall(r"\b[A-Z][a-zA-Z0-9'-]{2,}\b", el_text):
+                            doc_words.add(w)
+                except Exception:
+                    pass
+            ko_path = Path(job_dir) / "03_knowledge_objects" / "knowledge_objects.json"
+            if not ko_path.exists():
+                ko_path = Path(job_dir) / "03_knowledge_objects" / "knowledge_objects.jsonl"
+            if ko_path.exists():
+                try:
+                    import json
+                    content = ko_path.read_text(encoding="utf-8")
+                    for line in content.splitlines():
+                        if not line.strip():
+                            continue
+                        try:
+                            obj = json.loads(line)
+                            c = obj.get("content", "")
+                            for w in re.findall(r"\b[A-Z][a-zA-Z0-9'-]{2,}\b", c):
+                                doc_words.add(w)
+                        except Exception:
+                            pass
+                except Exception:
+                    pass
+
+        for w in doc_words:
+            if w.lower() in self.common_words:
+                continue
+            for m in re.finditer(r"\b" + re.escape(w) + r"\b", text):
+                out.append(ProtectedTerm(text=m.group(), char_start=m.start(), char_end=m.end(), reason="document learned vocabulary"))
+        return out
 
     def _named_entities(self, text: str) -> List[ProtectedTerm]:
         doc = self.nlp(text)
@@ -154,6 +239,15 @@ class ProtectedTermsBuilder:
     def _tech_vocabulary_terms(self, text: str) -> List[ProtectedTerm]:
         out = []
         tech_words = {
+            "sebi", "icai", "udin", "scada", "sap", "hvdc", "nse", "bse", "rbi", "irdai", "gst",
+            "ifsc", "neft", "rtgs", "imps", "upi", "pan", "tan", "cin", "din", "llp", "huf",
+            "epfo", "esic", "nsdl", "cdsl", "cibil", "isin", "lei", "npa", "crar", "slr", "crr",
+            "nbfc", "aif", "reit", "invit", "sgb", "etf", "fii", "dii", "fpi", "fdi", "fema",
+            "pmla", "sarfaesi", "ibc", "nclt", "nclat", "sat", "cci", "trai", "dgca", "fssai",
+            "peso", "cea", "cerc", "serc", "posoco", "gridcontroller", "rldc", "sldc", "nldc",
+            "statcom", "facts", "plc", "dcs", "rtu", "ied", "gis", "ais", "bess", "ppa", "psa",
+            "discom", "genco", "transco", "appc", "rec", "escert", "pat", "rpo", "rgo", "mop",
+            "mnre", "niti", "aayog", "cpri", "ntpc", "powergrid", "nhpc", "sjvn", "thdc", "eesl", "seci",
             "attention", "self-attention", "multi-head", "feed-forward", "scaled-dot",
             "encoder", "decoder", "transduction", "transformer", "sublayer", "dimension",
             "perplexity", "softmax", "residual", "normalization", "embeddings", "hyperparameters",
@@ -171,7 +265,7 @@ class ProtectedTermsBuilder:
         }
         for w in tech_words:
             for m in re.finditer(r"\b" + re.escape(w) + r"\b", text, re.IGNORECASE):
-                out.append(ProtectedTerm(text=m.group(), char_start=m.start(), char_end=m.end(), reason="DL/CS terminology"))
+                out.append(ProtectedTerm(text=m.group(), char_start=m.start(), char_end=m.end(), reason="DL/CS/Enterprise terminology"))
         return out
 
     def _explicit_whitelist(self, text: str) -> List[ProtectedTerm]:
@@ -240,6 +334,22 @@ class ProtectedTermsBuilder:
                 char_end=m.end(),
                 reason="person name"
             ))
+        return out
+
+    def _detect_address_terms(self, text: str) -> List[ProtectedTerm]:
+        out = []
+        for m in _DOTTED_ABBREV_ADJACENT_RE.finditer(text):
+            word = m.group(1)
+            if word.lower() in self.common_words:
+                continue
+            start, end = m.start(1), m.end(1)
+            out.append(ProtectedTerm(text=word, char_start=start, char_end=end, reason="proper noun after dotted abbreviation"))
+        for m in _ADDRESS_SUFFIX_RE.finditer(text):
+            word = m.group(1)
+            if word.lower() in self.common_words:
+                continue
+            start, end = m.start(1), m.end(1)
+            out.append(ProtectedTerm(text=word, char_start=start, char_end=end, reason="address/locality term"))
         return out
 
     def _detect_pronouns(self, text: str) -> List[ProtectedTerm]:

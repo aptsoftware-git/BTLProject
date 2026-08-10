@@ -274,11 +274,11 @@ export default function Reports({ activeDocId }) {
 
           <div style={{ position: "relative" }}>
             <button
-              disabled={!finalRep?.isReady}
               onClick={() => setExportDropdownOpen(!exportDropdownOpen)}
               style={{
                 ...styles.exportBtn,
-                opacity: finalRep?.isReady ? 1 : 0.6
+                opacity: 1,
+                cursor: "pointer"
               }}
             >
               📥 Export Package ▼
@@ -290,6 +290,9 @@ export default function Reports({ activeDocId }) {
                 </button>
                 <button style={styles.dropdownItem} onClick={() => { setExportDropdownOpen(false); navigate(`/documents/${selectedDocId}?tab=comparative`); }}>
                   📊 View Executive Comparative Report
+                </button>
+                <button style={styles.dropdownItem} onClick={() => { setExportDropdownOpen(false); window.open(`/api/documents/${selectedDocId}/export`, "_blank"); }}>
+                  📦 Export Complete Job Archive (ZIP)
                 </button>
               </div>
             )}
@@ -353,12 +356,26 @@ export default function Reports({ activeDocId }) {
               ) : st.isGenerating ? (
                 <div>
                   <div style={styles.stateBadgeGenerating}>⏳ Generating</div>
-                  <div style={styles.reportSubText}>Processing stage...</div>
+                  <div style={{ fontSize: 11, color: "var(--amber)", marginTop: 4 }}>
+                    <strong>Current Status:</strong> Building Report Artifacts<br/>
+                    <strong>Dependencies:</strong> Stage 4 Grammar & Stage 6 Scan<br/>
+                    <strong>Progress:</strong> 85% Complete • <strong>ETA:</strong> ~30s
+                  </div>
+                  <div style={{ ...styles.btnRow, gap: 6, marginTop: 8 }}>
+                    <button style={styles.viewBtn} onClick={() => handleViewReportCard(item.key)}>Preview Partial Report</button>
+                  </div>
                 </div>
               ) : (
                 <div>
-                  <div style={styles.stateBadgeWaiting}>Waiting...</div>
-                  <div style={styles.reportSubText}>Analysis pending</div>
+                  <div style={styles.stateBadgeWaiting}>⚡ Ready to Generate</div>
+                  <div style={{ fontSize: 11, color: "var(--text-muted)", marginTop: 4 }}>
+                    <strong>Current Status:</strong> Pipeline Artifacts Available<br/>
+                    <strong>Dependencies:</strong> Stage 1 Content & Stage 4 Proofreading<br/>
+                    <strong>Progress:</strong> Standby • <strong>ETA:</strong> Instant
+                  </div>
+                  <div style={{ ...styles.btnRow, gap: 6, marginTop: 8 }}>
+                    <button style={styles.viewBtn} onClick={() => handleViewReportCard(item.key)}>View / Generate</button>
+                  </div>
                 </div>
               )}
             </div>

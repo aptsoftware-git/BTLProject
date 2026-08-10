@@ -5,7 +5,7 @@ const NAV_ITEMS = [
   { key: "dashboard", label: "Dashboard", icon: "grid" },
   { key: "proofreading", label: "Proofreading", icon: "check-square" },
   { key: "assistant", label: "AI Assistant", icon: "message-square" },
-  { key: "analysis", label: "Context Analysis", icon: "search" },
+  { key: "analysis", label: "Ambiguity Analysis", icon: "search" },
   { key: "comparative", label: "Comparative Analysis", icon: "layers" },
   { key: "reports", label: "Reports", icon: "bar-chart" },
   { key: "settings", label: "Settings", icon: "settings" },

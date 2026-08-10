@@ -190,7 +190,7 @@ class ContextAnalysisPipeline:
                 return []
 
         if batches:
-            max_batch_workers = min(4, len(batches))
+            max_batch_workers = max(1, min(getattr(self.config, "context_max_workers", 4), len(batches)))
             with ThreadPoolExecutor(max_workers=max_batch_workers) as executor:
                 batch_results = list(executor.map(process_batch, enumerate(batches)))
             for found_issues in batch_results:
@@ -241,7 +241,7 @@ class ContextAnalysisPipeline:
                 return None
 
         if candidate_issues:
-            max_ver_workers = min(4, len(candidate_issues))
+            max_ver_workers = max(1, min(getattr(self.config, "context_max_workers", 4), len(candidate_issues)))
             with ThreadPoolExecutor(max_workers=max_ver_workers) as executor:
                 ver_results = list(executor.map(process_verification, candidate_issues))
             for verified_item in ver_results:

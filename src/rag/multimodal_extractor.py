@@ -1,5 +1,6 @@
 import logging
 import json
+import os
 import time
 import re
 import shutil
@@ -281,7 +282,10 @@ class MultimodalExtractor:
 
                     meta = ElementMetadata(
                         page_number=page_num,
-                        bbox=BoundingBox(x0=x0, y0=y0, x1=x1, y1=y1),
+                        # PyMuPDF "blocks" coordinates are already top-left-origin
+                        # points (unlike Docling's default BOTTOMLEFT convention),
+                        # so tag coord_origin explicitly rather than mislabeling them.
+                        bbox=BoundingBox(l=x0, t=y0, r=x1, b=y1, coord_origin="TOPLEFT"),
                         image_id=None,
                         table_id=None,
                         caption_id=None,
@@ -462,11 +466,21 @@ class MultimodalExtractor:
             from docling.document_converter import DocumentConverter, PdfFormatOption
             from docling.datamodel.pipeline_options import PdfPipelineOptions
             from docling.datamodel.base_models import InputFormat
-            
+
             pipeline_options = PdfPipelineOptions()
             pipeline_options.do_ocr = self.enable_ocr
             pipeline_options.do_table_structure = self.enable_table_extraction
             pipeline_options.generate_picture_images = self.enable_image_extraction
+            try:
+                # Docling defaults to only 4 CPU threads regardless of host
+                # size; use all available cores unless explicitly overridden.
+                from docling.datamodel.pipeline_options import AcceleratorOptions
+                pipeline_options.accelerator_options = AcceleratorOptions(
+                    num_threads=int(os.environ.get("DOCLING_NUM_THREADS", str(os.cpu_count() or 4))),
+                    device=os.environ.get("DOCLING_DEVICE", "auto"),
+                )
+            except ImportError:
+                pass
             try:
                 from docling.datamodel.pipeline_options import RapidOcrOptions
                 pipeline_options.ocr_options = RapidOcrOptions()
@@ -697,6 +711,7 @@ class MultimodalExtractor:
             
             if batch_objects and output_dir:
                 jsonl_path = output_dir / "03_knowledge_objects" / "knowledge_objects.jsonl"
+                jsonl_path.parent.mkdir(parents=True, exist_ok=True)
                 with open(jsonl_path, "a", encoding="utf-8") as f:
                     for obj in batch_objects:
                         obj.embedding_status = "Pending"

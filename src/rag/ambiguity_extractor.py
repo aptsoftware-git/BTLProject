@@ -169,18 +169,9 @@ class AmbiguityExtractor:
             return
 
         # 1. Load document chunks (Master list containing all chunks)
-        chunks_json_path = job_dir / "06_chunks" / "document_chunks.json"
-        if not chunks_json_path.exists():
-            chunks_json_path = job_dir / "document_chunks.json"
-            
-        chunks_master = []
-        if chunks_json_path.exists():
-            try:
-                with open(chunks_json_path, "r", encoding="utf-8") as f:
-                    chunks_data = json.load(f)
-                    chunks_master = chunks_data.get("chunks", [])
-            except Exception as e:
-                logger.error(f"Failed to load document chunks master list: {e}")
+        from src.rag.chunk_utils import load_stage6_chunks
+        chunks_data = load_stage6_chunks(job_dir, doc_id=doc_id, materialize_cache=True)
+        chunks_master = chunks_data.get("chunks", [])
                 
         if not chunks_master:
             logger.error("No semantic chunks found to extract claims from.")
@@ -333,7 +324,9 @@ Requested JSON Schema:
                 return chunk_id, self._extract_fallback_knowledge(chunk_id, text)
 
         from concurrent.futures import ThreadPoolExecutor, as_completed
-        max_workers = 8 if ollama_active else 12
+        # Only the ollama_active branch is CPU-bound (LLM inference); the
+        # regex-fallback branch is cheap, so its worker count is left as-is.
+        max_workers = getattr(self.config, "context_max_workers", 8) if ollama_active else 12
         with ThreadPoolExecutor(max_workers=max_workers) as executor:
             future_to_chunk = {executor.submit(_process_single_chunk, ch): ch for ch in chunks_master}
             for future in as_completed(future_to_chunk):

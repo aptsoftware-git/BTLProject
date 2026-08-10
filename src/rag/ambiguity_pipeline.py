@@ -76,24 +76,15 @@ class AmbiguityPipeline:
                 logger.warning(f"Failed to read cached semantic clusters: {e}. Re-running...")
 
         # 1. Load document chunks for full text/metadata mapping
-        chunks_json_path = job_dir / "06_chunks" / "document_chunks.json"
-        if not chunks_json_path.exists():
-            chunks_json_path = job_dir / "document_chunks.json"
-            
+        from src.rag.chunk_utils import load_stage6_chunks
+        chunks_data = load_stage6_chunks(job_dir, doc_id=doc_id, materialize_cache=True)
+        file_name = chunks_data.get("file_name", "unknown")
         chunks_by_id = {}
-        file_name = "unknown"
-        if chunks_json_path.exists():
-            try:
-                with open(chunks_json_path, "r", encoding="utf-8") as f:
-                    chunks_data = json.load(f)
-                    file_name = chunks_data.get("file_name", "unknown")
-                    for c in chunks_data.get("chunks", []):
-                        meta = c.get("metadata", {})
-                        cid = meta.get("chunk_id")
-                        if cid:
-                            chunks_by_id[cid] = c
-            except Exception as e:
-                logger.error(f"Failed to load document chunks for ambiguity pipeline: {e}")
+        for c in chunks_data.get("chunks", []):
+            meta = c.get("metadata", {})
+            cid = meta.get("chunk_id") or c.get("chunk_id")
+            if cid:
+                chunks_by_id[cid] = c
 
         # 2. Retrieve similarity graph from ChromaDB
         nodes, edges, neighbor_lists = self.retrieval_agent.retrieve_similar_pairs(doc_id)

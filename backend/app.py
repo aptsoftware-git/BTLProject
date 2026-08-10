@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import logging
+import os
 from fastapi import FastAPI, Request
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
@@ -13,6 +14,17 @@ logging.basicConfig(
     format="%(asctime)s | %(levelname)s | %(name)s | %(message)s"
 )
 backend_logger = logging.getLogger("backend")
+
+# PyTorch defaults to a conservative intra-op thread count rather than using
+# every available core; unset, this leaves embedding/reranking inference
+# (src/rag/embedding_provider.py) slower than the CPU-only host allows.
+# Set once at process startup, before any model is loaded. Override via
+# TORCH_NUM_THREADS if you want to leave cores free for other processes.
+try:
+    import torch
+    torch.set_num_threads(int(os.environ.get("TORCH_NUM_THREADS", str(os.cpu_count() or 4))))
+except Exception as _torch_thread_err:  # pragma: no cover - never fatal to app startup
+    backend_logger.warning("Could not set torch thread count: %s", _torch_thread_err)
 
 # Initialize FastAPI App
 app = FastAPI(

@@ -46,21 +46,42 @@ Never recommend edits simply because another wording sounds better.
 A document does NOT need to be rewritten simply because it can be written differently.
 
 ==================================================
+SCOPE
+==================================================
+
+This review covers ONLY Ambiguity / Contextual Consistency Analysis:
+cross-reference contradictions, numerical inconsistencies, pronoun/entity-
+reference ambiguity, terminology inconsistencies, date/timeline
+inconsistencies, unit/measurement inconsistencies, internal factual
+contradictions, structural/convention inconsistencies, and missing/
+conflicting context.
+
+Grammar, spelling, writing clarity, style, and vague-wording findings are
+OUT OF SCOPE -- those belong to a separate Proofreading review. Reject any
+candidate finding whose real issue is grammar, spelling, style, or general
+writing quality, even if the automated system labeled it as an ambiguity.
+
+==================================================
 FALSE POSITIVE FILTERING
 ==================================================
 
 Reject findings if:
 
-• Grammar is acceptable.
-• Spelling is correct.
+• The issue is actually grammar, spelling, style, or writing clarity (out of scope -- see SCOPE above).
 • Meaning is already clear.
 • Context removes ambiguity.
-• The issue is only stylistic.
 • The wording follows normal business writing.
 • Multiple interpretations are unlikely.
 • The finding cannot be supported using direct evidence.
+• The compared items refer to DIFFERENT reporting periods, fiscal years, or dates (e.g. FY2023 vs FY2024) -- a value legitimately changing over time is not a conflict.
+• The compared items refer to DIFFERENT entities, projects, or people that merely share a similar name.
+• The "conflicting" numbers are the same value expressed in different units or scales (e.g. 1.2 crore vs 12 million, kg vs lbs, USD vs local currency at the stated exchange rate) -- verify the underlying value before flagging.
+• The term differences are valid abbreviations, valid British/American spelling variants, or domain-standard terminology, not genuine inconsistency.
+• The two statements are compatible (e.g. one is a summary, the other a detailed version of the same fact).
 
-Only retain findings that create genuine business risk.
+Before confirming a Numerical, Date/Timeline, or Unit/Measurement finding, explicitly verify the compared items share the SAME entity, SAME metric, SAME reporting period, and SAME unit basis. If any of those differ, reject the finding as a legitimate difference, not a conflict.
+
+Only retain findings that create genuine business risk AND are objectively grounded in the supplied evidence.
 
 ==================================================
 IGNORE THESE CONTENT TYPES
@@ -148,79 +169,69 @@ Use EXACTLY one category.
 
 Never invent categories.
 
+Grammar, spelling, style, writing clarity, and "undefined term" are NOT
+valid categories here -- they are Proofreading's territory, not Ambiguity
+Analysis. If a candidate finding is really one of those, reject it.
+
 Allowed categories:
 
-Grammar Issue
+Cross-reference / contradiction
 
-Spelling Issue
+Numerical inconsistency
 
-Writing Clarity
+Pronoun / entity-reference ambiguity
 
-Pronoun Ambiguity
+Terminology inconsistency
 
-Undefined Term
+Date / timeline inconsistency
 
-Terminology Issue
+Unit / measurement inconsistency
 
-Cross-reference Issue
+Internal factual contradiction
 
-Policy Conflict
+Structural / convention inconsistency
 
-Numerical Inconsistency
-
-Contradictory Statement
+Missing / conflicting context
 
 ==================================================
 CATEGORY GUIDELINES
 ==================================================
 
-Grammar Issue
+Cross-reference / contradiction
 
-Incorrect grammar.
+A reference to another section, figure, table, or clause that is broken, incorrect, or contradicts what it points to.
 
-Never High.
+Numerical inconsistency
 
-Never Critical.
+The SAME metric, for the SAME entity and SAME period and SAME unit basis, is reported as two different numbers.
 
-Spelling Issue
+Pronoun / entity-reference ambiguity
 
-Misspelled words.
+Reader cannot determine what "it", "they", "this", "that" refers to, or which of two similarly-named entities a reference means.
 
-Never High.
+Terminology inconsistency
 
-Never Critical.
+The same concept is given multiple, non-equivalent names within the document (not a valid abbreviation or spelling variant).
 
-Writing Clarity
+Date / timeline inconsistency
 
-Sentence is grammatically correct but difficult to understand.
+The SAME event or deadline is given two different dates, or a timeline is internally contradictory (verify these are truly the same event, not different reporting periods).
 
-Pronoun Ambiguity
+Unit / measurement inconsistency
 
-Reader cannot determine what "it", "they", "this", "that" refers to.
+The SAME quantity is expressed with two genuinely different values after normalizing for unit/scale (not simply expressed in different but equivalent units).
 
-Undefined Term
+Internal factual contradiction
 
-Important acronym or business term appears without explanation.
+Two statements about the same fact, policy, or company detail cannot both be true.
 
-Terminology Issue
+Structural / convention inconsistency
 
-Same concept uses multiple names.
+Numbering gaps, duplicate headings, or inconsistent document conventions.
 
-Cross-reference Issue
+Missing / conflicting context
 
-Broken or incorrect references.
-
-Policy Conflict
-
-Two policies cannot both be true.
-
-Numerical Inconsistency
-
-Numbers conflict.
-
-Contradictory Statement
-
-Statements directly contradict each other.
+A claim depends on context (a definition, a prerequisite, a referenced condition) that is absent or conflicts with context given elsewhere.
 
 ==================================================
 SEVERITY
@@ -240,8 +251,6 @@ High
 
 Conflicting instructions
 
-Policy ambiguity
-
 Broken cross references
 
 Business misunderstanding
@@ -252,19 +261,13 @@ Terminology
 
 Definitions
 
-Ambiguous wording
+Missing context
 
 Low
 
-Grammar
-
-Spelling
-
 Formatting
 
-Writing polish
-
-Grammar and Spelling MUST NEVER be High or Critical.
+Minor structural/convention inconsistency
 
 ==================================================
 BUSINESS IMPACT
@@ -439,7 +442,7 @@ The following payload contains preliminary candidate findings generated by an au
 
 These findings were generated by local AI models during the initial inspection stage.
 
-The automated system is intentionally designed to be highly sensitive so that it identifies every potential ambiguity, inconsistency, grammar issue, spelling issue and terminology concern.
+The automated system is intentionally designed to be highly sensitive so that it identifies every potential ambiguity, contradiction, and terminology/consistency concern. It does not (and must not) surface grammar, spelling, or general writing-style issues -- those are handled by a separate Proofreading review.
 
 Consequently, some findings are expected to be false positives.
 
@@ -462,6 +465,10 @@ Instructions
 2. Reject findings that are not objectively supported by the document.
 
 3. Reject stylistic suggestions that do not materially improve understanding.
+
+3a. Reject any candidate whose real issue is grammar, spelling, style, or general writing clarity -- these are out of scope for this review, regardless of how the automated system labeled them.
+
+3b. Before confirming a Numerical, Date/Timeline, or Unit/Measurement finding, verify the compared items share the same entity, metric, reporting period, and unit basis; reject if they legitimately differ on any of those.
 
 4. Merge duplicate findings into a single consolidated finding.
 

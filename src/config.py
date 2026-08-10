@@ -58,9 +58,19 @@ class OllamaConfig:
     #   export OLLAMA_HOST="http://192.168.19.21:11434"
     host: str = field(default_factory=lambda: os.environ.get("OLLAMA_HOST", "http://192.168.19.21:11434"))
     model: str = field(default_factory=lambda: os.environ.get("OLLAMA_MODEL", os.environ.get("TEXT_MODEL", MODEL_ROUTER.get_model("grammar_review"))))
-    timeout_seconds: int = 30
+    # 30s was tuned for small/GPU-backed models; a CPU-only host generating
+    # against a batched multi-paragraph prompt routinely needs far longer,
+    # and hitting this timeout triggers a retry + a per-paragraph fallback
+    # loop (see grammar_agent.py) that silently multiplies wall-clock time.
+    # Override via OLLAMA_TIMEOUT_SECONDS for slower/CPU-only hosts.
+    timeout_seconds: int = field(default_factory=lambda: int(os.environ.get("OLLAMA_TIMEOUT_SECONDS", "180")))
     temperature: float = 0.0
     max_retries: int = 1
+    # Number of CPU threads Ollama uses for a single generation (distinct
+    # from server-side request concurrency). Defaults to all logical cores;
+    # override via OLLAMA_NUM_THREAD if you want to leave cores free for
+    # other work on the host.
+    num_thread: int = field(default_factory=lambda: int(os.environ.get("OLLAMA_NUM_THREAD", str(os.cpu_count() or 4))))
     # Avoid deepseek-r1:* and gpt-oss:* -- reasoning models tend to emit
     # chain-of-thought text even when told "return only JSON".
 
@@ -91,7 +101,7 @@ class PipelineConfig:
     merge: MergeConfig = field(default_factory=MergeConfig)
 
     stage_folders: tuple = (
-        "01_raw", "02_filtered", "03_preprocessed", "04_sentences",
+        "01_raw", "02_filtered", "03_preprocessed", "03_page_text", "04_sentences",
         "05_protected_terms", "06_spell", "07_grammar", "08_validation",
         "09_semantic", "10_final", "logs",
     )

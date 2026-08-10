@@ -1,0 +1,13 @@
+[
+  "SCADA", "GIS", "HVDC", "PLC", "IoT", "EPC", "AI", "ML", "NLP", "OCR", "RAG", "API",
+  "GDP", "ERP", "SAP", "BTP", "APT", "Docling", "ChromaDB", "PyMuPDF", "SymSpell", "LanguageTool",
+  "Ollama", "Infosys", "KPMG", "PwC", "Deloitte", "EY", "Sanjukta", "Mukherjee", "Maharatna",
+  "Navratna", "Miniratna", "NTPC", "ONGC", "IOCL", "BPCL", "HPCL", "GAIL", "SAIL", "BHEL",
+  "PGCIL", "Coal India", "MoP", "MoF", "NITI Aayog", "Substation", "Transformer", "Grid",
+  "Feeder", "Capacitor", "Inverter", "Rectifier", "Megawatt", "Gigawatt", "Kilowatt", "KWh",
+  "MVa", "KV", "Hz", "SCADA/EMS", "DMS", "WAMS", "PMU", "RTU", "IED", "Modbus", "IEC 61850",
+  "DNP3", "CIM", "OPC-UA", "SCADA-GIS", "AMR", "AMI", "Smart Meter", "Net Metering",
+  "Discom", "Transcom", "Gencom", "CEA", "CERC", "SERC", "POSOCO", "GRID-INDIA", "REMC",
+  "VRE", "BESS", "STATCOM", "FACTS", "HVDC LCC", "VSC", "UHV", "EHV", "RoFR", "TBCB",
+  "PPA", "PSA", "UDAY", "RDSS", "IPDS", "DDP", "APDRP", "R-APDRP"
+]

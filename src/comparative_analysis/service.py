@@ -36,6 +36,9 @@ from src.comparative_analysis.agents.executive_insights_agent import ExecutiveIn
 from src.comparative_analysis.agents.strategic_recommendation_agent import StrategicRecommendationAgent
 from src.comparative_analysis.report_generator import ComparativeReportGenerator
 
+from src.comparative_analysis.utils.document_subject_resolver import DocumentSubjectResolver
+from src.comparative_analysis.utils.target_company_validator import TargetCompanyValidationGate, TargetCompanyValidationError
+
 logger = logging.getLogger("comparative_analysis.service")
 
 
@@ -44,6 +47,7 @@ class ComparativeAnalysisService:
     Main orchestration service for Executive Comparative Analysis System.
 
     Refactored 10-Agent Workflow:
+    0. Target Company Resolution Engine (DocumentSubjectResolver)
     1. Business Context Retrieval Agent (CompanyProfileRetriever)
     2. Claude Business Understanding Agent (CompanySummaryAgent)
     3. Search Query Builder (SearchQueryBuilder)
@@ -54,13 +58,8 @@ class ComparativeAnalysisService:
     8. Gap Analysis Agent (GapAnalysisAgent)
     9. SWOT Analysis Agent (SWOTAnalysisAgent)
     10. Strategic Recommendation Agent (StrategicRecommendationAgent)
+    Validation: TargetCompanyValidationGate
     Output: ONE Executive Comparative Analysis Report (ComparativeReportGenerator).
-    """
-
-
-class ComparativeAnalysisService:
-    """
-    Main orchestration service for Executive Comparative Analysis System.
     """
 
     def __init__(
@@ -70,7 +69,7 @@ class ComparativeAnalysisService:
         llm_model_name: Optional[str] = None
     ) -> None:
         """
-        Initialize ComparativeAnalysisService with all 10 specialized agents.
+        Initialize ComparativeAnalysisService with all specialized agents.
         """
         self.model_name = llm_model_name or os.environ.get("MODEL_COMPARATIVE_ANALYSIS", MODEL_ROUTER.get_model("comparative_analysis"))
         self.retriever = CompanyProfileRetriever()
@@ -119,14 +118,42 @@ class ComparativeAnalysisService:
         logger.info("Executing 10-Agent Executive Comparative Analysis pipeline [%s] for document_id: %s", analysis_id, request.document_id)
 
         try:
+            # Step 0: Target Company Resolution Engine (deterministic front-matter grounding FIRST)
+            from src.config import ROOT_DIR
+            from src.rag.chunk_utils import load_stage6_chunks
+
+            job_dir = ROOT_DIR / "data" / "output" / request.document_id
+            c_data = load_stage6_chunks(job_dir, doc_id=request.document_id)
+            doc_chunks = c_data.get("chunks", [])
+
+            resolved_identity = None
+            if request.target_company_name:
+                resolved_identity = {
+                    "target_company": request.target_company_name,
+                    "evidence": "User explicit request override",
+                    "page": 1,
+                    "source": "user_override",
+                    "confidence": 100.0
+                }
+            else:
+                chunk_dicts = [{"content": c.get("content") or c.get("text") or "", "text": c.get("content") or c.get("text") or "", "page_number": (c.get("metadata") or {}).get("page_number") or 1} for c in doc_chunks]
+                resolved_identity = DocumentSubjectResolver.resolve_target_company(chunk_dicts, request.document_id)
+                logger.info("Step 0 Grounded Target Company Identity: %s", resolved_identity)
+
+            # Hard Validation Gate 1: Fail safely if identity cannot be grounded with high confidence
+            if not resolved_identity or not resolved_identity.get("target_company"):
+                raise TargetCompanyResolutionError(f"Stage 7 Execution Failed: Could not resolve grounded target company identity for document '{request.document_id}'.")
+
             # 1. Business Context Retrieval Agent: retrieve pre-indexed business chunks from ChromaDB
             retrieved_target_profile = self.retriever.retrieve_profile(request.document_id)
 
             # 2. Claude Business Understanding Agent: build structured CompanyProfile JSON
-            company_profile: CompanyProfile = self.company_summary_agent.summarize(retrieved_target_profile)
+            company_profile: CompanyProfile = self.company_summary_agent.summarize(retrieved_target_profile, resolved_identity=resolved_identity)
 
-            if request.target_company_name:
-                company_profile.company_name = request.target_company_name
+            # Enforce immutable locked target company name and identity metadata
+            company_profile.company_name = resolved_identity["target_company"]
+            company_profile.target_company_identity = resolved_identity
+
             if request.industry_override:
                 company_profile.primary_industry = request.industry_override
 
@@ -274,6 +301,15 @@ class ComparativeAnalysisService:
                     "threats": len(enhanced_swot.threats)
                 },
                 radar_chart=radar_map
+            )
+
+            # Pre-Report Validation Gate: Enforce target company integrity
+            TargetCompanyValidationGate.validate(
+                company_profile=company_profile,
+                competitors=competitor_summary_list.competitors,
+                swot=swot_analysis,
+                recommendations=recommendations,
+                resolved_identity=resolved_identity
             )
 
             # Step 16: Render Executive Dashboard & HTML Reports

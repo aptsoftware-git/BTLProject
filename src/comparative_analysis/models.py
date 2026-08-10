@@ -54,6 +54,7 @@ class CompanyProfile(BaseModel):
     keywords: List[str] = Field(default_factory=list, description="Relevant business keywords")
     certifications: List[str] = Field(default_factory=list, description="Certifications and compliance standards")
     strategic_partners: List[StrategicPartner] = Field(default_factory=list, description="Strategic partners, licensors, OEMs, and technology providers")
+    target_company_identity: Optional[Dict[str, Any]] = Field(None, description="Document-grounded target company resolution metadata (target_company, evidence, page, source)")
 
     @property
     def industry(self) -> str:

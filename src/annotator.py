@@ -64,6 +64,17 @@ class Annotator:
                 f"Source: {sources}\n"
                 f"Agreement Count: {issue.agreement_count}"
             )
+            t_str = _val(issue.issue_type).lower()
+            if "spell" in t_str:
+                css_class = "spelling"
+            elif "gramm" in t_str or "tense" in t_str:
+                css_class = "grammar"
+            elif "style" in t_str:
+                css_class = "style"
+            else:
+                css_class = "punctuation"
+            border = "border-high" if (getattr(issue, "final_confidence", 0.5) or 0.5) >= 0.7 else "border-low"
+
             parts.append(
                 f'<mark class="{css_class} {border}" data-tooltip="{escape(tooltip)}">'
                 f"{escape(issue.original_text)}</mark>"

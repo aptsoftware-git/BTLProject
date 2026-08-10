@@ -18,11 +18,63 @@ from src.protected_terms import ProtectedTermsBuilder
 from src.utils import dataclass_kwargs
 
 
+APPROVED_TYPES = {
+    "spelling", "grammar", "missing_hyphen", "incorrect_hyphenation",
+    "missing_space", "extra_space", "hyphenation", "spacing", "punctuation", "tense", "verb_form"
+}
+
+REJECTED_KEYWORDS = {
+    "style", "rewrite", "tone", "readability", "phrasing", "reword",
+    "enhancement", "content", "engaging", "concise", "formal", "clarity", "flow",
+    "word choice", "paraphrase", "simplification", "preference", "british", "american"
+}
+
+BRITISH_AMERICAN_PAIRS = {
+    ("fertiliser", "fertilizer"), ("fertilisers", "fertilizers"),
+    ("colour", "color"), ("colours", "colors"),
+    ("flavour", "flavor"), ("flavours", "flavors"),
+    ("humour", "humor"), ("labour", "labor"), ("neighbour", "neighbor"), ("neighbours", "neighbors"),
+    ("centre", "center"), ("centres", "centers"),
+    ("theatre", "theater"), ("theatres", "theaters"),
+    ("analyse", "analyze"), ("analysed", "analyzed"), ("analysing", "analyzing"),
+    ("catalyse", "catalyze"), ("catalysed", "catalyzed"),
+    ("organisation", "organization"), ("organisations", "organizations"),
+    ("realise", "realize"), ("realised", "realized"), ("realising", "realizing"),
+    ("optimise", "optimize"), ("optimised", "optimized"),
+    ("prioritise", "prioritize"), ("prioritised", "prioritized"),
+    ("emphasise", "emphasize"), ("emphasised", "emphasized"),
+    ("licence", "license"), ("defence", "defense"), ("offence", "offense"), ("pretence", "pretense"),
+    ("travelled", "traveled"), ("travelling", "traveling"),
+    ("cancelled", "canceled"), ("cancelling", "canceling"),
+    ("modelling", "modeling"), ("modeller", "modeler"),
+    ("fulfil", "fulfill"), ("enrol", "enroll"), ("skilful", "skillful"),
+    ("program", "programme"), ("catalog", "catalogue"), ("dialog", "dialogue"),
+    ("analog", "analogue"), ("installment", "instalment"), ("check", "cheque")
+}
+
+
 class ValidationAgent:
-    """Filters every candidate correction against the protected-terms list."""
+    """Filters candidate corrections against protected terms and strict proofreading scope."""
 
     def __init__(self, protected_terms: List[ProtectedTerm]) -> None:
         self.protected_terms = protected_terms
+        self.protected_texts = {p.text.lower().strip() for p in protected_terms}
+
+    def _is_british_american_swap(self, orig: str, sug: str) -> bool:
+        if (orig, sug) in BRITISH_AMERICAN_PAIRS or (sug, orig) in BRITISH_AMERICAN_PAIRS:
+            return True
+        # Heuristic for -ise / -ize, -our / -or, -re / -er suffix swaps
+        if orig.endswith("ise") and sug.endswith("ize") and orig[:-3] == sug[:-3]:
+            return True
+        if orig.endswith("ised") and sug.endswith("ized") and orig[:-4] == sug[:-4]:
+            return True
+        if orig.endswith("ising") and sug.endswith("izing") and orig[:-5] == sug[:-5]:
+            return True
+        if orig.endswith("our") and sug.endswith("or") and orig[:-3] == sug[:-2]:
+            return True
+        if orig.endswith("re") and sug.endswith("er") and orig[:-2] == sug[:-2]:
+            return True
+        return False
 
     def validate(self, candidates: List[Candidate]) -> Tuple[List[ValidatedIssue], List[ValidatedIssue]]:
         """Returns (accepted, rejected)."""
@@ -30,10 +82,31 @@ class ValidationAgent:
         rejected: List[ValidatedIssue] = []
         for candidate in candidates:
             hit = ProtectedTermsBuilder.overlaps(candidate.char_start, candidate.char_end, self.protected_terms)
+            
+            orig_lower = (candidate.original_text or "").strip().lower()
+            sug_lower = (candidate.suggested_text or "").strip().lower()
+            type_str = str(candidate.issue_type or "").lower()
+            reason_str = str(candidate.reason or "").lower()
+
+            reject_reason = None
+            if hit:
+                reject_reason = f"Protected Vocabulary ({hit.reason})"
+            elif orig_lower in self.protected_texts or sug_lower in self.protected_texts:
+                reject_reason = "Protected Vocabulary Match"
+            elif self._is_british_american_swap(orig_lower, sug_lower):
+                reject_reason = "Out of Scope (British/American Spelling Preference)"
+            elif any(kw in type_str or kw in reason_str for kw in REJECTED_KEYWORDS):
+                reject_reason = "Out of Scope (Style/Tone/Rewrite Suggestion)"
+            elif orig_lower == sug_lower and len(orig_lower) > 0:
+                reject_reason = "Out of Scope (Capitalization Preference Only)"
+
             issue = ValidatedIssue(
                 **dataclass_kwargs(candidate),
-                is_protected=hit is not None,
-                protected_reason=hit.reason if hit else None,
+                is_protected=reject_reason is not None,
+                protected_reason=reject_reason if reject_reason else (hit.reason if hit else None),
             )
-            (rejected if hit else accepted).append(issue)
+            if reject_reason:
+                rejected.append(issue)
+            else:
+                accepted.append(issue)
         return accepted, rejected

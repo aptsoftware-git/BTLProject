@@ -29,40 +29,66 @@ class ReportGenerator:
         """Returns (report_dict, changes_markdown, summary_csv)."""
         formatted_issues = []
         raw_issue_dicts = []
+
+        APPROVED_CATEGORIES = {
+            "spelling", "grammar", "missing_hyphen", "incorrect_hyphenation",
+            "missing_space", "extra_space", "hyphenation", "spacing", "tense", "verb_form"
+        }
+
+        REJECTED_KEYWORDS = {
+            "style", "rewrite", "tone", "readability", "phrasing", "reword",
+            "enhancement", "content", "engaging", "concise", "formal"
+        }
+
         for idx, issue in enumerate(issues):
-            s = self._sentence_by_id.get(issue.sentence_id)
-            page = getattr(issue, "page_number", None) or getattr(issue, "page", None)
-            if page is None and s:
-                page = s.page
-            if page is None:
-                page = 1
-            bbox = getattr(issue, "bbox", None)
-            if not bbox and s:
-                bbox = s.bbox
-            
-            # Normalize bbox format
-            if isinstance(bbox, dict):
-                x0 = bbox.get("x0", bbox.get("l", 0))
-                y0 = bbox.get("y0", bbox.get("t", 0))
-                x1 = bbox.get("x1", bbox.get("r", 0))
-                y1 = bbox.get("y1", bbox.get("b", 0))
-                bbox_dict = {"x0": float(x0), "y0": float(y0), "x1": float(x1), "y1": float(y1)}
-            elif hasattr(bbox, "l"):
-                bbox_dict = {"x0": float(bbox.l), "y0": float(bbox.t), "x1": float(bbox.r), "y1": float(bbox.b)}
+            type_str = (getattr(issue, "issue_type", "grammar") or "grammar").lower()
+            if hasattr(type_str, "value"):
+                type_str = type_str.value.lower()
             else:
-                bbox_dict = {"x0": 0.0, "y0": 0.0, "x1": 0.0, "y1": 0.0}
+                type_str = str(type_str).lower()
+
+            reason_str = str(getattr(issue, "reason", "") or "").lower()
+
+            # Skip protected issues or out-of-scope categories
+            if getattr(issue, "is_protected", False):
+                continue
+            if any(kw in type_str or kw in reason_str for kw in REJECTED_KEYWORDS):
+                continue
+
+            s = self._sentence_by_id.get(issue.sentence_id)
+            page = s.page if (s and getattr(s, "page", None)) else (getattr(issue, "page_number", None) or getattr(issue, "page", 1))
+
+            bbox = getattr(issue, "bbox", None)
+            if (not bbox or (isinstance(bbox, dict) and bbox.get("x0", 0) == 0 and bbox.get("x1", 0) == 0)) and s:
+                bbox = getattr(s, "bbox", None)
+
+            # Preserve real PDF bbox; NEVER generate synthetic fallback coordinates
+            bbox_dict = None
+            location_verified = False
+            if isinstance(bbox, dict):
+                x0 = float(bbox.get("x0", bbox.get("l", 0)) or 0)
+                y0 = float(bbox.get("y0", bbox.get("t", 0)) or 0)
+                x1 = float(bbox.get("x1", bbox.get("r", 0)) or 0)
+                y1 = float(bbox.get("y1", bbox.get("b", 0)) or 0)
+                if (x0 != 0 or y0 != 0 or x1 != 0 or y1 != 0) and x1 > x0 and y1 > y0:
+                    bbox_dict = {"x0": round(x0, 2), "y0": round(y0, 2), "x1": round(x1, 2), "y1": round(y1, 2)}
+                    location_verified = True
 
             iid = getattr(issue, "issue_id", None) or f"issue_{idx + 1}"
             issue.issue_id = iid
-            issue.page_number = page
+            issue.page_number = int(page)
             issue.bbox = bbox_dict
             formatted_issues.append(issue)
 
             d = issue.to_dict() if hasattr(issue, "to_dict") else dict(issue.__dict__) if hasattr(issue, "__dict__") else dict(issue)
             d["issue_id"] = iid
+            d["sentence_id"] = issue.sentence_id
             d["page"] = int(page)
             d["page_number"] = int(page)
             d["bbox"] = bbox_dict
+            d["location_verified"] = location_verified
+            d["sentence_text"] = s.text if s else ""
+            d["corrected_sentence_text"] = self._apply_corrections(s.text, s.doc_char_start or 0, [issue]) if s else ""
             raw_issue_dicts.append(d)
 
         report = {

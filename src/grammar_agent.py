@@ -19,6 +19,7 @@ that runs on every candidate afterwards regardless of what the LLM does.
 from __future__ import annotations
 
 import json
+import os
 import re
 import time
 from typing import Callable, Dict, List, Tuple
@@ -228,7 +229,14 @@ class GrammarAgent:
                     f"{self.config.host}/api/generate",
                     json={
                         "model": self.config.model, "prompt": prompt, "stream": False,
-                        "options": {"temperature": self.config.temperature},
+                        "options": {
+                            "temperature": self.config.temperature,
+                            # Threads used for THIS generation (distinct from
+                            # server-side request concurrency) -- lets a
+                            # CPU-only host actually use all its cores per
+                            # call instead of Ollama's conservative default.
+                            "num_thread": getattr(self.config, "num_thread", None) or (os.cpu_count() or 4),
+                        },
                     },
                     timeout=self.config.timeout_seconds,
                 )

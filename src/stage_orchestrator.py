@@ -84,6 +84,23 @@ STAGES_DEFINITIONS: List[Dict[str, str]] = [
 ]
 
 
+def _artifact_is_stale(output_path: Path, *input_paths: Path) -> bool:
+    """True if output_path is missing/empty, or older than any given input_path.
+
+    Used to gate stage cache-hit checks so a stage is never treated as
+    "already done" when its upstream artifact was regenerated more recently
+    (e.g. Stage 3 rerun after Stage 4 already produced a report from an
+    earlier, empty Stage 3 output).
+    """
+    if not output_path.exists() or output_path.stat().st_size == 0:
+        return True
+    output_mtime = output_path.stat().st_mtime
+    for input_path in input_paths:
+        if input_path and input_path.exists() and input_path.stat().st_mtime > output_mtime:
+            return True
+    return False
+
+
 def initialize_job_stages(created_at: str | None = None) -> List[Dict[str, Any]]:
     """Generates the initial 8-stage state array for a new job."""
     now_str = created_at or datetime.now().isoformat()
@@ -190,7 +207,9 @@ class StageOrchestrator:
             job = self.get_job()
             if job:
                 stage_obj = next((s for s in job.get("stages", []) if s["stage_id"] == stage_id), None)
-                if stage_obj and stage_obj["status"] == "Completed":
+                if stage_obj and stage_obj["status"] in ("Completed", "Blocked"):
+                    # "Blocked" means an upstream dependency failed/is missing;
+                    # retrying this same stage in place cannot fix that.
                     return
                 if attempt < max_retries:
                     logger.warning("Stage %s attempt %d/%d did not complete cleanly (%s). Automatically retrying...", stage_id, attempt, max_retries, stage_obj.get("errors") if stage_obj else "unknown")
@@ -249,7 +268,7 @@ class StageOrchestrator:
         # Final check
         job = self.get_job()
         if job:
-            failed_stages = [s for s in job.get("stages", []) if s["status"] == "Failed"]
+            failed_stages = [s for s in job.get("stages", []) if s["status"] in ("Failed", "Blocked")]
             if not failed_stages:
                 job["status"] = "completed"
                 job["current_stage"] = "Completed"
@@ -289,19 +308,80 @@ class StageOrchestrator:
             logger.info("Stage orchestration finished for job %s with status: %s", self.job_id, job["status"])
 
     # ------------------------------------------------------------------
-    # Stage 2: Document Extraction
+    # Stage 2: Document Extraction (Docling-first, page + sentence mapping)
     # ------------------------------------------------------------------
+    def _get_or_build_structured_document(self) -> dict:
+        """
+        Returns a StructuredDocument-shaped dict. Docling (via the unmodified
+        MultimodalExtractor used by Stage 5/RAG) is the primary and required
+        source for all proofreading running text. If Docling extraction
+        fails outright (corrupt file, no models available, etc.) we fall
+        back to the legacy PyMuPDF/python-docx extractor chain and
+        synthesize an equivalent minimal StructuredDocument so the rest of
+        the pipeline is unaffected.
+        """
+        try:
+            from src.rag.multimodal_extractor import MultimodalExtractor
+
+            extractor = MultimodalExtractor(
+                enable_ocr=False,
+                enable_table_extraction=True,
+                enable_image_extraction=True,
+            )
+            _, master_doc, _ = extractor.extract(self.file_path, output_dir=self.job_dir)
+            if hasattr(master_doc, "model_dump"):
+                return master_doc.model_dump()
+            if hasattr(master_doc, "dict"):
+                return master_doc.dict()
+            return master_doc
+        except Exception as exc:
+            logger.warning(
+                "Docling extraction failed for job %s (%s); falling back to legacy extractor.",
+                self.job_id, exc
+            )
+
+        from src.extractor import DocumentExtractor
+        from src.layout_analyzer import LayoutAnalyzer
+        from src.filter import RunningTextFilter
+        from src.preprocessing import TextPreprocessor
+        from src.paragraph_builder import ParagraphBuilder
+
+        document = DocumentExtractor(logger=logger).extract(self.file_path, output_dir=self.job_dir)
+        document = LayoutAnalyzer(logger=logger).analyze(document)
+        document = RunningTextFilter(logger=logger).filter(document)
+        document = TextPreprocessor(logger=logger).normalize(document)
+        document = ParagraphBuilder(logger=logger).build(document)
+
+        elements = []
+        for para in document.paragraphs:
+            elements.append({
+                "id": f"fallback_{para.paragraph_id}",
+                "type": "paragraph",
+                "text": para.text,
+                "metadata": {"page_number": para.page or 1},
+                "hierarchy_path": [],
+            })
+        return {
+            "title": document.name,
+            "file_name": document.name,
+            "file_type": document.file_type,
+            "page_count": document.page_count or 1,
+            "elements": elements,
+            "tables": {},
+            "images": {},
+            "metadata": {"extraction_source": "legacy_fallback"},
+        }
+
     def run_stage_2_extraction(self) -> None:
         stage_id = "stage_2_extraction"
         logger.info("START Stage 2")
-        doc_json = self.job_dir / "structured_document.json"
-        raw_txt = self.job_dir / "01_raw" / "raw_text.txt"
         sentences_json = self.job_dir / "04_sentences" / "sentences.json"
+        sentence_map_json = self.job_dir / "04_sentences" / "page_sentence_map.json"
 
         # Cache check
-        if doc_json.exists() and sentences_json.exists() and sentences_json.stat().st_size > 0:
+        if sentences_json.exists() and sentence_map_json.exists() and sentence_map_json.stat().st_size > 0:
             logger.info("[CACHE HIT] Stage 2 (Extraction) already completed for job %s", self.job_id)
-            self.update_stage_state(stage_id, "Completed", duration=0.0, output_location="structured_document.json")
+            self.update_stage_state(stage_id, "Completed", duration=0.0, output_location="04_sentences/page_sentence_map.json")
             job = self.get_job()
             if job:
                 job["extraction_ready"] = True
@@ -315,57 +395,54 @@ class StageOrchestrator:
         self.update_stage_state(stage_id, "Running", start_time=start_time_iso)
 
         try:
-            from src.extractor import DocumentExtractor
-            from src.layout_analyzer import LayoutAnalyzer
-            from src.filter import RunningTextFilter
-            from src.preprocessing import TextPreprocessor
-            from src.paragraph_builder import ParagraphBuilder
-            from src.sentence_splitter import SentenceSplitter
             from src.protected_terms import ProtectedTermsBuilder
-            from src.models import index_paragraph_doc_offsets, index_sentence_doc_offsets
+            from src.page_text_builder import build_page_text_and_blocks, save_page_text
+            from src.sentence_mapper import (
+                build_sentence_map, build_joined_text, save_sentence_map, to_legacy_sentences
+            )
             from src.utils import save_text, save_json
 
-            # Initialize reusable stages
-            extractor = DocumentExtractor(logger=logger)
-            layout_analyzer = LayoutAnalyzer(logger=logger)
-            running_text_filter = RunningTextFilter(logger=logger)
-            preprocessor = TextPreprocessor(logger=logger)
-            paragraph_builder = ParagraphBuilder(logger=logger)
+            stage_dirs = {name: self.job_dir / name for name in self.config.stage_folders}
+            for p in stage_dirs.values():
+                p.mkdir(parents=True, exist_ok=True)
 
+            # 1. Docling extraction -> StructuredDocument
+            structured_doc_dict = self._get_or_build_structured_document()
+
+            # 2. Page text layer (03_page_text/) - running text only, no tables/images.
+            #    page_texts_with_blocks also carries per-element text/type so sentence
+            #    splitting below can happen per-element instead of per merged page blob.
+            page_texts_with_blocks = build_page_text_and_blocks(structured_doc_dict)
+            page_texts = [{"page_number": p["page_number"], "text": p["text"]} for p in page_texts_with_blocks]
+            save_page_text(page_texts, stage_dirs["03_page_text"])
+
+            # 3. Sentence mapping layer (04_sentences/page_sentence_map.json) - single source of truth
             import spacy
             try:
                 nlp = spacy.load(self.config.spacy.model_name)
             except Exception:
                 nlp = None
 
-            sentence_splitter = SentenceSplitter(logger=logger, config=self.config.spacy, nlp=nlp)
+            sentence_map, lookup_index = build_sentence_map(page_texts_with_blocks, nlp=nlp)
+            save_sentence_map(sentence_map, lookup_index, stage_dirs["04_sentences"])
+
+            # 4. Joined document text, kept for backward compatibility with
+            #    downstream stages/exports that read these legacy paths.
+            joined_text = build_joined_text(page_texts)
+            save_text(joined_text, stage_dirs["01_raw"] / "raw_text.txt")
+            save_text(joined_text, stage_dirs["02_filtered"] / "filtered_text.txt")
+            save_text(joined_text, stage_dirs["03_preprocessed"] / "normalized_text.txt")
+
+            # 5. Legacy Sentence-shaped list so spell/grammar/validation/report
+            #    stages (unmodified) keep working against {sentence_id, text}.
+            legacy_sentences = to_legacy_sentences(sentence_map)
+            save_json(legacy_sentences, sentences_json)
+
+            # 6. Protected terms (unmodified builder, fed the Docling-derived text)
             protected_terms_builder = ProtectedTermsBuilder(
                 spacy_config=self.config.spacy, validation_config=self.config.validation, nlp=nlp
             )
-
-            stage_dirs = {name: self.job_dir / name for name in self.config.stage_folders}
-            for p in stage_dirs.values():
-                p.mkdir(parents=True, exist_ok=True)
-
-            document = extractor.extract(self.file_path, output_dir=self.job_dir)
-            save_text(document.raw_text, stage_dirs["01_raw"] / "raw_text.txt")
-
-            document = layout_analyzer.analyze(document)
-            document = running_text_filter.filter(document)
-            save_text(document.filtered_text, stage_dirs["02_filtered"] / "filtered_text.txt")
-
-            document = preprocessor.normalize(document)
-            save_text(document.normalized_text, stage_dirs["03_preprocessed"] / "normalized_text.txt")
-
-            document = paragraph_builder.build(document)
-            document = sentence_splitter.split(document)
-            index_paragraph_doc_offsets(document)
-            index_sentence_doc_offsets(document)
-
-            all_sentences = [s for p in document.paragraphs for s in p.sentences]
-            save_json(all_sentences, stage_dirs["04_sentences"] / "sentences.json")
-
-            protected_terms = protected_terms_builder.build(document.normalized_text)
+            protected_terms = protected_terms_builder.build(joined_text)
             save_json(protected_terms, stage_dirs["05_protected_terms"] / "protected_terms.json")
 
             end_time = datetime.now()
@@ -376,7 +453,7 @@ class StageOrchestrator:
                 "Completed",
                 end_time=end_time.isoformat(),
                 duration=duration,
-                output_location="structured_document.json"
+                output_location="04_sentences/page_sentence_map.json"
             )
 
             job = self.get_job()
@@ -401,9 +478,24 @@ class StageOrchestrator:
     def run_stage_3_spell(self) -> None:
         stage_id = "stage_3_spell"
         spell_file = self.job_dir / "06_spell" / "spell_candidates.json"
+        sentences_path = self.job_dir / "04_sentences" / "sentences.json"
 
-        # Cache check
-        if spell_file.exists() and spell_file.stat().st_size > 0:
+        # Dependency gate: Stage 3 must never run (or be treated as already
+        # run) against a missing/failed Stage 2 output.
+        job = self.get_job()
+        stage2 = next((s for s in (job or {}).get("stages", []) if s["stage_id"] == "stage_2_extraction"), None)
+        if stage2 and stage2.get("status") == "Failed":
+            self.update_stage_state(stage_id, "Blocked", errors="Blocked: Stage 2 (Document Extraction) failed, so Stage 3 has no valid input to run against.")
+            logger.error("Stage 3 (Spell) blocked for job %s: Stage 2 failed", self.job_id)
+            return
+        if not sentences_path.exists():
+            self.update_stage_state(stage_id, "Blocked", errors="Blocked: Stage 2 output (04_sentences/sentences.json) is missing.")
+            logger.error("Stage 3 (Spell) blocked for job %s: sentences.json missing", self.job_id)
+            return
+
+        # Cache check — only a fresh (not stale relative to its Stage 2 input)
+        # spell_candidates.json counts as "already done".
+        if not _artifact_is_stale(spell_file, sentences_path):
             logger.info("[CACHE HIT] Stage 3 (Spell) already completed for job %s", self.job_id)
             self.update_stage_state(stage_id, "Completed", duration=0.0, output_location="06_spell/spell_candidates.json")
             job = self.get_job()
@@ -484,9 +576,28 @@ class StageOrchestrator:
     def run_stage_4_grammar(self) -> None:
         stage_id = "stage_4_grammar"
         report_file = self.job_dir / "10_final" / "report.json"
+        spell_file = self.job_dir / "06_spell" / "spell_candidates.json"
+        sentences_file = self.job_dir / "04_sentences" / "sentences.json"
 
-        # Cache check
-        if report_file.exists() and report_file.stat().st_size > 0:
+        # Dependency gate: Stage 4 must never run — or be treated as already
+        # run via a stale report.json — against a missing/failed Stage 3
+        # output. This is what previously let a report.json generated from
+        # an earlier, empty Stage 3 pass silently "cache hit" forever even
+        # after Stage 3 was successfully rerun with real candidates.
+        job = self.get_job()
+        stage3 = next((s for s in (job or {}).get("stages", []) if s["stage_id"] == "stage_3_spell"), None)
+        if stage3 and stage3.get("status") == "Failed":
+            self.update_stage_state(stage_id, "Blocked", errors="Blocked: Stage 3 (Spell Checking) failed, so Stage 4 has no valid input to run against.")
+            logger.error("Stage 4 (Grammar) blocked for job %s: Stage 3 failed", self.job_id)
+            return
+        if not spell_file.exists():
+            self.update_stage_state(stage_id, "Blocked", errors="Blocked: Stage 3 output (06_spell/spell_candidates.json) is missing.")
+            logger.error("Stage 4 (Grammar) blocked for job %s: spell_candidates.json missing", self.job_id)
+            return
+
+        # Cache check — only a report.json newer than every upstream input it
+        # was built from counts as "already done".
+        if not _artifact_is_stale(report_file, spell_file, sentences_file):
             logger.info("[CACHE HIT] Stage 4 (Grammar) already completed for job %s", self.job_id)
             self.update_stage_state(stage_id, "Completed", duration=0.0, output_location="10_final/report.json")
             job = self.get_job()
@@ -608,6 +719,51 @@ class StageOrchestrator:
             TextWriter.write(changes_md, final_dir / "changes.md")
             TextWriter.write(summary_csv, final_dir / "summary.csv")
 
+            # Enrich the (unmodified) report_generator output with sentence_id /
+            # word-level highlight offsets for the review UI.
+            #
+            # This is NOT wrapped in a try/except that swallows failures: if
+            # finding mapping fails, Stage 4 must fail (see outer except
+            # below) rather than leave stale/missing mapped_findings.json
+            # while still reporting "Completed".
+            from src.finding_mapper import build_findings, save_findings
+            from src.config import load_preferences
+
+            lookup_path = self.job_dir / "04_sentences" / "sentence_lookup_index.json"
+            lookup_index = load_json(lookup_path) if lookup_path.exists() else {}
+            decisions_path = final_dir / "decisions.json"
+            decisions = load_json(decisions_path) if decisions_path.exists() else {}
+            protected_path = self.job_dir / "05_protected_terms" / "protected_terms.json"
+            protected_terms_raw = load_json(protected_path) if protected_path.exists() else []
+            spelling_standard = load_preferences().get("spelling_standard", "both")
+
+            findings, auto_rejected = build_findings(
+                rep_json.get("issues", []), lookup_index, decisions,
+                protected_terms=protected_terms_raw, spelling_standard=spelling_standard,
+            )
+
+            # Resolve real PDF coordinates from Docling provenance so the
+            # review UI can highlight the exact word/phrase on the original
+            # PDF page. This never fails the stage: a resolution failure
+            # just leaves those findings ungrounded (pdf_grounded=False),
+            # since a missing highlight is acceptable but a fake one is not.
+            try:
+                from src.pdf_bbox_resolver import resolve_bboxes
+                findings = resolve_bboxes(findings, self.file_path)
+            except Exception as bbox_err:
+                logger.warning(
+                    "PDF bbox resolution failed for job %s, findings remain ungrounded: %s",
+                    self.job_id, bbox_err
+                )
+                findings = [{**f, "bbox": None, "pdf_grounded": False} for f in findings]
+
+            save_findings(findings, final_dir / "mapped_findings.json")
+            save_findings(auto_rejected, final_dir / "auto_rejected_findings.json")
+            logger.info(
+                "Findings quality gate for job %s: %d passed, %d auto-rejected",
+                self.job_id, len(findings), len(auto_rejected)
+            )
+
             end_time = datetime.now()
             duration = round((end_time - start_time).total_seconds(), 2)
 
@@ -702,7 +858,17 @@ class StageOrchestrator:
     def run_stage_6_context(self, force_regenerate: bool = False) -> None:
         stage_id = "stage_6_context"
         rep_html = self.job_dir / "09_reports" / "consistency_report.html"
-        rep_json = self.job_dir / "report.json"
+        # final_report.json (System B: semantic clustering -> claim
+        # extraction -> cross-chunk reasoning -> Claude verification ->
+        # final report) is the single primary Ambiguity Analysis output.
+        # The redundant, independently-run ContextAnalysisPipeline ("System
+        # A", src/rag/contextual_analysis/pipeline.py -> report.json) has
+        # been retired from this stage -- it duplicated System B's LLM work
+        # against the same document with a different, unaligned category
+        # taxonomy and the UI already preferred System B's output when both
+        # were present. Its code is left in place (not confirmed unused
+        # elsewhere) but is no longer invoked here.
+        rep_json = self.job_dir / "15_final_report" / "final_report.json"
 
         # Cache check
         if not force_regenerate and rep_html.exists() and rep_json.exists():
@@ -722,15 +888,6 @@ class StageOrchestrator:
             if force_regenerate:
                 from backend.services import delete_stage_output_cache
                 delete_stage_output_cache(self.job_id, "stage_6_context")
-
-            from src.rag.contextual_analysis.pipeline import ContextAnalysisPipeline
-            from src.config import load_preferences
-
-            prefs = load_preferences()
-            model_name = prefs.get("ollama", {}).get("model", "qwen2.5-coder:7b")
-
-            consistency_pipeline = ContextAnalysisPipeline(model_name=model_name)
-            consistency_pipeline.run_analysis(self.job_dir, self.job_id, force_regenerate=force_regenerate)
 
             from src.rag.ambiguity_pipeline import AmbiguityPipeline
             ambiguity_pipeline = AmbiguityPipeline()
@@ -760,14 +917,17 @@ class StageOrchestrator:
             report_gen = FinalReportGenerator()
             report_gen.generate_report(self.job_dir, self.job_id, force_regenerate=force_regenerate)
 
-            # Copy to 09_reports
+            # Copy the primary (System B) final report into 09_reports/
+            # under its existing consistency_report.* names, so any
+            # consumer of that path keeps working unchanged.
             import shutil
             reports_dir = self.job_dir / "09_reports"
             reports_dir.mkdir(parents=True, exist_ok=True)
-            if (self.job_dir / "report.json").exists():
-                shutil.copy2(self.job_dir / "report.json", reports_dir / "consistency_report.json")
-            if (self.job_dir / "business_report.html").exists():
-                shutil.copy2(self.job_dir / "business_report.html", reports_dir / "consistency_report.html")
+            final_report_dir = self.job_dir / "15_final_report"
+            if (final_report_dir / "final_report.json").exists():
+                shutil.copy2(final_report_dir / "final_report.json", reports_dir / "consistency_report.json")
+            if (final_report_dir / "final_report.html").exists():
+                shutil.copy2(final_report_dir / "final_report.html", reports_dir / "consistency_report.html")
 
             end_time = datetime.now()
             duration = round((end_time - start_time).total_seconds(), 2)
