@@ -408,6 +408,10 @@ Return JSON schema matching:
                 
             md_reasoning.append("\n### Ambiguities Identified\n")
             for amb in cr.get("ambiguities", []):
+                if isinstance(amb, str):
+                    amb = {"issue_id": "amb_str", "type": "Undefined Term", "severity": "Low", "quote": amb, "reason": amb, "suggested_rewrite": "N/A"}
+                if not isinstance(amb, dict):
+                    continue
                 md_reasoning.append(
                     f"#### {amb.get('issue_id')} ({amb.get('type')})\n"
                     f"- **Severity**: {amb.get('severity')}\n"

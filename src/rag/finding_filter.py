@@ -231,7 +231,12 @@ class FindingRelevanceFilter:
     ) -> str:
         """Assigns 4-tier severity (CRITICAL, HIGH, MEDIUM, LOW)."""
         cat_lower = (category or "").lower()
-        text_block = (title + " " + quote + " " + explanation + " " + impact + " " + category).lower()
+        title_str = str(title or "")
+        quote_str = str(quote or "")
+        exp_str = str(explanation or "")
+        imp_str = str(impact or "")
+        cat_str = str(category or "")
+        text_block = f"{title_str} {quote_str} {exp_str} {imp_str} {cat_str}".lower()
 
         if any(w in text_block for w in ["regulatory audit failure", "legal liability", "contract breach", "penalty", "statutory violation", "gender", "statutory disclosure", "board appointment", "secretarial audit", "companies act", "director"]):
             return "CRITICAL"

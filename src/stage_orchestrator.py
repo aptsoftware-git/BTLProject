@@ -320,6 +320,17 @@ class StageOrchestrator:
         synthesize an equivalent minimal StructuredDocument so the rest of
         the pipeline is unaffected.
         """
+        docling_path = self.job_dir / "02_docling" / "structured_document.json"
+        if not docling_path.exists():
+            docling_path = self.job_dir / "structured_document.json"
+        if docling_path.exists() and docling_path.stat().st_size > 0:
+            try:
+                with open(docling_path, "r", encoding="utf-8") as f:
+                    logger.info("Reusing existing Docling structured_document.json for job %s", self.job_id)
+                    return json.load(f)
+            except Exception as e:
+                logger.warning("Could not load existing docling file: %s", e)
+
         try:
             from src.rag.multimodal_extractor import MultimodalExtractor
 
@@ -377,9 +388,20 @@ class StageOrchestrator:
         logger.info("START Stage 2")
         sentences_json = self.job_dir / "04_sentences" / "sentences.json"
         sentence_map_json = self.job_dir / "04_sentences" / "page_sentence_map.json"
+        sentence_lookup_json = self.job_dir / "04_sentences" / "sentence_lookup_index.json"
 
-        # Cache check
-        if sentences_json.exists() and sentence_map_json.exists() and sentence_map_json.stat().st_size > 0:
+        # Cache check. sentence_lookup_index.json is required here alongside
+        # sentences.json/page_sentence_map.json: it is the sole carrier of
+        # source_element_id/source_bbox provenance that finding_mapper.py and
+        # pdf_bbox_resolver.py depend on downstream. Jobs extracted before
+        # this file existed (or with it otherwise missing/empty) previously
+        # passed this cache check anyway, silently never regenerating it --
+        # Stage 4 would then load an empty lookup_index and auto-reject every
+        # finding as "ungrounded sentence/page provenance".
+        if (
+            sentences_json.exists() and sentence_map_json.exists() and sentence_map_json.stat().st_size > 0
+            and sentence_lookup_json.exists() and sentence_lookup_json.stat().st_size > 0
+        ):
             logger.info("[CACHE HIT] Stage 2 (Extraction) already completed for job %s", self.job_id)
             self.update_stage_state(stage_id, "Completed", duration=0.0, output_location="04_sentences/page_sentence_map.json")
             job = self.get_job()
@@ -576,6 +598,7 @@ class StageOrchestrator:
     def run_stage_4_grammar(self) -> None:
         stage_id = "stage_4_grammar"
         report_file = self.job_dir / "10_final" / "report.json"
+        mapped_findings_file = self.job_dir / "10_final" / "mapped_findings.json"
         spell_file = self.job_dir / "06_spell" / "spell_candidates.json"
         sentences_file = self.job_dir / "04_sentences" / "sentences.json"
 
@@ -595,9 +618,9 @@ class StageOrchestrator:
             logger.error("Stage 4 (Grammar) blocked for job %s: spell_candidates.json missing", self.job_id)
             return
 
-        # Cache check — only a report.json newer than every upstream input it
-        # was built from counts as "already done".
-        if not _artifact_is_stale(report_file, spell_file, sentences_file):
+        # Cache check — only if both report.json AND mapped_findings.json are newer
+        # than every upstream input count as "already done".
+        if not _artifact_is_stale(report_file, spell_file, sentences_file) and not _artifact_is_stale(mapped_findings_file, spell_file, sentences_file):
             logger.info("[CACHE HIT] Stage 4 (Grammar) already completed for job %s", self.job_id)
             self.update_stage_state(stage_id, "Completed", duration=0.0, output_location="10_final/report.json")
             job = self.get_job()

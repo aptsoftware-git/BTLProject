@@ -28,6 +28,32 @@ RUNNING_TEXT_TYPES = {"paragraph", "heading", "list_item", "text"}
 # before the hyphen, so this pattern only ever matches the punctuation case.
 _DASH_GLUE_RE = re.compile(r"(?<=\s)-(?=[a-zA-Z])")
 
+# Runs of 2+ regular spaces inside a line of extracted text. Verified against
+# this pipeline's own Docling output: these already exist verbatim in
+# structured_document.json element text (not introduced by any joining code
+# here), concentrated in justified-text PDFs where the renderer stretches
+# inter-word gaps -- Docling's gap-based word-boundary heuristic then reads
+# the stretched gap as "more than one space". Collapsing them is a standard,
+# document-agnostic text-extraction normalization (the same class of fix as
+# _normalize_dash_artifacts above), not a per-document exclusion: it never
+# touches single spaces, so a genuine missing/extra single space between two
+# distinct words is untouched and still reaches Spell/Grammar normally.
+_MULTI_SPACE_RE = re.compile(r"[^\S\n]{2,}")
+
+# "7 th" / "33 rd" -- a digit immediately followed by a bare ordinal suffix
+# separated by whitespace. Also verified present verbatim in Docling's raw
+# element text: PDFs commonly render the ordinal suffix as a separate
+# (often superscript) run, and Docling's extraction inserts a synthetic
+# space between it and the digit that has no visual counterpart in the
+# document. Only fires on the exact digit+suffix shape, so it cannot touch
+# unrelated words.
+_ORDINAL_SUFFIX_GLUE_RE = re.compile(r"(?<=\d)\s+(?=(?:st|nd|rd|th)\b)", re.IGNORECASE)
+
+
+def _normalize_whitespace_artifacts(text: str) -> str:
+    text = _ORDINAL_SUFFIX_GLUE_RE.sub("", text)
+    return _MULTI_SPACE_RE.sub(" ", text)
+
 
 def _normalize_dash_artifacts(text: str) -> str:
     return _DASH_GLUE_RE.sub("- ", text)
@@ -69,7 +95,7 @@ def build_page_text_and_blocks(structured_document: Dict[str, Any]) -> List[Dict
         el_type = str(el.get("type") or "").lower()
         if el_type not in RUNNING_TEXT_TYPES:
             continue
-        text = _normalize_dash_artifacts((el.get("text") or "").strip())
+        text = _normalize_whitespace_artifacts(_normalize_dash_artifacts((el.get("text") or "").strip()))
         if not text:
             continue
         metadata = el.get("metadata") or {}
