@@ -20,8 +20,39 @@ export default function FindingPopover({ finding, style, onAccept, onReject, onC
   const severityStyle = SEVERITY_COLORS[String(finding.severity || "medium").toLowerCase()] || SEVERITY_COLORS.medium;
   const isDone = finding.status === "accepted" || finding.status === "rejected";
 
+  const handleClose = (e) => {
+    if (e) {
+      e.stopPropagation();
+      e.preventDefault();
+    }
+    if (onClose) {
+      onClose();
+    }
+  };
+
+  const handleAccept = (e) => {
+    if (e) {
+      e.stopPropagation();
+      e.preventDefault();
+    }
+    if (onAccept) {
+      onAccept(finding.finding_id);
+    }
+  };
+
+  const handleReject = (e) => {
+    if (e) {
+      e.stopPropagation();
+      e.preventDefault();
+    }
+    if (onReject) {
+      onReject(finding.finding_id);
+    }
+  };
+
   return (
     <div
+      onClick={(e) => e.stopPropagation()}
       style={{
         position: "absolute",
         zIndex: 60,
@@ -40,7 +71,9 @@ export default function FindingPopover({ finding, style, onAccept, onReject, onC
           {finding.error_type ? finding.error_type.toUpperCase() : "ISSUE"}
         </span>
         <button
-          onClick={onClose}
+          type="button"
+          onClick={handleClose}
+          aria-label="Close"
           style={{ background: "none", border: "none", color: "#94a3b8", cursor: "pointer", fontSize: "14px", fontWeight: 700, lineHeight: 1 }}
         >
           ✕
@@ -77,13 +110,15 @@ export default function FindingPopover({ finding, style, onAccept, onReject, onC
       ) : (
         <div style={{ display: "flex", gap: "8px" }}>
           <button
-            onClick={() => onAccept(finding.finding_id)}
+            type="button"
+            onClick={handleAccept}
             style={{ flex: 1, background: "#166534", color: "#ffffff", border: "none", borderRadius: "6px", padding: "7px 0", fontSize: "12px", fontWeight: 700, cursor: "pointer" }}
           >
             Accept
           </button>
           <button
-            onClick={() => onReject(finding.finding_id)}
+            type="button"
+            onClick={handleReject}
             style={{ flex: 1, background: "#991b1b", color: "#ffffff", border: "none", borderRadius: "6px", padding: "7px 0", fontSize: "12px", fontWeight: 700, cursor: "pointer" }}
           >
             Reject

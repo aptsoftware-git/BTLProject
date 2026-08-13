@@ -18,21 +18,41 @@ export default function IssueCardList({
   onUndoFinding,
   documentStatus,
 }) {
+  const groundedFindings = useMemo(() => {
+    return (findings || []).filter((f) => {
+      if (!f) return false;
+      if (f.pdf_grounded !== true) return false;
+      if (!f.bbox || f.bbox === null) return false;
+      if (f.status === "Unanchored" || f.status === "unanchored") return false;
+      let bboxes = [];
+      if (typeof f.bbox === "object" && !Array.isArray(f.bbox) && "x0" in f.bbox) {
+        bboxes = [f.bbox];
+      } else if (Array.isArray(f.bbox)) {
+        if (f.bbox.length === 4 && typeof f.bbox[0] === "number") {
+          bboxes = [{ x0: f.bbox[0], y0: f.bbox[1], x1: f.bbox[2], y1: f.bbox[3] }];
+        } else {
+          bboxes = f.bbox.filter((b) => b && (typeof b.x0 === "number" || (Array.isArray(b) && b.length === 4)));
+        }
+      }
+      return bboxes.length > 0;
+    });
+  }, [findings]);
+
   const reviewedCount = useMemo(
-    () => findings.filter((f) => f.status === "accepted" || f.status === "rejected").length,
-    [findings]
+    () => groundedFindings.filter((f) => f.status === "accepted" || f.status === "rejected").length,
+    [groundedFindings]
   );
-  const total = findings.length;
+  const total = groundedFindings.length;
   const pct = total > 0 ? Math.round((reviewedCount / total) * 100) : 0;
 
   const counts = useMemo(() => {
     let accepted = 0, rejected = 0;
-    for (const f of findings) {
+    for (const f of groundedFindings) {
       if (f.status === "accepted") accepted++;
       else if (f.status === "rejected") rejected++;
     }
-    return { accepted, rejected, pending: findings.length - accepted - rejected };
-  }, [findings]);
+    return { accepted, rejected, pending: groundedFindings.length - accepted - rejected };
+  }, [groundedFindings]);
 
   const emptyStateMessage = () => {
     if (documentStatus === "processing" || documentStatus === "pending") {
@@ -50,17 +70,17 @@ export default function IssueCardList({
     return "No findings yet.";
   };
 
-  const selectedIndex = findings.findIndex((f) => f.finding_id === selectedFindingId);
+  const selectedIndex = groundedFindings.findIndex((f) => f.finding_id === selectedFindingId);
 
   const goPrev = () => {
     if (total === 0) return;
     const idx = selectedIndex <= 0 ? total - 1 : selectedIndex - 1;
-    onSelectFinding && onSelectFinding(findings[idx].finding_id, findings[idx]);
+    onSelectFinding && onSelectFinding(groundedFindings[idx].finding_id, groundedFindings[idx]);
   };
   const goNext = () => {
     if (total === 0) return;
     const idx = selectedIndex >= total - 1 ? 0 : selectedIndex + 1;
-    onSelectFinding && onSelectFinding(findings[idx].finding_id, findings[idx]);
+    onSelectFinding && onSelectFinding(groundedFindings[idx].finding_id, groundedFindings[idx]);
   };
 
   return (
@@ -109,7 +129,7 @@ export default function IssueCardList({
           {emptyStateMessage()}
         </div>
       ) : (
-        findings.map((f) => {
+        groundedFindings.map((f) => {
           const isSelected = f.finding_id === selectedFindingId;
           const isDone = f.status === "accepted" || f.status === "rejected";
           const origText = f.original_text || f.original || "";
@@ -117,7 +137,7 @@ export default function IssueCardList({
           const errType = f.issue_type || f.error_type || "Spelling";
           const sev = (f.severity || "MEDIUM").toUpperCase();
           const reasonText = f.reason || f.explanation || "Spelling / grammar correction suggested";
-          const isGrounded = f.pdf_grounded !== false && !!f.bbox;
+          const isGrounded = f.pdf_grounded === true && !!f.bbox;
 
           const sevStyle = sev === "HIGH" || sev === "CRITICAL"
             ? { color: "#dc2626", background: "#fee2e2" }
@@ -151,21 +171,12 @@ export default function IssueCardList({
                     Page {f.page_number}
                   </span>
                 </div>
-                {!isGrounded ? (
-                  <span
-                    title="Couldn't be located on original PDF page -- navigates to page without highlight."
-                    style={{ fontSize: "10px", fontWeight: 800, color: "#9a3412", background: "#ffedd5", border: "1px solid #fdba74", padding: "1px 7px", borderRadius: "999px" }}
-                  >
-                    Unanchored
-                  </span>
-                ) : (
-                  <span
-                    title="Located at exact bounding box on original PDF page"
-                    style={{ fontSize: "10px", fontWeight: 800, color: "#166534", background: "#dcfce7", border: "1px solid #86efac", padding: "1px 7px", borderRadius: "999px" }}
-                  >
-                    PDF Grounded
-                  </span>
-                )}
+                <span
+                  title="Located at exact bounding box on original PDF page"
+                  style={{ fontSize: "10px", fontWeight: 800, color: "#166534", background: "#dcfce7", border: "1px solid #86efac", padding: "1px 7px", borderRadius: "999px" }}
+                >
+                  PDF Grounded
+                </span>
               </div>
 
               {/* Original Text -> Suggested Correction */}

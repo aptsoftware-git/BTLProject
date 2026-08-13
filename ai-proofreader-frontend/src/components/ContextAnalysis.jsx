@@ -118,7 +118,11 @@ export default function ContextAnalysis({ id, doc: propDoc, onShowInDocument }) 
 
     async function checkStatus() {
       try {
-        const docData = await fetchDocument(id);
+        const [docData, reportsLoaded] = await Promise.all([
+          fetchDocument(id),
+          fetchReports()
+        ]);
+
         if (!active) return;
         setDocProgress(docData);
 
@@ -129,23 +133,18 @@ export default function ContextAnalysis({ id, doc: propDoc, onShowInDocument }) 
         const isStage6Failed = stage6State === "failed" || stage6State === "blocked" || docData?.context_analysis_status === "failed";
         const stage6Error = stage6Obj?.errors || docData?.error;
 
-        if (isStage6Complete) {
+        if (reportsLoaded || isStage6Complete) {
           setRunning(false);
-          const reportsLoaded = await fetchReports();
+          setError(null);
           if (!reportsLoaded) {
-            timerId = setTimeout(checkStatus, 2000);
+            timerId = setTimeout(checkStatus, 1500);
           }
         } else if (isStage6Failed) {
           setRunning(false);
           setError(stage6Error || "Ambiguity analysis pipeline encountered an error.");
         } else {
           setRunning(true);
-          const reportsLoaded = await fetchReports();
-          if (reportsLoaded) {
-            setRunning(false);
-          } else {
-            timerId = setTimeout(checkStatus, 2500);
-          }
+          timerId = setTimeout(checkStatus, 2000);
         }
       } catch (err) {
         if (active) setError("Connection error: " + err.message);
@@ -177,7 +176,16 @@ export default function ContextAnalysis({ id, doc: propDoc, onShowInDocument }) 
 
       if (final) setFinalReport(final);
       if (claude) setClaudeReport(claude);
-      return !!(final || claude);
+
+      const finalData = final?.data || (final?.findings ? final : null);
+      const claudeData = claude?.data || (claude?.verified_findings ? claude : null);
+
+      const hasValidData = Boolean(
+        (finalData && Array.isArray(finalData.findings)) ||
+        (claudeData && Array.isArray(claudeData.verified_findings))
+      );
+
+      return hasValidData;
     } catch (e) {
       console.error("Error fetching ambiguity reports", e);
       return false;
@@ -334,11 +342,20 @@ export default function ContextAnalysis({ id, doc: propDoc, onShowInDocument }) 
     });
   }, [verifiedFindings, selectedSeverity, selectedCategory, searchTerm]);
 
+  const hasValidReport = useMemo(() => {
+    const finalData = finalReport?.data || (finalReport?.findings ? finalReport : null);
+    const claudeData = claudeReport?.data || (claudeReport?.verified_findings ? claudeReport : null);
+    return Boolean(
+      (finalData && Array.isArray(finalData.findings)) ||
+      (claudeData && Array.isArray(claudeData.verified_findings))
+    );
+  }, [finalReport, claudeReport]);
+
   const stage6Obj = docProgress?.stages?.find(s => s.stage_id === "stage_6_context");
   const stage6State = stage6Obj?.status?.toLowerCase() || docProgress?.context_analysis_status?.toLowerCase() || (running ? "running" : "pending");
-  const isStage6Complete = (stage6State === "completed" || docProgress?.context_analysis_ready === true) && finalReport !== null;
-  const isStage6Failed = stage6State === "failed" || stage6State === "blocked" || docProgress?.context_analysis_status === "failed";
-  const isStage6Running = !isStage6Complete && !isStage6Failed;
+  const isStage6Complete = stage6State === "completed" || docProgress?.context_analysis_ready === true || hasValidReport;
+  const isStage6Failed = (stage6State === "failed" || stage6State === "blocked" || docProgress?.context_analysis_status === "failed") && !hasValidReport;
+  const isStage6Running = !hasValidReport && !isStage6Complete && !isStage6Failed;
 
   if (loading) {
     return (

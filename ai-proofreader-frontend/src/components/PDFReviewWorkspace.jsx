@@ -150,18 +150,19 @@ export default function PDFReviewWorkspace({
   }
 
   const calculateOptimalZoom = (unionBbox) => {
-    if (!scrollContainerRef.current || !unionBbox) return 1.35;
+    if (!scrollContainerRef.current || !unionBbox) return 1.5;
     const cWidth = scrollContainerRef.current.clientWidth || 800;
     const cHeight = scrollContainerRef.current.clientHeight || 600;
 
-    const bboxW = Math.max(12, unionBbox.x1 - unionBbox.x0);
-    const bboxH = Math.max(12, unionBbox.y1 - unionBbox.y0);
+    const bboxW = Math.max(16, unionBbox.x1 - unionBbox.x0);
+    const bboxH = Math.max(16, unionBbox.y1 - unionBbox.y0);
 
-    const fitWZoom = (cWidth * 0.65) / bboxW;
-    const fitHZoom = (cHeight * 0.5) / bboxH;
+    // Calculate zoom level to make the error word/phrase prominent (approx 35-45% of viewport)
+    const fitWZoom = (cWidth * 0.45) / bboxW;
+    const fitHZoom = (cHeight * 0.35) / bboxH;
 
     const idealZoom = Math.min(fitWZoom, fitHZoom);
-    return Math.max(1.25, Math.min(1.75, idealZoom));
+    return Math.max(1.5, Math.min(2.2, idealZoom));
   };
 
   const performFocusAndCenter = (targetObj, currentZoom = zoomLevel) => {
@@ -178,14 +179,21 @@ export default function PDFReviewWorkspace({
     const pageTop = pageEl.offsetTop;
     const pageLeft = pageEl.offsetLeft;
 
-    const centerX = ((unionBbox.x0 + unionBbox.x1) / 2) * currentZoom;
-    const centerY = ((unionBbox.y0 + unionBbox.y1) / 2) * currentZoom;
+    let targetScrollTop = pageTop;
+    let targetScrollLeft = 0;
 
-    const absoluteX = pageLeft + centerX;
-    const absoluteY = pageTop + centerY;
+    if (unionBbox) {
+      const centerX = ((unionBbox.x0 + unionBbox.x1) / 2) * currentZoom;
+      const centerY = ((unionBbox.y0 + unionBbox.y1) / 2) * currentZoom;
 
-    const targetScrollTop = Math.max(0, absoluteY - cHeight / 2);
-    const targetScrollLeft = Math.max(0, absoluteX - cWidth / 2);
+      const absoluteX = pageLeft + centerX;
+      const absoluteY = pageTop + centerY;
+
+      targetScrollTop = Math.max(0, absoluteY - cHeight / 2);
+      targetScrollLeft = Math.max(0, absoluteX - cWidth / 2);
+    } else {
+      targetScrollTop = Math.max(0, pageTop - 20);
+    }
 
     container.scrollTo({
       top: targetScrollTop,
@@ -205,11 +213,11 @@ export default function PDFReviewWorkspace({
     const attemptScroll = () => {
       attempts++;
       const pageEl = document.getElementById(`pdf-page-${targetObj.pageNumber}`);
-      const canvasEl = pageEl?.querySelector("canvas");
-      if (pageEl && canvasEl && canvasEl.clientHeight > 0) {
+      if (pageEl) {
         performFocusAndCenter(targetObj, effectiveZoom);
-      } else if (attempts < 25) {
-        focusRetryTimeoutRef.current = setTimeout(attemptScroll, 60);
+      }
+      if (attempts < 12) {
+        focusRetryTimeoutRef.current = setTimeout(attemptScroll, 100);
       }
     };
 
@@ -240,6 +248,15 @@ export default function PDFReviewWorkspace({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [activeFocusTarget, viewMode, zoomLevel]);
 
+  const handleClosePopover = (e) => {
+    if (e && e.stopPropagation) {
+      e.stopPropagation();
+    }
+    setPopoverFindingId(null);
+    setSelectedFindingId(null);
+    setActiveFocusTarget(null);
+  };
+
   const handleSelectFinding = (findingId, findingObj) => {
     const target = findingObj || findings.find((f) => f.finding_id === findingId);
     if (!target) return;
@@ -247,7 +264,7 @@ export default function PDFReviewWorkspace({
     setSelectedFindingId(findingId);
 
     if (viewMode === "pdf") {
-      const isGrounded = target.pdf_grounded !== false && !!target.bbox;
+      const isGrounded = target.pdf_grounded === true && !!target.bbox;
       const bboxes = isGrounded ? normalizeBboxes(target.bbox) : [];
 
       if (isGrounded && bboxes.length > 0) {
@@ -725,7 +742,7 @@ export default function PDFReviewWorkspace({
                   const isSelectedPage = activeFocusTarget?.pageNumber === pNum;
                   const isNearVisibleWindow = Math.abs(pNum - visiblePage) <= 3 || isSelectedPage || numPages <= 10;
                   const pageFindings = findings.filter(
-                    (f) => f.page_number === pNum && f.pdf_grounded && f.bbox && f.status !== "rejected"
+                    (f) => f.page_number === pNum && f.pdf_grounded === true && f.bbox && f.status !== "rejected"
                   );
                   return (
                     <div
@@ -808,7 +825,7 @@ export default function PDFReviewWorkspace({
                                             style={{ top: height + 6, left: 0 }}
                                             onAccept={(id) => { handleAcceptFinding(id); }}
                                             onReject={(id) => { handleRejectFinding(id); }}
-                                            onClose={() => setPopoverFindingId(null)}
+                                            onClose={handleClosePopover}
                                           />
                                         )}
                                       </div>
