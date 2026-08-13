@@ -9,5 +9,8 @@
   "DNP3", "CIM", "OPC-UA", "SCADA-GIS", "AMR", "AMI", "Smart Meter", "Net Metering",
   "Discom", "Transcom", "Gencom", "CEA", "CERC", "SERC", "POSOCO", "GRID-INDIA", "REMC",
   "VRE", "BESS", "STATCOM", "FACTS", "HVDC LCC", "VSC", "UHV", "EHV", "RoFR", "TBCB",
-  "PPA", "PSA", "UDAY", "RDSS", "IPDS", "DDP", "APDRP", "R-APDRP"
+  "PPA", "PSA", "UDAY", "RDSS", "IPDS", "DDP", "APDRP", "R-APDRP",
+  "hydel", "hydel plant", "hydel power", "hydel project", "hydel station", "hydel generation",
+  "Fitchner", "Fichtner", "Fichtner Consulting", "Wärtsilä", "Wurtsila", "Hydroelectric",
+  "Captive Power", "National Infrastructure Pipeline", "PM Gati Shakti"
 ]

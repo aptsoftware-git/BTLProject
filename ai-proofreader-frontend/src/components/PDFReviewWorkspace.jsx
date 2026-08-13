@@ -60,7 +60,7 @@ export default function PDFReviewWorkspace({
   const scrollContainerRef = useRef(null);
   const pdfUrl = `${API_BASE_URL}/documents/${docId}/file`;
 
-  // Load findings whenever the document changes.
+  // Load findings whenever the document changes or proofreading completes.
   const loadFindings = () => {
     if (!docId) return;
     fetchFindings(docId)
@@ -73,6 +73,25 @@ export default function PDFReviewWorkspace({
     setViewModeInitialized(false);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [docId]);
+
+  const docStatus = documentData?.status;
+  const isProcessing = docStatus === "processing" || docStatus === "pending";
+  const isFailed = docStatus === "failed";
+  const isRecoverable = docStatus === "recoverable";
+  const isDone = docStatus === "completed" || docStatus === "completed_with_warnings";
+
+  const proofreadingReady = documentData?.proofreading_ready || documentData?.proofreading_status === "completed";
+  const proofreadingStatus = documentData?.proofreading_status || (proofreadingReady || isDone ? "completed" : "pending");
+  const proofreadingDone = proofreadingStatus === "completed" || proofreadingReady === true;
+  const sidebarStatus = proofreadingDone ? "completed" : docStatus;
+
+  // Re-fetch findings automatically as soon as proofreading becomes ready/completed
+  useEffect(() => {
+    if (proofreadingDone) {
+      loadFindings();
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [proofreadingDone, documentData?.proofreading_status, documentData?.proofreading_ready]);
 
   // Set the default tab exactly once per document, once we actually know
   // its file type -- PDF originals default to the real-PDF review surface;
@@ -91,40 +110,78 @@ export default function PDFReviewWorkspace({
     setFindings((prev) => prev.map((f) => (f.finding_id === findingId ? { ...f, status } : f)));
   };
 
+function normalizeBboxes(bbox) {
+  if (!bbox) return [];
+  if (typeof bbox === "object" && !Array.isArray(bbox) && "x0" in bbox) {
+    return [bbox];
+  }
+  if (Array.isArray(bbox)) {
+    if (bbox.length === 4 && typeof bbox[0] === "number") {
+      return [{ x0: bbox[0], y0: bbox[1], x1: bbox[2], y1: bbox[3] }];
+    }
+    return bbox
+      .map((b) => {
+        if (Array.isArray(b) && b.length === 4) {
+          return { x0: b[0], y0: b[1], x1: b[2], y1: b[3] };
+        }
+        return b;
+      })
+      .filter((b) => b && typeof b.x0 === "number");
+  }
+  return [];
+}
+
   const handleSelectFinding = (findingId, findingObj) => {
     const target = findingObj || findings.find((f) => f.finding_id === findingId);
+    if (!target) return;
 
     setSelectedFindingId(findingId);
 
     if (viewMode === "pdf") {
-      // Only a PDF-grounded finding has a real highlight box to flash/open
-      // a popover against; an "Unanchored" finding just navigates to its
-      // page with no fake highlight drawn.
-      if (target?.pdf_grounded && target?.bbox) {
+      const isGrounded = target.pdf_grounded !== false && !!target.bbox;
+      if (isGrounded) {
         setFlashingFindingId(findingId);
         setPopoverFindingId(findingId);
-        setTimeout(() => setFlashingFindingId(null), 1600);
+        setTimeout(() => {
+          setFlashingFindingId((current) => (current === findingId ? null : current));
+        }, 5000);
       } else {
         setPopoverFindingId(null);
       }
-      if (target) {
-        setVisiblePage(target.page_number);
-        setTimeout(() => {
-          const el = document.getElementById(`pdf-page-${target.page_number}`);
-          if (el) el.scrollIntoView({ behavior: "smooth", block: "start" });
-        }, 60);
-      }
+
+      setVisiblePage(target.page_number);
+
+      setTimeout(() => {
+        const pageEl = document.getElementById(`pdf-page-${target.page_number}`);
+        if (!pageEl || !scrollContainerRef.current) return;
+
+        const bboxes = normalizeBboxes(target.bbox);
+        let yOffset = 0;
+        if (bboxes.length > 0) {
+          yOffset = bboxes[0].y0 * zoomLevel;
+        }
+
+        const pageTop = pageEl.offsetTop;
+        const targetScrollTop = Math.max(0, pageTop + yOffset - 130);
+
+        scrollContainerRef.current.scrollTo({
+          top: targetScrollTop,
+          behavior: "smooth"
+        });
+      }, 80);
     } else {
       setFlashingFindingId(findingId);
-      setTimeout(() => setFlashingFindingId(null), 1600);
+      setTimeout(() => {
+        setFlashingFindingId((current) => (current === findingId ? null : current));
+      }, 5000);
       if (target) {
         setScrollRequest({ sentenceId: target.sentence_id, pageNumber: target.page_number, findingId: target.finding_id, nonce: Date.now() });
       }
     }
 
     setTimeout(() => {
-      const el = document.getElementById(`finding-card-${findingId}`);
-      if (el) el.scrollIntoView({ behavior: "smooth", block: "nearest" });
+      const cardEl = document.getElementById(`finding-card-${findingId}`);
+      if (cardEl) cardEl.scrollIntoView({ behavior: "smooth", block: "nearest" });
     }, 150);
   };
 
@@ -259,18 +316,7 @@ export default function PDFReviewWorkspace({
   const renderedHeight = pageDimensions.height * zoomLevel;
   const pageNumbers = Array.from({ length: numPages }, (_, i) => i + 1);
 
-  const docStatus = documentData?.status;
-  const isProcessing = docStatus === "processing" || docStatus === "pending";
-  const isFailed = docStatus === "failed";
-  const isRecoverable = docStatus === "recoverable";
-  const isDone = docStatus === "completed" || docStatus === "completed_with_warnings";
 
-  // Gate "0 issues" on the proofreading pipeline actually having finished --
-  // never infer completion from an empty findings array, which is
-  // indistinguishable from "hasn't run yet" while the pipeline is mid-flight.
-  const proofreadingStatus = documentData?.proofreading_status || (isDone ? "completed" : "pending");
-  const proofreadingDone = proofreadingStatus === "completed";
-  const sidebarStatus = proofreadingDone ? docStatus : "processing";
 
   return (
     <div
@@ -298,9 +344,50 @@ export default function PDFReviewWorkspace({
           position: "relative"
         }}
       >
-        {/* Live Stage Processing Status Header -- one branch per job status,
-            so "failed"/"recoverable" never look like generic "in progress". */}
-        {isProcessing && (
+        {/* Live Stage Processing Status Header -- scoped to Proofreading pipeline completion */}
+        {proofreadingDone ? (
+          <div style={{
+            background: "#f0fdf4",
+            borderBottom: "1px solid #22c55e",
+            padding: "8px 16px",
+            fontSize: "12px",
+            display: "flex",
+            justifyContent: "space-between",
+            alignItems: "center",
+            zIndex: 25
+          }}>
+            <div style={{ display: "flex", alignItems: "center", gap: "12px", flexWrap: "wrap" }}>
+              <span style={{ background: "#16a34a", color: "#ffffff", fontSize: "10px", fontWeight: 800, padding: "2px 6px", borderRadius: "4px" }}>
+                PROOFREADING COMPLETED
+              </span>
+              <span><strong>Status:</strong> Completed</span>
+              <span>•</span>
+              <span><strong>Progress:</strong> 100%</span>
+              {documentData?.total_pages > 0 && (
+                <>
+                  <span>•</span>
+                  <span><strong>Pages:</strong> {documentData.total_pages}/{documentData.total_pages}</span>
+                </>
+              )}
+              {documentData?.total_batches > 0 && (
+                <>
+                  <span>•</span>
+                  <span><strong>Batch:</strong> {documentData.total_batches}/{documentData.total_batches}</span>
+                </>
+              )}
+              <span>•</span>
+              <span><strong>ETA:</strong> 0s</span>
+              {isProcessing && (
+                <span style={{ color: "#64748b", fontStyle: "italic", fontSize: "11px" }}>
+                  (Downstream RAG & reports processing in background)
+                </span>
+              )}
+            </div>
+            <button onClick={handleRerunProofreading} style={{ ...styles.ctrlBtn, background: "#dcfce7", color: "#15803d", border: "1px solid #22c55e" }} disabled={isRerunning}>
+              {isRerunning ? "Rerunning..." : "↻ Rerun Proofreading"}
+            </button>
+          </div>
+        ) : isProcessing ? (
           <div style={{
             background: "#fffbeb",
             borderBottom: "1px solid #f59e0b",
@@ -315,29 +402,29 @@ export default function PDFReviewWorkspace({
               <span style={{ background: "#d97706", color: "#ffffff", fontSize: "10px", fontWeight: 800, padding: "2px 6px", borderRadius: "4px" }}>
                 PROOFREADING SCAN IN PROGRESS
               </span>
-              <span><strong>Status:</strong> {documentData.current_stage || "Scanning Text & Grammar Issues"}</span>
+              <span><strong>Status:</strong> {documentData?.current_stage || "Scanning Text & Grammar Issues"}</span>
               <span>•</span>
-              <span><strong>Progress:</strong> {documentData.overall_progress || Math.round(documentData.progress_percentage || 45)}%</span>
-              {documentData.total_pages > 0 && (
+              <span><strong>Progress:</strong> {documentData?.overall_progress || Math.round(documentData?.progress_percentage || 45)}%</span>
+              {documentData?.total_pages > 0 && (
                 <>
                   <span>•</span>
-                  <span><strong>Pages:</strong> {documentData.current_page || 0}/{documentData.total_pages}</span>
+                  <span><strong>Pages:</strong> {documentData?.current_page || 0}/{documentData?.total_pages}</span>
                 </>
               )}
-              {documentData.total_batches > 0 && (
+              {documentData?.total_batches > 0 && (
                 <>
                   <span>•</span>
-                  <span><strong>Batch:</strong> {documentData.current_batch || 0}/{documentData.total_batches}</span>
+                  <span><strong>Batch:</strong> {documentData?.current_batch || 0}/{documentData?.total_batches}</span>
                 </>
               )}
               <span>•</span>
-              <span><strong>ETA:</strong> {documentData.estimated_remaining_time || "~1 min"}</span>
+              <span><strong>ETA:</strong> {documentData?.estimated_remaining_time || "~1 min"}</span>
             </div>
             <button onClick={handleRerunProofreading} style={{ ...styles.ctrlBtn, background: "var(--brand-light)", color: "var(--brand)", border: "1px solid var(--brand)" }} disabled={isRerunning}>
               {isRerunning ? "Rerunning..." : "↻ Rerun Proofreading"}
             </button>
           </div>
-        )}
+        ) : null}
 
         {isFailed && (
           <div style={{
@@ -543,41 +630,63 @@ export default function PDFReviewWorkspace({
                           <div style={{ position: "absolute", inset: 0, pointerEvents: "none" }}>
                             {pageFindings.map((f) => {
                               const isAccepted = f.status === "accepted";
+                              const isSelected = f.finding_id === selectedFindingId;
                               const isFlashing = f.finding_id === flashingFindingId;
-                              const left = f.bbox.x0 * zoomLevel;
-                              const top = f.bbox.y0 * zoomLevel;
-                              const width = Math.max(4, (f.bbox.x1 - f.bbox.x0) * zoomLevel);
-                              const height = Math.max(4, (f.bbox.y1 - f.bbox.y0) * zoomLevel);
-                              return (
-                                <div
-                                  key={f.finding_id}
-                                  style={{
-                                    position: "absolute",
-                                    left, top, width, height,
-                                    pointerEvents: "auto",
-                                    cursor: "pointer",
-                                    background: isAccepted ? "rgba(22,101,52,0.18)" : "rgba(245,158,11,0.28)",
-                                    border: isAccepted ? "1.5px solid #166534" : "1.5px solid #d97706",
-                                    borderRadius: "2px",
-                                    boxShadow: isFlashing ? "0 0 0 4px rgba(79,70,229,0.45)" : "none",
-                                    transition: "box-shadow 0.2s ease",
-                                  }}
-                                  onClick={(e) => {
-                                    e.stopPropagation();
-                                    handleSelectFinding(f.finding_id, f);
-                                  }}
-                                >
-                                  {popoverFindingId === f.finding_id && (
-                                    <FindingPopover
-                                      finding={f}
-                                      style={{ top: height + 6, left: 0 }}
-                                      onAccept={(id) => { handleAcceptFinding(id); }}
-                                      onReject={(id) => { handleRejectFinding(id); }}
-                                      onClose={() => setPopoverFindingId(null)}
-                                    />
-                                  )}
-                                </div>
-                              );
+                              const bboxes = normalizeBboxes(f.bbox);
+
+                              return bboxes.map((b, bIdx) => {
+                                const left = b.x0 * zoomLevel;
+                                const top = b.y0 * zoomLevel;
+                                const width = Math.max(6, (b.x1 - b.x0) * zoomLevel);
+                                const height = Math.max(6, (b.y1 - b.y0) * zoomLevel);
+
+                                const bg = isAccepted
+                                  ? (isSelected ? "rgba(22, 101, 52, 0.35)" : "rgba(22, 101, 52, 0.18)")
+                                  : (isSelected || isFlashing ? "rgba(79, 70, 229, 0.38)" : "rgba(245, 158, 11, 0.28)");
+
+                                const border = isAccepted
+                                  ? (isSelected ? "2px solid #15803d" : "1.5px solid #166534")
+                                  : (isSelected || isFlashing ? "2.5px solid #4f46e5" : "1.5px solid #d97706");
+
+                                const boxShadow = isSelected || isFlashing
+                                  ? "0 0 0 4px rgba(79, 70, 229, 0.45), 0 0 16px rgba(79, 70, 229, 0.7)"
+                                  : "none";
+
+                                return (
+                                  <div
+                                    key={`${f.finding_id}-${bIdx}`}
+                                    style={{
+                                      position: "absolute",
+                                      left,
+                                      top,
+                                      width,
+                                      height,
+                                      pointerEvents: "auto",
+                                      cursor: "pointer",
+                                      background: bg,
+                                      border,
+                                      borderRadius: "3px",
+                                      boxShadow,
+                                      zIndex: isSelected || isFlashing ? 30 : 10,
+                                      transition: "all 0.15s ease",
+                                    }}
+                                    onClick={(e) => {
+                                      e.stopPropagation();
+                                      handleSelectFinding(f.finding_id, f);
+                                    }}
+                                  >
+                                    {bIdx === 0 && popoverFindingId === f.finding_id && (
+                                      <FindingPopover
+                                        finding={f}
+                                        style={{ top: height + 6, left: 0 }}
+                                        onAccept={(id) => { handleAcceptFinding(id); }}
+                                        onReject={(id) => { handleRejectFinding(id); }}
+                                        onClose={() => setPopoverFindingId(null)}
+                                      />
+                                    )}
+                                  </div>
+                                );
+                              });
                             })}
                           </div>
                         </>

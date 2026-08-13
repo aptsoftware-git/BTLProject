@@ -79,6 +79,8 @@ class GrammarAgent:
 
     def __init__(self, config: OllamaConfig) -> None:
         self.config = config
+        import logging
+        self.logger = logging.getLogger("pipeline")
 
     def run(
         self,
@@ -108,30 +110,43 @@ class GrammarAgent:
             return []
 
         all_candidates: List[Candidate] = []
+        total_paragraphs = len(paragraphs_data)
+        successful_paragraphs = 0
+        failed_paragraphs = 0
 
         chunks = [paragraphs_data[i : i + batch_size] for i in range(0, len(paragraphs_data), batch_size)]
+        self.logger.info(
+            "GrammarAgent: Calling Ollama (model: '%s', host: '%s') across %d paragraph(s) in %d batch(es)...",
+            self.config.model, self.config.host, total_paragraphs, len(chunks)
+        )
+
+        def safe_process_item(item: dict) -> List[Candidate]:
+            nonlocal successful_paragraphs, failed_paragraphs
+            protected_str = ", ".join(sorted({t.text for t in item.get("protected_terms", []) if hasattr(t, "text")})) or "(none)"
+            prompt = _PROMPT_TEMPLATE.format(protected_terms=protected_str, paragraph_text=item["text"])
+            try:
+                raw = self._call_ollama(prompt)
+                errors = self._parse_json(raw)
+                cands = self._candidates_from_errors(item["text"], item["doc_char_start"], errors, sentence_id_for_offset_lookup)
+                successful_paragraphs += 1
+                return cands
+            except Exception as exc:
+                failed_paragraphs += 1
+                self.logger.warning("GrammarAgent paragraph processing failed for offset %d: %s", item.get("doc_char_start", 0), exc)
+                return []
 
         def process_chunk(chunk: List[dict]) -> List[Candidate]:
+            nonlocal successful_paragraphs, failed_paragraphs
             chunk_candidates: List[Candidate] = []
             if len(chunk) == 1:
-                item = chunk[0]
-                protected_str = ", ".join(sorted({t.text for t in item["protected_terms"]})) or "(none)"
-                prompt = _PROMPT_TEMPLATE.format(protected_terms=protected_str, paragraph_text=item["text"])
-                try:
-                    raw = self._call_ollama(prompt)
-                    errors = self._parse_json(raw)
-                    chunk_candidates.extend(
-                        self._candidates_from_errors(item["text"], item["doc_char_start"], errors, sentence_id_for_offset_lookup)
-                    )
-                except Exception:
-                    pass
-                return chunk_candidates
+                return safe_process_item(chunk[0])
 
             all_protected = set()
             formatted_paragraphs = []
             for idx, p_item in enumerate(chunk, 1):
                 for t in p_item.get("protected_terms", []):
-                    all_protected.add(t.text)
+                    if hasattr(t, "text"):
+                        all_protected.add(t.text)
                 formatted_paragraphs.append(f"[Paragraph {idx}]\n{p_item['text']}\n")
 
             protected_str = ", ".join(sorted(all_protected)) or "(none)"
@@ -144,31 +159,26 @@ class GrammarAgent:
             try:
                 raw = self._call_ollama(prompt)
                 batch_data = self._parse_batch_json(raw)
-                if batch_data:
+                if batch_data and isinstance(batch_data, list):
                     batch_success = True
                     for p_res in batch_data:
+                        if not isinstance(p_res, dict):
+                            continue
                         p_idx = p_res.get("paragraph_index", 0) - 1
                         if 0 <= p_idx < len(chunk):
                             item = chunk[p_idx]
                             errors = p_res.get("errors", [])
-                            chunk_candidates.extend(
-                                self._candidates_from_errors(item["text"], item["doc_char_start"], errors, sentence_id_for_offset_lookup)
-                            )
-            except Exception:
+                            cands = self._candidates_from_errors(item["text"], item["doc_char_start"], errors, sentence_id_for_offset_lookup)
+                            chunk_candidates.extend(cands)
+                            successful_paragraphs += 1
+            except Exception as batch_exc:
+                self.logger.warning("GrammarAgent batch call failed (%s); falling back to single paragraph items.", batch_exc)
                 batch_success = False
 
             if not batch_success:
                 for item in chunk:
-                    protected_str = ", ".join(sorted({t.text for t in item["protected_terms"]})) or "(none)"
-                    prompt = _PROMPT_TEMPLATE.format(protected_terms=protected_str, paragraph_text=item["text"])
-                    try:
-                        raw = self._call_ollama(prompt)
-                        errors = self._parse_json(raw)
-                        chunk_candidates.extend(
-                            self._candidates_from_errors(item["text"], item["doc_char_start"], errors, sentence_id_for_offset_lookup)
-                        )
-                    except Exception:
-                        pass
+                    chunk_candidates.extend(safe_process_item(item))
+
             return chunk_candidates
 
         if len(chunks) > 1:
@@ -182,6 +192,10 @@ class GrammarAgent:
             for c in chunks:
                 all_candidates.extend(process_chunk(c))
 
+        self.logger.info(
+            "GrammarAgent Review Summary — Paragraphs Total: %d, Successful: %d, Failed: %d, Candidates Generated: %d",
+            total_paragraphs, successful_paragraphs, failed_paragraphs, len(all_candidates)
+        )
         return all_candidates
 
     def _candidates_from_errors(
@@ -194,28 +208,40 @@ class GrammarAgent:
         candidates = []
         used_positions: Dict[str, int] = {}
         for err in errors:
-            original = err.get("original", "").strip()
-            corrected = err.get("corrected", "").strip()
+            if not isinstance(err, dict):
+                continue
+            original = str(err.get("original", "") or "").strip()
+            corrected = str(err.get("corrected", "") or "").strip()
             if not original or original == corrected:
                 continue
             span = self._locate_span(paragraph_text, original, used_positions)
             if span is None:
                 continue
             start, end = span
-            sent_id = sentence_id_for_offset_lookup(paragraph_doc_offset + start)
-            sent_obj = sentence_id_for_offset_lookup(paragraph_doc_offset + start, return_object=True) if hasattr(sentence_id_for_offset_lookup, "__code__") and "return_object" in sentence_id_for_offset_lookup.__code__.co_varnames else None
+            char_start = paragraph_doc_offset + start
+            char_end = paragraph_doc_offset + end
+
+            sent_id = sentence_id_for_offset_lookup(char_start)
+            sent_obj = None
+            try:
+                if hasattr(sentence_id_for_offset_lookup, "__code__") and "return_object" in sentence_id_for_offset_lookup.__code__.co_varnames:
+                    sent_obj = sentence_id_for_offset_lookup(char_start, return_object=True)
+            except Exception:
+                sent_obj = None
+
             page_num = getattr(sent_obj, "page", 1) if sent_obj else 1
             bbox_val = getattr(sent_obj, "bbox", None) if sent_obj else None
+
             candidates.append(Candidate(
                 sentence_id=sent_id,
-                char_start=paragraph_doc_offset + start,
-                char_end=paragraph_doc_offset + end,
+                char_start=char_start,
+                char_end=char_end,
                 original_text=original,
                 suggested_text=corrected,
-                issue_type=self._map_type(err.get("type", "grammar")),
+                issue_type=self._map_type(str(err.get("type", "grammar"))),
                 source=SourceAgent.LLM,
-                reason=err.get("reason", ""),
-                confidence=0.7,
+                reason=str(err.get("reason", "") or "Grammar/style suggestion from LLM"),
+                confidence=0.75,
                 page_number=page_num,
                 bbox=bbox_val,
             ))
@@ -231,10 +257,6 @@ class GrammarAgent:
                         "model": self.config.model, "prompt": prompt, "stream": False,
                         "options": {
                             "temperature": self.config.temperature,
-                            # Threads used for THIS generation (distinct from
-                            # server-side request concurrency) -- lets a
-                            # CPU-only host actually use all its cores per
-                            # call instead of Ollama's conservative default.
                             "num_thread": getattr(self.config, "num_thread", None) or (os.cpu_count() or 4),
                         },
                     },
@@ -242,34 +264,51 @@ class GrammarAgent:
                 )
                 resp.raise_for_status()
                 return resp.json().get("response", "")
-            except (requests.ConnectionError, requests.Timeout) as e:
+            except (requests.ConnectionError, requests.Timeout, requests.HTTPError) as e:
                 last_error = e
                 if attempt <= self.config.max_retries:
-                    time.sleep(1.5 * attempt)  # brief backoff before retrying over the network
+                    time.sleep(1.5 * attempt)
         raise RuntimeError(
             f"Could not reach Ollama at {self.config.host} after {self.config.max_retries + 1} "
-            f"attempts. Check the IP, that 'ollama serve' is bound to 0.0.0.0 (not just "
-            f"127.0.0.1) on that machine, and that nothing blocks port 11434 between the two "
-            f"machines. Last error: {last_error}"
+            f"attempts. Last error: {last_error}"
         )
 
     @staticmethod
-    def _parse_json(raw: str) -> List[dict]:
-        # strip stray markdown fences the model sometimes adds despite instructions
-        cleaned = re.sub(r"^```(json)?|```$", "", raw.strip(), flags=re.MULTILINE).strip()
-        try:
-            data = json.loads(cleaned)
-            return data.get("errors", [])
-        except (json.JSONDecodeError, AttributeError):
-            return []  # fail closed: no candidates rather than a crash
+    def _extract_json_string(raw: str) -> str:
+        if not raw:
+            return ""
+        cleaned = re.sub(r"^```(?:json)?|```$", "", raw.strip(), flags=re.MULTILINE).strip()
+        # Find first '{' or '[' and last '}' or ']'
+        first_brace = min([i for i in [cleaned.find("{"), cleaned.find("[")] if i != -1], default=-1)
+        last_brace = max([cleaned.rfind("}"), cleaned.rfind("]")], default=-1)
+        if first_brace != -1 and last_brace != -1 and last_brace > first_brace:
+            return cleaned[first_brace : last_brace + 1]
+        return cleaned
 
-    @staticmethod
-    def _parse_batch_json(raw: str) -> List[dict]:
-        cleaned = re.sub(r"^```(json)?|```$", "", raw.strip(), flags=re.MULTILINE).strip()
+    @classmethod
+    def _parse_json(cls, raw: str) -> List[dict]:
+        json_str = cls._extract_json_string(raw)
+        if not json_str:
+            return []
         try:
-            data = json.loads(cleaned)
+            data = json.loads(json_str)
             if isinstance(data, dict):
-                return data.get("paragraph_results", [])
+                return data.get("errors", [])
+            elif isinstance(data, list):
+                return data
+            return []
+        except (json.JSONDecodeError, AttributeError):
+            return []
+
+    @classmethod
+    def _parse_batch_json(cls, raw: str) -> List[dict]:
+        json_str = cls._extract_json_string(raw)
+        if not json_str:
+            return []
+        try:
+            data = json.loads(json_str)
+            if isinstance(data, dict):
+                return data.get("paragraph_results", []) or data.get("errors", [])
             elif isinstance(data, list):
                 return data
             return []

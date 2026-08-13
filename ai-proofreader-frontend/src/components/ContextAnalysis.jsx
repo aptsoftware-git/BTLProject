@@ -122,25 +122,30 @@ export default function ContextAnalysis({ id, doc: propDoc, onShowInDocument }) 
         if (!active) return;
         setDocProgress(docData);
 
-        const isContextComplete = docData.context_analysis_status === "completed" || docData.status === "completed";
-        const isContextRunning = docData.context_analysis_status === "running" || docData.context_analysis_status === "pending";
+        const stage6Obj = docData?.stages?.find(s => s.stage_id === "stage_6_context");
+        const stage6State = stage6Obj?.status?.toLowerCase() || docData?.context_analysis_status?.toLowerCase() || "pending";
 
-        if (isContextComplete) {
+        const isStage6Complete = stage6State === "completed" || docData?.context_analysis_ready === true;
+        const isStage6Failed = stage6State === "failed" || stage6State === "blocked" || docData?.context_analysis_status === "failed";
+        const stage6Error = stage6Obj?.errors || docData?.error;
+
+        if (isStage6Complete) {
           setRunning(false);
-          await fetchReports();
-        } else if (isContextRunning) {
-          setRunning(true);
-          timerId = setTimeout(checkStatus, 2500);
-        } else if (docData.context_analysis_ready) {
+          const reportsLoaded = await fetchReports();
+          if (!reportsLoaded) {
+            timerId = setTimeout(checkStatus, 2000);
+          }
+        } else if (isStage6Failed) {
           setRunning(false);
-          await fetchReports();
-        } else if (docData.context_analysis_status === "failed") {
-          setRunning(false);
-          setError("Ambiguity analysis pipeline encountered an error.");
+          setError(stage6Error || "Ambiguity analysis pipeline encountered an error.");
         } else {
           setRunning(true);
-          await runContextAnalysis(id).catch(() => {});
-          timerId = setTimeout(checkStatus, 2500);
+          const reportsLoaded = await fetchReports();
+          if (reportsLoaded) {
+            setRunning(false);
+          } else {
+            timerId = setTimeout(checkStatus, 2500);
+          }
         }
       } catch (err) {
         if (active) setError("Connection error: " + err.message);
@@ -172,8 +177,10 @@ export default function ContextAnalysis({ id, doc: propDoc, onShowInDocument }) 
 
       if (final) setFinalReport(final);
       if (claude) setClaudeReport(claude);
+      return !!(final || claude);
     } catch (e) {
       console.error("Error fetching ambiguity reports", e);
+      return false;
     }
   };
 
@@ -327,7 +334,11 @@ export default function ContextAnalysis({ id, doc: propDoc, onShowInDocument }) 
     });
   }, [verifiedFindings, selectedSeverity, selectedCategory, searchTerm]);
 
-  const isPipelineRunning = running || (docProgress && (docProgress.context_analysis_status === "running" || docProgress.context_analysis_status === "pending"));
+  const stage6Obj = docProgress?.stages?.find(s => s.stage_id === "stage_6_context");
+  const stage6State = stage6Obj?.status?.toLowerCase() || docProgress?.context_analysis_status?.toLowerCase() || (running ? "running" : "pending");
+  const isStage6Complete = (stage6State === "completed" || docProgress?.context_analysis_ready === true) && finalReport !== null;
+  const isStage6Failed = stage6State === "failed" || stage6State === "blocked" || docProgress?.context_analysis_status === "failed";
+  const isStage6Running = !isStage6Complete && !isStage6Failed;
 
   if (loading) {
     return (
@@ -338,34 +349,51 @@ export default function ContextAnalysis({ id, doc: propDoc, onShowInDocument }) 
     );
   }
 
-  return (
-    <div style={styles.container}>
-      {/* ---------------------------------------------------- */}
-      {/* 1. Compact Processing Banner                        */}
-      {/* ---------------------------------------------------- */}
-      {isPipelineRunning && (
-        <div style={styles.progressBanner}>
-          <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
-            <span style={styles.pulseDot} />
-            <strong style={{ fontSize: 13, color: "var(--amber)" }}>
-              Stage 6 Contextual Ambiguity Review in Progress
-            </strong>
-            <span style={{ fontSize: 12, color: "var(--text-secondary)" }}>
-              ({docProgress?.overall_progress || Math.round(docProgress?.progress_percentage || 70)}% complete)
+  if (isStage6Failed || (error && !finalReport)) {
+    return (
+      <div style={{ ...styles.container, padding: 24 }}>
+        <div style={{ background: "#fef2f2", border: "1px solid #fca5a5", borderRadius: 12, padding: 20 }}>
+          <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 8 }}>
+            <span style={{ background: "#dc2626", color: "#ffffff", fontSize: 11, fontWeight: 800, padding: "2px 8px", borderRadius: 4 }}>
+              AMBIGUITY ANALYSIS FAILED
             </span>
+            <strong style={{ fontSize: 14, color: "#991b1b" }}>Stage 6 Review Encountered an Error</strong>
           </div>
+          <p style={{ fontSize: 13, color: "#7f1d1d", margin: "8px 0 16px" }}>
+            {error || stage6Obj?.errors || "The ambiguity analysis pipeline could not complete processing for this document."}
+          </p>
+          <button onClick={handleRerun} style={{ ...styles.rerunBtn, background: "#dc2626", color: "#ffffff" }}>
+            ↻ Re-trigger Stage 6 Analysis
+          </button>
+        </div>
+      </div>
+    );
+  }
 
-          <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
-            <span style={{ fontSize: 11.5, color: "var(--text-muted)" }}>
-              Est. Remaining: {docProgress?.estimated_remaining_time || "~1 min"}
-            </span>
-            <button onClick={handleRerun} style={styles.retryBtn}>
-              ↻ Re-trigger
-            </button>
+  if (isStage6Running) {
+    return (
+      <div style={{ ...styles.container, padding: 24 }}>
+        <div style={{ background: "#fffbeb", border: "1px solid #fcd34d", borderRadius: 12, padding: 24, textAlign: "center" }}>
+          <div style={{ display: "inline-flex", alignItems: "center", gap: 8, background: "#fef3c7", padding: "6px 14px", borderRadius: 20, marginBottom: 12 }}>
+            <span style={styles.pulseDot} />
+            <strong style={{ fontSize: 13, color: "#d97706" }}>Stage 6 Contextual Ambiguity Review in Progress</strong>
+          </div>
+          <h3 style={{ margin: "8px 0 6px", fontSize: 16, color: "#92400e" }}>Auditing Document Ambiguities & Contradictions...</h3>
+          <p style={{ margin: "0 auto 16px", maxWidth: 540, fontSize: 13, color: "#b45309", lineHeight: 1.5 }}>
+            Evaluating cross-chunk contradictions, numerical mismatches, referential ambiguities, and structural conflicts across document clauses. Verified disclosures will appear automatically upon completion.
+          </p>
+          <div style={{ display: "flex", justifyContent: "center", alignItems: "center", gap: 16, fontSize: 12, color: "#78350f" }}>
+            <span><strong>Status:</strong> {stage6Obj?.name || "Consistency & Contradiction Review"} ({stage6State.toUpperCase()})</span>
+            <span>•</span>
+            <span><strong>Est. Remaining:</strong> {docProgress?.estimated_remaining_time || "~1 min"}</span>
           </div>
         </div>
-      )}
+      </div>
+    );
+  }
 
+  return (
+    <div style={styles.container}>
       {/* ---------------------------------------------------- */}
       {/* 2. Workspace Header                                  */}
       {/* ---------------------------------------------------- */}

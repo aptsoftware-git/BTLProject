@@ -53,12 +53,15 @@ BRITISH_AMERICAN_PAIRS = {
 }
 
 
+import re
+
+
 class ValidationAgent:
     """Filters candidate corrections against protected terms and strict proofreading scope."""
 
     def __init__(self, protected_terms: List[ProtectedTerm]) -> None:
         self.protected_terms = protected_terms
-        self.protected_texts = {p.text.lower().strip() for p in protected_terms}
+        self.protected_texts = {p.text.lower().strip(): p for p in protected_terms if p.text}
 
     def _is_british_american_swap(self, orig: str, sug: str) -> bool:
         if (orig, sug) in BRITISH_AMERICAN_PAIRS or (sug, orig) in BRITISH_AMERICAN_PAIRS:
@@ -76,23 +79,48 @@ class ValidationAgent:
             return True
         return False
 
-    def validate(self, candidates: List[Candidate]) -> Tuple[List[ValidatedIssue], List[ValidatedIssue]]:
+    def _find_protected_match(self, orig_lower: str, sug_lower: str, char_start: Optional[int], char_end: Optional[int]) -> Optional[ProtectedTerm]:
+        # 1. Span-based overlap check
+        if char_start is not None and char_end is not None and char_start >= 0 and char_end > char_start:
+            hit = ProtectedTermsBuilder.overlaps(char_start, char_end, self.protected_terms)
+            if hit:
+                return hit
+
+        if not orig_lower:
+            return None
+
+        # 2. Exact string match check
+        if orig_lower in self.protected_texts:
+            return self.protected_texts[orig_lower]
+        if sug_lower in self.protected_texts:
+            return self.protected_texts[sug_lower]
+
+        # 3. Multi-word phrase containment check (e.g. "hydel" inside protected term "hydel plant")
+        for term_text_lower, term_obj in self.protected_texts.items():
+            words = set(re.findall(r"\b[A-Za-z0-9'-]+\b", term_text_lower))
+            if len(words) > 1:
+                if orig_lower in words or sug_lower in words:
+                    return term_obj
+
+        return None
+
+    def validate(self, candidates: List[Candidate | dict]) -> Tuple[List[ValidatedIssue], List[ValidatedIssue]]:
         """Returns (accepted, rejected)."""
         accepted: List[ValidatedIssue] = []
         rejected: List[ValidatedIssue] = []
-        for candidate in candidates:
-            hit = ProtectedTermsBuilder.overlaps(candidate.char_start, candidate.char_end, self.protected_terms)
-            
+        for item in candidates:
+            candidate = Candidate(**item) if isinstance(item, dict) else item
             orig_lower = (candidate.original_text or "").strip().lower()
             sug_lower = (candidate.suggested_text or "").strip().lower()
             type_str = str(candidate.issue_type or "").lower()
             reason_str = str(candidate.reason or "").lower()
 
+            hit = self._find_protected_match(orig_lower, sug_lower, candidate.char_start, candidate.char_end)
+
             reject_reason = None
             if hit:
-                reject_reason = f"Protected Vocabulary ({hit.reason})"
-            elif orig_lower in self.protected_texts or sug_lower in self.protected_texts:
-                reject_reason = "Protected Vocabulary Match"
+                reason_name = str(hit.reason or "PROTECTED_TERM").upper().replace(" ", "_")
+                reject_reason = f"PROTECTED_{reason_name}"
             elif self._is_british_american_swap(orig_lower, sug_lower):
                 reject_reason = "Out of Scope (British/American Spelling Preference)"
             elif any(kw in type_str or kw in reason_str for kw in REJECTED_KEYWORDS):

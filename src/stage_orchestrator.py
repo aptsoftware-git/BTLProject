@@ -499,6 +499,7 @@ class StageOrchestrator:
     # ------------------------------------------------------------------
     def run_stage_3_spell(self) -> None:
         stage_id = "stage_3_spell"
+        logger.info("START Stage 3 (Language & Spelling Review) for job %s", self.job_id)
         spell_file = self.job_dir / "06_spell" / "spell_candidates.json"
         sentences_path = self.job_dir / "04_sentences" / "sentences.json"
 
@@ -528,6 +529,10 @@ class StageOrchestrator:
 
         start_time = datetime.now()
         self.update_stage_state(stage_id, "Running", start_time=start_time.isoformat())
+        job = self.get_job()
+        if job:
+            job["current_stage"] = "Stage 3: Language & Spelling Review"
+            self.save_job()
 
         try:
             from src.languagetool_agent import LanguageToolAgent
@@ -542,6 +547,7 @@ class StageOrchestrator:
 
             sentences_data = load_json(sentences_path)
             all_sentences = [Sentence(**s) if isinstance(s, dict) else s for s in sentences_data]
+            logger.info("Stage 3: Running LanguageTool & SymSpell analysis across %d sentence(s)...", len(all_sentences))
 
             lt_agent = LanguageToolAgent(self.config.languagetool)
             spell_agent = SpellAgent(self.config.symspell)
@@ -583,7 +589,7 @@ class StageOrchestrator:
                 job["spell_ready"] = True
                 self.save_job()
 
-            logger.info("Stage 3 (Spell) completed in %.2fs for job %s", duration, self.job_id)
+            logger.info("END Stage 3: Language & Spelling Review completed in %.2fs (%d candidate findings extracted)", duration, len(all_candidates))
 
         except Exception as exc:
             end_time = datetime.now()
@@ -597,6 +603,7 @@ class StageOrchestrator:
     # ------------------------------------------------------------------
     def run_stage_4_grammar(self) -> None:
         stage_id = "stage_4_grammar"
+        logger.info("START Stage 4 (Grammar & Writing Quality Review) for job %s", self.job_id)
         report_file = self.job_dir / "10_final" / "report.json"
         mapped_findings_file = self.job_dir / "10_final" / "mapped_findings.json"
         spell_file = self.job_dir / "06_spell" / "spell_candidates.json"
@@ -633,6 +640,10 @@ class StageOrchestrator:
 
         start_time = datetime.now()
         self.update_stage_state(stage_id, "Running", start_time=start_time.isoformat())
+        job = self.get_job()
+        if job:
+            job["current_stage"] = "Stage 4: Grammar & Writing Quality Review"
+            self.save_job()
 
         try:
             from src.grammar_agent import GrammarAgent
@@ -654,6 +665,7 @@ class StageOrchestrator:
 
             spell_cands_raw = load_json(spell_file) if spell_file.exists() else []
             all_candidates = [Candidate(**c) if isinstance(c, dict) else c for c in spell_cands_raw]
+            logger.info("Stage 4: Loaded %d spelling candidate(s) from Stage 3 for job %s", len(all_candidates), self.job_id)
 
             sentences_raw = load_json(sentences_file) if sentences_file.exists() else []
             all_sentences = [Sentence(**s) if isinstance(s, dict) else s for s in sentences_raw]
@@ -665,37 +677,55 @@ class StageOrchestrator:
 
             # LLM Grammar Agent
             grammar_agent = GrammarAgent(self.config.ollama)
-            if self.config.ollama.model and self.config.ollama.model.lower() != "none":
-                # Divide sentences into paragraph chunks
-                paragraphs = []
-                current_p = []
-                for s in all_sentences:
-                    current_p.append(s.text)
-                    if len(current_p) >= 3:
-                        paragraphs.append(" ".join(current_p))
-                        current_p = []
-                if current_p:
-                    paragraphs.append(" ".join(current_p))
+            llm_grammar_candidates: List[Candidate] = []
 
-                para_items = []
-                for p_text in paragraphs:
-                    para_items.append({
+            def sentence_lookup(offset: int, return_object: bool = False):
+                for s in all_sentences:
+                    if s.char_start <= offset < s.char_end or (s.char_start <= offset <= s.char_end and s == all_sentences[-1]):
+                        return s if return_object else s.sentence_id
+                if all_sentences:
+                    return all_sentences[0] if return_object else all_sentences[0].sentence_id
+                return None if return_object else -1
+
+            if self.config.ollama.model and self.config.ollama.model.lower() != "none" and all_sentences:
+                paragraphs_data = []
+                current_s_group = []
+                for s in all_sentences:
+                    current_s_group.append(s)
+                    if len(current_s_group) >= 3:
+                        p_text = " ".join([st.text for st in current_s_group])
+                        p_start = current_s_group[0].char_start
+                        paragraphs_data.append({
+                            "text": p_text,
+                            "doc_char_start": p_start,
+                            "protected_terms": protected_terms,
+                        })
+                        current_s_group = []
+                if current_s_group:
+                    p_text = " ".join([st.text for st in current_s_group])
+                    p_start = current_s_group[0].char_start
+                    paragraphs_data.append({
                         "text": p_text,
-                        "doc_char_start": 0,
+                        "doc_char_start": p_start,
                         "protected_terms": protected_terms,
                     })
 
                 try:
-                    para_cands = grammar_agent.run_batch(para_items, lambda off: -1, batch_size=15)
-                    all_candidates.extend(para_cands)
+                    logger.info("Stage 4: Running LLM grammar review batch across %d paragraph(s)...", len(paragraphs_data))
+                    llm_grammar_candidates = grammar_agent.run_batch(paragraphs_data, sentence_lookup, batch_size=15)
                 except Exception as exc:
                     logger.warning("Grammar review (Ollama batch) failed in Stage 4: %s", exc)
 
             grammar_dir = self.job_dir / "07_grammar"
             grammar_dir.mkdir(parents=True, exist_ok=True)
-            save_json(all_candidates, grammar_dir / "grammar_candidates.json")
+            # Deterministic artifact guarantee: grammar_candidates.json is ALWAYS created
+            save_json(llm_grammar_candidates, grammar_dir / "grammar_candidates.json")
+
+            # Combine Stage 3 spell candidates + Stage 4 LLM grammar candidates for downstream validation/merge
+            all_candidates.extend(llm_grammar_candidates)
 
             # Validation
+            logger.info("Stage 4: Validating %d candidate(s) against protected terms shield...", len(all_candidates))
             validator = ValidationAgent(protected_terms)
             accepted, rejected = validator.validate(all_candidates)
             save_json(accepted, self.job_dir / "08_validation" / "accepted.json")
@@ -718,6 +748,7 @@ class StageOrchestrator:
             save_json(semantically_failed, self.job_dir / "09_semantic" / "semantic_failed.json")
 
             # Difference Engine & Merge Agent
+            logger.info("Stage 4: Running difference engine & merging confirmed findings...")
             diff_engine = DifferenceEngine(norm_text)
             confirmed = diff_engine.run(semantically_passed)
             merge_agent = MergeAgent(self.config.merge)
@@ -742,13 +773,7 @@ class StageOrchestrator:
             TextWriter.write(changes_md, final_dir / "changes.md")
             TextWriter.write(summary_csv, final_dir / "summary.csv")
 
-            # Enrich the (unmodified) report_generator output with sentence_id /
-            # word-level highlight offsets for the review UI.
-            #
-            # This is NOT wrapped in a try/except that swallows failures: if
-            # finding mapping fails, Stage 4 must fail (see outer except
-            # below) rather than leave stale/missing mapped_findings.json
-            # while still reporting "Completed".
+            logger.info("Stage 4: Mapping %d issue(s) to sentence lookup & resolving PDF bounding boxes...", len(rep_json.get("issues", [])))
             from src.finding_mapper import build_findings, save_findings
             from src.config import load_preferences
 
@@ -765,11 +790,6 @@ class StageOrchestrator:
                 protected_terms=protected_terms_raw, spelling_standard=spelling_standard,
             )
 
-            # Resolve real PDF coordinates from Docling provenance so the
-            # review UI can highlight the exact word/phrase on the original
-            # PDF page. This never fails the stage: a resolution failure
-            # just leaves those findings ungrounded (pdf_grounded=False),
-            # since a missing highlight is acceptable but a fake one is not.
             try:
                 from src.pdf_bbox_resolver import resolve_bboxes
                 findings = resolve_bboxes(findings, self.file_path)

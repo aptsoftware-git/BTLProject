@@ -2,21 +2,21 @@
   "doc_hash": "full_cache_hit_hash_00000000000000000000",
   "original_filename": "test_enterprise.pdf",
   "created_at": "2026-07-22T17:07:20.821533",
-  "last_updated": "2026-08-11T13:16:11.158932",
+  "last_updated": "2026-08-11T16:33:49.777630",
   "pipeline_version": "2.0.0",
   "prompt_version": "1.0.0",
   "embedding_model_version": "all-MiniLM-L6-v2",
   "completed_stages": [
-    "embeddings",
-    "claude_verification",
-    "proofreading",
-    "claim_extraction",
-    "extraction",
-    "semantic_clusters",
-    "chunk_reasoning",
-    "chunks",
-    "final_report",
     "cluster_reasoning",
-    "claude_input"
+    "claude_input",
+    "semantic_clusters",
+    "claude_verification",
+    "final_report",
+    "embeddings",
+    "extraction",
+    "chunks",
+    "chunk_reasoning",
+    "claim_extraction",
+    "proofreading"
   ]
 }

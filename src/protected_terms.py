@@ -203,9 +203,25 @@ class ProtectedTermsBuilder:
 
     def _named_entities(self, text: str) -> List[ProtectedTerm]:
         doc = self.nlp(text)
+        LABEL_TO_REASON = {
+            "PERSON": "PERSON_NAME",
+            "ORG": "ORGANIZATION",
+            "GPE": "LOCATION",
+            "LOC": "LOCATION",
+            "FAC": "LOCATION",
+            "PRODUCT": "PRODUCT_NAME",
+            "EVENT": "PROJECT_NAME",
+            "WORK_OF_ART": "PROJECT_NAME",
+            "NORP": "PROPER_NOUN",
+            "LAW": "TECHNICAL_TERM",
+        }
         return [
-            ProtectedTerm(text=ent.text, char_start=ent.start_char, char_end=ent.end_char,
-                          reason=f"NER:{ent.label_}")
+            ProtectedTerm(
+                text=ent.text,
+                char_start=ent.start_char,
+                char_end=ent.end_char,
+                reason=LABEL_TO_REASON.get(ent.label_, f"NER_{ent.label_}")
+            )
             for ent in doc.ents if ent.label_ in self.protected_entity_labels
         ]
 
@@ -222,18 +238,24 @@ class ProtectedTermsBuilder:
         for m in re.finditer(r"\b[a-zA-Z]\b", text):
             val = m.group()
             if val not in ("a", "A", "I"):
-                out.append(ProtectedTerm(text=val, char_start=m.start(), char_end=m.end(), reason="single letter variable"))
+                out.append(ProtectedTerm(text=val, char_start=m.start(), char_end=m.end(), reason="TECHNICAL_TERM"))
         return out
 
     def _author_first_page_terms(self, text: str) -> List[ProtectedTerm]:
         out = []
-        # Title/author block usually occupies first 2500 characters
         first_part = text[:2500]
-        # Match capitalized words
         for m in re.finditer(r"\b[A-ZŁŚŹŻĆŃÓ][a-zA-Złśźżćńó']+\b", first_part):
             word = m.group()
-            if word.lower() not in self.common_words:
-                out.append(ProtectedTerm(text=word, char_start=m.start(), char_end=m.end(), reason="first page proper noun/author"))
+            word_lower = word.lower()
+            start = m.start()
+            preceding = text[max(0, start - 5):start].rstrip()
+            is_sentence_start = (start == 0) or (len(preceding) > 0 and preceding[-1] in ".?!")
+
+            if is_sentence_start and word_lower not in self.dict_words:
+                continue
+
+            if word_lower not in self.common_words:
+                out.append(ProtectedTerm(text=word, char_start=m.start(), char_end=m.end(), reason="PERSON_NAME"))
         return out
 
     def _tech_vocabulary_terms(self, text: str) -> List[ProtectedTerm]:
@@ -248,24 +270,14 @@ class ProtectedTermsBuilder:
             "statcom", "facts", "plc", "dcs", "rtu", "ied", "gis", "ais", "bess", "ppa", "psa",
             "discom", "genco", "transco", "appc", "rec", "escert", "pat", "rpo", "rgo", "mop",
             "mnre", "niti", "aayog", "cpri", "ntpc", "powergrid", "nhpc", "sjvn", "thdc", "eesl", "seci",
-            "attention", "self-attention", "multi-head", "feed-forward", "scaled-dot",
-            "encoder", "decoder", "transduction", "transformer", "sublayer", "dimension",
-            "perplexity", "softmax", "residual", "normalization", "embeddings", "hyperparameters",
-            "dropout", "bleu", "adam", "tensor", "codebase", "convolutional", "recurrent",
-            "recurrents", "convolutions", "sequence", "sequences", "checkpoint", "tokenization",
-            "tokens", "token", "vector", "vectors", "matrix", "matrices", "gradient", "gradients",
-            "backpropagation", "neural", "network", "networks", "linear", "projection", "projections",
-            "weight", "weights", "bias", "biases", "layer", "layers", "learning", "rate", "rates",
-            "epoch", "epochs", "batch", "batches", "dataset", "datasets", "corpus", "corpora",
-            "vocabulary", "vocabularies", "embedding", "parameters", "parameter", "activation",
-            "activations", "regularization", "optimizer", "optimizers", "loss", "losses",
-            "training", "inference", "architectures", "architecture", "model", "models",
-            "baseline", "baselines", "state-of-the-art", "feedforward", "layernorm", "tensor2tensor",
-            "deep", "learning", "machine", "translation", "nlp", "ai", "seq2seq", "convseq"
+            "hydel", "hydroelectric", "switchyard", "substation", "feedforward", "layernorm",
+            "attention", "self-attention", "multi-head", "transformer", "encoder", "decoder",
+            "fitchner", "fichtner", "wartsila", "wurtsila"
         }
         for w in tech_words:
             for m in re.finditer(r"\b" + re.escape(w) + r"\b", text, re.IGNORECASE):
-                out.append(ProtectedTerm(text=m.group(), char_start=m.start(), char_end=m.end(), reason="DL/CS/Enterprise terminology"))
+                reason = "DOMAIN_TERM" if w in ("hydel", "hydroelectric", "switchyard", "substation", "discom", "genco", "transco") else "TECHNICAL_TERM"
+                out.append(ProtectedTerm(text=m.group(), char_start=m.start(), char_end=m.end(), reason=reason))
         return out
 
     def _explicit_whitelist(self, text: str) -> List[ProtectedTerm]:
@@ -276,9 +288,6 @@ class ProtectedTermsBuilder:
         return out
 
     def _auto_whitelist_repeated_tokens(self, text: str) -> List[ProtectedTerm]:
-        """A word that looks unusual but appears identically 2+ times is far
-        more likely a name/technical term than a typo (typos rarely repeat
-        with the exact same misspelling across a document)."""
         tokens = re.findall(r"\b[A-Za-z][A-Za-z'-]{2,}\b", text)
         counts = Counter(w.lower() for w in tokens)
         out = []
@@ -288,12 +297,12 @@ class ProtectedTermsBuilder:
                     continue
                 if tok_lower in self.dict_words:
                     for m in re.finditer(r"\b" + re.escape(tok_lower) + r"\b", text, re.IGNORECASE):
-                        out.append(ProtectedTerm(text=m.group(), char_start=m.start(), char_end=m.end(), reason=f"repeated {n}x valid term"))
+                        out.append(ProtectedTerm(text=m.group(), char_start=m.start(), char_end=m.end(), reason="DOMAIN_TERM"))
                 else:
                     for m in re.finditer(r"\b" + re.escape(tok_lower) + r"\b", text, re.IGNORECASE):
                         val = m.group()
                         if any(c.isupper() for c in val):
-                            out.append(ProtectedTerm(text=val, char_start=m.start(), char_end=m.end(), reason=f"repeated {n}x proper noun/code"))
+                            out.append(ProtectedTerm(text=val, char_start=m.start(), char_end=m.end(), reason="PROPER_NOUN"))
         return out
 
     _PRONOUNS = {
@@ -308,32 +317,45 @@ class ProtectedTermsBuilder:
 
     def _detect_person_names(self, text: str) -> List[ProtectedTerm]:
         out = []
-        # Match titles followed by capitalized names, or multiple capitalized words
-        # e.g., Dr. Ramesh Kumar, John Smith, Alice Johnson
+        # Title + name or multi-word capitalized names/surnames
         pattern = re.compile(
-            r"\b(?:Dr\.|Prof\.|Mr\.|Mrs\.|Ms\.)\s+[A-Z][a-zA-Z]+(?:\s+[A-Z][a-zA-Z]+)*\b|"
-            r"\b[A-Z][a-zA-Z]+(?:\s+[A-Z][a-zA-Z]+){1,2}\b"
+            r"\b(?:Dr\.|Prof\.|Mr\.|Mrs\.|Ms\.|Eng\.|Shri|Smt\.|Er\.)\s+[A-Z][a-zA-Z0-9'-]+(?:\s+[A-Z][a-zA-Z0-9'-]+)*\b|"
+            r"\b[A-Z][a-zA-Z0-9'-]+(?:\s+[A-Z][a-zA-Z0-9'-]+){1,3}\b"
         )
         for m in pattern.finditer(text):
             val = m.group()
-            words = [w for w in re.findall(r"\b[A-Za-z]+\b", val)]
-            
-            # If the match starts with a common lowercase word or first word is a common noun/verb, skip
+            words = [w for w in re.findall(r"\b[A-Za-z0-9'-]+\b", val)]
             if words:
                 first_word_lower = words[0].lower()
-                # Skip if the first word is a very common lowercase English word (like The, A, In, On, We, They, etc.)
                 if first_word_lower in self.common_words:
                     continue
-                # Also check all words; if they are all very common dictionary words in lowercase, skip
                 if all(w.lower() in self.common_words for w in words):
                     continue
-            
             out.append(ProtectedTerm(
                 text=val,
                 char_start=m.start(),
                 char_end=m.end(),
-                reason="person name"
+                reason="PERSON_NAME" if any(t in val for t in ("Dr.", "Prof.", "Mr.", "Mrs.", "Ms.")) else "PROPER_NOUN"
             ))
+
+        # Single capitalized words that are proper surnames or rare proper nouns (e.g. "Fitchner", "Wärtsilä")
+        # Preceding character check prevents sentence-initial typos (e.g. "Recieve the report") from being treated as surnames.
+        single_cap_pattern = re.compile(r"\b[A-Z][a-zA-Z0-9'-]{2,}\b")
+        for m in single_cap_pattern.finditer(text):
+            val = m.group()
+            val_lower = val.lower()
+            start = m.start()
+            preceding = text[max(0, start - 5):start].rstrip()
+            is_sentence_start = (start == 0) or (len(preceding) > 0 and preceding[-1] in ".?!")
+            
+            if not is_sentence_start and val_lower not in self.common_words and val_lower not in self.dict_words:
+                out.append(ProtectedTerm(
+                    text=val,
+                    char_start=m.start(),
+                    char_end=m.end(),
+                    reason="PERSON_NAME"
+                ))
+
         return out
 
     def _detect_address_terms(self, text: str) -> List[ProtectedTerm]:

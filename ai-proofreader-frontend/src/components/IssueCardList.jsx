@@ -112,6 +112,16 @@ export default function IssueCardList({
         findings.map((f) => {
           const isSelected = f.finding_id === selectedFindingId;
           const isDone = f.status === "accepted" || f.status === "rejected";
+          const origText = f.original_text || f.original || "";
+          const sugText = f.suggested_text || f.suggestion || "";
+          const errType = f.issue_type || f.error_type || "Spelling";
+          const sev = (f.severity || "MEDIUM").toUpperCase();
+          const reasonText = f.reason || f.explanation || "Spelling / grammar correction suggested";
+          const isGrounded = f.pdf_grounded !== false && !!f.bbox;
+
+          const sevStyle = sev === "HIGH" || sev === "CRITICAL"
+            ? { color: "#dc2626", background: "#fee2e2" }
+            : (sev === "LOW" ? { color: "#475569", background: "#f1f5f9" } : { color: "#c2410c", background: "#ffedd5" });
 
           return (
             <div
@@ -120,56 +130,78 @@ export default function IssueCardList({
               onClick={() => onSelectFinding && onSelectFinding(f.finding_id, f)}
               style={{
                 background: isSelected ? "#eef2ff" : "#ffffff",
-                border: isSelected ? "1.5px solid #4f46e5" : "1px solid #e2e8f0",
+                border: isSelected ? "2px solid #4f46e5" : "1px solid #e2e8f0",
                 borderRadius: "10px",
                 padding: "12px 14px",
                 cursor: "pointer",
-                boxShadow: "0 1px 2px rgba(15,23,42,0.04)",
+                boxShadow: isSelected ? "0 4px 12px rgba(79,70,229,0.15)" : "0 1px 2px rgba(15,23,42,0.04)",
+                transition: "all 0.15s ease",
               }}
             >
-              <div style={{ fontSize: "13px", fontWeight: 650, marginBottom: "8px", opacity: isDone ? 0.55 : 1 }}>
-                <span style={{ color: "#991b1b", textDecoration: "line-through" }}>{f.original}</span>
-                {" → "}
-                <span style={{ color: "#166534" }}>{f.suggestion}</span>
-              </div>
-
-              <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-                <div style={{ display: "flex", gap: "6px" }}>
-                  <span style={categoryPillStyle(f.error_type)}>
-                    {f.error_type ? f.error_type.charAt(0).toUpperCase() + f.error_type.slice(1) : "Issue"}
+              {/* Card Header: Error Type + Severity + Page + Grounding */}
+              <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "8px", gap: "6px" }}>
+                <div style={{ display: "flex", gap: "6px", alignItems: "center", flexWrap: "wrap" }}>
+                  <span style={categoryPillStyle(errType)}>
+                    {errType.charAt(0).toUpperCase() + errType.slice(1)}
+                  </span>
+                  <span style={{ fontSize: "10px", fontWeight: 800, padding: "2px 7px", borderRadius: "999px", ...sevStyle }}>
+                    {sev}
                   </span>
                   <span style={{ fontSize: "10.5px", fontWeight: 700, color: "#64748b", background: "#f1f5f9", padding: "2px 8px", borderRadius: "999px" }}>
                     Page {f.page_number}
                   </span>
-                  {f.pdf_grounded === false && (
-                    <span
-                      title="Couldn't be located on the original PDF page -- no highlight is drawn for it."
-                      style={{ fontSize: "10.5px", fontWeight: 700, color: "#9a3412", background: "#ffedd5", padding: "2px 8px", borderRadius: "999px" }}
-                    >
-                      Unanchored
-                    </span>
-                  )}
                 </div>
-
-                {isDone ? (
-                  f.status === "accepted" ? (
-                    <span style={pillAccepted}>✓ Accepted</span>
-                  ) : (
-                    <span style={pillRejected}>✕ Rejected</span>
-                  )
+                {!isGrounded ? (
+                  <span
+                    title="Couldn't be located on original PDF page -- navigates to page without highlight."
+                    style={{ fontSize: "10px", fontWeight: 800, color: "#9a3412", background: "#ffedd5", border: "1px solid #fdba74", padding: "1px 7px", borderRadius: "999px" }}
+                  >
+                    Unanchored
+                  </span>
                 ) : (
-                  <div style={{ display: "flex", gap: "6px" }} onClick={(e) => e.stopPropagation()}>
-                    <button onClick={() => onAcceptFinding(f.finding_id)} style={acceptBtnStyle}>Accept</button>
-                    <button onClick={() => onRejectFinding(f.finding_id)} style={rejectBtnStyle}>Reject</button>
-                  </div>
+                  <span
+                    title="Located at exact bounding box on original PDF page"
+                    style={{ fontSize: "10px", fontWeight: 800, color: "#166534", background: "#dcfce7", border: "1px solid #86efac", padding: "1px 7px", borderRadius: "999px" }}
+                  >
+                    PDF Grounded
+                  </span>
                 )}
               </div>
 
-              {isDone && (
-                <div style={{ marginTop: "6px", textAlign: "right" }} onClick={(e) => e.stopPropagation()}>
-                  <button onClick={() => onUndoFinding(f.finding_id)} style={undoLinkStyle}>Undo</button>
-                </div>
-              )}
+              {/* Original Text -> Suggested Correction */}
+              <div style={{ fontSize: "13px", fontWeight: 650, marginBottom: "6px", opacity: isDone ? 0.6 : 1, lineHeight: 1.4 }}>
+                <span style={{ color: "#dc2626", textDecoration: "line-through", background: "#fee2e2", padding: "1px 5px", borderRadius: "4px" }}>
+                  {origText}
+                </span>
+                <span style={{ color: "#64748b", margin: "0 6px", fontWeight: 700 }}>→</span>
+                <span style={{ color: "#166534", fontWeight: 700, background: "#dcfce7", padding: "1px 5px", borderRadius: "4px" }}>
+                  {sugText}
+                </span>
+              </div>
+
+              {/* Short Explanation */}
+              <p style={{ margin: "0 0 10px", fontSize: "11.5px", color: "#475569", lineHeight: 1.35, display: "-webkit-box", WebkitLineClamp: 2, WebkitBoxOrient: "vertical", overflow: "hidden" }}>
+                {reasonText}
+              </p>
+
+              {/* Action Buttons */}
+              <div style={{ display: "flex", justifyContent: "flex-end", alignItems: "center" }}>
+                {isDone ? (
+                  <div style={{ display: "flex", alignItems: "center", gap: "8px" }} onClick={(e) => e.stopPropagation()}>
+                    {f.status === "accepted" ? (
+                      <span style={pillAccepted}>✓ Accepted</span>
+                    ) : (
+                      <span style={pillRejected}>✕ Rejected</span>
+                    )}
+                    <button onClick={() => onUndoFinding(f.finding_id)} style={undoLinkStyle}>Undo</button>
+                  </div>
+                ) : (
+                  <div style={{ display: "flex", gap: "6px" }} onClick={(e) => e.stopPropagation()}>
+                    <button onClick={() => onAcceptFinding(f.finding_id)} style={acceptBtnStyle}>✓ Accept</button>
+                    <button onClick={() => onRejectFinding(f.finding_id)} style={rejectBtnStyle}>✕ Reject</button>
+                  </div>
+                )}
+              </div>
             </div>
           );
         })
