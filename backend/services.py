@@ -167,6 +167,9 @@ def load_job_metadata(job_id: str) -> Optional[Dict[str, Any]]:
             comparative_path = job_dir / "09_reports" / "comparative_report.html"
             business_path = job_dir / "business_report.html"
 
+            stage4_obj = next((s for s in job.get("stages", []) if s.get("stage_id") == "stage_4_grammar"), None)
+            stage4_failed = (stage4_obj and stage4_obj.get("status") == "Failed") or job.get("proofreading_status") == "failed"
+
             if doc_json.exists() and sentences_path.exists():
                 job["extraction_ready"] = True
                 job["document_viewer_ready"] = True
@@ -174,10 +177,15 @@ def load_job_metadata(job_id: str) -> Optional[Dict[str, Any]]:
             if spell_path.exists():
                 job["spell_ready"] = True
 
-            if report_path.exists():
+            if report_path.exists() and not stage4_failed:
                 job["grammar_ready"] = True
                 job["proofreading_ready"] = True
                 job["proofreading_status"] = "completed"
+            elif stage4_failed:
+                job["grammar_ready"] = False
+                job["proofreading_ready"] = False
+                job["proofreading_status"] = "failed"
+                job["status"] = "failed"
 
             if ko_path.exists():
                 job["rag_ready"] = True
@@ -194,11 +202,13 @@ def load_job_metadata(job_id: str) -> Optional[Dict[str, Any]]:
             if business_path.exists():
                 job["reports_ready"] = True
 
-            if (consistency_path.exists() or business_path.exists()) and job.get("status") in ("processing", "uploaded", "pending"):
+            if (consistency_path.exists() or business_path.exists()) and job.get("status") in ("processing", "uploaded", "pending") and not stage4_failed:
                 job["status"] = "completed"
                 job["current_stage"] = "Completed"
                 job["overall_progress"] = 100
                 job["progress_percentage"] = 100.0
+            elif stage4_failed:
+                job["status"] = "failed"
 
             JOBS[job_id] = job
             return job

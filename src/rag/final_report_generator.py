@@ -325,7 +325,7 @@ class FinalReportGenerator:
         # a fallback category.
         from src.rag.ambiguity_taxonomy import normalize_category, APPROVED_CATEGORIES
         from src.rag.ambiguity_grounding_gate import verify_evidence
-        from src.rag.ambiguity_context_filter import is_context_conflict_plausible
+        from src.rag.ambiguity_context_filter import is_context_conflict_plausible, is_genuine_ambiguity
 
         gated_confirmed_findings = []
         for f in confirmed_findings:
@@ -348,6 +348,11 @@ class FinalReportGenerator:
             plausible, context_reason = is_context_conflict_plausible(f)
             if not plausible:
                 rejected_findings.append({**f, "status": "rejected", "reject_reason": f"context check failed: {context_reason}"})
+                continue
+
+            is_genuine, genuine_reason = is_genuine_ambiguity(f)
+            if not is_genuine:
+                rejected_findings.append({**f, "status": "rejected", "reject_reason": f"ambiguity validation failed: {genuine_reason}"})
                 continue
 
             gated_confirmed_findings.append(f)
@@ -522,9 +527,12 @@ class FinalReportGenerator:
         except Exception as exc:
             logger.warning(f"Failed to export audit_metrics.json: {exc}")
 
-        # 1. Output: final_report.json
+        # 1. Output: final_report.json & rejected_candidates.json audit log
         with open(report_dir / "final_report.json", "w", encoding="utf-8") as f:
             json.dump(final_report_data, f, indent=2, ensure_ascii=False)
+
+        with open(report_dir / "rejected_candidates.json", "w", encoding="utf-8") as f:
+            json.dump({"rejected_candidates": rejected_findings}, f, indent=2, ensure_ascii=False)
 
         # 2. Output: executive_summary.md (Clean C-Suite Summary)
         exec_md = f"""# Executive Compliance Audit Summary

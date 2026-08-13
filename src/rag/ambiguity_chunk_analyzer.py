@@ -428,23 +428,45 @@ Return JSON schema matching:
         # validated_claims.md
         md_val_claims = ["# Validated Claims Index\n\n| Claim ID | Chunk ID | Status | Reason | Improved Claim |\n|:---------|:---------|:-------|:-------|:---------------|\n"]
         for vc in validated_claims_list:
-            md_val_claims.append(f"| `{vc['claim_id']}` | `{vc['chunk_id']}` | **{vc['status'].upper()}** | {vc['reason']} | {vc['improved_claim']} |\n")
+            if not isinstance(vc, dict):
+                continue
+            c_id = str(vc.get("claim_id") or "N/A")
+            ch_id = str(vc.get("chunk_id") or "N/A")
+            st_raw = vc.get("status")
+            st = str(st_raw).upper() if st_raw is not None else "UNKNOWN"
+            re = str(vc.get("reason") or "N/A").replace("\n", " ")
+            imp = str(vc.get("improved_claim") or "N/A").replace("\n", " ")
+            md_val_claims.append(f"| `{c_id}` | `{ch_id}` | **{st}** | {re} | {imp} |\n")
         with open(reason_dir / "validated_claims.md", "w", encoding="utf-8") as f:
             f.write("".join(md_val_claims))
 
         # ambiguity_index.md
         md_ambs = ["# Ambiguity Index\n\n| Issue ID | Chunk ID | Type | Severity | Quote | Reason | Suggested Rewrite |\n|:---------|:---------|:-----|:---------|:------|:-------|:------------------|\n"]
         for amb in ambiguities_list:
-            md_ambs.append(f"| `{amb['issue_id']}` | `{amb['chunk_id']}` | {amb['type']} | **{amb['severity']}** | \"{amb['quote']}\" | {amb['reason']} | {amb['suggested_rewrite']} |\n")
+            if not isinstance(amb, dict):
+                continue
+            iss_id = str(amb.get("issue_id") or "N/A")
+            ch_id = str(amb.get("chunk_id") or "N/A")
+            a_type = str(amb.get("type") or "Undefined Term")
+            sev_raw = amb.get("severity")
+            sev = str(sev_raw).upper() if sev_raw is not None else "LOW"
+            q = str(amb.get("quote") or "").replace("\n", " ")
+            r = str(amb.get("reason") or "").replace("\n", " ")
+            sug = str(amb.get("suggested_rewrite") or "").replace("\n", " ")
+            md_ambs.append(f"| `{iss_id}` | `{ch_id}` | {a_type} | **{sev}** | \"{q}\" | {r} | {sug} |\n")
         with open(reason_dir / "ambiguity_index.md", "w", encoding="utf-8") as f:
             f.write("".join(md_ambs))
 
         # rewrite_suggestions.md
         md_rewrites = ["# Side-by-Side Rewrite Suggestions\n\n| ID | Type | Original Text / Quote | Suggested Rewrite |\n|:---|:-----|:----------------------|:------------------|\n"]
         for rw in rewrites_list:
-            orig_text = (rw.get("original_text") or "").strip()
-            sugg_text = (rw.get("suggested_text") or "").strip()
-            md_rewrites.append(f"| `{rw['id']}` | {rw['type']} | *\"{orig_text}\"* | **{sugg_text}** |\n")
+            if not isinstance(rw, dict):
+                continue
+            rw_id = str(rw.get("id") or "N/A")
+            rw_type = str(rw.get("type") or "claim")
+            orig_text = str(rw.get("original_text") or "").strip().replace("\n", " ")
+            sugg_text = str(rw.get("suggested_text") or "").strip().replace("\n", " ")
+            md_rewrites.append(f"| `{rw_id}` | {rw_type} | *\"{orig_text}\"* | **{sugg_text}** |\n")
         with open(reason_dir / "rewrite_suggestions.md", "w", encoding="utf-8") as f:
             f.write("".join(md_rewrites))
 

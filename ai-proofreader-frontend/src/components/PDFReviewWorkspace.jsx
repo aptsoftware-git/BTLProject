@@ -53,11 +53,13 @@ export default function PDFReviewWorkspace({
   const [selectedFindingId, setSelectedFindingId] = useState(null);
   const [flashingFindingId, setFlashingFindingId] = useState(null);
   const [popoverFindingId, setPopoverFindingId] = useState(null);
+  const [activeFocusTarget, setActiveFocusTarget] = useState(null);
   const [scrollRequest, setScrollRequest] = useState(null);
   const [isExportingCorrected, setIsExportingCorrected] = useState(false);
   const [findingActionError, setFindingActionError] = useState(null);
 
   const scrollContainerRef = useRef(null);
+  const focusRetryTimeoutRef = useRef(null);
   const pdfUrl = `${API_BASE_URL}/documents/${docId}/file`;
 
   // Load findings whenever the document changes or proofreading completes.
@@ -74,16 +76,19 @@ export default function PDFReviewWorkspace({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [docId]);
 
-  const docStatus = documentData?.status;
-  const isProcessing = docStatus === "processing" || docStatus === "pending";
-  const isFailed = docStatus === "failed";
-  const isRecoverable = docStatus === "recoverable";
-  const isDone = docStatus === "completed" || docStatus === "completed_with_warnings";
+  const stage4Failed = documentData?.stages?.some((s) => s.stage_id === "stage_4_grammar" && s.status === "Failed");
+  const proofreadingFailed = documentData?.proofreading_status === "failed" || stage4Failed;
 
-  const proofreadingReady = documentData?.proofreading_ready || documentData?.proofreading_status === "completed";
-  const proofreadingStatus = documentData?.proofreading_status || (proofreadingReady || isDone ? "completed" : "pending");
-  const proofreadingDone = proofreadingStatus === "completed" || proofreadingReady === true;
-  const sidebarStatus = proofreadingDone ? "completed" : docStatus;
+  const docStatus = documentData?.status;
+  const isProcessing = (docStatus === "processing" || docStatus === "pending") && !proofreadingFailed;
+  const isFailed = docStatus === "failed" || proofreadingFailed;
+  const isRecoverable = docStatus === "recoverable" && !proofreadingFailed;
+  const isDone = (docStatus === "completed" || docStatus === "completed_with_warnings") && !proofreadingFailed;
+
+  const proofreadingReady = (documentData?.proofreading_ready || documentData?.proofreading_status === "completed") && !proofreadingFailed;
+  const proofreadingStatus = proofreadingFailed ? "failed" : (documentData?.proofreading_status || (proofreadingReady || isDone ? "completed" : "pending"));
+  const proofreadingDone = proofreadingStatus === "completed" && proofreadingReady === true;
+  const sidebarStatus = proofreadingFailed ? "failed" : (proofreadingDone ? "completed" : docStatus);
 
   // Re-fetch findings automatically as soon as proofreading becomes ready/completed
   useEffect(() => {
@@ -110,26 +115,130 @@ export default function PDFReviewWorkspace({
     setFindings((prev) => prev.map((f) => (f.finding_id === findingId ? { ...f, status } : f)));
   };
 
-function normalizeBboxes(bbox) {
-  if (!bbox) return [];
-  if (typeof bbox === "object" && !Array.isArray(bbox) && "x0" in bbox) {
-    return [bbox];
-  }
-  if (Array.isArray(bbox)) {
-    if (bbox.length === 4 && typeof bbox[0] === "number") {
-      return [{ x0: bbox[0], y0: bbox[1], x1: bbox[2], y1: bbox[3] }];
+  function normalizeBboxes(bbox) {
+    if (!bbox) return [];
+    if (typeof bbox === "object" && !Array.isArray(bbox) && "x0" in bbox) {
+      return [bbox];
     }
-    return bbox
-      .map((b) => {
-        if (Array.isArray(b) && b.length === 4) {
-          return { x0: b[0], y0: b[1], x1: b[2], y1: b[3] };
-        }
-        return b;
-      })
-      .filter((b) => b && typeof b.x0 === "number");
+    if (Array.isArray(bbox)) {
+      if (bbox.length === 4 && typeof bbox[0] === "number") {
+        return [{ x0: bbox[0], y0: bbox[1], x1: bbox[2], y1: bbox[3] }];
+      }
+      return bbox
+        .map((b) => {
+          if (Array.isArray(b) && b.length === 4) {
+            return { x0: b[0], y0: b[1], x1: b[2], y1: b[3] };
+          }
+          return b;
+        })
+        .filter((b) => b && typeof b.x0 === "number");
+    }
+    return [];
   }
-  return [];
-}
+
+  function computeUnionBbox(bboxes) {
+    if (!bboxes || bboxes.length === 0) return null;
+    return bboxes.reduce(
+      (acc, b) => ({
+        x0: Math.min(acc.x0, b.x0),
+        y0: Math.min(acc.y0, b.y0),
+        x1: Math.max(acc.x1, b.x1),
+        y1: Math.max(acc.y1, b.y1),
+      }),
+      { x0: Infinity, y0: Infinity, x1: -Infinity, y1: -Infinity }
+    );
+  }
+
+  const calculateOptimalZoom = (unionBbox) => {
+    if (!scrollContainerRef.current || !unionBbox) return 1.35;
+    const cWidth = scrollContainerRef.current.clientWidth || 800;
+    const cHeight = scrollContainerRef.current.clientHeight || 600;
+
+    const bboxW = Math.max(12, unionBbox.x1 - unionBbox.x0);
+    const bboxH = Math.max(12, unionBbox.y1 - unionBbox.y0);
+
+    const fitWZoom = (cWidth * 0.65) / bboxW;
+    const fitHZoom = (cHeight * 0.5) / bboxH;
+
+    const idealZoom = Math.min(fitWZoom, fitHZoom);
+    return Math.max(1.25, Math.min(1.75, idealZoom));
+  };
+
+  const performFocusAndCenter = (targetObj, currentZoom = zoomLevel) => {
+    if (!targetObj || !scrollContainerRef.current) return false;
+    const { pageNumber, unionBbox } = targetObj;
+    const pageEl = document.getElementById(`pdf-page-${pageNumber}`);
+    if (!pageEl) return false;
+
+    const container = scrollContainerRef.current;
+    const cWidth = container.clientWidth;
+    const cHeight = container.clientHeight;
+    if (cWidth === 0 || cHeight === 0) return false;
+
+    const pageTop = pageEl.offsetTop;
+    const pageLeft = pageEl.offsetLeft;
+
+    const centerX = ((unionBbox.x0 + unionBbox.x1) / 2) * currentZoom;
+    const centerY = ((unionBbox.y0 + unionBbox.y1) / 2) * currentZoom;
+
+    const absoluteX = pageLeft + centerX;
+    const absoluteY = pageTop + centerY;
+
+    const targetScrollTop = Math.max(0, absoluteY - cHeight / 2);
+    const targetScrollLeft = Math.max(0, absoluteX - cWidth / 2);
+
+    container.scrollTo({
+      top: targetScrollTop,
+      left: targetScrollLeft,
+      behavior: "smooth"
+    });
+    return true;
+  };
+
+  const triggerFocus = (targetObj, desiredZoom) => {
+    if (focusRetryTimeoutRef.current) clearTimeout(focusRetryTimeoutRef.current);
+    if (!targetObj) return;
+
+    const effectiveZoom = desiredZoom !== undefined ? desiredZoom : zoomLevel;
+    let attempts = 0;
+
+    const attemptScroll = () => {
+      attempts++;
+      const pageEl = document.getElementById(`pdf-page-${targetObj.pageNumber}`);
+      const canvasEl = pageEl?.querySelector("canvas");
+      if (pageEl && canvasEl && canvasEl.clientHeight > 0) {
+        performFocusAndCenter(targetObj, effectiveZoom);
+      } else if (attempts < 25) {
+        focusRetryTimeoutRef.current = setTimeout(attemptScroll, 60);
+      }
+    };
+
+    attemptScroll();
+  };
+
+  // Re-center when active focus target or zoom changes
+  useEffect(() => {
+    if (activeFocusTarget && viewMode === "pdf") {
+      performFocusAndCenter(activeFocusTarget, zoomLevel);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [activeFocusTarget, zoomLevel, viewMode]);
+
+  // Recalculate center position when PDF container dimensions change
+  useEffect(() => {
+    const container = scrollContainerRef.current;
+    if (!container) return;
+
+    const observer = new ResizeObserver(() => {
+      if (activeFocusTarget && viewMode === "pdf") {
+        triggerFocus(activeFocusTarget, zoomLevel);
+      }
+    });
+
+    observer.observe(container);
+    return () => observer.disconnect();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [activeFocusTarget, viewMode, zoomLevel]);
 
   const handleSelectFinding = (findingId, findingObj) => {
     const target = findingObj || findings.find((f) => f.finding_id === findingId);
@@ -139,36 +248,51 @@ function normalizeBboxes(bbox) {
 
     if (viewMode === "pdf") {
       const isGrounded = target.pdf_grounded !== false && !!target.bbox;
-      if (isGrounded) {
+      const bboxes = isGrounded ? normalizeBboxes(target.bbox) : [];
+
+      if (isGrounded && bboxes.length > 0) {
+        const unionBbox = computeUnionBbox(bboxes);
+        const targetZoom = calculateOptimalZoom(unionBbox);
+
+        const focusTarget = {
+          findingId,
+          pageNumber: target.page_number,
+          unionBbox,
+          bboxes,
+          timestamp: Date.now()
+        };
+
         setFlashingFindingId(findingId);
         setPopoverFindingId(findingId);
+        setActiveFocusTarget(focusTarget);
+        setVisiblePage(target.page_number);
+
+        if (Math.abs(zoomLevel - targetZoom) > 0.05) {
+          setZoomLevel(targetZoom);
+        }
+
+        triggerFocus(focusTarget, targetZoom);
+
         setTimeout(() => {
           setFlashingFindingId((current) => (current === findingId ? null : current));
         }, 5000);
       } else {
+        // Grounded === false (Unanchored)
         setPopoverFindingId(null);
-      }
-
-      setVisiblePage(target.page_number);
-
-      setTimeout(() => {
-        const pageEl = document.getElementById(`pdf-page-${target.page_number}`);
-        if (!pageEl || !scrollContainerRef.current) return;
-
-        const bboxes = normalizeBboxes(target.bbox);
-        let yOffset = 0;
-        if (bboxes.length > 0) {
-          yOffset = bboxes[0].y0 * zoomLevel;
+        setActiveFocusTarget(null);
+        if (target.page_number) {
+          setVisiblePage(target.page_number);
+          setTimeout(() => {
+            const pageEl = document.getElementById(`pdf-page-${target.page_number}`);
+            if (pageEl && scrollContainerRef.current) {
+              scrollContainerRef.current.scrollTo({
+                top: Math.max(0, pageEl.offsetTop - 40),
+                behavior: "smooth"
+              });
+            }
+          }, 100);
         }
-
-        const pageTop = pageEl.offsetTop;
-        const targetScrollTop = Math.max(0, pageTop + yOffset - 130);
-
-        scrollContainerRef.current.scrollTo({
-          top: targetScrollTop,
-          behavior: "smooth"
-        });
-      }, 80);
+      }
     } else {
       setFlashingFindingId(findingId);
       setTimeout(() => {
@@ -251,6 +375,12 @@ function normalizeBboxes(bbox) {
     }
   };
 
+  const handlePageRenderSuccess = (pageNumber) => {
+    if (activeFocusTarget && activeFocusTarget.pageNumber === pageNumber) {
+      performFocusAndCenter(activeFocusTarget, zoomLevel);
+    }
+  };
+
   const handleZoomIn = () => setZoomLevel((prev) => Math.min(prev + 0.2, 2.5));
   const handleZoomOut = () => setZoomLevel((prev) => Math.max(prev - 0.2, 0.5));
   const handleZoomReset = () => setZoomLevel(1.0);
@@ -316,8 +446,6 @@ function normalizeBboxes(bbox) {
   const renderedHeight = pageDimensions.height * zoomLevel;
   const pageNumbers = Array.from({ length: numPages }, (_, i) => i + 1);
 
-
-
   return (
     <div
       style={{
@@ -332,8 +460,7 @@ function normalizeBboxes(bbox) {
         boxShadow: "var(--shadow-card, 0 4px 6px -1px rgba(0, 0, 0, 0.1))"
       }}
     >
-      {/* Main pane: document is the primary focus, so it takes ~78% width
-          when the findings sidebar is shown and 100% on the export-only tab. */}
+      {/* Main pane: document is the primary focus */}
       <div
         style={{
           flex: viewMode !== "corrected" ? "0 0 78%" : "1 1 100%",
@@ -344,7 +471,7 @@ function normalizeBboxes(bbox) {
           position: "relative"
         }}
       >
-        {/* Live Stage Processing Status Header -- scoped to Proofreading pipeline completion */}
+        {/* Live Stage Processing Status Header */}
         {proofreadingDone ? (
           <div style={{
             background: "#f0fdf4",
@@ -545,8 +672,6 @@ function normalizeBboxes(bbox) {
               </>
             )}
             {isDone && (viewMode === "pdf" || viewMode === "review") && (
-              /* Once completed, the status banner above is gone -- keep small,
-                 always-reachable ways to re-check the document. */
               <>
                 <button onClick={handleRerunProofreading} style={styles.ctrlBtn} disabled={isRerunning} title="Re-run Spell, Grammar and Validation and refresh findings">
                   {isRerunning ? "Rerunning..." : "↻ Rerun Proofreading"}
@@ -572,13 +697,12 @@ function normalizeBboxes(bbox) {
 
         {/* Tab content */}
         {viewMode === "pdf" ? (
-          /* PRIMARY review surface: the real, untouched original PDF, with
-             findings highlighted at their real PDF-grounded coordinates. */
           <div
             ref={scrollContainerRef}
             style={{
               flex: 1,
               overflowY: "auto",
+              overflowX: "auto",
               display: "flex",
               flexDirection: "column",
               alignItems: "center",
@@ -598,7 +722,8 @@ function normalizeBboxes(bbox) {
                 loading={<div style={{ padding: "40px", textAlign: "center" }}>Loading PDF Document...</div>}
               >
                 {pageNumbers.map((pNum) => {
-                  const isNearVisibleWindow = Math.abs(pNum - visiblePage) <= 3 || numPages <= 10;
+                  const isSelectedPage = activeFocusTarget?.pageNumber === pNum;
+                  const isNearVisibleWindow = Math.abs(pNum - visiblePage) <= 3 || isSelectedPage || numPages <= 10;
                   const pageFindings = findings.filter(
                     (f) => f.page_number === pNum && f.pdf_grounded && f.bbox && f.status !== "rejected"
                   );
@@ -621,72 +746,93 @@ function normalizeBboxes(bbox) {
                             pageNumber={pNum}
                             scale={zoomLevel}
                             onLoadSuccess={handlePageLoadSuccess}
+                            onRenderSuccess={() => handlePageRenderSuccess(pNum)}
                             renderAnnotationLayer={false}
                             renderTextLayer={false}
                           />
-                          {/* Highlight overlay: real bbox * zoomLevel, never a
-                              synthetic box -- ungrounded findings simply have
-                              no entry in pageFindings, so nothing is drawn. */}
+                          {/* Highlight overlay for pdf_grounded findings */}
                           <div style={{ position: "absolute", inset: 0, pointerEvents: "none" }}>
                             {pageFindings.map((f) => {
                               const isAccepted = f.status === "accepted";
                               const isSelected = f.finding_id === selectedFindingId;
                               const isFlashing = f.finding_id === flashingFindingId;
                               const bboxes = normalizeBboxes(f.bbox);
+                              const union = bboxes.length > 1 ? computeUnionBbox(bboxes) : null;
 
-                              return bboxes.map((b, bIdx) => {
-                                const left = b.x0 * zoomLevel;
-                                const top = b.y0 * zoomLevel;
-                                const width = Math.max(6, (b.x1 - b.x0) * zoomLevel);
-                                const height = Math.max(6, (b.y1 - b.y0) * zoomLevel);
+                              return (
+                                <React.Fragment key={f.finding_id}>
+                                  {bboxes.map((b, bIdx) => {
+                                    const left = b.x0 * zoomLevel;
+                                    const top = b.y0 * zoomLevel;
+                                    const width = Math.max(6, (b.x1 - b.x0) * zoomLevel);
+                                    const height = Math.max(6, (b.y1 - b.y0) * zoomLevel);
 
-                                const bg = isAccepted
-                                  ? (isSelected ? "rgba(22, 101, 52, 0.35)" : "rgba(22, 101, 52, 0.18)")
-                                  : (isSelected || isFlashing ? "rgba(79, 70, 229, 0.38)" : "rgba(245, 158, 11, 0.28)");
+                                    const bg = isAccepted
+                                      ? (isSelected ? "rgba(34, 197, 94, 0.35)" : "rgba(34, 197, 94, 0.18)")
+                                      : (isSelected || isFlashing ? "rgba(250, 204, 21, 0.45)" : "rgba(245, 158, 11, 0.28)");
 
-                                const border = isAccepted
-                                  ? (isSelected ? "2px solid #15803d" : "1.5px solid #166534")
-                                  : (isSelected || isFlashing ? "2.5px solid #4f46e5" : "1.5px solid #d97706");
+                                    const border = isAccepted
+                                      ? (isSelected ? "2px solid #15803d" : "1.5px solid #166534")
+                                      : (isSelected || isFlashing ? "2.5px solid #d97706" : "1.5px solid #d97706");
 
-                                const boxShadow = isSelected || isFlashing
-                                  ? "0 0 0 4px rgba(79, 70, 229, 0.45), 0 0 16px rgba(79, 70, 229, 0.7)"
-                                  : "none";
+                                    const boxShadow = isSelected || isFlashing
+                                      ? "0 0 0 4px rgba(234, 179, 8, 0.5), 0 0 16px rgba(217, 119, 6, 0.6)"
+                                      : "none";
 
-                                return (
-                                  <div
-                                    key={`${f.finding_id}-${bIdx}`}
-                                    style={{
-                                      position: "absolute",
-                                      left,
-                                      top,
-                                      width,
-                                      height,
-                                      pointerEvents: "auto",
-                                      cursor: "pointer",
-                                      background: bg,
-                                      border,
-                                      borderRadius: "3px",
-                                      boxShadow,
-                                      zIndex: isSelected || isFlashing ? 30 : 10,
-                                      transition: "all 0.15s ease",
-                                    }}
-                                    onClick={(e) => {
-                                      e.stopPropagation();
-                                      handleSelectFinding(f.finding_id, f);
-                                    }}
-                                  >
-                                    {bIdx === 0 && popoverFindingId === f.finding_id && (
-                                      <FindingPopover
-                                        finding={f}
-                                        style={{ top: height + 6, left: 0 }}
-                                        onAccept={(id) => { handleAcceptFinding(id); }}
-                                        onReject={(id) => { handleRejectFinding(id); }}
-                                        onClose={() => setPopoverFindingId(null)}
-                                      />
-                                    )}
-                                  </div>
-                                );
-                              });
+                                    return (
+                                      <div
+                                        key={`${f.finding_id}-${bIdx}`}
+                                        style={{
+                                          position: "absolute",
+                                          left,
+                                          top,
+                                          width,
+                                          height,
+                                          pointerEvents: "auto",
+                                          cursor: "pointer",
+                                          background: bg,
+                                          border,
+                                          borderRadius: "3px",
+                                          boxShadow,
+                                          zIndex: isSelected || isFlashing ? 30 : 10,
+                                          transition: "all 0.15s ease",
+                                        }}
+                                        onClick={(e) => {
+                                          e.stopPropagation();
+                                          handleSelectFinding(f.finding_id, f);
+                                        }}
+                                      >
+                                        {bIdx === 0 && popoverFindingId === f.finding_id && (
+                                          <FindingPopover
+                                            finding={f}
+                                            style={{ top: height + 6, left: 0 }}
+                                            onAccept={(id) => { handleAcceptFinding(id); }}
+                                            onReject={(id) => { handleRejectFinding(id); }}
+                                            onClose={() => setPopoverFindingId(null)}
+                                          />
+                                        )}
+                                      </div>
+                                    );
+                                  })}
+
+                                  {/* Multi-word phrase bounding outline if selected */}
+                                  {union && (isSelected || isFlashing) && (
+                                    <div
+                                      style={{
+                                        position: "absolute",
+                                        left: union.x0 * zoomLevel - 3,
+                                        top: union.y0 * zoomLevel - 3,
+                                        width: (union.x1 - union.x0) * zoomLevel + 6,
+                                        height: (union.y1 - union.y0) * union.y0 > 0 ? (union.y1 - union.y0) * zoomLevel + 6 : 12,
+                                        pointerEvents: "none",
+                                        border: "2px dashed #d97706",
+                                        borderRadius: "4px",
+                                        zIndex: 29,
+                                      }}
+                                    />
+                                  )}
+                                </React.Fragment>
+                              );
                             })}
                           </div>
                         </>
@@ -744,8 +890,7 @@ function normalizeBboxes(bbox) {
         )}
       </div>
 
-      {/* Findings sidebar -- Review tabs only (PDF or Text View); secondary
-          to the document, used for navigation and accept/reject. */}
+      {/* Findings sidebar */}
       {(viewMode === "pdf" || viewMode === "review") && (
         <div style={{ flex: "0 0 22%", width: "22%", height: "100%", borderLeft: "1px solid var(--border, #e2e8f0)", background: "#ffffff" }}>
           <IssueCardList

@@ -601,7 +601,7 @@ class StageOrchestrator:
     # ------------------------------------------------------------------
     # Stage 4: Grammar Checking
     # ------------------------------------------------------------------
-    def run_stage_4_grammar(self) -> None:
+    def run_stage_4_grammar(self, force_regenerate: bool = False) -> None:
         stage_id = "stage_4_grammar"
         logger.info("START Stage 4 (Grammar & Writing Quality Review) for job %s", self.job_id)
         report_file = self.job_dir / "10_final" / "report.json"
@@ -625,9 +625,9 @@ class StageOrchestrator:
             logger.error("Stage 4 (Grammar) blocked for job %s: spell_candidates.json missing", self.job_id)
             return
 
-        # Cache check — only if both report.json AND mapped_findings.json are newer
+        # Cache check — only if force_regenerate is False AND both report.json AND mapped_findings.json are newer
         # than every upstream input count as "already done".
-        if not _artifact_is_stale(report_file, spell_file, sentences_file) and not _artifact_is_stale(mapped_findings_file, spell_file, sentences_file):
+        if not force_regenerate and not _artifact_is_stale(report_file, spell_file, sentences_file) and not _artifact_is_stale(mapped_findings_file, spell_file, sentences_file):
             logger.info("[CACHE HIT] Stage 4 (Grammar) already completed for job %s", self.job_id)
             self.update_stage_state(stage_id, "Completed", duration=0.0, output_location="10_final/report.json")
             job = self.get_job()
@@ -675,13 +675,36 @@ class StageOrchestrator:
 
             norm_text = norm_text_file.read_text(encoding="utf-8") if norm_text_file.exists() else ""
 
+            # Clear stale Stage 4+ artifacts so previous/failed findings are never served
+            artifacts_to_clear = [
+                self.job_dir / "07_grammar" / "grammar_candidates.json",
+                self.job_dir / "08_validation" / "accepted.json",
+                self.job_dir / "08_validation" / "rejected.json",
+                self.job_dir / "09_semantic" / "semantic_failed.json",
+                self.job_dir / "10_final" / "report.json",
+                self.job_dir / "10_final" / "mapped_findings.json",
+                self.job_dir / "10_final" / "auto_rejected_findings.json",
+                self.job_dir / "10_final" / "annotated_original.html",
+                self.job_dir / "10_final" / "corrected_document.html",
+                self.job_dir / "10_final" / "summary.csv",
+                self.job_dir / "10_final" / "changes.md",
+            ]
+            for art in artifacts_to_clear:
+                if art.exists():
+                    try:
+                        art.unlink()
+                    except Exception as e:
+                        logger.warning("Could not remove stale artifact %s: %s", art, e)
+
             # LLM Grammar Agent
             grammar_agent = GrammarAgent(self.config.ollama)
             llm_grammar_candidates: List[Candidate] = []
 
             def sentence_lookup(offset: int, return_object: bool = False):
                 for s in all_sentences:
-                    if s.char_start <= offset < s.char_end or (s.char_start <= offset <= s.char_end and s == all_sentences[-1]):
+                    s_start = s.doc_char_start if s.doc_char_start is not None else s.start_offset
+                    s_end = s.doc_char_end if s.doc_char_end is not None else s.end_offset
+                    if s_start <= offset < s_end or (s_start <= offset <= s_end and s == all_sentences[-1]):
                         return s if return_object else s.sentence_id
                 if all_sentences:
                     return all_sentences[0] if return_object else all_sentences[0].sentence_id
@@ -694,7 +717,7 @@ class StageOrchestrator:
                     current_s_group.append(s)
                     if len(current_s_group) >= 3:
                         p_text = " ".join([st.text for st in current_s_group])
-                        p_start = current_s_group[0].char_start
+                        p_start = current_s_group[0].doc_char_start if current_s_group[0].doc_char_start is not None else current_s_group[0].start_offset
                         paragraphs_data.append({
                             "text": p_text,
                             "doc_char_start": p_start,
@@ -703,7 +726,7 @@ class StageOrchestrator:
                         current_s_group = []
                 if current_s_group:
                     p_text = " ".join([st.text for st in current_s_group])
-                    p_start = current_s_group[0].char_start
+                    p_start = current_s_group[0].doc_char_start if current_s_group[0].doc_char_start is not None else current_s_group[0].start_offset
                     paragraphs_data.append({
                         "text": p_text,
                         "doc_char_start": p_start,
@@ -834,6 +857,15 @@ class StageOrchestrator:
             error_msg = f"{str(exc)}\n{traceback.format_exc()}"
             self.update_stage_state(stage_id, "Failed", end_time=end_time.isoformat(), duration=duration, errors=error_msg)
             logger.error("Stage 4 (Grammar) failed for job %s: %s", self.job_id, exc)
+
+            job = self.get_job()
+            if job:
+                job["status"] = "failed"
+                job["proofreading_status"] = "failed"
+                job["proofreading_ready"] = False
+                job["grammar_ready"] = False
+                job["error"] = f"Stage 4 (Grammar) failed: {str(exc)}"
+                self.save_job()
 
     # ------------------------------------------------------------------
     # Stage 5: RAG Index Construction
