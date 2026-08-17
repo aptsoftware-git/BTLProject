@@ -147,15 +147,58 @@ def is_context_conflict_plausible(finding: Dict[str, Any]) -> Tuple[bool, Option
     return True, None
 
 
+def is_evidence_relevant_to_claim(finding: Dict[str, Any]) -> Tuple[bool, Optional[str]]:
+    """Checks if cited evidence items are topically relevant to the claim/title of the finding.
+
+    Rejects mismatched findings where evidence quotes belong to a completely different topic
+    (e.g., claim about Management/Audit Committee, but evidence quotes talk about Foreign Exchange / Interest Rate Risk).
+    """
+    title = (finding.get("title") or "").lower()
+    explanation = (finding.get("claude_explanation") or finding.get("reason") or finding.get("explanation") or "").lower()
+    evidence_items = list(finding.get("evidence") or [])
+
+    if not evidence_items or not title:
+        return True, None
+
+    claim_text = f"{title} {explanation}"
+
+    # Extract key domain nouns (> 3 chars, excluding generic stop words)
+    words = re.findall(r"\b[a-z]{4,}\b", claim_text)
+    stop_words = {
+        "this", "that", "with", "from", "have", "been", "where", "which", "there", "their", "about",
+        "would", "could", "should", "section", "document", "finding", "report", "issue", "conflict",
+        "contradiction", "inconsistency", "mismatch", "between", "statement", "passage", "text"
+    }
+    subject_keywords = set(w for w in words if w not in stop_words)
+
+    if not subject_keywords:
+        return True, None
+
+    # Check if at least one evidence quote contains at least one subject keyword
+    relevant_count = 0
+    for ev in evidence_items:
+        q = str(ev.get("quote") or "").lower()
+        if not q:
+            continue
+        if any(kw in q for kw in subject_keywords):
+            relevant_count += 1
+
+    if evidence_items and relevant_count == 0:
+        return False, (
+            f"mismatched evidence: cited quotes do not relate to claim subject '{title}'"
+        )
+
+    return True, None
+
+
 def is_genuine_ambiguity(finding: Dict[str, Any]) -> Tuple[bool, Optional[str]]:
     """Evaluates if a candidate finding represents a genuine document ambiguity.
 
-    A factual statement ALONE is NOT an ambiguity.
-    Rejects:
-    - Standalone factual statements with no conflicting context or identified discrepancy.
-    - Style advice, writing criticism, grammar suggestions, subjective rewrites.
-    - Boilerplate headings, section titles, contact info.
-    - Placeholder text or prompt leakage.
+    Enforces:
+    - Pronoun / entity-reference ambiguity single-quote retention.
+    - Terminology inconsistency validation (requires same entity/concept context).
+    - Mismatched evidence rejection.
+    - Rejection of style advice, writing criticism, boilerplate headings, prompt leakage.
     """
     if not isinstance(finding, dict):
         return False, "invalid finding object structure"
@@ -182,14 +225,31 @@ def is_genuine_ambiguity(finding: Dict[str, Any]) -> Tuple[bool, Optional[str]]:
     if q_clean in BOILERPLATE_PATTERNS or t_clean in BOILERPLATE_PATTERNS:
         return False, "boilerplate heading, section title, or standalone label cannot be flagged as an ambiguity"
 
-    # 4. Standalone factual statement check
-    # A factual statement alone (e.g. "Operating segments include Engineering and Agro Machinery")
-    # is NOT an ambiguity unless there is concrete evidence of a conflicting statement or mismatch.
+    # 4. Mismatched evidence check
+    rel_ok, rel_reason = is_evidence_relevant_to_claim(finding)
+    if not rel_ok:
+        return False, rel_reason
+
+    # 5. Pronoun / Entity-reference ambiguity validation (single-quote valid)
+    if category == "Pronoun / entity-reference ambiguity":
+        pronoun_terms = ["he", "she", "they", "it", "his", "her", "herself", "himself", "itself", "themselves", "this", "these", "entity", "pronoun", "antecedent", "referent", "mismatch", "gender"]
+        if any(p in full_text for p in pronoun_terms):
+            return True, None
+
+    # 6. Terminology inconsistency validation (requires same entity/concept context)
+    if category == "Terminology inconsistency":
+        term_context_kw = ["same", "concept", "entity", "naming", "variant", "refer", "inconsistent", "differs", "varies", "across"]
+        if not any(kw in full_text for kw in term_context_kw):
+            return False, "terminology difference lacks contextual evidence that terms refer to the same entity/concept"
+
+    # 7. Standalone factual statement check
     evidence_items = list(finding.get("evidence") or [])
     has_conflict_keywords = any(
         kw in full_text for kw in [
             "conflict", "contradict", "mismatch", "inconsist", "differ", "discrepancy",
-            "unclear", "ambiguous", "opposite", "varies", "clash", "versus", "vs"
+            "unclear", "ambiguous", "opposite", "varies", "clash", "versus", "vs",
+            "vague", "missing", "lack", "omitted", "absence", "no defined", "timeline",
+            "error", "incorrect", "wrong", "incongruity"
         ]
     )
 

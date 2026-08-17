@@ -155,6 +155,7 @@ class SourceAgent(str, Enum):
     LANGUAGETOOL = "languagetool"
     LLM = "llm"
     T5 = "t5"
+    GRAMFORMER = "gramformer"
 
 
 @dataclass

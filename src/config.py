@@ -48,6 +48,14 @@ class LanguageToolConfig:
     language: str = "en-US"
 
 
+@dataclass
+class GramformerConfig:
+    model_name: str = "prithivida/grammar_error_correcter_v1"
+    batch_size: int = 16
+    use_gpu: bool = False
+    max_length: int = 128
+
+
 from src.model_router import MODEL_ROUTER, ModelRouter, get_model_for_stage
 
 
@@ -96,6 +104,7 @@ class PipelineConfig:
     spacy: SpacyConfig = field(default_factory=SpacyConfig)
     symspell: SymSpellConfig = field(default_factory=SymSpellConfig)
     languagetool: LanguageToolConfig = field(default_factory=LanguageToolConfig)
+    gramformer: GramformerConfig = field(default_factory=GramformerConfig)
     ollama: OllamaConfig = field(default_factory=OllamaConfig)
     validation: ValidationConfig = field(default_factory=ValidationConfig)
     merge: MergeConfig = field(default_factory=MergeConfig)

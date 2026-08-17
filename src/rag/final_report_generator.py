@@ -64,9 +64,10 @@ def _group_and_consolidate_findings(confirmed_findings: List[Dict[str, Any]], ch
         reason = (f.get("reason") or f.get("explanation") or "").strip()
         recommendation = (f.get("recommendation") or f.get("suggested_resolution") or "").strip()
         severity = f.get("severity", "Medium")
-
-        rec_key = recommendation[:50].lower() if recommendation else reason[:50].lower()
-        group_key = (category, rec_key)
+        issue_id = f.get("issue_id") or f.get("finding_id")
+        sus_t = (f.get("highlighted_ambiguity") or f.get("suspected_text") or f.get("original_text") or f.get("quote") or "").strip().lower()
+        fingerprint = issue_id or re.sub(r"\s+", " ", sus_t)[:100] or f"finding_{idx}"
+        group_key = (category, fingerprint)
 
         evidence = f.get("evidence", [])
         source_sections = [ev.get("chunk_id") for ev in evidence if ev.get("chunk_id")]

@@ -444,16 +444,23 @@ class FindingRelevanceFilter:
 
             valid_findings.append(f)
 
-        # Issue 6: Semantic Deduplication & Root-Cause Consolidation
+        # Semantic Deduplication: group by category + ordered title subject key (prevents false collisions while grouping duplicate findings)
         consolidated_map = {}
         for f in valid_findings:
             cat = f["category"]
             quote_clean = f.get("quote", "").strip().lower()
             title_clean = f.get("title", "").strip().lower()
 
-            topic_words = re.findall(r"\b[a-z]{4,}\b", title_clean + " " + quote_clean)
-            key_words = [w for w in topic_words if w not in {"the", "this", "that", "from", "with", "have", "been", "where"}]
-            topic_key = "_".join(sorted(key_words[:3])) if key_words else title_clean[:20]
+            topic_words = re.findall(r"\b[a-z]{4,}\b", title_clean)
+            stop_words = {
+                "the", "this", "that", "from", "with", "have", "been", "where", "further",
+                "effective", "conflicting", "statement", "section", "report", "according",
+                "given", "found", "stated", "states", "shown", "shows", "date", "dates",
+                "also", "than", "more", "less", "into", "over", "under", "after", "before",
+                "conflict", "contradiction", "inconsistency", "mismatch", "issue", "error"
+            }
+            key_words = [w for w in topic_words if w not in stop_words]
+            topic_key = "_".join(key_words[:4]) if key_words else (quote_clean[:40] or title_clean[:30])
             group_key = (cat, topic_key)
 
             if group_key not in consolidated_map:

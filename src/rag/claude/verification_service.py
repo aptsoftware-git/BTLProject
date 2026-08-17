@@ -66,9 +66,10 @@ class ClaudeVerificationService:
                 primary_cid = evidence[0].get("chunk_id") if evidence and evidence[0].get("chunk_id") else "N/A"
                 quote_text = evidence[0].get("quote") if evidence and evidence[0].get("quote") else ""
 
+                raw_cat = find.get("type") or find.get("category") or find.get("raw_category") or "Internal factual contradiction"
                 raw_findings.append({
                     "issue_id": find.get("issue_id", f"finding_{len(raw_findings)+1:03d}"),
-                    "raw_category": "Policy Conflict",
+                    "raw_category": raw_cat,
                     "page": find.get("page", 1),
                     "section": find.get("section", "Cross-Section Policy"),
                     "chunk_id": primary_cid,

@@ -87,12 +87,19 @@ class AmbiguityChunkAnalyzer:
         # 2. Extract Ambiguities
         amb_idx = 0
 
-        # 2a. Pronoun Ambiguity Check (Gated to structural ambiguity phrases)
-        pronoun_phrases = [r"\bthis section\b", r"\bthese policies\b", r"\bthey state\b", r"\bit requires\b", r"\bthis requirement\b"]
-        for p_pat in pronoun_phrases:
+        # 2a. Pronoun & Entity Ambiguity Check (Personal pronouns, gender/entity incongruity, & structural phrases)
+        pronoun_patterns = [
+            (r"\b(mr\.|shri|male)\b[^\.\n]{1,60}\b(herself|she|her)\b", "Gender/entity pronoun mismatch between subject honorific and pronoun."),
+            (r"\b(mrs\.|ms\.|female)\b[^\.\n]{1,60}\b(himself|he|his)\b", "Gender/entity pronoun mismatch between subject honorific and pronoun."),
+            (r"\b(herself|himself|itself|themselves)\b", "Reflexive pronoun lacks explicit structural antecedent in chunk."),
+            (r"\b(this section|these policies|they state|it requires|this requirement)\b", "Phrasing lacks specific structural antecedent or section citation.")
+        ]
+        
+        for p_pat, p_reason in pronoun_patterns:
             match = re.search(p_pat, text, re.IGNORECASE)
             if match and not any(a["quote"].lower() == match.group(0).lower() for a in ambiguities):
-                affected = [c.get("claim_id") for c in claims if match.group(0).lower() in c.get("text", "").lower()]
+                q_text = match.group(0)
+                affected = [c.get("claim_id") for c in claims if q_text.lower() in c.get("text", "").lower()]
                 start_idx = max(0, match.start() - 30)
                 end_idx = min(len(text), match.end() + 30)
                 evidence = text[start_idx:end_idx].strip()
@@ -100,13 +107,13 @@ class AmbiguityChunkAnalyzer:
                 ambiguities.append({
                     "issue_id": f"{chunk_id}_amb_{amb_idx:03d}",
                     "type": "Pronoun / entity-reference ambiguity",
-                    "severity": "Medium",
-                    "quote": match.group(0),
-                    "reason": f"Phrasing '{match.group(0)}' lacks a specific structural antecedent or section citation.",
+                    "severity": "High" if "mismatch" in p_reason else "Medium",
+                    "quote": q_text,
+                    "reason": p_reason,
                     "supporting_evidence": f"...{evidence}...",
-                    "suggested_rewrite": text.replace(match.group(0), f"[Insert explicit noun antecedent]"),
+                    "suggested_rewrite": f"Clarify reference/pronoun: [Insert explicit noun antecedent for '{q_text}']",
                     "affected_claims": affected,
-                    "confidence": 0.80,
+                    "confidence": 0.88 if "mismatch" in p_reason else 0.80,
                     "detector_type": "pronoun"
                 })
                 amb_idx += 1

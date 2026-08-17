@@ -93,6 +93,8 @@ class ProofreadingPipeline:
         self.protected_terms_builder = ProtectedTermsBuilder(
             spacy_config=self.config.spacy, validation_config=self.config.validation, nlp=self.nlp
         )
+        from src.gramformer_agent import GramformerAgent
+        self.gramformer_agent = GramformerAgent(self.config.gramformer)
         self.languagetool_agent = LanguageToolAgent(self.config.languagetool)
         self.spell_agent = SpellAgent(self.config.symspell)
         self.grammar_agent = GrammarAgent(self.config.ollama)
@@ -205,34 +207,48 @@ class ProofreadingPipeline:
                     all_candidates.extend(self.spell_agent.run(sent, set()))
 
         save_json(all_candidates, stage_dirs["06_spell"] / "spell_candidates.json")
-        self.logger.info("Spell/grammar candidates so far: %d", len(all_candidates))
+        self.logger.info("Raw spell/grammar candidates: %d", len(all_candidates))
 
-        # --- Stage 11: LLM Paragraph Reviewer (Level-2 grammar model) ---
-        self.logger.stage("Grammar review (local LLM)")
+        # --- Spell Candidate Protection & Filtering Stage (Requirement 8 & 9) ---
+        self.logger.stage("Spell candidate protection & filtering")
+        from src.spell_filter import SpellCandidateFilter
+        spell_filter = SpellCandidateFilter(spacy_config=self.config.spacy, nlp=self.nlp)
+        filter_res = spell_filter.run(
+            sentences=all_sentences,
+            candidates=all_candidates,
+            output_dir=stage_dirs["06_spell"],
+            extra_whitelist=self.protected_terms_builder.whitelist_extra
+        )
+        self.logger.info(
+            "Spell Protection Filter: Raw=%d -> Filtered=%d (NER entities=%d, Protected terms=%d, Rejected=%d)",
+            filter_res["raw_candidates_count"],
+            filter_res["filtered_candidates_count"],
+            filter_res["ner_entities_count"],
+            filter_res["protected_terms_count"],
+            filter_res["rejected_candidates_count"],
+        )
+        # Stage 4 Grammar consumes filtered_spell_candidates (Requirement 9)
+        all_candidates = list(filter_res["filtered_candidates"])
 
+        # --- Primary Grammar Engine: Gramformer ---
+        self.logger.stage("Grammar review (Gramformer)")
+        grammar_candidates: List[Candidate] = []
+        try:
+            grammar_candidates = self.gramformer_agent.correct_batch(all_sentences, protected_terms)
+        except Exception as exc:
+            self.logger.warning("Gramformer grammar review failed: %s. Continuing...", exc)
+
+        # --- Optional Level-2 LLM Paragraph Reviewer ---
+        llm_grammar_candidates: List[Candidate] = []
         if self.config.ollama.model and self.config.ollama.model.lower() != "none":
+            self.logger.stage("Secondary grammar review (local LLM)")
             def sentence_id_for_offset(doc_offset: int) -> int:
                 for sentence in all_sentences:
                     if sentence.doc_char_start <= doc_offset < sentence.doc_char_end:
                         return sentence.sentence_id
                 return -1
 
-            def process_paragraph(paragraph):
-                para_start = paragraph.doc_char_start or 0
-                para_end = para_start + len(paragraph.text)
-                terms_in_paragraph = [
-                    t for t in protected_terms if t.char_start < para_end and t.char_end > para_start
-                ]
-                try:
-                    return self.grammar_agent.run(
-                        paragraph.text, para_start, sentence_id_for_offset, terms_in_paragraph
-                    )
-                except Exception as exc:
-                    self.logger.warning("Grammar review (Ollama) failed: %s. Continuing...", exc)
-                    return []
-
             if document.paragraphs:
-                # Filter paragraphs to avoid sending short headings, numbers, or empty lines to LLM
                 reviewable_paragraphs = []
                 for p in document.paragraphs:
                     txt = (p.text or "").strip()
@@ -258,14 +274,14 @@ class ProofreadingPipeline:
                     })
 
                 try:
-                    para_candidates = self.grammar_agent.run_batch(para_items, sentence_id_for_offset, batch_size=15)
-                    all_candidates.extend(para_candidates)
+                    llm_grammar_candidates = self.grammar_agent.run_batch(para_items, sentence_id_for_offset, batch_size=15)
                 except Exception as exc:
                     self.logger.warning("Grammar review (Ollama batch) failed: %s. Continuing...", exc)
-        else:
-            self.logger.info("Skipping grammar review (Ollama) because model is 'none'")
-        save_json(all_candidates, stage_dirs["07_grammar"] / "grammar_candidates.json")
-        self.logger.info("Total candidates after grammar review: %d", len(all_candidates))
+
+        combined_grammar_candidates = grammar_candidates + llm_grammar_candidates
+        save_json(combined_grammar_candidates, stage_dirs["07_grammar"] / "grammar_candidates.json")
+        all_candidates.extend(combined_grammar_candidates)
+        self.logger.info("Total candidates after Gramformer & grammar review: %d", len(all_candidates))
 
         # --- Stage 10: Validation Agent (single gatekeeper, all sources) ----
         self.logger.stage("Validation (protected-terms gate)")

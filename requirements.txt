@@ -1,47 +1,54 @@
 ############################################################
-    # Document Extraction & Layout Parsing
-    ############################################################
-    docling>=2.0.0
-    PyMuPDF>=1.24.0
-    python-docx>=1.1.0
-    Pillow>=10.0.0
+# Document Extraction & Layout Parsing
+############################################################
+docling>=2.0.0
+PyMuPDF>=1.24.0
+python-docx>=1.1.0
+Pillow>=10.0.0
 
-    ############################################################
-    # Natural Language Processing (NLP)
-    ############################################################
-    spacy>=3.7.0
-    # Requires model: python -m spacy download en_core_web_sm
+############################################################
+# Natural Language Processing (NLP) & Tokenization
+############################################################
+spacy>=3.7.0
+# Requires spaCy model: python -m spacy download en_core_web_sm
+tiktoken>=0.7.0
 
-    ############################################################
-    # Proofreading & Grammar
-    ############################################################
-    language-tool-python>=2.8.0
-    # Requires Java Runtime Environment (JRE) installed
-    symspellpy>=6.7.7
+############################################################
+# Proofreading, Spelling & Neural Grammar Engine
+############################################################
+transformers>=4.40.0
+torch>=2.0.0
+errant>=3.0.0
+Levenshtein>=0.25.0
+python-Levenshtein>=0.25.0
+fuzzywuzzy>=0.18.0
+git+https://github.com/PrithivirajDamodaran/Gramformer.git#egg=gramformer
+symspellpy>=6.7.7
+language-tool-python>=2.8.0
+# Note: language-tool-python requires Java Runtime Environment (JRE)
 
-    ############################################################
-    # Web Backend & Server
-    ############################################################
-    fastapi>=0.116.0
-    uvicorn[standard]>=0.35.0
-    python-multipart>=0.0.20
+############################################################
+# Web Backend & Server
+############################################################
+fastapi>=0.116.0
+uvicorn[standard]>=0.35.0
+python-multipart>=0.0.20
+pydantic>=2.10.0
 
-    ############################################################
-    # Network & APIs
-    ############################################################
-    requests>=2.32.0
+############################################################
+# Network, Utilities & Monitoring
+############################################################
+requests>=2.32.0
+psutil>=5.9.0
 
-    ############################################################
-    # RAG & Semantic Retrieval
-    ############################################################
-    chromadb>=1.0.0
-    sentence-transformers>=5.0.0
-    torch>=2.8.0
-    rank_bm25>=0.2.2
+############################################################
+# RAG, Vector Database & Semantic Retrieval
+############################################################
+chromadb>=0.4.0
+sentence-transformers>=3.0.0
+rank_bm25>=0.2.2
 
-    ############################################################
-    # System & Token Utilities
-    ############################################################
-    pydantic>=2.11.0
-    psutil>=5.9.0
-    tiktoken>=0.7.0
+############################################################
+# Testing & Quality Assurance
+############################################################
+pytest>=8.0.0

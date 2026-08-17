@@ -90,6 +90,7 @@ def verify_evidence(
 
     all_chunks_list = list(chunk_map.items())
     grounded_any = False
+    valid_evidence = []
 
     for item in evidence_items:
         if not isinstance(item, dict):
@@ -105,11 +106,12 @@ def verify_evidence(
             item["chunk_id"] = cited_cid
             finding["grounding_verified"] = True
             grounded_any = True
+            valid_evidence.append(item)
             continue
 
-        # 2. Neighbor / Provenance Search: search neighboring chunks & entire chunk_map
+        # 2. Document-wide verbatim search: search all chunks in chunk_map if cited_cid is missing or quote not in cited chunk
         matched_cid = None
-        # Try adjacent chunk IDs first (e.g. if cited_cid is "chunk_014", check chunk_013, chunk_015)
+        # Try adjacent chunk IDs first if cited_cid matches prefix_num format
         if cited_cid and "_" in str(cited_cid):
             prefix, _, num_str = str(cited_cid).rpartition("_")
             if num_str.isdigit():
@@ -121,7 +123,7 @@ def verify_evidence(
                         matched_cid = candidate_cid
                         break
 
-        # If not found in adjacent chunks, search all chunks in chunk_map
+        # Search ALL document chunks if not matched in adjacent chunks
         if not matched_cid:
             for cid, cdata in all_chunks_list:
                 if _quote_found_in_chunk(quote, cdata.get("text") or ""):
@@ -135,11 +137,10 @@ def verify_evidence(
                 finding["chunk_id"] = matched_cid
             finding["grounding_verified"] = True
             grounded_any = True
-        else:
-            sample_q = str(quote)[:50]
-            return False, f"evidence quote '{sample_q}...' could not be located in cited chunk '{cited_cid}' or any document source chunk"
+            valid_evidence.append(item)
 
     if grounded_any:
+        finding["evidence"] = valid_evidence
         return True, None
 
-    return False, "evidence quote does not appear in document chunks"
+    return False, "evidence quote does not appear verbatim in document chunks"

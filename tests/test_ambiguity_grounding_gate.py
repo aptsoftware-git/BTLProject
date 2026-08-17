@@ -37,11 +37,19 @@ def test_missing_evidence_list_is_rejected():
     assert "no source location" in reason
 
 
-def test_citing_nonexistent_chunk_id_is_rejected():
+def test_citing_nonexistent_chunk_id_grounds_if_quote_exists():
+    # Synthetic chunk_id but valid verbatim quote -> document-wide search grounds to c1
     finding = {"evidence": [{"chunk_id": "c99", "quote": "Revenue grew by 12% in FY2024"}]}
     grounded, reason = verify_evidence(finding, CHUNK_MAP)
+    assert grounded is True
+    assert finding["evidence"][0]["chunk_id"] == "c1"
+
+def test_citing_nonexistent_chunk_id_rejects_if_quote_absent():
+    # Synthetic chunk_id and missing quote -> rejected
+    finding = {"evidence": [{"chunk_id": "c99", "quote": "Revenue grew by 99% in FY2099"}]}
+    grounded, reason = verify_evidence(finding, CHUNK_MAP)
     assert grounded is False
-    assert "not found" in reason
+    assert "does not appear verbatim" in reason
 
 
 def test_at_least_one_grounded_evidence_item_is_sufficient():

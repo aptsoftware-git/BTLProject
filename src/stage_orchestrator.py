@@ -573,6 +573,23 @@ class StageOrchestrator:
             spell_dir.mkdir(parents=True, exist_ok=True)
             save_json(all_candidates, spell_file)
 
+            # Spell Candidate Protection / Filtering Stage (Requirement 8)
+            from src.spell_filter import SpellCandidateFilter
+            spell_filter = SpellCandidateFilter(spacy_config=self.config.spacy)
+            filter_res = spell_filter.run(
+                sentences=all_sentences,
+                candidates=all_candidates,
+                output_dir=spell_dir
+            )
+            logger.info(
+                "Stage 3 Spell Protection Filter: Raw=%d -> Filtered=%d (NER entities=%d, Protected terms=%d, Rejected=%d)",
+                filter_res["raw_candidates_count"],
+                filter_res["filtered_candidates_count"],
+                filter_res["ner_entities_count"],
+                filter_res["protected_terms_count"],
+                filter_res["rejected_candidates_count"],
+            )
+
             end_time = datetime.now()
             duration = round((end_time - start_time).total_seconds(), 2)
 
@@ -581,7 +598,7 @@ class StageOrchestrator:
                 "Completed",
                 end_time=end_time.isoformat(),
                 duration=duration,
-                output_location="06_spell/spell_candidates.json"
+                output_location="06_spell/filtered_spell_candidates.json"
             )
 
             job = self.get_job()
@@ -589,7 +606,7 @@ class StageOrchestrator:
                 job["spell_ready"] = True
                 self.save_job()
 
-            logger.info("END Stage 3: Language & Spelling Review completed in %.2fs (%d candidate findings extracted)", duration, len(all_candidates))
+            logger.info("END Stage 3: Language & Spelling Review completed in %.2fs (%d candidate findings retained)", duration, filter_res["filtered_candidates_count"])
 
         except Exception as exc:
             end_time = datetime.now()
@@ -606,6 +623,7 @@ class StageOrchestrator:
         logger.info("START Stage 4 (Grammar & Writing Quality Review) for job %s", self.job_id)
         report_file = self.job_dir / "10_final" / "report.json"
         mapped_findings_file = self.job_dir / "10_final" / "mapped_findings.json"
+        filtered_spell_file = self.job_dir / "06_spell" / "filtered_spell_candidates.json"
         spell_file = self.job_dir / "06_spell" / "spell_candidates.json"
         sentences_file = self.job_dir / "04_sentences" / "sentences.json"
 
@@ -620,14 +638,16 @@ class StageOrchestrator:
             self.update_stage_state(stage_id, "Blocked", errors="Blocked: Stage 3 (Spell Checking) failed, so Stage 4 has no valid input to run against.")
             logger.error("Stage 4 (Grammar) blocked for job %s: Stage 3 failed", self.job_id)
             return
-        if not spell_file.exists():
-            self.update_stage_state(stage_id, "Blocked", errors="Blocked: Stage 3 output (06_spell/spell_candidates.json) is missing.")
-            logger.error("Stage 4 (Grammar) blocked for job %s: spell_candidates.json missing", self.job_id)
+        if not filtered_spell_file.exists() and not spell_file.exists():
+            self.update_stage_state(stage_id, "Blocked", errors="Blocked: Stage 3 output (06_spell/filtered_spell_candidates.json) is missing.")
+            logger.error("Stage 4 (Grammar) blocked for job %s: spell candidates missing", self.job_id)
             return
+
+        active_spell_file = filtered_spell_file if filtered_spell_file.exists() else spell_file
 
         # Cache check — only if force_regenerate is False AND both report.json AND mapped_findings.json are newer
         # than every upstream input count as "already done".
-        if not force_regenerate and not _artifact_is_stale(report_file, spell_file, sentences_file) and not _artifact_is_stale(mapped_findings_file, spell_file, sentences_file):
+        if not force_regenerate and not _artifact_is_stale(report_file, active_spell_file, sentences_file) and not _artifact_is_stale(mapped_findings_file, active_spell_file, sentences_file):
             logger.info("[CACHE HIT] Stage 4 (Grammar) already completed for job %s", self.job_id)
             self.update_stage_state(stage_id, "Completed", duration=0.0, output_location="10_final/report.json")
             job = self.get_job()
@@ -658,14 +678,17 @@ class StageOrchestrator:
             from src.utils import save_json, load_json, save_text
             from concurrent.futures import ThreadPoolExecutor
 
+            filtered_spell_file = self.job_dir / "06_spell" / "filtered_spell_candidates.json"
             spell_file = self.job_dir / "06_spell" / "spell_candidates.json"
             sentences_file = self.job_dir / "04_sentences" / "sentences.json"
             protected_file = self.job_dir / "05_protected_terms" / "protected_terms.json"
             norm_text_file = self.job_dir / "03_preprocessed" / "normalized_text.txt"
 
-            spell_cands_raw = load_json(spell_file) if spell_file.exists() else []
+            # Stage 4 consumes filtered_spell_candidates.json (Requirement 9)
+            active_spell_file = filtered_spell_file if filtered_spell_file.exists() else spell_file
+            spell_cands_raw = load_json(active_spell_file) if active_spell_file.exists() else []
             all_candidates = [Candidate(**c) if isinstance(c, dict) else c for c in spell_cands_raw]
-            logger.info("Stage 4: Loaded %d spelling candidate(s) from Stage 3 for job %s", len(all_candidates), self.job_id)
+            logger.info("Stage 4: Loaded %d filtered spelling candidate(s) from %s for job %s", len(all_candidates), active_spell_file.name, self.job_id)
 
             sentences_raw = load_json(sentences_file) if sentences_file.exists() else []
             all_sentences = [Sentence(**s) if isinstance(s, dict) else s for s in sentences_raw]
@@ -696,7 +719,22 @@ class StageOrchestrator:
                     except Exception as e:
                         logger.warning("Could not remove stale artifact %s: %s", art, e)
 
-            # LLM Grammar Agent
+            # Primary Grammar Engine: Gramformer (Seq2Seq + ERRANT get_edits)
+            from src.gramformer_agent import GramformerAgent
+            gramformer_agent = GramformerAgent(self.config.gramformer)
+            grammar_candidates: List[Candidate] = []
+
+            if not gramformer_agent.available:
+                raise RuntimeError("Gramformer grammar engine is not available or failed to load.")
+
+            try:
+                logger.info("Stage 4: Running Gramformer sentence-level grammar correction across %d sentence(s)...", len(all_sentences))
+                grammar_candidates = gramformer_agent.correct_batch(all_sentences, protected_terms)
+            except Exception as exc:
+                logger.exception("Gramformer grammar review failed in Stage 4: %s", exc)
+                raise RuntimeError(f"Gramformer execution failed: {exc}") from exc
+
+            # Optional Level-2 LLM paragraph reviewer if configured
             grammar_agent = GrammarAgent(self.config.ollama)
             llm_grammar_candidates: List[Candidate] = []
 
@@ -734,18 +772,20 @@ class StageOrchestrator:
                     })
 
                 try:
-                    logger.info("Stage 4: Running LLM grammar review batch across %d paragraph(s)...", len(paragraphs_data))
+                    logger.info("Stage 4: Running secondary LLM paragraph grammar review across %d paragraph(s)...", len(paragraphs_data))
                     llm_grammar_candidates = grammar_agent.run_batch(paragraphs_data, sentence_lookup, batch_size=15)
                 except Exception as exc:
                     logger.warning("Grammar review (Ollama batch) failed in Stage 4: %s", exc)
 
+            combined_grammar_candidates = grammar_candidates + llm_grammar_candidates
+
             grammar_dir = self.job_dir / "07_grammar"
             grammar_dir.mkdir(parents=True, exist_ok=True)
             # Deterministic artifact guarantee: grammar_candidates.json is ALWAYS created
-            save_json(llm_grammar_candidates, grammar_dir / "grammar_candidates.json")
+            save_json(combined_grammar_candidates, grammar_dir / "grammar_candidates.json")
 
-            # Combine Stage 3 spell candidates + Stage 4 LLM grammar candidates for downstream validation/merge
-            all_candidates.extend(llm_grammar_candidates)
+            # Combine Stage 3 filtered spell candidates + Stage 4 Gramformer grammar candidates for downstream validation/merge
+            all_candidates.extend(combined_grammar_candidates)
 
             # Validation
             logger.info("Stage 4: Validating %d candidate(s) against protected terms shield...", len(all_candidates))

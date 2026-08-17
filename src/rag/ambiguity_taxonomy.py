@@ -81,6 +81,8 @@ _ALIASES = {
     "referential ambiguity": "Pronoun / entity-reference ambiguity",
     "ambiguous reference": "Pronoun / entity-reference ambiguity",
     "pronoun / entity-reference ambiguity": "Pronoun / entity-reference ambiguity",
+    "entity/pronoun inconsistency": "Pronoun / entity-reference ambiguity",
+    "pronoun inconsistency": "Pronoun / entity-reference ambiguity",
 
     # Terminology inconsistency
     "terminology conflict": "Terminology inconsistency",
@@ -108,6 +110,9 @@ _ALIASES = {
     "business logic conflict": "Internal factual contradiction",
     "duplicate guidance": "Internal factual contradiction",
     "internal factual contradiction": "Internal factual contradiction",
+    "designation inconsistency": "Internal factual contradiction",
+    "designation conflict": "Internal factual contradiction",
+    "internal factual contradiction / designation inconsistency": "Internal factual contradiction",
 
     # Structural / convention inconsistency
     "structural inconsistency": "Structural / convention inconsistency",
