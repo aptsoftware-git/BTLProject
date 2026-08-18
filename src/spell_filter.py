@@ -1,45 +1,45 @@
 """
 spell_filter.py
 ===============
-Spell Candidate Protection/Filtering stage AFTER the existing Spell Agent.
+High-Precision Spell Candidate Protection and Filtering Stage.
 
-Flow:
-  04_sentences/sentences.json
-          ↓
-  spaCy NER — run ONCE over all extracted running-text sentences using nlp.pipe()
-          ↓
-  ner_entities.json
-          ↓
-  Build protected_terms.json
-          ↓
+Optimized Flow:
   06_spell/spell_candidates.json
           ↓
-  Protected-term filtering (match using sentence_id and precomputed vocabulary)
+  Extract unique sentence_ids from spell_candidates.json
           ↓
-  filtered_spell_candidates.json
+  Retrieve corresponding full sentences from 04_sentences/sentences.json
           ↓
-  Stage 4 Grammar
-
-Key Requirements:
-1. Use 04_sentences/sentences.json as text source (never run spaCy on raw candidates).
-2. Process all sentences in batch with spaCy nlp.pipe() for maximum efficiency.
-3. Extract & protect PERSON, ORG, GPE, LOC, FAC, PRODUCT, EVENT, NORP.
-4. Protect acronyms, abbreviations, repeated proper terms, company names, domain terminology.
-5. Use sentence_id from spell_candidates.json to match candidates against precomputed entities & terms.
-6. Preserve raw spell_candidates.json unchanged.
-7. Generate 06_spell/ner_entities.json, 06_spell/protected_terms.json, 06_spell/filtered_spell_candidates.json.
-8. Record rejection reasons for every filtered candidate (e.g. PERSON_ENTITY, ORG_ENTITY, GPE_ENTITY, ACRONYM, DOMAIN_TERM).
-9. Keep deterministic and fast. Optimize for HIGH PRECISION.
+  Process ONCE with spaCy nlp.pipe(batch_size=64)
+          ↓
+  06_spell/ner_entities.json (PERSON, ORG, GPE, LOC, FAC, PRODUCT, EVENT, NORP)
+          ↓
+  Build 06_spell/protected_terms.json
+          ↓
+  Multi-layer Precision Validation Gate:
+    • OCR artifacts, single letters, ordinals, roman numerals
+    • Acronyms & short codes
+    • Sentence & Document-level NER entity shielding
+    • Canonical corporate, geographic, and legal vocabularies
+    • Domain, engineering, financial, and technical dictionaries
+    • Document-level repeated terminology
+    • Valid English dictionary word gate
+    • Strict Levenshtein edit-distance threshold (<= 2 for short words)
+          ↓
+  06_spell/filtered_spell_candidates.json (Retained genuine spelling errors only)
+  06_spell/rejected_spell_candidates.json (Full audit log with explicit rejection reasons)
 """
 
 from __future__ import annotations
 
 import re
+import string
 from collections import Counter
 from pathlib import Path
 from typing import Any, Dict, List, Optional, Set, Tuple
 
 import spacy
+from symspellpy import SymSpell, Verbosity
 
 from src.config import SpacyConfig, ROOT_DIR
 from src.domain_words import VALID_DOMAIN_WORDS, is_valid_domain_term
@@ -85,7 +85,8 @@ CANONICAL_INDIAN_LOCATIONS: Set[str] = {
     "bengal", "odisha", "bihar", "assam", "maharashtra", "gujarat", "karnataka",
     "tamil nadu", "kerala", "andhra pradesh", "telangana", "uttar pradesh",
     "madhya pradesh", "rajasthan", "punjab", "haryana", "uttarakhand", "himachal pradesh",
-    "goa", "sikkim", "tripura", "meghalaya", "manipur", "nagaland", "mizoram"
+    "goa", "sikkim", "tripura", "meghalaya", "manipur", "nagaland", "mizoram",
+    "secunderabad", "visakhapatnam", "kochi", "coimbatore", "mysore", "mysuru"
 }
 
 CANONICAL_CORPORATE_ENTITIES: Set[str] = {
@@ -96,7 +97,8 @@ CANONICAL_CORPORATE_ENTITIES: Set[str] = {
     "ntpc", "powergrid", "nhpc", "sjvn", "thdc", "eesl", "seci", "dvc", "cesc",
     "wbsedcl", "wbsetcl", "jusnl", "bsphcl", "uppcl", "siemens", "alstom", "abb",
     "schneider", "toshiba", "hitachi", "ge", "technip", "kpmg", "pwc", "deloitte", "ey",
-    "infosys", "tcs", "wipro", "hcl", "cognizant", "tech mahindra", "bagra", "ambedkar"
+    "infosys", "tcs", "wipro", "hcl", "cognizant", "tech mahindra", "bagra", "ambedkar",
+    "sail", "gail", "ongc", "iocnl", "boc", "vedanta", "hindalco", "jsw", "jindal"
 }
 
 KNOWN_ACRONYMS: Set[str] = {
@@ -113,10 +115,17 @@ KNOWN_ACRONYMS: Set[str] = {
     "ebit", "pbt", "roce", "roe", "cagr", "o&m", "boq", "loa", "loi", "jv",
     "spv", "emd", "bg", "pbg", "lc", "b2b", "b2c", "oem", "oems", "udin",
     "icai", "mca", "rera", "fy20", "fy21", "fy22", "fy23", "fy24", "fy25", "fy26",
-    "q1", "q2", "q3", "q4", "yoy", "qoq", "csr", "inr", "usd", "eur", "gbp"
+    "q1", "q2", "q3", "q4", "yoy", "qoq", "csr", "inr", "usd", "eur", "gbp",
+    "pvt", "ltd", "inc", "corp", "co", "mfg", "sqft", "sqm", "nos", "no", "dr",
+    "ca", "cs", "cma", "agm", "egm", "roc", "tds", "tcs", "it", "ot", "iot"
 }
 
-BRITISH_AMERICAN_PAIRS = {
+ROMAN_NUMERALS: Set[str] = {
+    "i", "ii", "iii", "iv", "v", "vi", "vii", "viii", "ix", "x",
+    "xi", "xii", "xiii", "xiv", "xv", "xvi", "xvii", "xviii", "xix", "xx"
+}
+
+BRITISH_AMERICAN_PAIRS: Set[Tuple[str, str]] = {
     ("fertiliser", "fertilizer"), ("fertilisers", "fertilizers"),
     ("colour", "color"), ("colours", "colors"),
     ("flavour", "flavor"), ("flavours", "flavors"),
@@ -136,13 +145,10 @@ BRITISH_AMERICAN_PAIRS = {
     ("modelling", "modeling"), ("modeller", "modeler"),
     ("fulfil", "fulfill"), ("enrol", "enroll"), ("skilful", "skillful"),
     ("program", "programme"), ("catalog", "catalogue"), ("dialog", "dialogue"),
-    ("analog", "analogue"), ("installment", "instalment"), ("check", "cheque")
+    ("analog", "analogue"), ("installment", "instalment"), ("check", "cheque"),
+    ("behavior", "behaviour"), ("favour", "favor"), ("honour", "honor")
 }
 
-
-# ---------------------------------------------------------------------------
-# Helper functions
-# ---------------------------------------------------------------------------
 
 def _levenshtein_distance(s1: str, s2: str) -> int:
     """Compute Levenshtein edit distance between two strings."""
@@ -179,15 +185,71 @@ def _is_british_american_swap(orig: str, sug: str) -> bool:
     return False
 
 
-# ---------------------------------------------------------------------------
-# SpellCandidateFilter Engine
-# ---------------------------------------------------------------------------
+_DICT_WORDS_CACHE: Optional[Set[str]] = None
+_COMMON_WORDS_CACHE: Optional[Set[str]] = None
+_DOMAIN_DICT_CACHE: Optional[Set[str]] = None
+_SYM_SPELL_CACHE: Optional[SymSpell] = None
+
+
+def get_cached_dictionaries() -> Tuple[Set[str], Set[str], Set[str]]:
+    """Cache loaded frequency and domain dictionaries in memory for high-throughput multi-page jobs."""
+    global _DICT_WORDS_CACHE, _COMMON_WORDS_CACHE, _DOMAIN_DICT_CACHE
+    if _DICT_WORDS_CACHE is None or _COMMON_WORDS_CACHE is None or _DOMAIN_DICT_CACHE is None:
+        dict_words: Set[str] = set()
+        common_words: Set[str] = set()
+        dict_path = ROOT_DIR / "models" / "frequency_dictionary_en_82_765.txt"
+        if dict_path.exists():
+            try:
+                with open(dict_path, "r", encoding="utf-8") as f:
+                    for line in f:
+                        parts = line.strip().split()
+                        if len(parts) >= 2:
+                            w = parts[0].lower()
+                            try:
+                                freq = int(parts[1])
+                                dict_words.add(w)
+                                if freq > 1000000:
+                                    common_words.add(w)
+                            except ValueError:
+                                continue
+            except Exception:
+                pass
+
+        domain_dict_terms: Set[str] = set()
+        domain_dict_path = ROOT_DIR / "data" / "domain_dictionary.json"
+        if domain_dict_path.exists():
+            try:
+                data = load_json(domain_dict_path)
+                if isinstance(data, list):
+                    domain_dict_terms = {str(item).lower().strip() for item in data}
+            except Exception:
+                pass
+
+        _DICT_WORDS_CACHE = dict_words
+        _COMMON_WORDS_CACHE = common_words
+        _DOMAIN_DICT_CACHE = domain_dict_terms
+
+    return _DICT_WORDS_CACHE, _COMMON_WORDS_CACHE, _DOMAIN_DICT_CACHE
+
+
+def get_cached_symspell() -> Optional[SymSpell]:
+    """Cache SymSpell dictionary instance for spelling suggestions."""
+    global _SYM_SPELL_CACHE
+    if _SYM_SPELL_CACHE is None:
+        try:
+            dict_path = ROOT_DIR / "models" / "frequency_dictionary_en_82_765.txt"
+            if dict_path.exists():
+                ss = SymSpell(max_dictionary_edit_distance=2, prefix_length=7)
+                if ss.load_dictionary(str(dict_path), term_index=0, count_index=1):
+                    _SYM_SPELL_CACHE = ss
+        except Exception:
+            _SYM_SPELL_CACHE = None
+    return _SYM_SPELL_CACHE
+
 
 class SpellCandidateFilter:
     """
-    High-precision protection and filtering engine for spell checking candidates.
-    Extracts entities once across sentences via spaCy nlp.pipe() and protects
-    valid names, places, organizations, acronyms, and domain terminology.
+    High-Precision Protection and Filtering Engine for Spell Checking Candidates.
     """
 
     PROTECTED_NER_LABELS = {
@@ -196,11 +258,12 @@ class SpellCandidateFilter:
 
     _ACRONYM_REGEX = re.compile(r"\b[A-Z0-9/&.-]{2,}s?\b")
     _SLASH_ACRONYM_REGEX = re.compile(r"^[A-Z0-9]+(?:/[A-Z0-9]+)+$")
-    _ABBREV_REGEX = re.compile(r"\b(?:Pvt|Ltd|Co|Inc|Corp|Govt|Dr|Prof|Mr|Mrs|Ms|Shri|Smt|Er)\.?\b", re.IGNORECASE)
+    _ABBREV_REGEX = re.compile(r"\b(?:Pvt|Ltd|Co|Inc|Corp|Govt|Dr|Prof|Mr|Mrs|Ms|Shri|Smt|Er|Adv)\.?\b", re.IGNORECASE)
     _DOTTED_NAME_REGEX = re.compile(r"\b(?:[A-Z]\.){1,4}\s*([A-Z][a-zA-Z]+)\b")
     _ADDRESS_SUFFIX_REGEX = re.compile(
         r"\b([A-Z][a-zA-Z]+)\s+(?:Marg|Road|Rd\.?|Street|St\.?|Nagar|Chowk|Colony|Society|Estate|Vihar|Puram|Bagh|Circle|Lane)\b"
     )
+    _ORDINAL_REGEX = re.compile(r"^\d+(?:st|nd|rd|th)$", re.IGNORECASE)
 
     def __init__(
         self,
@@ -218,47 +281,71 @@ class SpellCandidateFilter:
                 self.nlp = None
 
         self.whitelist_extra = set(whitelist_extra or [])
+        self.dict_words, self.common_words, self.domain_dict_terms = get_cached_dictionaries()
+        self.sym_spell = get_cached_symspell()
 
-        # Load domain dictionary from data/domain_dictionary.json
-        self.domain_dict_terms: Set[str] = set()
-        domain_dict_path = ROOT_DIR / "data" / "domain_dictionary.json"
-        if domain_dict_path.exists():
-            try:
-                data = load_json(domain_dict_path)
-                if isinstance(data, list):
-                    self.domain_dict_terms = {str(item).lower().strip() for item in data}
-            except Exception:
-                pass
+    def is_candidate_pre_rejected(self, cand: Candidate | dict) -> Optional[str]:
+        """
+        Fast lightweight pre-check to identify items that are definitely not genuine spelling errors
+        before running spaCy NER. Returns rejection reason string if pre-rejected, else None.
+        """
+        orig = (getattr(cand, "original_text", None) or (cand.get("original_text") if isinstance(cand, dict) else "") or "").strip()
+        sug = (getattr(cand, "suggested_text", None) or (cand.get("suggested_text") if isinstance(cand, dict) else "") or "").strip()
+        orig_lower = orig.lower()
+        sug_lower = sug.lower()
 
-        # Load frequency dictionary to recognize standard dictionary words
-        self.dict_words: Set[str] = set()
-        self.common_words: Set[str] = set()
-        dict_path = ROOT_DIR / "models" / "frequency_dictionary_en_82_765.txt"
-        if dict_path.exists():
-            try:
-                with open(dict_path, "r", encoding="utf-8") as f:
-                    for line in f:
-                        parts = line.strip().split()
-                        if len(parts) >= 2:
-                            w = parts[0].lower()
-                            try:
-                                freq = int(parts[1])
-                                self.dict_words.add(w)
-                                if freq > 10000000:
-                                    self.common_words.add(w)
-                            except ValueError:
-                                continue
-            except Exception:
-                pass
+        # Check 0: Genuine Typo of Canonical Country or Location -> do not pre-reject!
+        is_genuine_proper_misspelling = (
+            (sug_lower in CANONICAL_COUNTRIES and orig_lower not in CANONICAL_COUNTRIES and _levenshtein_distance(orig_lower, sug_lower) <= 2) or
+            (sug_lower in CANONICAL_INDIAN_LOCATIONS and orig_lower not in CANONICAL_INDIAN_LOCATIONS and _levenshtein_distance(orig_lower, sug_lower) <= 2)
+        )
+        if is_genuine_proper_misspelling:
+            return None
 
-    # ------------------------------------------------------------------
-    # Step 1: spaCy NER across candidate sentences using nlp.pipe(batch_size=64)
-    # ------------------------------------------------------------------
+        # 1. OCR Artifacts, Single-Letter Fragments, Symbols, Numbers
+        if len(orig) < 2:
+            return "SINGLE_LETTER_OR_OCR_ARTIFACT"
+        if not re.search(r"[A-Za-z]", orig):
+            return "NUMERIC_OR_SYMBOL_TOKEN"
+        if re.search(r"\d", orig) or self._ORDINAL_REGEX.match(orig):
+            return "ORDINAL_OR_NUMERIC_CODE"
+        if orig_lower in ROMAN_NUMERALS:
+            return "ROMAN_NUMERAL"
+
+        # 2. Capitalization / British-American Swap
+        if orig_lower == sug_lower and len(orig_lower) > 0:
+            return "CAPITALIZATION_PREFERENCE"
+        if _is_british_american_swap(orig, sug):
+            return "BRITISH_AMERICAN_PREFERENCE"
+
+        # 3. Acronyms & Short Codes
+        if (orig.isupper() and len(orig) >= 2) or "/" in orig or orig_lower in KNOWN_ACRONYMS:
+            return "ACRONYM"
+        if self._SLASH_ACRONYM_REGEX.match(orig):
+            return "ACRONYM"
+
+        # 4. Canonical Corporate, Place, & Person Names
+        if orig_lower in CANONICAL_CORPORATE_ENTITIES:
+            return "ORG_ENTITY" if orig_lower in {"btl", "btl epc", "fitchner", "fichtner", "wartsila", "shrachi", "vertexa"} else "PERSON_ENTITY"
+        if orig_lower in CANONICAL_INDIAN_LOCATIONS or orig_lower in CANONICAL_COUNTRIES:
+            return "GPE_ENTITY"
+
+        # 5. Domain Terminology
+        if is_valid_domain_term(orig_lower) or orig_lower in self.domain_dict_terms:
+            return "DOMAIN_TERM"
+
+        # 6. Abbreviations
+        if self._ABBREV_REGEX.search(orig):
+            return "ABBREVIATION"
+
+        # 7. Valid English Dictionary Words
+        if orig_lower in self.dict_words and orig_lower not in {"occuring", "recieve", "seperate", "untill", "definately"}:
+            return "VALID_DICTIONARY_WORD"
+
+        return None
+
     def extract_ner_entities(self, sentences: List[Sentence], batch_size: int = 64) -> List[Dict[str, Any]]:
-        """
-        Run spaCy NER ONCE over unique candidate sentences using nlp.pipe(batch_size=64).
-        Extracts PERSON, ORG, GPE, LOC, FAC, PRODUCT, EVENT, NORP, LAW, WORK_OF_ART.
-        """
+        """Run spaCy NER ONCE over unique candidate sentences using nlp.pipe(batch_size=64)."""
         if not self.nlp or not sentences:
             return []
 
@@ -288,24 +375,13 @@ class SpellCandidateFilter:
 
         return ner_entities
 
-    # ------------------------------------------------------------------
-    # Step 2: Build protected_terms.json
-    # ------------------------------------------------------------------
     def build_protected_terms(
         self,
         sentences: List[Sentence],
         ner_entities: List[Dict[str, Any]],
         extra_whitelist: Optional[Set[str]] = None,
     ) -> List[Dict[str, Any]]:
-        """
-        Build a comprehensive, deduplicated protected terms registry combining:
-        - NER entities
-        - Acronyms & Abbreviations
-        - Canonical corporate & geographic vocabularies
-        - Domain-specific terminology
-        - Repeated proper terms across sentences
-        - User whitelists
-        """
+        """Build a comprehensive, deduplicated protected terms registry."""
         protected_list: List[Dict[str, Any]] = []
         seen_keys: Set[Tuple[str, str]] = set()
 
@@ -397,9 +473,6 @@ class SpellCandidateFilter:
 
         return protected_list
 
-    # ------------------------------------------------------------------
-    # Step 3: Protected-term filtering
-    # ------------------------------------------------------------------
     def filter_candidates(
         self,
         candidates: List[Candidate | dict],
@@ -408,13 +481,10 @@ class SpellCandidateFilter:
         protected_terms: List[Dict[str, Any]],
     ) -> Tuple[List[Candidate], List[Dict[str, Any]]]:
         """
-        Match each candidate in spell_candidates.json against precomputed NER entities
-        and protected terms, using sentence_id and token rules.
-
-        Returns:
-            (filtered_candidates, rejected_candidates_with_reasons)
+        Match each candidate in spell_candidates.json against precomputed NER entities,
+        canonical dictionaries, strict edit-distance rules, and protected terms.
         """
-        # Build lookup indices for instant O(1) matching
+        # Lookup indices
         sentence_map: Dict[int, Sentence] = {s.sentence_id: s for s in sentences}
         entities_by_sentence: Dict[int, List[Dict[str, Any]]] = {}
         for ent in ner_entities:
@@ -446,45 +516,60 @@ class SpellCandidateFilter:
             sug_lower = sug.lower()
             sid = cand.sentence_id
 
-            # Default: no rejection
             rejection_reason: Optional[str] = None
             matched_term: Optional[str] = None
 
-            # ---------------------------------------------------------
-            # Check 0: Trivial Identical / Case / British-American Swap
-            # ---------------------------------------------------------
-            if orig_lower == sug_lower:
-                rejection_reason = "CAPITALIZATION_PREFERENCE"
-                matched_term = orig
-            elif _is_british_american_swap(orig, sug):
-                rejection_reason = "BRITISH_AMERICAN_PREFERENCE"
+            # If suggested_text is empty, consult SymSpell for correction suggestion
+            if not sug and self.sym_spell is not None:
+                suggestions = self.sym_spell.lookup(orig_lower, Verbosity.TOP, max_edit_distance=2)
+                if suggestions:
+                    cand.suggested_text = suggestions[0].term
+                    sug = cand.suggested_text
+                    sug_lower = sug.lower()
+
+            if not sug and not rejection_reason:
+                rejection_reason = "NO_VALID_CORRECTION_SUGGESTION"
                 matched_term = orig
 
             # ---------------------------------------------------------
-            # Check 1: Is this a genuine typo of a country or word?
-            # E.g. "Bangaldesh" -> "Bangladesh", "occuring" -> "occurring", "renior" -> "senior"
+            # Check 0: Genuine Typo of Canonical Country or Location
+            # E.g. "Bangaldesh" -> "Bangladesh" (edit distance <= 2)
             # ---------------------------------------------------------
-            is_genuine_spelling_error = False
+            is_genuine_proper_misspelling = (
+                (sug_lower in CANONICAL_COUNTRIES and orig_lower not in CANONICAL_COUNTRIES and _levenshtein_distance(orig_lower, sug_lower) <= 2) or
+                (sug_lower in CANONICAL_INDIAN_LOCATIONS and orig_lower not in CANONICAL_INDIAN_LOCATIONS and _levenshtein_distance(orig_lower, sug_lower) <= 2)
+            )
 
+            # ---------------------------------------------------------
+            # 1. OCR Artifacts, Single-Letter Fragments, Symbols, Numbers
+            # ---------------------------------------------------------
             if not rejection_reason:
-                # 1a. Canonical Country Misspelling Check (e.g. Bangaldesh -> Bangladesh)
-                if sug_lower in CANONICAL_COUNTRIES and orig_lower not in CANONICAL_COUNTRIES:
-                    if _levenshtein_distance(orig_lower, sug_lower) <= 2:
-                        is_genuine_spelling_error = True
-
-                # 1b. Standard Lowercase Misspelling Check (e.g. occuring -> occurring, renior -> senior)
-                elif orig.islower() and not orig_lower.isupper() and orig_lower not in KNOWN_ACRONYMS:
-                    if not is_valid_domain_term(orig_lower) and orig_lower not in self.domain_dict_terms:
-                        if orig_lower not in CANONICAL_INDIAN_LOCATIONS and orig_lower not in CANONICAL_CORPORATE_ENTITIES:
-                            # Standard lowercase misspelling flagged by spell checker
-                            is_genuine_spelling_error = True
-
-            if is_genuine_spelling_error:
-                accepted_candidates.append(cand)
-                continue
+                if len(orig) < 2:
+                    rejection_reason = "SINGLE_LETTER_OR_OCR_ARTIFACT"
+                    matched_term = orig
+                elif not re.search(r"[A-Za-z]", orig):
+                    rejection_reason = "NUMERIC_OR_SYMBOL_TOKEN"
+                    matched_term = orig
+                elif re.search(r"\d", orig) or self._ORDINAL_REGEX.match(orig):
+                    rejection_reason = "ORDINAL_OR_NUMERIC_CODE"
+                    matched_term = orig
+                elif orig_lower in ROMAN_NUMERALS:
+                    rejection_reason = "ROMAN_NUMERAL"
+                    matched_term = orig
 
             # ---------------------------------------------------------
-            # Check 2: Acronyms & Short Codes (e.g. CNC, EPC, TREDS, CNC/EPC/TREDS)
+            # 2. Trivial Identical / Capitalization / British-American Swap
+            # ---------------------------------------------------------
+            if not rejection_reason:
+                if orig_lower == sug_lower:
+                    rejection_reason = "CAPITALIZATION_PREFERENCE"
+                    matched_term = orig
+                elif _is_british_american_swap(orig, sug):
+                    rejection_reason = "BRITISH_AMERICAN_PREFERENCE"
+                    matched_term = orig
+
+            # ---------------------------------------------------------
+            # 3. Acronyms & Short Codes (e.g. CNC, EPC, TREDS, CNC/EPC/TREDS)
             # ---------------------------------------------------------
             if not rejection_reason:
                 if (orig.isupper() and len(orig) >= 2) or "/" in orig or orig_lower in KNOWN_ACRONYMS:
@@ -495,45 +580,9 @@ class SpellCandidateFilter:
                     matched_term = orig
 
             # ---------------------------------------------------------
-            # Check 3: Sentence-Level NER Entity Overlap (sentence_id match)
+            # 4. Canonical Corporate, Place, & Person Names
             # ---------------------------------------------------------
-            if not rejection_reason and sid in entities_by_sentence:
-                sent_ents = entities_by_sentence[sid]
-                
-                # Check character span overlap or exact entity text match within sentence
-                for ent in sent_ents:
-                    ent_text = ent["text"]
-                    ent_lbl = ent["label"]
-                    ent_lower = ent_text.lower()
-
-                    # Exact text match or containment in entity
-                    if orig_lower == ent_lower or orig_lower in ent_lower.split():
-                        rejection_reason = f"{ent_lbl}_ENTITY"
-                        matched_term = ent_text
-                        break
-
-                    # Doc offset span overlap check if offsets are populated
-                    if cand.char_start is not None and cand.char_end is not None:
-                        e_start = ent.get("doc_char_start")
-                        e_end = ent.get("doc_char_end")
-                        if e_start is not None and e_end is not None:
-                            if cand.char_start < e_end and cand.char_end > e_start:
-                                rejection_reason = f"{ent_lbl}_ENTITY"
-                                matched_term = ent_text
-                                break
-
-            # ---------------------------------------------------------
-            # Check 4: Document-Wide NER Entities (e.g. Todi, Fitchner, India, Deoghar, BTL EPC)
-            # ---------------------------------------------------------
-            if not rejection_reason:
-                if orig_lower in doc_entities_lower:
-                    rejection_reason = doc_entities_lower[orig_lower]
-                    matched_term = orig
-
-            # ---------------------------------------------------------
-            # Check 5: Canonical Corporate, Place, & Person Names
-            # ---------------------------------------------------------
-            if not rejection_reason:
+            if not rejection_reason and not is_genuine_proper_misspelling:
                 if orig_lower in CANONICAL_CORPORATE_ENTITIES:
                     rejection_reason = "ORG_ENTITY" if orig_lower in {"btl", "btl epc", "fitchner", "fichtner", "wartsila", "shrachi", "vertexa"} else "PERSON_ENTITY"
                     matched_term = orig
@@ -545,31 +594,76 @@ class SpellCandidateFilter:
                     matched_term = orig
 
             # ---------------------------------------------------------
-            # Check 6: Domain Terminology (e.g. hydel, switchyard, substation)
+            # 5. Sentence-Level NER Entity Overlap (sentence_id match)
+            # ---------------------------------------------------------
+            if not rejection_reason and not is_genuine_proper_misspelling and sid in entities_by_sentence:
+                sent_ents = entities_by_sentence[sid]
+                for ent in sent_ents:
+                    ent_text = ent["text"]
+                    ent_lbl = ent["label"]
+                    ent_lower = ent_text.lower()
+
+                    if orig_lower == ent_lower or orig_lower in ent_lower.split():
+                        rejection_reason = f"{ent_lbl}_ENTITY"
+                        matched_term = ent_text
+                        break
+
+                    if cand.char_start is not None and cand.char_end is not None:
+                        e_start = ent.get("doc_char_start")
+                        e_end = ent.get("doc_char_end")
+                        if e_start is not None and e_end is not None:
+                            if cand.char_start < e_end and cand.char_end > e_start:
+                                rejection_reason = f"{ent_lbl}_ENTITY"
+                                matched_term = ent_text
+                                break
+
+            # ---------------------------------------------------------
+            # 6. Document-Wide NER Entities
+            # ---------------------------------------------------------
+            if not rejection_reason and not is_genuine_proper_misspelling and orig_lower in doc_entities_lower:
+                rejection_reason = doc_entities_lower[orig_lower]
+                matched_term = orig
+
+            # ---------------------------------------------------------
+            # 7. Domain Terminology & Protected Terms Registry Match
             # ---------------------------------------------------------
             if not rejection_reason:
                 if is_valid_domain_term(orig_lower) or orig_lower in self.domain_dict_terms:
                     rejection_reason = "DOMAIN_TERM"
                     matched_term = orig
-
-            # ---------------------------------------------------------
-            # Check 7: Precomputed Protected Terms Registry Match
-            # ---------------------------------------------------------
-            if not rejection_reason:
-                if orig_lower in protected_texts_lower:
+                elif orig_lower in protected_texts_lower and not is_genuine_proper_misspelling:
                     rejection_reason = protected_texts_lower[orig_lower]
                     matched_term = orig
-                elif sug_lower in protected_texts_lower and not orig.islower():
+                elif sug_lower in protected_texts_lower and not is_genuine_proper_misspelling and not orig.islower():
                     rejection_reason = protected_texts_lower[sug_lower]
                     matched_term = sug
 
             # ---------------------------------------------------------
-            # Check 8: Abbreviations / Dotted Initial Terms
+            # 8. Abbreviations / Dotted Initial Terms
             # ---------------------------------------------------------
             if not rejection_reason:
                 if self._ABBREV_REGEX.search(orig):
                     rejection_reason = "ABBREVIATION"
                     matched_term = orig
+
+            # ---------------------------------------------------------
+            # 9. Valid English Word Gate (Never flag valid dictionary words as typos)
+            # ---------------------------------------------------------
+            if not rejection_reason:
+                if orig_lower in self.dict_words and orig_lower not in {"occuring", "recieve", "seperate", "untill", "definately"}:
+                    rejection_reason = "VALID_DICTIONARY_WORD"
+                    matched_term = orig
+
+            # ---------------------------------------------------------
+            # 10. Strict Levenshtein Edit-Distance & Confidence Gate
+            # ---------------------------------------------------------
+            if not rejection_reason:
+                dist = _levenshtein_distance(orig_lower, sug_lower)
+                # Short words (<= 6 chars) must have edit distance <= 2; longer <= 3
+                max_allowed_dist = 2 if len(orig) <= 6 else 3
+                if dist > max_allowed_dist or dist == 0:
+                    rejection_reason = "HIGH_EDIT_DISTANCE_OR_UNRELIABLE"
+                    matched_term = f"dist={dist}"
 
             # ---------------------------------------------------------
             # Decision
@@ -592,9 +686,6 @@ class SpellCandidateFilter:
 
         return accepted_candidates, rejected_records
 
-    # ------------------------------------------------------------------
-    # Full Execution Flow: extract unique sentences -> NER -> filter -> save
-    # ------------------------------------------------------------------
     def run(
         self,
         sentences: List[Sentence],
@@ -604,42 +695,52 @@ class SpellCandidateFilter:
     ) -> Dict[str, Any]:
         """
         Executes the optimized protection/filtering stage:
-          1. Extract unique sentence_ids referenced by candidates.
-          2. Retrieve and deduplicate corresponding full sentences.
-          3. Process ONCE using spaCy nlp.pipe(batch_size=64).
-          4. Extract PERSON/ORG/GPE/LOC/FAC/PRODUCT/EVENT/NORP entities.
-          5. Build protected terms.
-          6. Filter candidates using sentence_id and protected vocabulary.
-          7. Preserve raw spell_candidates.json and generate filtered/audit artifacts.
+          1. Filter input candidates for spelling-type items.
+          2. Identify unresolved spelling candidates (skipping already pre-rejected items).
+          3. Process spaCy NER ONLY over sentences containing unresolved candidates.
+          4. Build protected terms registry.
+          5. Filter spell candidates through multi-layer precision gate (SymSpell + dictionary + edit distance).
+          6. Generate filtered_spell_candidates.json and rejected_spell_candidates.json audit artifacts.
         """
         import time
 
-        # Step 1: Extract unique sentence_ids referenced by spell_candidates
-        candidate_sids: Set[int] = set()
+        # Extract only spelling-type candidates if mixed candidates passed
+        spelling_candidates: List[Candidate | dict] = []
         for c in candidates:
+            itype = getattr(c, "issue_type", None) if hasattr(c, "issue_type") else (c.get("issue_type") if isinstance(c, dict) else None)
+            if itype is None or itype == IssueType.SPELLING or itype == "spelling":
+                spelling_candidates.append(c)
+
+        # Step 1: Identify unresolved candidates that require spaCy NER
+        unresolved_sids: Set[int] = set()
+        all_candidate_sids: Set[int] = set()
+        sentence_map = {s.sentence_id: s for s in sentences}
+
+        for c in spelling_candidates:
             sid = getattr(c, "sentence_id", None) if hasattr(c, "sentence_id") else c.get("sentence_id")
             if sid is not None:
-                candidate_sids.add(sid)
+                all_candidate_sids.add(sid)
+                if not self.is_candidate_pre_rejected(c):
+                    unresolved_sids.add(sid)
 
-        # Step 2: Retrieve & deduplicate corresponding full sentences from sentences
-        sentence_map = {s.sentence_id: s for s in sentences}
+        # Step 2: Run spaCy NER ONLY over sentences with unresolved candidates (for 216-page doc efficiency)
+        target_sids = unresolved_sids if unresolved_sids else all_candidate_sids
         unique_candidate_sentences = [
             sentence_map[sid]
-            for sid in sorted(candidate_sids)
+            for sid in sorted(target_sids)
             if sid in sentence_map
         ]
 
-        # Step 3: spaCy NER ONCE over unique candidate sentences using nlp.pipe(batch_size=64)
         t_spacy_start = time.time()
-        ner_entities = self.extract_ner_entities(unique_candidate_sentences, batch_size=64)
+        ner_entities = self.extract_ner_entities(unique_candidate_sentences, batch_size=64) if unique_candidate_sentences else []
         spacy_processing_time = round(time.time() - t_spacy_start, 4)
 
-        # Step 4: Build protected terms registry
+        # Step 3: Build protected terms registry
         protected_terms = self.build_protected_terms(unique_candidate_sentences, ner_entities, extra_whitelist)
 
-        # Step 5: Filter candidates using sentence_id and protected vocabulary
+        # Step 4: Filter candidates through multi-layer precision gate
         filtered_candidates, rejected_records = self.filter_candidates(
-            candidates=candidates,
+            candidates=spelling_candidates,
             sentences=unique_candidate_sentences,
             ner_entities=ner_entities,
             protected_terms=protected_terms
@@ -648,7 +749,7 @@ class SpellCandidateFilter:
         # Breakdown of rejection reasons
         rejection_breakdown = Counter(r["rejection_reason"] for r in rejected_records)
 
-        # Step 6: Save artifacts if output_dir provided
+        # Step 5: Save artifacts if output_dir provided
         if output_dir:
             out_p = Path(output_dir)
             out_p.mkdir(parents=True, exist_ok=True)
@@ -658,7 +759,7 @@ class SpellCandidateFilter:
             save_json(rejected_records, out_p / "rejected_spell_candidates.json")
 
         return {
-            "raw_candidates_count": len(candidates),
+            "raw_candidates_count": len(spelling_candidates),
             "unique_candidate_sentences_count": len(unique_candidate_sentences),
             "spacy_processing_time_seconds": spacy_processing_time,
             "ner_entities_count": len(ner_entities),

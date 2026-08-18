@@ -29,6 +29,9 @@ from typing import Any, Dict, List, Optional, Tuple
 
 from src.config import PipelineConfig, ROOT_DIR
 from src.logger import get_logger
+from src.models import Candidate, IssueType, ProtectedTerm, Sentence, SourceAgent
+from src.validation_agent import ValidationAgent
+from src.utils import load_json, save_json
 
 logger = get_logger("backend")
 
@@ -546,7 +549,7 @@ class StageOrchestrator:
                 raise FileNotFoundError(f"Missing sentences file: {sentences_path}")
 
             sentences_data = load_json(sentences_path)
-            all_sentences = [Sentence(**s) if isinstance(s, dict) else s for s in sentences_data]
+            all_sentences = [Sentence.from_dict(s) if isinstance(s, dict) else s for s in sentences_data]
             logger.info("Stage 3: Running LanguageTool & SymSpell analysis across %d sentence(s)...", len(all_sentences))
 
             lt_agent = LanguageToolAgent(self.config.languagetool)
@@ -571,14 +574,34 @@ class StageOrchestrator:
 
             spell_dir = self.job_dir / "06_spell"
             spell_dir.mkdir(parents=True, exist_ok=True)
-            save_json(all_candidates, spell_file)
+
+            # Separate into spelling candidates and grammar candidates from single LanguageTool pass
+            spell_candidates = [
+                c for c in all_candidates
+                if (c.issue_type if hasattr(c, "issue_type") else c.get("issue_type")) in (
+                    IssueType.SPELLING, "spelling"
+                )
+            ]
+            save_json(spell_candidates, spell_file)
+
+            # Save LanguageTool first-pass grammar candidates to 07_grammar/grammar_candidates.json
+            grammar_dir = self.job_dir / "07_grammar"
+            grammar_dir.mkdir(parents=True, exist_ok=True)
+            lt_grammar_cands = [
+                c for c in all_candidates
+                if (c.issue_type if hasattr(c, "issue_type") else c.get("issue_type")) in (
+                    IssueType.GRAMMAR, IssueType.TENSE, IssueType.PUNCTUATION,
+                    "grammar", "tense", "punctuation"
+                )
+            ]
+            save_json(lt_grammar_cands, grammar_dir / "grammar_candidates.json")
 
             # Spell Candidate Protection / Filtering Stage (Requirement 8)
             from src.spell_filter import SpellCandidateFilter
             spell_filter = SpellCandidateFilter(spacy_config=self.config.spacy)
             filter_res = spell_filter.run(
                 sentences=all_sentences,
-                candidates=all_candidates,
+                candidates=spell_candidates,
                 output_dir=spell_dir
             )
             logger.info(
@@ -687,20 +710,19 @@ class StageOrchestrator:
             # Stage 4 consumes filtered_spell_candidates.json (Requirement 9)
             active_spell_file = filtered_spell_file if filtered_spell_file.exists() else spell_file
             spell_cands_raw = load_json(active_spell_file) if active_spell_file.exists() else []
-            all_candidates = [Candidate(**c) if isinstance(c, dict) else c for c in spell_cands_raw]
+            all_candidates = [Candidate.from_dict(c) if isinstance(c, dict) else c for c in spell_cands_raw]
             logger.info("Stage 4: Loaded %d filtered spelling candidate(s) from %s for job %s", len(all_candidates), active_spell_file.name, self.job_id)
 
             sentences_raw = load_json(sentences_file) if sentences_file.exists() else []
-            all_sentences = [Sentence(**s) if isinstance(s, dict) else s for s in sentences_raw]
+            all_sentences = [Sentence.from_dict(s) if isinstance(s, dict) else s for s in sentences_raw]
 
             protected_raw = load_json(protected_file) if protected_file.exists() else []
             protected_terms = [ProtectedTerm(**pt) if isinstance(pt, dict) else pt for pt in protected_raw]
 
             norm_text = norm_text_file.read_text(encoding="utf-8") if norm_text_file.exists() else ""
 
-            # Clear stale Stage 4+ artifacts so previous/failed findings are never served
+            # Clear downstream Stage 4 artifacts so previous/failed findings are never served
             artifacts_to_clear = [
-                self.job_dir / "07_grammar" / "grammar_candidates.json",
                 self.job_dir / "08_validation" / "accepted.json",
                 self.job_dir / "08_validation" / "rejected.json",
                 self.job_dir / "09_semantic" / "semantic_failed.json",
@@ -719,22 +741,79 @@ class StageOrchestrator:
                     except Exception as e:
                         logger.warning("Could not remove stale artifact %s: %s", art, e)
 
-            # Primary Grammar Engine: Gramformer (Seq2Seq + ERRANT get_edits)
-            from src.gramformer_agent import GramformerAgent
-            gramformer_agent = GramformerAgent(self.config.gramformer)
-            grammar_candidates: List[Candidate] = []
+            # Primary Grammar Engine: LanguageTool First-Pass + Targeted Gramformer
+            grammar_dir = self.job_dir / "07_grammar"
+            grammar_dir.mkdir(parents=True, exist_ok=True)
+            grammar_file = grammar_dir / "grammar_candidates.json"
 
-            if not gramformer_agent.available:
-                raise RuntimeError("Gramformer grammar engine is not available or failed to load.")
+            # Step 1: Extract grammar candidates flagged by LanguageTool / lightweight first-pass
+            lt_grammar_candidates: List[Candidate] = []
+            if grammar_file.exists() and grammar_file.stat().st_size > 5:
+                try:
+                    loaded_gc = load_json(grammar_file)
+                    lt_grammar_candidates = [Candidate.from_dict(c) if isinstance(c, dict) else c for c in loaded_gc]
+                    logger.info("Stage 4: Loaded %d existing grammar candidate(s) from %s", len(lt_grammar_candidates), grammar_file.name)
+                except Exception:
+                    lt_grammar_candidates = []
 
-            try:
-                logger.info("Stage 4: Running Gramformer sentence-level grammar correction across %d sentence(s)...", len(all_sentences))
-                grammar_candidates = gramformer_agent.correct_batch(all_sentences, protected_terms)
-            except Exception as exc:
-                logger.exception("Gramformer grammar review failed in Stage 4: %s", exc)
-                raise RuntimeError(f"Gramformer execution failed: {exc}") from exc
+            raw_spell_file = self.job_dir / "06_spell" / "spell_candidates.json"
+            raw_spell_candidates = load_json(raw_spell_file) if raw_spell_file.exists() else []
 
-            # Optional Level-2 LLM paragraph reviewer if configured
+            if not lt_grammar_candidates and raw_spell_candidates:
+                lt_grammar_candidates = [
+                    Candidate.from_dict(c) if isinstance(c, dict) else c for c in raw_spell_candidates
+                    if (c.issue_type if hasattr(c, "issue_type") else c.get("issue_type")) in (
+                        IssueType.GRAMMAR, IssueType.TENSE, IssueType.PUNCTUATION,
+                        "grammar", "tense", "punctuation"
+                    )
+                ]
+                save_json(lt_grammar_candidates, grammar_file)
+
+            # Step 2: Retrieve original context for candidate sentences (target + previous + next sentence)
+            from src.gramformer_agent import get_sentence_context, is_clear_high_confidence
+            candidate_sentence_ids = sorted(list({c.sentence_id for c in lt_grammar_candidates if c.sentence_id is not None}))
+            candidate_contexts = [get_sentence_context(sid, all_sentences) for sid in candidate_sentence_ids]
+
+            # Step 3: Run Gramformer ONLY for these grammar candidate sentences
+            gramformer_candidates: List[Candidate] = []
+            if candidate_contexts:
+                from src.gramformer_agent import GramformerAgent
+                gramformer_agent = GramformerAgent(self.config.gramformer)
+                if not gramformer_agent.available:
+                    raise RuntimeError("Gramformer grammar engine is not available or failed to load.")
+
+                try:
+                    logger.info("Stage 4: Running Gramformer candidate grammar review on %d candidate sentence(s) with context...", len(candidate_contexts))
+                    gramformer_candidates = gramformer_agent.correct_candidates_with_context(
+                        candidate_contexts, protected_terms=protected_terms
+                    )
+                except Exception as exc:
+                    logger.exception("Gramformer candidate grammar review failed in Stage 4: %s", exc)
+                    raise RuntimeError(f"Gramformer execution failed: {exc}") from exc
+            else:
+                logger.info("Stage 4: No grammar candidate sentences flagged by LanguageTool; skipping Gramformer full-document scan.")
+
+            # Step 4: Validate Gramformer candidates and partition into clear vs ambiguous
+            validator_pre = ValidationAgent(protected_terms)
+            gf_accepted, _ = validator_pre.validate(gramformer_candidates)
+
+            ambiguous_candidates: List[Candidate] = []
+            clear_gramformer_candidates: List[Candidate] = []
+            for cand in gf_accepted:
+                if is_clear_high_confidence(cand):
+                    clear_gramformer_candidates.append(cand)
+                else:
+                    ambiguous_candidates.append(cand)
+
+            # Check for conflicts between LanguageTool suggestions and Gramformer suggestions on overlapping spans
+            for lt_c in lt_grammar_candidates:
+                for gf_c in gf_accepted:
+                    if lt_c.char_start < gf_c.char_end and lt_c.char_end > gf_c.char_start:
+                        if (lt_c.suggested_text or "").strip().lower() != (gf_c.suggested_text or "").strip().lower():
+                            if gf_c not in ambiguous_candidates:
+                                ambiguous_candidates.append(gf_c)
+
+            # Step 5: Route ONLY ambiguous/conflicting/context-dependent cases to Local LLM
             grammar_agent = GrammarAgent(self.config.ollama)
             llm_grammar_candidates: List[Candidate] = []
 
@@ -748,21 +827,23 @@ class StageOrchestrator:
                     return all_sentences[0] if return_object else all_sentences[0].sentence_id
                 return None if return_object else -1
 
-            if self.config.ollama.model and self.config.ollama.model.lower() != "none" and all_sentences:
+            if ambiguous_candidates and self.config.ollama.model and self.config.ollama.model.lower() != "none" and all_sentences:
+                ambiguous_sentence_ids = {c.sentence_id for c in ambiguous_candidates}
                 paragraphs_data = []
                 current_s_group = []
                 for s in all_sentences:
                     current_s_group.append(s)
                     if len(current_s_group) >= 3:
-                        p_text = " ".join([st.text for st in current_s_group])
-                        p_start = current_s_group[0].doc_char_start if current_s_group[0].doc_char_start is not None else current_s_group[0].start_offset
-                        paragraphs_data.append({
-                            "text": p_text,
-                            "doc_char_start": p_start,
-                            "protected_terms": protected_terms,
-                        })
+                        if any(st.sentence_id in ambiguous_sentence_ids for st in current_s_group):
+                            p_text = " ".join([st.text for st in current_s_group])
+                            p_start = current_s_group[0].doc_char_start if current_s_group[0].doc_char_start is not None else current_s_group[0].start_offset
+                            paragraphs_data.append({
+                                "text": p_text,
+                                "doc_char_start": p_start,
+                                "protected_terms": protected_terms,
+                            })
                         current_s_group = []
-                if current_s_group:
+                if current_s_group and any(st.sentence_id in ambiguous_sentence_ids for st in current_s_group):
                     p_text = " ".join([st.text for st in current_s_group])
                     p_start = current_s_group[0].doc_char_start if current_s_group[0].doc_char_start is not None else current_s_group[0].start_offset
                     paragraphs_data.append({
@@ -771,18 +852,16 @@ class StageOrchestrator:
                         "protected_terms": protected_terms,
                     })
 
-                try:
-                    logger.info("Stage 4: Running secondary LLM paragraph grammar review across %d paragraph(s)...", len(paragraphs_data))
-                    llm_grammar_candidates = grammar_agent.run_batch(paragraphs_data, sentence_lookup, batch_size=15)
-                except Exception as exc:
-                    logger.warning("Grammar review (Ollama batch) failed in Stage 4: %s", exc)
+                if paragraphs_data:
+                    try:
+                        logger.info("Stage 4: Running selective LLM paragraph grammar review across %d ambiguous paragraph(s)...", len(paragraphs_data))
+                        llm_grammar_candidates = grammar_agent.run_batch(paragraphs_data, sentence_lookup, batch_size=15)
+                    except Exception as exc:
+                        logger.warning("Grammar review (Ollama batch) failed in Stage 4: %s", exc)
+            else:
+                logger.info("Stage 4: Gramformer corrections are clear / no ambiguous grammar cases requiring LLM; bypassing LLM review.")
 
-            combined_grammar_candidates = grammar_candidates + llm_grammar_candidates
-
-            grammar_dir = self.job_dir / "07_grammar"
-            grammar_dir.mkdir(parents=True, exist_ok=True)
-            # Deterministic artifact guarantee: grammar_candidates.json is ALWAYS created
-            save_json(combined_grammar_candidates, grammar_dir / "grammar_candidates.json")
+            combined_grammar_candidates = gramformer_candidates + llm_grammar_candidates
 
             # Combine Stage 3 filtered spell candidates + Stage 4 Gramformer grammar candidates for downstream validation/merge
             all_candidates.extend(combined_grammar_candidates)

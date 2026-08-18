@@ -71,6 +71,99 @@ ERRANT_TYPE_MAP = {
 }
 
 
+def get_sentence_context(
+    target_sentence_id: int,
+    all_sentences: List[Sentence],
+    window: int = 1,
+) -> Dict[str, Any]:
+    """
+    Retrieve the original context of a target sentence from the structured sentences list.
+    Provides the target sentence plus surrounding context (previous and next sentence by default).
+    Does not use the candidate JSON as the sole context source.
+    """
+    target_idx = -1
+    for idx, s in enumerate(all_sentences):
+        if s.sentence_id == target_sentence_id:
+            target_idx = idx
+            break
+
+    if target_idx == -1:
+        return {
+            "sentence_id": target_sentence_id,
+            "target_sentence": None,
+            "prev_sentence": None,
+            "next_sentence": None,
+            "context_text": "",
+            "paragraph_id": None,
+        }
+
+    target_sent = all_sentences[target_idx]
+
+    prev_sent: Optional[Sentence] = None
+    if target_idx > 0:
+        cand_prev = all_sentences[target_idx - 1]
+        prev_sent = cand_prev
+
+    next_sent: Optional[Sentence] = None
+    if target_idx < len(all_sentences) - 1:
+        cand_next = all_sentences[target_idx + 1]
+        next_sent = cand_next
+
+    context_parts = []
+    if prev_sent and prev_sent.text.strip():
+        context_parts.append(prev_sent.text.strip())
+    if target_sent.text.strip():
+        context_parts.append(target_sent.text.strip())
+    if next_sent and next_sent.text.strip():
+        context_parts.append(next_sent.text.strip())
+
+    context_text = " ".join(context_parts)
+
+    return {
+        "sentence_id": target_sentence_id,
+        "target_sentence": target_sent,
+        "prev_sentence": prev_sent,
+        "next_sentence": next_sent,
+        "paragraph_id": target_sent.paragraph_id,
+        "doc_char_start": target_sent.doc_char_start,
+        "doc_char_end": target_sent.doc_char_end,
+        "context_text": context_text,
+    }
+
+
+def is_clear_high_confidence(candidate: Candidate) -> bool:
+    """
+    Evaluates whether a Gramformer candidate is a clear, unambiguous, high-confidence
+    grammatical fix (e.g. SVA, verb tense/form, noun number, pronoun, simple article/preposition)
+    that can be accepted directly without secondary LLM processing.
+    """
+    src = candidate.source.value if hasattr(candidate.source, "value") else str(candidate.source)
+    if src.lower() != "gramformer":
+        return False
+
+    # High confidence threshold
+    if getattr(candidate, "confidence", 0.0) < 0.80:
+        return False
+
+    orig = (candidate.original_text or "").strip()
+    sug = (candidate.suggested_text or "").strip()
+
+    # Must be an actual non-empty change
+    if not orig or not sug or orig.lower() == sug.lower():
+        return False
+
+    # Multi-word replacements or significant restructuring are marked ambiguous
+    if " " in orig or " " in sug:
+        return False
+
+    # Must be standard grammar/tense/punctuation
+    c_type = candidate.issue_type.value if hasattr(candidate.issue_type, "value") else str(candidate.issue_type)
+    if c_type.lower() not in ("grammar", "tense", "punctuation"):
+        return False
+
+    return True
+
+
 class GramformerAgent:
     """
     Primary Grammar Engine backed by Gramformer Seq2Seq neural network and ERRANT.
@@ -158,6 +251,37 @@ class GramformerAgent:
 
         return False
 
+    def correct_candidates_with_context(
+        self,
+        candidate_contexts: List[Dict[str, Any]],
+        protected_terms: Optional[List[ProtectedTerm]] = None,
+    ) -> List[Candidate]:
+        """
+        Process ONLY the candidate sentences with their surrounding context through Gramformer.
+        Extracts edits using ERRANT, preserves exact character offsets, and marks confidence.
+        """
+        if not self.available or not candidate_contexts:
+            if not self.available:
+                raise RuntimeError("GramformerAgent is not available or model failed to load.")
+            return []
+
+        target_sentences: List[Sentence] = []
+        seen_ids = set()
+        for ctx in candidate_contexts:
+            sent = ctx.get("target_sentence")
+            if isinstance(sent, Sentence) and sent.sentence_id not in seen_ids:
+                seen_ids.add(sent.sentence_id)
+                target_sentences.append(sent)
+
+        if not target_sentences:
+            return []
+
+        logger.info(
+            "Gramformer: Running candidate-targeted grammar review on %d flagged candidate sentence(s) (bypassing clean sentences)...",
+            len(target_sentences)
+        )
+        return self.correct_batch(target_sentences, protected_terms=protected_terms)
+
     def correct_batch(
         self,
         sentences: List[Sentence],
@@ -179,12 +303,23 @@ class GramformerAgent:
             if not self._should_skip_sentence(s.text):
                 reviewable_sentences.append(s)
 
-        logger.info("Gramformer: Reviewing %d/%d sentences...", len(reviewable_sentences), len(sentences))
+        total_reviewable = len(reviewable_sentences)
+        total_sentences = len(sentences)
+        total_batches = (total_reviewable + self.batch_size - 1) // self.batch_size if total_reviewable > 0 else 0
+
+        logger.info(
+            "Gramformer: Starting grammar review on %d/%d eligible sentences across %d batch(es) (Batch size: %d, Device: %s)...",
+            total_reviewable, total_sentences, total_batches, self.batch_size, self.device
+        )
         if not reviewable_sentences:
             return []
 
+        import time
+        start_time = time.time()
+        last_log_time = start_time
+
         # Batch inference
-        for i in range(0, len(reviewable_sentences), self.batch_size):
+        for b_idx, i in enumerate(range(0, total_reviewable, self.batch_size), start=1):
             batch_sents = reviewable_sentences[i:i + self.batch_size]
             prompt_texts = ["gec: " + s.text.strip() for s in batch_sents]
 
@@ -266,7 +401,27 @@ class GramformerAgent:
                         ))
 
             except Exception as batch_err:
-                logger.warning("Gramformer batch execution error at index %d: %s", i, batch_err)
+                logger.warning("Gramformer batch execution error at batch %d/%d: %s", b_idx, total_batches, batch_err)
 
-        logger.info("Gramformer: Extracted %d candidate grammar findings.", len(candidates))
+            # Real-time progress log (every 3 seconds, or every 5 batches, or on the final batch)
+            now = time.time()
+            processed_sents = min(i + self.batch_size, total_reviewable)
+            pct = (processed_sents / total_reviewable) * 100
+            if (now - last_log_time >= 2.5) or (b_idx % 5 == 0) or (processed_sents == total_reviewable):
+                elapsed = max(0.1, now - start_time)
+                speed = processed_sents / elapsed
+                remaining_sents = total_reviewable - processed_sents
+                eta_sec = remaining_sents / speed if speed > 0 else 0
+                eta_str = f"{int(eta_sec // 60)}m {int(eta_sec % 60):02d}s" if eta_sec >= 60 else f"{int(eta_sec)}s"
+                logger.info(
+                    "Gramformer Progress: [Batch %d/%d] %d/%d sentences (%.1f%%) | Speed: %.1f sent/s | ETA: %s | Candidates found: %d",
+                    b_idx, total_batches, processed_sents, total_reviewable, pct, speed, eta_str, len(candidates)
+                )
+                last_log_time = now
+
+        total_duration = round(time.time() - start_time, 2)
+        logger.info(
+            "Gramformer: Finished reviewing %d sentences in %.2fs (%.1f sent/s) -> %d candidate grammar findings extracted.",
+            total_reviewable, total_duration, (total_reviewable / max(0.01, total_duration)), len(candidates)
+        )
         return candidates

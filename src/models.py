@@ -63,6 +63,26 @@ class Sentence:
     doc_char_end: Optional[int] = None
     bbox: Optional[Dict[str, Any]] = None
 
+    @classmethod
+    def from_dict(cls, d: Dict[str, Any]) -> "Sentence":
+        if isinstance(d, cls):
+            return d
+        start_off = d.get("start_offset") if d.get("start_offset") is not None else d.get("char_start", 0)
+        end_off = d.get("end_offset") if d.get("end_offset") is not None else d.get("char_end", len(d.get("text", "")))
+        doc_start = d.get("doc_char_start") if d.get("doc_char_start") is not None else d.get("char_start")
+        doc_end = d.get("doc_char_end") if d.get("doc_char_end") is not None else d.get("char_end")
+        return cls(
+            sentence_id=int(d.get("sentence_id", 0)),
+            paragraph_id=int(d.get("paragraph_id", 0)),
+            page=int(d.get("page", 1)),
+            text=str(d.get("text", "")),
+            start_offset=int(start_off),
+            end_offset=int(end_off),
+            doc_char_start=int(doc_start) if doc_start is not None else None,
+            doc_char_end=int(doc_end) if doc_end is not None else None,
+            bbox=d.get("bbox")
+        )
+
 
 @dataclass
 class Paragraph:
@@ -180,6 +200,42 @@ class Candidate:
     confidence: float = 0.5
     page_number: int = 1
     bbox: Optional[Dict[str, Any]] = None
+
+    @classmethod
+    def from_dict(cls, d: Dict[str, Any]) -> "Candidate":
+        if isinstance(d, cls):
+            return d
+        raw_issue = d.get("issue_type", IssueType.GRAMMAR)
+        if isinstance(raw_issue, str):
+            try:
+                issue_type = IssueType(raw_issue)
+            except Exception:
+                issue_type = IssueType.GRAMMAR
+        else:
+            issue_type = raw_issue or IssueType.GRAMMAR
+
+        raw_source = d.get("source", SourceAgent.LANGUAGETOOL)
+        if isinstance(raw_source, str):
+            try:
+                source = SourceAgent(raw_source)
+            except Exception:
+                source = SourceAgent.LANGUAGETOOL
+        else:
+            source = raw_source or SourceAgent.LANGUAGETOOL
+
+        return cls(
+            sentence_id=int(d.get("sentence_id", 0)),
+            char_start=int(d.get("char_start", 0)),
+            char_end=int(d.get("char_end", 0)),
+            original_text=str(d.get("original_text", "")),
+            suggested_text=str(d.get("suggested_text", "")),
+            issue_type=issue_type,
+            source=source,
+            reason=str(d.get("reason", "")),
+            confidence=float(d.get("confidence", 0.5)),
+            page_number=int(d.get("page_number") or d.get("page") or 1),
+            bbox=d.get("bbox")
+        )
 
 
 @dataclass

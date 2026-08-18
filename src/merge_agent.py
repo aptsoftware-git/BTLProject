@@ -16,7 +16,7 @@ flagged the same word). Policy:
 
 from __future__ import annotations
 
-from typing import List
+from typing import List, Optional, Set
 
 from src.config import MergeConfig
 from src.models import MergedIssue, SourceAgent, ValidatedIssue
@@ -46,8 +46,14 @@ class MergeAgent:
         self.config = config
 
     def merge(self, issues: List[ValidatedIssue]) -> List[MergedIssue]:
+        if not issues:
+            return []
         groups = self._group_overlapping(issues)
-        merged = [self._merge_group(group) for group in groups]
+        merged: List[MergedIssue] = []
+        for group in groups:
+            res = self._merge_group(group)
+            if res is not None:
+                merged.append(res)
         return sorted(merged, key=lambda m: m.char_start)
 
     @staticmethod
@@ -65,42 +71,64 @@ class MergeAgent:
                 groups.append([issue])
         return groups
 
-    def calculate_confidence(self, sources: set[SourceAgent], issue_type: Optional[str] = None) -> float:
-        # Base confidence depending on sources
-        if SourceAgent.LANGUAGETOOL in sources and SourceAgent.LLM in sources and SourceAgent.SYMSPELL in sources:
+    def calculate_confidence(self, sources: Set[SourceAgent | str], issue_type: Optional[str] = None) -> float:
+        gf = getattr(SourceAgent, "GRAMFORMER", "gramformer")
+        
+        # Multi-source high agreement
+        if len(sources) >= 3:
             return 1.00
-        elif SourceAgent.LANGUAGETOOL in sources and SourceAgent.LLM in sources:
+        elif (SourceAgent.LLM in sources or gf in sources) and SourceAgent.LANGUAGETOOL in sources:
             return 0.95
+        elif SourceAgent.LLM in sources and gf in sources:
+            return 0.95
+        elif (SourceAgent.LLM in sources or gf in sources) and SourceAgent.SYMSPELL in sources:
+            return 0.90
         elif SourceAgent.LANGUAGETOOL in sources and SourceAgent.SYMSPELL in sources:
             return 0.88
-        elif SourceAgent.SYMSPELL in sources and SourceAgent.LLM in sources:
-            return 0.82
-        elif SourceAgent.LANGUAGETOOL in sources:
-            conf = 0.75
-            if issue_type == "spelling":
-                conf = 0.78
-            elif issue_type == "grammar":
-                conf = 0.73
-            return conf
+        
+        # Single source confidence
+        if gf in sources:
+            return 0.85
         elif SourceAgent.LLM in sources:
             return 0.80
+        elif SourceAgent.LANGUAGETOOL in sources:
+            if issue_type == "spelling":
+                return 0.78
+            elif issue_type == "grammar":
+                return 0.73
+            return 0.75
         elif SourceAgent.SYMSPELL in sources:
             return 0.35
         else:
             return 0.50
 
-    def _merge_group(self, group: List[ValidatedIssue]) -> MergedIssue:
-        # Prioritize suggestions by source: LLM -> LanguageTool -> SymSpell
-        llm_candidates = [i for i in group if i.source == SourceAgent.LLM]
-        lt_candidates = [i for i in group if i.source == SourceAgent.LANGUAGETOOL]
-        ss_candidates = [i for i in group if i.source == SourceAgent.SYMSPELL]
+    def _merge_group(self, group: List[ValidatedIssue]) -> Optional[MergedIssue]:
+        if not group:
+            return None
+
+        # Prioritize suggestions by source reliability and context:
+        # LLM -> GRAMFORMER -> LANGUAGETOOL -> T5 -> SYMSPELL -> first available
+        source_priority = [
+            SourceAgent.LLM,
+            getattr(SourceAgent, "GRAMFORMER", "gramformer"),
+            SourceAgent.LANGUAGETOOL,
+            getattr(SourceAgent, "T5", "t5"),
+            SourceAgent.SYMSPELL,
+        ]
+
+        best: Optional[ValidatedIssue] = None
+        for src in source_priority:
+            matching = [i for i in group if i.source == src]
+            if matching:
+                best = matching[0]
+                break
         
-        if llm_candidates:
-            best = llm_candidates[0]
-        elif lt_candidates:
-            best = lt_candidates[0]
-        else:
-            best = ss_candidates[0]
+        if best is None:
+            # Fallback: choose highest confidence candidate, or group[0]
+            best = max(group, key=lambda i: getattr(i, "confidence", 0.5)) if group else None
+
+        if best is None:
+            return None
 
         # Candidates that agree with the chosen suggested_text
         agreeing_candidates = [i for i in group if i.suggested_text == best.suggested_text]
@@ -113,12 +141,11 @@ class MergeAgent:
         final_conf = self.calculate_confidence(agreeing_sources, issue_type_val)
         
         # If the candidate was marked as protected, force confidence to 0
-        if best.is_protected:
+        if getattr(best, "is_protected", False):
             final_conf = 0.0
 
         # Calculate severity
-        issue_type_str = best.issue_type.value if hasattr(best.issue_type, "value") else str(best.issue_type) if best.issue_type else None
-        weight = get_issue_type_weight(issue_type_str)
+        weight = get_issue_type_weight(issue_type_val)
         severity_score = final_conf * weight
 
         if severity_score >= 0.85:

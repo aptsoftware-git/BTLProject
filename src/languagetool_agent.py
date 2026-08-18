@@ -38,10 +38,16 @@ class LanguageToolAgent:
         return self.run_batch([sentence])
 
     def run_batch(self, sentences: List[Sentence]) -> List[Candidate]:
-        """Process a list of sentences concurrently, returning all detected candidates."""
+        """Process a list of sentences concurrently with real-time progress logging, returning all detected candidates."""
         if not self.available or not sentences:
             return []
-        
+
+        import logging
+        import time
+        logger = logging.getLogger("backend")
+        total_sents = len(sentences)
+        logger.info("LanguageTool: Starting rule & spell check on %d sentence(s)...", total_sents)
+
         def check_sentence(sentence: Sentence) -> List[Candidate]:
             if sentence.doc_char_start is None or not sentence.text.strip():
                 return []
@@ -70,17 +76,46 @@ class LanguageToolAgent:
             return sentence_candidates
 
         candidates: List[Candidate] = []
+        start_time = time.time()
+
         if len(sentences) > 5:
-            from concurrent.futures import ThreadPoolExecutor
+            from concurrent.futures import ThreadPoolExecutor, as_completed
             workers = min(16, max(4, len(sentences) // 25))
+            completed_count = 0
+            last_log_time = start_time
+
             with ThreadPoolExecutor(max_workers=workers) as executor:
-                results = executor.map(check_sentence, sentences)
-                for res in results:
-                    candidates.extend(res)
+                futures = {executor.submit(check_sentence, s): s for s in sentences}
+                for fut in as_completed(futures):
+                    completed_count += 1
+                    try:
+                        res = fut.result()
+                        if res:
+                            candidates.extend(res)
+                    except Exception:
+                        pass
+
+                    now = time.time()
+                    if (now - last_log_time >= 2.5) or (completed_count == total_sents) or (completed_count % 500 == 0):
+                        elapsed = max(0.1, now - start_time)
+                        speed = completed_count / elapsed
+                        rem = total_sents - completed_count
+                        eta_sec = rem / speed if speed > 0 else 0
+                        eta_str = f"{int(eta_sec // 60)}m {int(eta_sec % 60):02d}s" if eta_sec >= 60 else f"{int(eta_sec)}s"
+                        logger.info(
+                            "LanguageTool Progress: %d/%d sentences (%.1f%%) | Speed: %.1f sent/s | ETA: %s | Candidates flagged: %d",
+                            completed_count, total_sents, (completed_count / total_sents) * 100, speed, eta_str, len(candidates)
+                        )
+                        last_log_time = now
         else:
             for s in sentences:
                 candidates.extend(check_sentence(s))
 
+        total_duration = round(time.time() - start_time, 2)
+        logger.info(
+            "LanguageTool: Completed check on %d sentences in %.2fs (%.1f sent/s) -> %d candidate(s) flagged.",
+            total_sents, total_duration, (total_sents / max(0.01, total_duration)), len(candidates)
+        )
         return candidates
 
     @staticmethod

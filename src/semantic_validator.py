@@ -49,6 +49,36 @@ Items to check:
 """
 
 
+def is_high_risk_candidate(issue: ValidatedIssue) -> bool:
+    """
+    Returns True if an issue involves multi-word rewrites, structural ambiguity,
+    low confidence, or complex syntactic alterations that require LLM semantic validation.
+    Clear, high-confidence standard fixes (e.g. SVA, simple singular/plural, simple verb form)
+    are safe and do not require LLM calls.
+    """
+    i_type = issue.issue_type.value if hasattr(issue.issue_type, "value") else str(issue.issue_type)
+    if i_type.lower() == "spelling":
+        return False
+
+    orig = (issue.original_text or "").strip()
+    sug = (issue.suggested_text or "").strip()
+
+    # Multi-word replacements are higher risk
+    if " " in orig or " " in sug:
+        return True
+
+    # Low confidence
+    if getattr(issue, "confidence", 1.0) < 0.80:
+        return True
+
+    # Ambiguous or complex types
+    reason = str(getattr(issue, "reason", "")).lower()
+    if any(k in reason for k in ("word order", "conjunction", "ambiguous", "rewrite", "clause")):
+        return True
+
+    return False
+
+
 class SemanticValidator:
     """Independent second-pass LLM check that a correction preserves meaning."""
 
@@ -69,12 +99,20 @@ class SemanticValidator:
         non_spelling_items = []
 
         for idx, issue in enumerate(issues):
-            if issue.issue_type == IssueType.SPELLING:
+            i_type = issue.issue_type.value if hasattr(issue.issue_type, "value") else str(issue.issue_type)
+            if i_type.lower() == "spelling":
                 results_map[idx] = SemanticCheckResult(
                     candidate_index=idx,
                     meaning_preserved=True,
                     grammatically_correct=True,
                     notes="spelling fix, no semantic check needed",
+                )
+            elif not is_high_risk_candidate(issue):
+                results_map[idx] = SemanticCheckResult(
+                    candidate_index=idx,
+                    meaning_preserved=True,
+                    grammatically_correct=True,
+                    notes="clear high-confidence grammar fix, semantic check bypassed",
                 )
             else:
                 sentence_text = sentence_text_lookup(issue.sentence_id)

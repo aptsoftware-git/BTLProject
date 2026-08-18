@@ -206,8 +206,21 @@ class ProofreadingPipeline:
                 for sent in all_sentences:
                     all_candidates.extend(self.spell_agent.run(sent, set()))
 
-        save_json(all_candidates, stage_dirs["06_spell"] / "spell_candidates.json")
-        self.logger.info("Raw spell/grammar candidates: %d", len(all_candidates))
+        # Separate into spelling candidates and grammar candidates from single LanguageTool pass
+        raw_spell_candidates = [
+            c for c in all_candidates
+            if getattr(c, "issue_type", None) in (IssueType.SPELLING, "spelling")
+        ]
+        raw_grammar_candidates = [
+            c for c in all_candidates
+            if getattr(c, "issue_type", None) in (
+                IssueType.GRAMMAR, IssueType.TENSE, IssueType.PUNCTUATION,
+                "grammar", "tense", "punctuation"
+            )
+        ]
+        save_json(raw_spell_candidates, stage_dirs["06_spell"] / "spell_candidates.json")
+        save_json(raw_grammar_candidates, stage_dirs["07_grammar"] / "grammar_candidates.json")
+        self.logger.info("Raw spell candidates: %d | Raw grammar candidates: %d", len(raw_spell_candidates), len(raw_grammar_candidates))
 
         # --- Spell Candidate Protection & Filtering Stage (Requirement 8 & 9) ---
         self.logger.stage("Spell candidate protection & filtering")
@@ -215,7 +228,7 @@ class ProofreadingPipeline:
         spell_filter = SpellCandidateFilter(spacy_config=self.config.spacy, nlp=self.nlp)
         filter_res = spell_filter.run(
             sentences=all_sentences,
-            candidates=all_candidates,
+            candidates=raw_spell_candidates,
             output_dir=stage_dirs["06_spell"],
             extra_whitelist=self.protected_terms_builder.whitelist_extra
         )
@@ -227,41 +240,80 @@ class ProofreadingPipeline:
             filter_res["protected_terms_count"],
             filter_res["rejected_candidates_count"],
         )
-        # Stage 4 Grammar consumes filtered_spell_candidates (Requirement 9)
-        all_candidates = list(filter_res["filtered_candidates"])
+        # Filtered spell candidates retained for downstream merge
+        filtered_spell_candidates = list(filter_res["filtered_candidates"])
 
-        # --- Primary Grammar Engine: Gramformer ---
-        self.logger.stage("Grammar review (Gramformer)")
-        grammar_candidates: List[Candidate] = []
-        try:
-            grammar_candidates = self.gramformer_agent.correct_batch(all_sentences, protected_terms)
-        except Exception as exc:
-            self.logger.warning("Gramformer grammar review failed: %s. Continuing...", exc)
+        # --- Stage 4 / Grammar Detection: LanguageTool First-Pass & Targeted Gramformer ---
+        self.logger.stage("Grammar review (LanguageTool first-pass + Targeted Gramformer)")
+        from src.gramformer_agent import get_sentence_context, is_clear_high_confidence
 
-        # --- Optional Level-2 LLM Paragraph Reviewer ---
+        # Step 1: Extract grammar candidates flagged by LanguageTool / lightweight first-pass
+        lt_grammar_candidates = [
+            c for c in all_candidates
+            if getattr(c, "issue_type", None) in (
+                IssueType.GRAMMAR, IssueType.TENSE, IssueType.PUNCTUATION,
+                "grammar", "tense", "punctuation"
+            )
+        ]
+        save_json(lt_grammar_candidates, stage_dirs["07_grammar"] / "grammar_candidates.json")
+        self.logger.info("LanguageTool first-pass: %d potential grammar candidate finding(s)", len(lt_grammar_candidates))
+
+        # Step 2: Retrieve original context for candidate sentences (target + previous + next sentence)
+        candidate_sentence_ids = sorted(list({c.sentence_id for c in lt_grammar_candidates if c.sentence_id is not None}))
+        candidate_contexts = [get_sentence_context(sid, all_sentences) for sid in candidate_sentence_ids]
+
+        # Step 3: Run Gramformer ONLY for these grammar candidate sentences
+        gramformer_candidates: List[Candidate] = []
+        if candidate_contexts:
+            try:
+                self.logger.info("Running Gramformer on %d candidate sentence(s) with context...", len(candidate_contexts))
+                gramformer_candidates = self.gramformer_agent.correct_candidates_with_context(
+                    candidate_contexts, protected_terms=protected_terms
+                )
+            except Exception as exc:
+                self.logger.warning("Gramformer candidate review failed: %s. Continuing...", exc)
+        else:
+            self.logger.info("No grammar candidate sentences flagged by LanguageTool; skipping Gramformer full-document scan.")
+
+        # Step 4: Validate Gramformer candidates and identify ambiguous/conflicting cases
+        validator_pre = ValidationAgent(protected_terms)
+        gf_accepted, _ = validator_pre.validate(gramformer_candidates)
+
+        ambiguous_candidates: List[Candidate] = []
+        clear_gramformer_candidates: List[Candidate] = []
+        for cand in gf_accepted:
+            if is_clear_high_confidence(cand):
+                clear_gramformer_candidates.append(cand)
+            else:
+                ambiguous_candidates.append(cand)
+
+        # Check for conflicts between LanguageTool suggestions and Gramformer suggestions on overlapping spans
+        for lt_c in lt_grammar_candidates:
+            for gf_c in gf_accepted:
+                if lt_c.char_start < gf_c.char_end and lt_c.char_end > gf_c.char_start:
+                    if (lt_c.suggested_text or "").strip().lower() != (gf_c.suggested_text or "").strip().lower():
+                        if gf_c not in ambiguous_candidates:
+                            ambiguous_candidates.append(gf_c)
+
+        # Step 5: Route ONLY ambiguous/conflicting/context-dependent cases to Local LLM
         llm_grammar_candidates: List[Candidate] = []
-        if self.config.ollama.model and self.config.ollama.model.lower() != "none":
-            self.logger.stage("Secondary grammar review (local LLM)")
+        if ambiguous_candidates and self.config.ollama.model and self.config.ollama.model.lower() != "none":
+            self.logger.stage("Selective secondary grammar review (local LLM for ambiguous candidates)")
             def sentence_id_for_offset(doc_offset: int) -> int:
                 for sentence in all_sentences:
                     if sentence.doc_char_start <= doc_offset < sentence.doc_char_end:
                         return sentence.sentence_id
                 return -1
 
+            ambiguous_sentence_ids = {c.sentence_id for c in ambiguous_candidates}
             if document.paragraphs:
                 reviewable_paragraphs = []
                 for p in document.paragraphs:
-                    txt = (p.text or "").strip()
-                    if len(txt) < 25:
-                        continue
-                    p_start = p.doc_char_start or 0
-                    p_end = p_start + len(txt)
-                    has_flagged = any(p_start <= c.char_start < p_end for c in all_candidates)
-                    if has_flagged or len(txt.split()) >= 15:
+                    p_sids = {s.sentence_id for s in p.sentences}
+                    if p_sids.intersection(ambiguous_sentence_ids):
                         reviewable_paragraphs.append(p)
 
-                self.logger.info("Filtered %d paragraphs down to %d candidate paragraphs for LLM review", len(document.paragraphs), len(reviewable_paragraphs))
-                
+                self.logger.info("Routing %d ambiguous paragraph(s) to LLM review", len(reviewable_paragraphs))
                 para_items = []
                 for p in reviewable_paragraphs:
                     p_start = p.doc_char_start or 0
@@ -273,15 +325,18 @@ class ProofreadingPipeline:
                         "protected_terms": terms,
                     })
 
-                try:
-                    llm_grammar_candidates = self.grammar_agent.run_batch(para_items, sentence_id_for_offset, batch_size=15)
-                except Exception as exc:
-                    self.logger.warning("Grammar review (Ollama batch) failed: %s. Continuing...", exc)
+                if para_items:
+                    try:
+                        llm_grammar_candidates = self.grammar_agent.run_batch(para_items, sentence_id_for_offset, batch_size=15)
+                    except Exception as exc:
+                        self.logger.warning("Selective LLM grammar review failed: %s. Continuing...", exc)
+        else:
+            self.logger.info("Gramformer corrections are clear / no ambiguous grammar cases requiring LLM; bypassing LLM review.")
 
-        combined_grammar_candidates = grammar_candidates + llm_grammar_candidates
-        save_json(combined_grammar_candidates, stage_dirs["07_grammar"] / "grammar_candidates.json")
-        all_candidates.extend(combined_grammar_candidates)
-        self.logger.info("Total candidates after Gramformer & grammar review: %d", len(all_candidates))
+        # Combine candidates: filtered spell + Gramformer + any selective LLM candidates
+        combined_grammar_candidates = gramformer_candidates + llm_grammar_candidates
+        all_candidates = filtered_spell_candidates + combined_grammar_candidates
+        self.logger.info("Total candidates after targeted grammar review: %d", len(all_candidates))
 
         # --- Stage 10: Validation Agent (single gatekeeper, all sources) ----
         self.logger.stage("Validation (protected-terms gate)")
