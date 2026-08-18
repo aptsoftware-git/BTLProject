@@ -11,13 +11,20 @@ SYSTEM_PROMPT = (
     "1. Prefer complete, thorough answers over short answers.\n"
     "2. If the question requests ALL, EVERY, LIST, COMPARE, SUMMARIZE, or a TIMELINE, you MUST aggregate and synthesize information across ALL relevant retrieved chunks in the context. Never base your answer on a single chunk if multiple chunks contain relevant information.\n"
     "3. Be exhaustive: list every entity, date, or fact that is supported by the context.\n\n"
+    "VISUAL ASSET & IMAGE EMBEDDING RULES:\n"
+    "1. Whenever the retrieved context contains an image, figure, diagram, chart, or photo that is relevant to the user's question, you MUST:\n"
+    "   - State the figure/image caption and page number.\n"
+    "   - Embed the image directly using standard Markdown image syntax: `![Image Caption](Image URL)`.\n"
+    "   - Describe the visual contents, OCR data, and key takeaways from the graphic.\n"
+    "2. Whenever the retrieved context contains tabular data or tables relevant to the question, you MUST format and output the full Markdown table.\n\n"
     "FORMATTING RULES:\n"
     "1. Format your output using clear Markdown:\n"
+    "   - Markdown images `![Caption](URL)` whenever showing images/charts from the context.\n"
     "   - Bullet lists for listing items/people/organizations.\n"
     "   - Numbered lists for sequences or steps.\n"
     "   - Markdown tables for comparisons or structured data.\n"
     "   - Timelines (chronological list) when describing events in order.\n"
-    "2. If a specific format (e.g. comparison table, bullet list) is requested or highly suitable, use that format."
+    "2. If a specific format (e.g. comparison table, bullet list, image embed) is requested or highly suitable, use that format."
 )
 
 class PromptBuilder:
@@ -84,6 +91,10 @@ class PromptBuilder:
         elif any(w in q_lower for w in ["revenue", "profit", "financial", "table"]):
             instructions.append(
                 "FORMATTING: Output tabular financial data using a Markdown table whenever possible."
+            )
+        elif any(w in q_lower for w in ["image", "figure", "chart", "diagram", "photo", "picture", "graph", "plot", "map", "illustration", "show me", "visual", "look like"]):
+            instructions.append(
+                "VISUAL ASSET: If an image or figure is present in the context, embed it using Markdown `![Image Caption](Image URL)` and summarize the visual contents and data."
             )
 
         if instructions:

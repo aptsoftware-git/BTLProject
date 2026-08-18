@@ -183,12 +183,22 @@ def test_prompt_builder():
     prompt_data = builder.build_prompt(context, question, history)
     
     assert prompt_data["system"] == SYSTEM_PROMPT
+    assert "VISUAL ASSET & IMAGE EMBEDDING RULES" in prompt_data["system"]
     assert "Document Context:" in prompt_data["prompt"]
     assert "This is some document text." in prompt_data["prompt"]
     assert "Conversation History:" in prompt_data["prompt"]
     assert "User: Hi" in prompt_data["prompt"]
     assert "Assistant: Hello" in prompt_data["prompt"]
     assert "Question: What is the document about?" in prompt_data["prompt"]
+
+
+def test_prompt_builder_visual_instructions():
+    builder = PromptBuilder()
+    context = "Image Caption: Figure 1: Architecture\nImage URL: /outputs/doc1/05_images/image_001.png"
+    question = "Show me the diagram of the architecture"
+    prompt_data = builder.build_prompt(context, question)
+    assert "VISUAL ASSET" in prompt_data["prompt"]
+    assert "![Image Caption](Image URL)" in prompt_data["prompt"]
 
 
 # =====================================================================

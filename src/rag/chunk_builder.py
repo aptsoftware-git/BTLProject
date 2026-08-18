@@ -445,11 +445,17 @@ class ChunkBuilder:
             caption_text = getattr(image_meta, "caption", None) or caption_text
             ocr_text = getattr(image_meta, "ocr_text", None) or ocr_text
             vlm_desc = getattr(image_meta, "semantic_description", None) or ""
-            image_type = getattr(image_meta, "image_type", None) or "Image"
-            
+        img_path = getattr(image_meta, "image_path", None) if image_meta else None
+        if not img_path and element.metadata and hasattr(element.metadata, "image_path"):
+            img_path = element.metadata.image_path
+
+        img_url = f"/outputs/{doc_id}/{img_path}" if (img_path and not img_path.startswith("http") and not img_path.startswith("/")) else (img_path or f"/outputs/{doc_id}/05_images/{element.id}.png")
+
         image_parts = [f"Image Type: {image_type}"]
         if caption_text:
             image_parts.append(f"Image Caption: {caption_text}")
+        if img_url:
+            image_parts.append(f"Image URL: {img_url}")
         if ocr_text:
             image_parts.append(f"Image OCR Text: {ocr_text}")
         if vlm_desc:
@@ -487,6 +493,8 @@ class ChunkBuilder:
             token_estimate=estimate_tokens(content),
             bounding_boxes=bboxes,
             image_id=element.id,
+            image_path=img_path,
+            image_url=img_url,
             element_types=["image"],
             relationships={"belongs_to": hierarchy_path[-1] if hierarchy_path else "body"},
             **enriched

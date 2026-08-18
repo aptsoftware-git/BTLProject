@@ -18,6 +18,8 @@ class ChunkMetadata(BaseModel):
     token_estimate: int = Field(..., description="Estimated number of tokens in this chunk")
     bounding_boxes: List[BoundingBox] = Field(default_factory=list, description="Bounding boxes of the source elements")
     image_id: Optional[str] = Field(None, description="Referenced image ID if chunk is an image")
+    image_path: Optional[str] = Field(None, description="Local path to saved image file")
+    image_url: Optional[str] = Field(None, description="Static URL to access the image")
     table_id: Optional[str] = Field(None, description="Referenced table ID if chunk is a table")
     element_types: List[str] = Field(default_factory=list, description="Types of source elements composing this chunk")
     relationships: Dict[str, Any] = Field(default_factory=dict, description="Relationships to other chunks or elements")
