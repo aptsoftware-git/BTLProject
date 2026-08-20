@@ -434,6 +434,13 @@ class StageOrchestrator:
             # 1. Docling extraction -> StructuredDocument
             structured_doc_dict = self._get_or_build_structured_document()
 
+            # 1b. Export extracted tables to 04_tables/ in CSV, JSON, MD, and HTML formats
+            try:
+                from src.rag.knowledge_extraction_agent import export_all_tables
+                export_all_tables(structured_doc_dict, self.job_dir)
+            except Exception as tbl_err:
+                logger.warning("Table export in Stage 2 encountered an error: %s", tbl_err)
+
             # 2. Page text layer (03_page_text/) - running text only, no tables/images.
             #    page_texts_with_blocks also carries per-element text/type so sentence
             #    splitting below can happen per-element instead of per merged page blob.

@@ -1,6 +1,6 @@
 import logging
 import re
-from typing import List, Set, Tuple
+from typing import List, Set, Tuple, Dict, Any, Optional
 from src.rag.retrieval_models import ScoredChunk
 
 logger = logging.getLogger("pipeline")
@@ -27,13 +27,53 @@ class ContextBuilder:
             pass
         return 0
 
-    def build_context(self, retrieved_chunks: List[ScoredChunk]) -> Tuple[str, List[str], List[int]]:
+    def extract_image_references(self, chunks: List[ScoredChunk]) -> List[Dict[str, Any]]:
+        """
+        Extracts structured image reference metadata from chunks for UI and citation.
+        """
+        image_refs = []
+        seen_img_ids = set()
+        for chunk in chunks:
+            meta = chunk.metadata
+            if meta.chunk_type == "image" or meta.image_id or getattr(meta, "image_path", None):
+                img_id = meta.image_id or meta.chunk_id
+                if img_id not in seen_img_ids:
+                    seen_img_ids.add(img_id)
+                    img_path = getattr(meta, "image_path", None) or ""
+                    img_url = getattr(meta, "image_url", None)
+                    if not img_url and img_path:
+                        doc_id = meta.document_id
+                        img_url = f"/outputs/{doc_id}/{img_path}" if not img_path.startswith("http") and not img_path.startswith("/") else img_path
+
+                    bboxes_list = []
+                    for b in meta.bounding_boxes:
+                        if hasattr(b, "model_dump"):
+                            bboxes_list.append(b.model_dump())
+                        elif hasattr(b, "dict"):
+                            bboxes_list.append(b.dict())
+                        elif isinstance(b, dict):
+                            bboxes_list.append(b)
+
+                    image_refs.append({
+                        "image_id": img_id,
+                        "page_number": meta.page_number,
+                        "caption": getattr(meta, "caption", None) or meta.heading or f"Figure on Page {meta.page_number}",
+                        "image_url": img_url or "",
+                        "image_path": img_path,
+                        "image_type": getattr(meta, "image_type", None) or "Figure",
+                        "bounding_boxes": bboxes_list,
+                        "objects": getattr(meta, "objects", []) or [],
+                        "detected_entities": getattr(meta, "detected_entities", []) or []
+                    })
+        return image_refs
+
+    def build_context(self, retrieved_chunks: List[ScoredChunk]) -> Tuple[str, List[str], List[int], List[Dict[str, Any]]]:
         """
         Selects chunks based on relevance/reranker scores up to max_tokens, 
         de-duplicates them, sorts them by original document order, and formats the context.
         
         Returns:
-            Tuple[context_str, used_chunk_ids, page_references]
+            Tuple[context_str, used_chunk_ids, page_references, image_references]
         """
         logger.info("Building context from retrieved chunks...")
         
@@ -62,10 +102,13 @@ class ContextBuilder:
             else:
                 logger.info(f"Skipping chunk {chunk.metadata.chunk_id} to avoid exceeding context window limit of {self.max_tokens} tokens.")
         
-        # 3. Sort selected chunks to preserve original document order (by page number, then chunk index)
+        # 3. Extract image references from selected chunks
+        image_references = self.extract_image_references(selected_chunks)
+
+        # 4. Sort selected chunks to preserve original document order (by page number, then chunk index)
         selected_chunks.sort(key=lambda c: (c.metadata.page_number, self._parse_chunk_index(c.metadata.chunk_id)))
 
-        # 3.5 Dynamic adjacent chunk merging (Phase 6 Optimization)
+        # 4.5 Dynamic adjacent chunk merging (Phase 6 Optimization - only for text chunks)
         merged_chunks = []
         for chunk in selected_chunks:
             if not merged_chunks:
@@ -78,7 +121,8 @@ class ContextBuilder:
                 if (curr_idx == prev_idx + 1 and 
                     prev.metadata.document_id == chunk.metadata.document_id and
                     prev.metadata.page_number == chunk.metadata.page_number and
-                    prev.metadata.section == chunk.metadata.section):
+                    prev.metadata.section == chunk.metadata.section and
+                    prev.metadata.chunk_type == "text" and chunk.metadata.chunk_type == "text"):
                     
                     prev.content += "\n\n" + chunk.content
                     logger.info(f"Dynamically merged adjacent chunks {prev.metadata.chunk_id} and {chunk.metadata.chunk_id}")
@@ -86,7 +130,7 @@ class ContextBuilder:
                     merged_chunks.append(chunk)
         selected_chunks = merged_chunks
 
-        # 4. Section-level Context Assembly & Merging (Phase 6 Context Assembly)
+        # 5. Section-level Context Assembly & Merging
         sections_dict = {}
         used_chunk_ids = []
         page_references = set()
@@ -117,5 +161,5 @@ class ContextBuilder:
         context_str = "\n\n".join(context_parts)
         sorted_pages = sorted(list(page_references))
         
-        logger.info(f"Context constructed using {len(used_chunk_ids)} chunks across pages {sorted_pages} in {len(sections_dict)} section blocks.")
-        return context_str, used_chunk_ids, sorted_pages
+        logger.info(f"Context constructed using {len(used_chunk_ids)} chunks across pages {sorted_pages} with {len(image_references)} visual assets in {len(sections_dict)} section blocks.")
+        return context_str, used_chunk_ids, sorted_pages, image_references

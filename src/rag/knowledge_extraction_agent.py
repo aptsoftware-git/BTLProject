@@ -212,52 +212,88 @@ class KnowledgeExtractionAgent:
                 typed_name = "Image"
 
             # 1. Processing Tables
-            if el_type == "table" and tables_dir:
+            if el_type == "table":
                 self.stats["table_count"] += 1
-                table_struct = structured_doc.tables.get(self_ref)
-                if table_struct:
-                    tbl_idx = self.stats["table_count"]
-                    tbl_name = f"table_{tbl_idx:03d}"
-                    
+                table_struct = None
+                if structured_doc and getattr(structured_doc, "tables", None):
+                    table_struct = structured_doc.tables.get(self_ref)
+                    if not table_struct and hasattr(element, "metadata") and getattr(element.metadata, "table_id", None):
+                        table_struct = structured_doc.tables.get(element.metadata.table_id)
+                    if not table_struct and "_" in self_ref:
+                        table_struct = structured_doc.tables.get(self_ref.split("_", 1)[-1])
+                    if not table_struct:
+                        for k, v in structured_doc.tables.items():
+                            if k == self_ref or k.endswith(self_ref) or self_ref.endswith(k):
+                                table_struct = v
+                                break
+                
+                tbl_idx = self.stats["table_count"]
+                tbl_name = f"table_{tbl_idx:03d}"
+                md_str = (getattr(table_struct, "markdown", "") if table_struct else "") or text_content or ""
+                
+                if tables_dir:
+                    tables_dir.mkdir(parents=True, exist_ok=True)
                     # Reconstruct grid
-                    grid = [["" for _ in range(table_struct.cols_count)] for _ in range(table_struct.rows_count)]
-                    for cell in table_struct.cells:
-                        r, c = cell.row_index, cell.col_index
-                        if r < len(grid) and c < len(grid[0]):
-                            grid[r][c] = cell.text
+                    grid = []
+                    if table_struct and getattr(table_struct, "rows_count", 0) and getattr(table_struct, "cols_count", 0) and getattr(table_struct, "cells", None):
+                        grid = [["" for _ in range(table_struct.cols_count)] for _ in range(table_struct.rows_count)]
+                        for cell in table_struct.cells:
+                            r = getattr(cell, "row_index", 0) if hasattr(cell, "row_index") else (cell.get("row_index", 0) if isinstance(cell, dict) else 0)
+                            c = getattr(cell, "col_index", 0) if hasattr(cell, "col_index") else (cell.get("col_index", 0) if isinstance(cell, dict) else 0)
+                            t = getattr(cell, "text", "") if hasattr(cell, "text") else (cell.get("text", "") if isinstance(cell, dict) else "")
+                            if r < len(grid) and c < len(grid[0]):
+                                grid[r][c] = (t or "").strip()
+                    if not grid and md_str:
+                        lines = [ln.strip() for ln in md_str.splitlines() if ln.strip()]
+                        for line in lines:
+                            if line.startswith("|") and line.endswith("|"):
+                                inner = line.strip("|").strip()
+                                if re.match(r'^[\s\-:|]+$', inner):
+                                    continue
+                                cols = [c.strip() for c in line.split("|")[1:-1]]
+                                if cols:
+                                    grid.append(cols)
                             
                     # Save formats (CSV, JSON, MD, HTML)
                     import csv
                     import io
                     csv_io = io.StringIO()
-                    writer = csv.writer(csv_io)
-                    writer.writerows(grid)
+                    writer = csv.writer(csv_io, lineterminator="\n")
+                    if grid:
+                        writer.writerows(grid)
                     (tables_dir / f"{tbl_name}.csv").write_text(csv_io.getvalue(), encoding="utf-8")
                     
                     tbl_json = {
-                        "table_id": table_struct.table_id,
-                        "rows_count": table_struct.rows_count,
-                        "cols_count": table_struct.cols_count,
-                        "caption": table_struct.caption,
-                        "markdown": table_struct.markdown,
-                        "html": table_struct.html,
+                        "table_id": getattr(table_struct, "table_id", self_ref) if table_struct else self_ref,
+                        "rows_count": len(grid),
+                        "cols_count": len(grid[0]) if grid else (getattr(table_struct, "cols_count", 0) if table_struct else 0),
+                        "caption": getattr(table_struct, "caption", None) if table_struct else None,
+                        "markdown": md_str,
+                        "html": getattr(table_struct, "html", "") if table_struct else "",
                         "grid": grid
                     }
                     with open(tables_dir / f"{tbl_name}.json", "w", encoding="utf-8") as f:
                         json.dump(tbl_json, f, indent=2, ensure_ascii=False)
                         
-                    md_str = table_struct.markdown or ""
-                    (tables_dir / f"{tbl_name}.md").write_text(md_str, encoding="utf-8")
+                    if md_str:
+                        (tables_dir / f"{tbl_name}.md").write_text(md_str, encoding="utf-8")
                     
-                    html_str = table_struct.html or ""
-                    html_content = (
-                        f"<html><head><style>body{{font-family:sans-serif;padding:20px;}} table{{border-collapse:collapse;width:100%;}} th,td{{border:1px solid #ccc;padding:8px;text-align:left;}} th{{background:#eee;}}</style></head><body>"
-                        f"<h2>Table: {tbl_name}</h2>"
-                        f"<p><strong>Caption</strong>: {table_struct.caption or 'None'}</p>"
-                        f"{html_str}"
-                        f"</body></html>"
-                    )
-                    (tables_dir / f"{tbl_name}.html").write_text(html_content, encoding="utf-8")
+                    html_str = getattr(table_struct, "html", "") if table_struct else ""
+                    if html_str:
+                        html_content = (
+                            f"<!DOCTYPE html><html><head><meta charset='utf-8'><style>"
+                            f"body{{font-family:system-ui,-apple-system,sans-serif;padding:20px;color:#333;}}"
+                            f"table{{border-collapse:collapse;width:100%;margin-top:12px;font-size:13px;}}"
+                            f"th,td{{border:1px solid #ddd;padding:8px 12px;text-align:left;}}"
+                            f"th{{background:#f4f5f7;font-weight:600;}}"
+                            f"tr:nth-child(even){{background:#fafbfc;}}"
+                            f"</style></head><body>"
+                            f"<h2>Table: {tbl_name}</h2>"
+                            f"<p><strong>Caption</strong>: {getattr(table_struct, 'caption', None) or 'None'}</p>"
+                            f"{html_str}"
+                            f"</body></html>"
+                        )
+                        (tables_dir / f"{tbl_name}.html").write_text(html_content, encoding="utf-8")
 
                     # Yield main table object
                     t_relationships = {
@@ -498,8 +534,29 @@ class KnowledgeExtractionAgent:
                     if last_caption_id:
                         img_relationships["has_caption"] = last_caption_id
 
+                    img_text_parts = [
+                        f"Image ID: {self_ref}",
+                        f"Image Type: {image_type}",
+                        f"Page: {page}",
+                        f"Caption: {caption or 'None'}",
+                    ]
+                    if new_png_path and new_png_path.exists():
+                        img_text_parts.append(f"Image URL: /outputs/{doc_id}/05_images/{seq_name}.png")
+                    if vlm_description:
+                        img_text_parts.append(f"Semantic Description: {vlm_description}")
+                    if ocr_text:
+                        img_text_parts.append(f"OCR Text: {ocr_text}")
+                    if detected_objects:
+                        img_text_parts.append(f"Detected Objects: {', '.join(detected_objects)}")
+                    if detected_entities:
+                        img_text_parts.append(f"Detected Entities: {', '.join(detected_entities)}")
+                    if keywords:
+                        img_text_parts.append(f"Keywords: {', '.join(keywords)}")
+
+                    img_full_text = "\n".join(img_text_parts)
+
                     img_meta_dict = make_metadata(
-                        txt=caption or f"Image Element {seq_name}",
+                        txt=img_full_text,
                         ref_id=self_ref,
                         element_bbox=bbox,
                         custom_meta={
@@ -507,9 +564,12 @@ class KnowledgeExtractionAgent:
                             "caption": caption,
                             "ocr_text": ocr_text,
                             "image_type": image_type,
+                            "image_path": f"05_images/{seq_name}.png",
+                            "image_url": f"/outputs/{doc_id}/05_images/{seq_name}.png",
                             "objects": detected_objects,
                             "keywords": keywords,
-                            "entities": detected_entities
+                            "entities": detected_entities,
+                            "semantic_description": vlm_description
                         }
                     )
                     
@@ -526,7 +586,7 @@ class KnowledgeExtractionAgent:
                         parent_heading=parent_heading,
                         section_path=section_path,
                         sequence_number=seq_num - 1,
-                        text=caption or f"Image Element {seq_name}",
+                        text=img_full_text,
                         metadata=img_meta_dict,
                         relationships=img_relationships,
                         source_file=source_file,
@@ -853,6 +913,22 @@ class KnowledgeExtractionAgent:
             }
             if meta.image_id:
                 meta_dict["image_id"] = meta.image_id
+            if getattr(meta, "image_path", None):
+                meta_dict["image_path"] = meta.image_path
+            if getattr(meta, "image_url", None):
+                meta_dict["image_url"] = meta.image_url
+            if getattr(meta, "image_type", None):
+                meta_dict["image_type"] = meta.image_type
+            if getattr(meta, "caption", None):
+                meta_dict["caption"] = meta.caption
+            if getattr(meta, "ocr_text", None):
+                meta_dict["ocr_text"] = meta.ocr_text
+            if getattr(meta, "semantic_description", None):
+                meta_dict["semantic_description"] = meta.semantic_description
+            if getattr(meta, "objects", None):
+                meta_dict["objects"] = meta.objects
+            if getattr(meta, "detected_entities", None):
+                meta_dict["detected_entities"] = meta.detected_entities
             if meta.table_id:
                 meta_dict["table_id"] = meta.table_id
                 
@@ -896,6 +972,9 @@ class KnowledgeExtractionAgent:
                 f"-----------------------------------------\n\n"
             )
         md_path.write_text("".join(md_parts), encoding="utf-8")
+
+        # Export all tables to 04_tables/ in CSV, JSON, MD, and HTML formats
+        export_all_tables(structured_doc, output_dir)
 
         # Generate Embedding summary (06_embeddings/)
         emb_summary = {
@@ -1230,3 +1309,131 @@ def idx_img_id(chunk_id: str, objects_list: List[dict]) -> int:
         return ids.index(chunk_id) + 1
     except Exception:
         return 1
+
+def export_all_tables(structured_doc: Any, output_dir: Path) -> int:
+    """
+    Extracts all tables from the structured document (both from structured_doc.tables
+    and table layout elements) and saves them in human-readable formats (CSV, Markdown, JSON, HTML)
+    under output_dir / '04_tables'.
+    """
+    import csv
+    import io
+    import re
+    
+    tables_dir = output_dir / "04_tables"
+    tables_dir.mkdir(parents=True, exist_ok=True)
+    
+    exported_count = 0
+    seen_table_ids = set()
+    
+    # 1. Export tables from structured_doc.tables dictionary
+    tables_dict = getattr(structured_doc, "tables", {})
+    if isinstance(tables_dict, dict):
+        for tbl_id, tbl_struct in tables_dict.items():
+            exported_count += 1
+            tbl_name = f"table_{exported_count:03d}"
+            seen_table_ids.add(tbl_id)
+            
+            grid = []
+            rows_cnt = getattr(tbl_struct, "rows_count", 0) or (tbl_struct.get("rows_count", 0) if isinstance(tbl_struct, dict) else 0)
+            cols_cnt = getattr(tbl_struct, "cols_count", 0) or (tbl_struct.get("cols_count", 0) if isinstance(tbl_struct, dict) else 0)
+            cells = getattr(tbl_struct, "cells", []) or (tbl_struct.get("cells", []) if isinstance(tbl_struct, dict) else [])
+            caption = getattr(tbl_struct, "caption", None) or (tbl_struct.get("caption") if isinstance(tbl_struct, dict) else None)
+            md_str = getattr(tbl_struct, "markdown", "") or (tbl_struct.get("markdown", "") if isinstance(tbl_struct, dict) else "")
+            html_str = getattr(tbl_struct, "html", "") or (tbl_struct.get("html", "") if isinstance(tbl_struct, dict) else "")
+            
+            if rows_cnt and cols_cnt and cells:
+                grid = [["" for _ in range(cols_cnt)] for _ in range(rows_cnt)]
+                for cell in cells:
+                    r = getattr(cell, "row_index", 0) if hasattr(cell, "row_index") else (cell.get("row_index", 0) if isinstance(cell, dict) else 0)
+                    c = getattr(cell, "col_index", 0) if hasattr(cell, "col_index") else (cell.get("col_index", 0) if isinstance(cell, dict) else 0)
+                    t = getattr(cell, "text", "") if hasattr(cell, "text") else (cell.get("text", "") if isinstance(cell, dict) else "")
+                    if r < len(grid) and c < len(grid[0]):
+                        grid[r][c] = (t or "").strip()
+            elif md_str:
+                lines = [ln.strip() for ln in md_str.splitlines() if ln.strip()]
+                for line in lines:
+                    if line.startswith("|") and line.endswith("|"):
+                        inner = line.strip("|").strip()
+                        if re.match(r'^[\s\-:|]+$', inner):
+                            continue
+                        cols = [c.strip() for c in line.split("|")[1:-1]]
+                        if cols:
+                            grid.append(cols)
+                            
+            csv_io = io.StringIO()
+            writer = csv.writer(csv_io, lineterminator="\n")
+            if grid:
+                writer.writerows(grid)
+            csv_content = csv_io.getvalue()
+            
+            (tables_dir / f"{tbl_name}.csv").write_text(csv_content, encoding="utf-8")
+            if md_str:
+                (tables_dir / f"{tbl_name}.md").write_text(md_str, encoding="utf-8")
+            
+            tbl_json = {
+                "table_id": tbl_id,
+                "rows_count": len(grid),
+                "cols_count": len(grid[0]) if grid else cols_cnt,
+                "caption": caption,
+                "markdown": md_str,
+                "html": html_str,
+                "grid": grid
+            }
+            with open(tables_dir / f"{tbl_name}.json", "w", encoding="utf-8") as jf:
+                json.dump(tbl_json, jf, indent=2, ensure_ascii=False)
+                
+            if html_str:
+                html_content = (
+                    f"<!DOCTYPE html><html><head><meta charset='utf-8'><style>"
+                    f"body{{font-family:system-ui,-apple-system,sans-serif;padding:20px;color:#333;}}"
+                    f"table{{border-collapse:collapse;width:100%;margin-top:12px;font-size:13px;}}"
+                    f"th,td{{border:1px solid #ddd;padding:8px 12px;text-align:left;}}"
+                    f"th{{background:#f4f5f7;font-weight:600;}}"
+                    f"tr:nth-child(even){{background:#fafbfc;}}"
+                    f"</style></head><body>"
+                    f"<h2>Table: {tbl_name}</h2>"
+                    f"<p><strong>Caption</strong>: {caption or 'None'}</p>"
+                    f"{html_str}"
+                    f"</body></html>"
+                )
+                (tables_dir / f"{tbl_name}.html").write_text(html_content, encoding="utf-8")
+
+    # 2. Check any remaining table elements in structured_doc.elements
+    elements = getattr(structured_doc, "elements", []) or (structured_doc.get("elements", []) if isinstance(structured_doc, dict) else [])
+    for el in elements:
+        el_type = getattr(el, "type", "") if hasattr(el, "type") else (el.get("type", "") if isinstance(el, dict) else "")
+        el_id = getattr(el, "id", "") if hasattr(el, "id") else (el.get("id", "") if isinstance(el, dict) else "")
+        if el_type == "table" and el_id not in seen_table_ids and not any(el_id.endswith(s) for s in seen_table_ids):
+            txt = getattr(el, "text", "") if hasattr(el, "text") else (el.get("text", "") if isinstance(el, dict) else "")
+            if txt and "|" in txt:
+                exported_count += 1
+                tbl_name = f"table_{exported_count:03d}"
+                grid = []
+                lines = [ln.strip() for ln in txt.splitlines() if ln.strip()]
+                for line in lines:
+                    if line.startswith("|") and line.endswith("|"):
+                        inner = line.strip("|").strip()
+                        if re.match(r'^[\s\-:|]+$', inner):
+                            continue
+                        cols = [c.strip() for c in line.split("|")[1:-1]]
+                        if cols:
+                            grid.append(cols)
+                if grid:
+                    csv_io = io.StringIO()
+                    writer = csv.writer(csv_io, lineterminator="\n")
+                    writer.writerows(grid)
+                    (tables_dir / f"{tbl_name}.csv").write_text(csv_io.getvalue(), encoding="utf-8")
+                    (tables_dir / f"{tbl_name}.md").write_text(txt, encoding="utf-8")
+                    with open(tables_dir / f"{tbl_name}.json", "w", encoding="utf-8") as jf:
+                        json.dump({
+                            "table_id": el_id,
+                            "rows_count": len(grid),
+                            "cols_count": len(grid[0]) if grid else 0,
+                            "caption": None,
+                            "markdown": txt,
+                            "grid": grid
+                        }, jf, indent=2, ensure_ascii=False)
+                        
+    logger.info("Exported %d table(s) in CSV, JSON, MD, and HTML formats to %s", exported_count, tables_dir)
+    return exported_count

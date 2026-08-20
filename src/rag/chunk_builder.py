@@ -289,6 +289,12 @@ class ChunkBuilder:
             # Process Images (Task 4)
             if el_type == "image":
                 image_meta = doc.images.get(element.id)
+                if not image_meta and hasattr(doc, "images") and doc.images:
+                    target_id = getattr(element.metadata, "image_id", None) or element.id
+                    for k, v in doc.images.items():
+                        if k == target_id or k.endswith(target_id) or target_id.endswith(k):
+                            image_meta = v
+                            break
                 img_chunk = self._create_semantic_image_chunk(
                     element, image_meta, document_id, active_headings, active_heading_ids, len(chunks)
                 )
@@ -431,7 +437,8 @@ class ChunkBuilder:
         chunk_idx: int
     ) -> Optional[DocumentChunk]:
         """
-        Creates one semantic image chunk consolidating caption, OCR blocks, and VLM descriptions.
+        Creates a dedicated semantic image representation combining semantic_description,
+        caption, ocr_text, objects, keywords, and detected_entities as a first-class retrievable knowledge object.
         """
         page_number = element.metadata.page_number
         heading, section, hierarchy_path, sec_heading, subsec_heading, sec_id = self._get_heading_contexts(active_headings, active_heading_ids)
@@ -440,43 +447,85 @@ class ChunkBuilder:
         ocr_text = element.metadata.ocr_text or ""
         vlm_desc = ""
         image_type = "Image"
+        objects = []
+        keywords = []
+        detected_entities = []
+        img_path = None
         
         if image_meta:
-            caption_text = getattr(image_meta, "caption", None) or caption_text
-            ocr_text = getattr(image_meta, "ocr_text", None) or ocr_text
-            vlm_desc = getattr(image_meta, "semantic_description", None) or ""
-        img_path = getattr(image_meta, "image_path", None) if image_meta else None
+            if isinstance(image_meta, dict):
+                caption_text = image_meta.get("caption") or caption_text
+                ocr_text = image_meta.get("ocr_text") or ocr_text
+                vlm_desc = image_meta.get("semantic_description") or ""
+                image_type = image_meta.get("image_type") or "Image"
+                objects = image_meta.get("objects") or []
+                keywords = image_meta.get("keywords") or []
+                detected_entities = image_meta.get("detected_entities") or []
+                img_path = image_meta.get("image_path")
+            else:
+                caption_text = getattr(image_meta, "caption", None) or caption_text
+                ocr_text = getattr(image_meta, "ocr_text", None) or ocr_text
+                vlm_desc = getattr(image_meta, "semantic_description", None) or ""
+                image_type = getattr(image_meta, "image_type", None) or "Image"
+                objects = getattr(image_meta, "objects", []) or []
+                keywords = getattr(image_meta, "keywords", []) or []
+                detected_entities = getattr(image_meta, "detected_entities", []) or []
+                img_path = getattr(image_meta, "image_path", None)
+
         if not img_path and element.metadata and hasattr(element.metadata, "image_path"):
             img_path = element.metadata.image_path
 
         img_url = f"/outputs/{doc_id}/{img_path}" if (img_path and not img_path.startswith("http") and not img_path.startswith("/")) else (img_path or f"/outputs/{doc_id}/05_images/{element.id}.png")
 
-        image_parts = [f"Image Type: {image_type}"]
-        if caption_text:
-            image_parts.append(f"Image Caption: {caption_text}")
+        if not caption_text.strip():
+            clean_name = element.id.replace("#/", "").replace("/", " ").replace("_", " ").title()
+            caption_text = f"Figure on Page {page_number} ({heading or clean_name})"
+        if not vlm_desc.strip():
+            vlm_desc = f"Visual graphic / {image_type.lower()} on Page {page_number} under section '{section}'."
+
+        # Dedicated image representation combining all multimodal modalities
+        image_parts = [
+            f"Image ID: {element.id}",
+            f"Image Type: {image_type}",
+            f"Page: {page_number}",
+            f"Image Caption: {caption_text}",
+        ]
         if img_url:
             image_parts.append(f"Image URL: {img_url}")
+        if vlm_desc:
+            image_parts.append(f"Image Semantic Description: {vlm_desc}")
         if ocr_text:
             image_parts.append(f"Image OCR Text: {ocr_text}")
-        if vlm_desc:
-            image_parts.append(f"Image VLM Description: {vlm_desc}")
+        if objects:
+            objs_str = ", ".join(objects) if isinstance(objects, list) else str(objects)
+            image_parts.append(f"Detected Visual Objects: {objs_str}")
+        if detected_entities:
+            ents_str = ", ".join(detected_entities) if isinstance(detected_entities, list) else str(detected_entities)
+            image_parts.append(f"Detected Entities: {ents_str}")
+        if keywords:
+            kws_str = ", ".join(keywords) if isinstance(keywords, list) else str(keywords)
+            image_parts.append(f"Keywords: {kws_str}")
             
         actual_image_text = "\n".join(image_parts)
-        
-        # Filter empty image chunks (Task 1) - Skip if caption, ocr, and description are all empty
-        if not caption_text.strip() and not ocr_text.strip() and not vlm_desc.strip():
-            return None
-        if not is_semantic_content(actual_image_text):
-            return None
 
-        # Apply Context Conditioning (Task 5)
+        # Apply Context Conditioning
         content = f"Document Section: {section}\nContent:\n{actual_image_text}"
         
         bboxes = [element.metadata.bbox] if element.metadata.bbox else []
         
-        # Clean metadata enrichment (Task 3) - Run on actual_image_text instead of content
+        # Clean metadata enrichment
         enriched = self._enrich_chunk_metadata(actual_image_text, page_number, section)
         
+        # Merge detected entities/keywords with enriched metadata if not already present
+        if detected_entities:
+            for ent in detected_entities:
+                if ent not in enriched.get("people", []) and ent not in enriched.get("organizations", []):
+                    enriched.setdefault("organizations", []).append(ent)
+        if keywords:
+            for kw in keywords:
+                if kw not in enriched.get("keywords", []):
+                    enriched.setdefault("keywords", []).append(kw)
+
         metadata = ChunkMetadata(
             chunk_id=f"{doc_id}_chunk_{chunk_idx:04d}",
             document_id=doc_id,
@@ -495,6 +544,12 @@ class ChunkBuilder:
             image_id=element.id,
             image_path=img_path,
             image_url=img_url,
+            image_type=image_type,
+            caption=caption_text,
+            ocr_text=ocr_text,
+            semantic_description=vlm_desc,
+            objects=objects if isinstance(objects, list) else [objects],
+            detected_entities=detected_entities if isinstance(detected_entities, list) else [detected_entities],
             element_types=["image"],
             relationships={"belongs_to": hierarchy_path[-1] if hierarchy_path else "body"},
             **enriched

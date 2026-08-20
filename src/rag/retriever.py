@@ -81,7 +81,7 @@ class Retriever:
             return "manufacturing"
         if any(w in q for w in ["table", "tabular", "column", "row"]):
             return "table"
-        if any(w in q for w in ["chart", "graph", "diagram", "figure", "image", "illustration"]):
+        if any(w in q for w in ["chart", "graph", "diagram", "figure", "image", "illustration", "photo", "picture", "flowchart", "architecture", "map", "plot", "layout", "visual", "look like", "sketch", "infographic", "schematic", "trend", "pie chart", "bar chart"]):
             return "image"
         if any(w in q for w in ["list", "enumerate", "who are the", "name all", "what are the", "which people", "entities"]):
             return "list"
@@ -109,7 +109,7 @@ class Retriever:
             "product": (35, 20, 8),
             "manufacturing": (35, 20, 8),
             "table": (25, 15, 6),
-            "image": (25, 15, 6),
+            "image": (35, 20, 8),
             "list": (40, 20, 10),
             "procedure": (30, 15, 8),
             "statistics": (30, 15, 8),
@@ -122,6 +122,9 @@ class Retriever:
     def expand_query(self, query: str) -> str:
         expanded = query
         synonyms = {
+            r"\b(diagram|flowchart|architecture)\b": "diagram flowchart architecture visual figure illustration schematic workflow system diagram",
+            r"\b(chart|graph|plot)\b": "chart graph plot visual trend curve data graphic figure",
+            r"\b(figure|image|photo|illustration|picture)\b": "figure image photo illustration visual picture diagram graphic",
             r"\bboard\b": "board of directors leadership corporate governance directors management",
             r"\bchairman\b": "board chairman chairperson executive chairman leadership corporate governance",
             r"\bleadership\b": "executive committee board of directors management corporate governance",
@@ -141,6 +144,9 @@ class Retriever:
     def _boost_candidates(self, clean_query: str, fused_results: List[Tuple[DocumentChunk, float, float]]) -> List[Tuple[DocumentChunk, float, float]]:
         q = clean_query.lower()
         boosted = []
+        visual_terms = ["diagram", "chart", "graph", "figure", "image", "illustration", "photo", "picture", "flowchart", "architecture", "map", "plot", "layout", "visual", "look like", "workflow", "schematic", "trend"]
+        is_visual_query = any(vt in q for vt in visual_terms)
+
         for chunk, rrf, sem in fused_results:
             boost = 0.0
             meta = chunk.metadata
@@ -150,8 +156,18 @@ class Retriever:
                 boost += 0.3
                 
             # 2. Figure/Image target
-            if any(term in q for term in ["figure", "image", "diagram", "photo", "caption"]) and meta.chunk_type == "image":
-                boost += 0.3
+            if meta.chunk_type == "image":
+                if is_visual_query:
+                    boost += 0.5
+                caption = (getattr(meta, "caption", None) or meta.heading or "").lower()
+                ocr = (getattr(meta, "ocr_text", None) or "").lower()
+                vlm = (getattr(meta, "semantic_description", None) or "").lower()
+                objs = [str(o).lower() for o in (getattr(meta, "objects", []) or [])]
+                
+                import re
+                q_words = [w for w in re.findall(r'\w+', q) if len(w) > 2 and w not in visual_terms]
+                if q_words and any(w in caption or w in ocr or w in vlm or any(w in o for o in objs) for w in q_words):
+                    boost += 0.4
                 
             # 3. People target
             if any(term in q for term in ["people", "person", "who", "names"]) and (getattr(meta, "people", None) or meta.chunk_type == "text"):
@@ -180,6 +196,56 @@ class Retriever:
         boosted.sort(key=lambda x: x[1], reverse=True)
         return boosted
 
+    def _search_images(self, chunks: List[DocumentChunk], query: str) -> List[DocumentChunk]:
+        """
+        Dedicated visual search matching query keywords, figure numbers, captions,
+        OCR text, semantic descriptions, detected objects, entities, and keywords.
+        """
+        matched = []
+        q_lower = query.lower()
+        
+        import re
+        fig_match = re.search(r'(?i)\b(?:figure|fig\.?|chart|diagram|image|photo|illustration)\s*#?\s*(\d+)\b', query)
+        fig_target_num = fig_match.group(1) if fig_match else None
+
+        visual_terms = ["diagram", "chart", "graph", "figure", "image", "illustration", "photo", "picture", "flowchart", "architecture", "map", "plot", "layout", "visual", "look like", "workflow", "schematic", "trend"]
+        is_visual_query = any(vt in q_lower for vt in visual_terms)
+
+        for c in chunks:
+            if c.metadata.chunk_type != "image" and not c.metadata.image_id:
+                continue
+
+            meta = c.metadata
+            caption = (getattr(meta, "caption", None) or meta.heading or "").lower()
+            ocr = (getattr(meta, "ocr_text", None) or "").lower()
+            vlm = (getattr(meta, "semantic_description", None) or "").lower()
+            objs = [str(o).lower() for o in (getattr(meta, "objects", []) or [])]
+            ents = [str(e).lower() for e in (getattr(meta, "detected_entities", []) or [])]
+            kws = [str(k).lower() for k in (getattr(meta, "keywords", []) or [])]
+
+            # 1. Figure number exact match
+            if fig_target_num:
+                if fig_target_num in caption or (meta.image_id and fig_target_num in meta.image_id):
+                    matched.append(c)
+                    continue
+
+            # 2. Query words matching caption, OCR, VLM description, objects, entities, keywords
+            q_words = [w for w in re.findall(r'\w+', q_lower) if len(w) > 2 and w not in visual_terms]
+            if q_words:
+                match_count = 0
+                for w in q_words:
+                    if w in caption or w in ocr or w in vlm or any(w in o for o in objs) or any(w in e for e in ents) or any(w in k for k in kws):
+                        match_count += 1
+                if match_count > 0:
+                    matched.append(c)
+                    continue
+
+            # 3. If it's a general visual query, include image chunks
+            if is_visual_query:
+                matched.append(c)
+
+        return self._deduplicate_chunks(matched)
+
     def retrieve(
         self, 
         document_id: str, 
@@ -189,7 +255,7 @@ class Retriever:
         import time
         start_time = time.time()
         
-        # 1. Intent Detection
+        # 1. Intent Detection & Query Routing
         intent = self.detect_intent(query)
         top_k_retrieve, top_k_rerank, top_k_final = self._get_intent_depth(intent)
         logger.info(f"Detected intent: {intent} -> (retrieve={top_k_retrieve}, rerank={top_k_rerank}, final={top_k_final})")
@@ -228,13 +294,17 @@ class Retriever:
         entity_candidates = self._search_entity_index(entity_index, query)
         add_candidates(entity_candidates)
         
-        # Stage D: BM25 Search
+        # Stage D: Dedicated Image & Visual Search
+        image_candidates = self._search_images(all_chunks, query)
+        add_candidates(image_candidates)
+        
+        # Stage E: BM25 Search
         filtered_chunks = self._filter_chunks(all_chunks, metadata_filter)
         bm25_search = BM25Search(filtered_chunks)
         bm25_results = bm25_search.search(clean_query, top_k=top_k_retrieve)
         add_candidates([chunk for chunk, _ in bm25_results])
         
-        # Stage E: Vector Search
+        # Stage F: Vector Search
         query_emb = self.query_processor.generate_query_embedding(query)
         vector_results = self._search_vector_store(document_id, query_emb, metadata_filter, n_results=top_k_retrieve)
         add_candidates([chunk for chunk, _ in vector_results])
@@ -509,6 +579,18 @@ class Retriever:
                         elif other.metadata.page_number == meta.page_number and other.metadata.chunk_type == "text" and (other.metadata.heading == meta.heading or other.metadata.section == meta.section):
                             expanded.append(other)
                             seen.add(other.metadata.chunk_id)
+            elif meta.chunk_type == "text":
+                # If text refers to a figure or diagram, expand the corresponding image chunk
+                import re
+                fig_refs = re.findall(r'(?i)\b(?:figure|fig\.?|chart|diagram|image|photo)\s*#?\s*(\d+)\b', chunk.content)
+                if fig_refs:
+                    for other in all_chunks:
+                        if other.metadata.chunk_id not in seen and (other.metadata.chunk_type == "image" or other.metadata.image_id):
+                            for ref_num in fig_refs:
+                                other_cap = (getattr(other.metadata, "caption", None) or other.metadata.heading or "").lower()
+                                if ref_num in other_cap or (other.metadata.image_id and ref_num in other.metadata.image_id):
+                                    expanded.append(other)
+                                    seen.add(other.metadata.chunk_id)
                             
         def parse_chunk_idx(chunk_id: str) -> int:
             import re
@@ -553,7 +635,10 @@ class Retriever:
                     bboxes = []
                     for bbox_data in meta_data.get("bounding_boxes", []):
                         if bbox_data:
-                            bboxes.append(BoundingBox(**bbox_data))
+                            if isinstance(bbox_data, dict):
+                                bboxes.append(BoundingBox(**bbox_data))
+                            elif isinstance(bbox_data, BoundingBox):
+                                bboxes.append(bbox_data)
 
                     meta = ChunkMetadata(
                         chunk_id=meta_data.get("chunk_id"),
@@ -564,10 +649,18 @@ class Retriever:
                         section=meta_data.get("section"),
                         hierarchy_path=meta_data.get("hierarchy_path", []),
                         source_element_ids=meta_data.get("source_element_ids", []),
-                        word_count=meta_data.get("word_count"),
-                        token_estimate=meta_data.get("token_estimate"),
+                        word_count=meta_data.get("word_count", 0),
+                        token_estimate=meta_data.get("token_estimate", 0),
                         bounding_boxes=bboxes,
                         image_id=meta_data.get("image_id"),
+                        image_path=meta_data.get("image_path"),
+                        image_url=meta_data.get("image_url"),
+                        image_type=meta_data.get("image_type"),
+                        caption=meta_data.get("caption"),
+                        ocr_text=meta_data.get("ocr_text"),
+                        semantic_description=meta_data.get("semantic_description"),
+                        objects=self._parse_list_meta(meta_data.get("objects")),
+                        detected_entities=self._parse_list_meta(meta_data.get("detected_entities")),
                         table_id=meta_data.get("table_id"),
                         report_number=meta_data.get("report_number"),
                         state=meta_data.get("state"),
@@ -597,6 +690,12 @@ class Retriever:
                 hierarchy_path = json.loads(meta_data.get("hierarchy_path", "[]"))
                 source_element_ids = json.loads(meta_data.get("source_element_ids", "[]"))
                 
+                bboxes_raw = json.loads(meta_data.get("bounding_boxes", "[]")) if isinstance(meta_data.get("bounding_boxes"), str) else meta_data.get("bounding_boxes", [])
+                bboxes = []
+                for b in bboxes_raw:
+                    if isinstance(b, dict):
+                        bboxes.append(BoundingBox(**b))
+                
                 meta = ChunkMetadata(
                     chunk_id=meta_data.get("chunk_id"),
                     document_id=meta_data.get("document_id"),
@@ -608,7 +707,16 @@ class Retriever:
                     source_element_ids=source_element_ids,
                     word_count=int(meta_data.get("word_count", 0)),
                     token_estimate=int(meta_data.get("token_estimate", 0)),
+                    bounding_boxes=bboxes,
                     image_id=meta_data.get("image_id"),
+                    image_path=meta_data.get("image_path"),
+                    image_url=meta_data.get("image_url"),
+                    image_type=meta_data.get("image_type"),
+                    caption=meta_data.get("caption"),
+                    ocr_text=meta_data.get("ocr_text"),
+                    semantic_description=meta_data.get("semantic_description"),
+                    objects=self._parse_list_meta(meta_data.get("objects")),
+                    detected_entities=self._parse_list_meta(meta_data.get("detected_entities")),
                     table_id=meta_data.get("table_id"),
                     report_number=meta_data.get("report_number"),
                     state=meta_data.get("state"),
@@ -694,6 +802,12 @@ class Retriever:
                 hierarchy_path = json.loads(meta_data.get("hierarchy_path", "[]"))
                 source_element_ids = json.loads(meta_data.get("source_element_ids", "[]"))
                 
+                bboxes_raw = json.loads(meta_data.get("bounding_boxes", "[]")) if isinstance(meta_data.get("bounding_boxes"), str) else meta_data.get("bounding_boxes", [])
+                bboxes = []
+                for b in bboxes_raw:
+                    if isinstance(b, dict):
+                        bboxes.append(BoundingBox(**b))
+
                 meta = ChunkMetadata(
                     chunk_id=meta_data.get("chunk_id"),
                     document_id=meta_data.get("document_id"),
@@ -705,7 +819,16 @@ class Retriever:
                     source_element_ids=source_element_ids,
                     word_count=int(meta_data.get("word_count", 0)),
                     token_estimate=int(meta_data.get("token_estimate", 0)),
+                    bounding_boxes=bboxes,
                     image_id=meta_data.get("image_id"),
+                    image_path=meta_data.get("image_path"),
+                    image_url=meta_data.get("image_url"),
+                    image_type=meta_data.get("image_type"),
+                    caption=meta_data.get("caption"),
+                    ocr_text=meta_data.get("ocr_text"),
+                    semantic_description=meta_data.get("semantic_description"),
+                    objects=self._parse_list_meta(meta_data.get("objects")),
+                    detected_entities=self._parse_list_meta(meta_data.get("detected_entities")),
                     table_id=meta_data.get("table_id"),
                     report_number=meta_data.get("report_number"),
                     state=meta_data.get("state"),

@@ -92,9 +92,9 @@ class PromptBuilder:
             instructions.append(
                 "FORMATTING: Output tabular financial data using a Markdown table whenever possible."
             )
-        elif any(w in q_lower for w in ["image", "figure", "chart", "diagram", "photo", "picture", "graph", "plot", "map", "illustration", "show me", "visual", "look like"]):
+        elif any(w in q_lower for w in ["image", "figure", "chart", "diagram", "photo", "picture", "graph", "plot", "map", "illustration", "show me", "visual", "look like", "flowchart", "architecture", "trend"]):
             instructions.append(
-                "VISUAL ASSET: If an image or figure is present in the context, embed it using Markdown `![Image Caption](Image URL)` and summarize the visual contents and data."
+                "VISUAL ASSET: If an image or figure is present in the context, embed it using Markdown `![Image Caption](Image URL)` and summarize the visual contents, OCR data, and key takeaways."
             )
 
         if instructions:

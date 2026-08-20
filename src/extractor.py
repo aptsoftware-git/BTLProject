@@ -68,6 +68,12 @@ class DocumentExtractor:
                 self.logger.info("Saved structured_document.json to %s", structured_doc_path)
             except Exception as e:
                 self.logger.error("Failed to save structured_document.json: %s", e)
+            
+            try:
+                from src.rag.knowledge_extraction_agent import export_all_tables
+                export_all_tables(structured_doc, output_dir)
+            except Exception as tbl_err:
+                self.logger.warning("Failed to export tables to 04_tables: %s", tbl_err)
 
         document = Document(
             name=file_path.stem,

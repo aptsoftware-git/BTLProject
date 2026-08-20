@@ -166,6 +166,34 @@ class VectorStore:
             # Extract image_id or table_id if applicable
             if meta.image_id:
                 flat_metadata["image_id"] = str(meta.image_id)
+            if getattr(meta, "image_path", None):
+                flat_metadata["image_path"] = str(meta.image_path)
+            if getattr(meta, "image_url", None):
+                flat_metadata["image_url"] = str(meta.image_url)
+            if getattr(meta, "image_type", None):
+                flat_metadata["image_type"] = str(meta.image_type)
+            if getattr(meta, "caption", None):
+                flat_metadata["caption"] = str(meta.caption)
+            if getattr(meta, "ocr_text", None):
+                flat_metadata["ocr_text"] = str(meta.ocr_text)
+            if getattr(meta, "semantic_description", None):
+                flat_metadata["semantic_description"] = str(meta.semantic_description)
+            for img_list in ["objects", "detected_entities"]:
+                val = getattr(meta, img_list, [])
+                if val:
+                    flat_metadata[img_list] = json.dumps(val)
+
+            if meta.bounding_boxes:
+                bboxes_data = []
+                for b in meta.bounding_boxes:
+                    if hasattr(b, "model_dump"):
+                        bboxes_data.append(b.model_dump())
+                    elif hasattr(b, "dict"):
+                        bboxes_data.append(b.dict())
+                    elif isinstance(b, dict):
+                        bboxes_data.append(b)
+                flat_metadata["bounding_boxes"] = json.dumps(bboxes_data)
+
             if meta.table_id:
                 flat_metadata["table_id"] = str(meta.table_id)
 

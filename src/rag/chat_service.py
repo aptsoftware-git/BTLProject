@@ -57,7 +57,7 @@ class ChatService:
 
         # 2. Build Context
         logger.info("Building context...")
-        context_str, used_chunk_ids, page_references = self.context_builder.build_context(retrieved_chunks)
+        context_str, used_chunk_ids, page_references, image_references = self.context_builder.build_context(retrieved_chunks)
 
         # 3. Retrieve Conversation History & Build Prompt
         logger.info("Preparing prompt...")
@@ -122,6 +122,7 @@ class ChatService:
         retrieval_statistics = {
             "total_retrieved": len(retrieved_chunks),
             "used_chunks_count": len(used_chunk_ids),
+            "image_references_count": len(image_references),
             "retrieval_time_seconds": retrieval_time,
             "max_similarity_score": max(similarity_scores) if similarity_scores else 0.0,
             "min_similarity_score": min(similarity_scores) if similarity_scores else 0.0,
@@ -155,6 +156,7 @@ class ChatService:
             answer=answer.strip(),
             used_chunk_ids=used_chunk_ids,
             page_references=page_references,
+            image_references=image_references,
             retrieval_statistics=retrieval_statistics,
             generation_time=generation_time,
             selected_model=selected_model,

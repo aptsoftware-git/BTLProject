@@ -136,7 +136,7 @@ def test_context_builder_ordering_and_deduplication():
     retrieved = [chunk_b, chunk_a, chunk_c, chunk_duplicate]
 
     builder = ContextBuilder(max_tokens=350)
-    context_str, used_ids, page_refs = builder.build_context(retrieved)
+    context_str, used_ids, page_refs, image_refs = builder.build_context(retrieved)
 
     # De-duplicated should keep only 3 chunks: A, B, C (duplicate chunk_0001 is filtered)
     assert len(used_ids) == 3
@@ -161,7 +161,7 @@ def test_context_builder_token_budgeting():
     # Chunk A (100 + 50 overhead) fits. Chunk B (100 + 50 overhead) would exceed, so it's skipped.
     # Chunk C also exceeds.
     builder = ContextBuilder(max_tokens=220)
-    context_str, used_ids, page_refs = builder.build_context([chunk_a, chunk_b, chunk_c])
+    context_str, used_ids, page_refs, image_refs = builder.build_context([chunk_a, chunk_b, chunk_c])
 
     assert len(used_ids) == 1
     assert "chunk_1" in used_ids
@@ -338,3 +338,62 @@ def test_chat_service_empty_retrieval_unsupported_question():
     assert response.answer == fallback_ans
     assert response.used_chunk_ids == []
     assert response.page_references == []
+    assert response.image_references == []
+
+
+def test_chat_service_multimodal_image_retrieval_and_citation():
+    # Setup mock image chunk
+    img_meta = ChunkMetadata(
+        chunk_id="doc_test_chunk_0005",
+        document_id="doc_test",
+        page_number=3,
+        chunk_type="image",
+        heading="System Flowchart",
+        section="Architecture > System Flowchart",
+        hierarchy_path=["#/texts/0"],
+        source_element_ids=["#/pictures/0"],
+        word_count=20,
+        token_estimate=30,
+        image_id="#/pictures/0",
+        image_path="05_images/image_001.png",
+        image_type="Flowchart",
+        caption="Figure 1: Multimodal Ingestion Pipeline",
+        ocr_text="INGESTION EXTRACT CHUNK RETRIEVE",
+        semantic_description="Architecture diagram showing the multi-stage document processing pipeline.",
+        objects=["boxes", "arrows", "labels"],
+        keywords=["pipeline", "architecture", "flowchart"]
+    )
+    img_chunk = ScoredChunk(
+        content="Image ID: #/pictures/0\nImage Type: Flowchart\nPage: 3\nCaption: Figure 1: Multimodal Ingestion Pipeline",
+        metadata=img_meta,
+        similarity_score=0.92,
+        reranker_score=0.95
+    )
+
+    retriever = FakeRetriever([img_chunk])
+    ollama_client = FakeOllamaClient("As shown in Figure 1 on Page 3, the pipeline consists of ingestion, extraction, chunking, and retrieval.")
+
+    service = ChatService(
+        retriever=retriever,
+        ollama_client=ollama_client,
+        context_builder=ContextBuilder(),
+        prompt_builder=PromptBuilder(),
+        memory=ConversationMemory()
+    )
+
+    response = service.answer_question("doc_test", "What does the architecture diagram show?")
+
+    assert isinstance(response, GroundedAnswerResponse)
+    assert "Figure 1 on Page 3" in response.answer
+    assert response.used_chunk_ids == ["doc_test_chunk_0005"]
+    assert response.page_references == [3]
+    assert len(response.image_references) == 1
+    
+    img_ref = response.image_references[0]
+    assert img_ref["image_id"] == "#/pictures/0"
+    assert img_ref["page_number"] == 3
+    assert img_ref["image_type"] == "Flowchart"
+    assert img_ref["image_url"] == "/outputs/doc_test/05_images/image_001.png"
+    assert img_ref["caption"] == "Figure 1: Multimodal Ingestion Pipeline"
+    assert "boxes" in img_ref["objects"]
+    assert response.retrieval_statistics["image_references_count"] == 1

@@ -260,6 +260,7 @@ export default function Assistant({ propDoc, onSelectPage }) {
         content: res.answer,
         timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
         pageReferences: res.page_references,
+        imageReferences: res.image_references || [],
         usedChunks: res.used_chunk_ids,
         statistics: res.retrieval_statistics,
         generationTime: res.generation_time,
@@ -412,6 +413,62 @@ export default function Assistant({ propDoc, onSelectPage }) {
                           dangerouslySetInnerHTML={{ __html: parseMarkdown(msg.content) }}
                           style={styles.assistantText}
                         />
+
+                        {/* Visual Evidence & Referenced Images */}
+                        {msg.imageReferences && msg.imageReferences.length > 0 && (
+                          <div style={styles.imageEvidenceSection}>
+                            <div style={styles.imageEvidenceHeader}>
+                              <span style={styles.imageEvidenceTitle}>
+                                🖼️ Visual Evidence & Figures ({msg.imageReferences.length})
+                              </span>
+                            </div>
+                            <div style={styles.imageEvidenceGrid}>
+                              {msg.imageReferences.map((img, imgIdx) => {
+                                let cleanSrc = (img.image_url || img.image_path || "").trim();
+                                if (cleanSrc && !cleanSrc.startsWith("http") && !cleanSrc.startsWith("/")) {
+                                  cleanSrc = "/" + cleanSrc;
+                                }
+                                return (
+                                  <div key={imgIdx} style={styles.imageEvidenceCard}>
+                                    {cleanSrc && (
+                                      <a 
+                                        href={cleanSrc} 
+                                        target="_blank" 
+                                        rel="noopener noreferrer" 
+                                        style={styles.imageEvidenceThumbLink} 
+                                        title="Click to view full image in new tab"
+                                      >
+                                        <img 
+                                          src={cleanSrc} 
+                                          alt={img.caption || `Figure on Page ${img.page_number}`}
+                                          style={styles.imageEvidenceThumb}
+                                          onError={(e) => { e.target.style.display = 'none'; }}
+                                        />
+                                      </a>
+                                    )}
+                                    <div style={styles.imageEvidenceInfo}>
+                                      <div style={styles.imageEvidenceBadgeRow}>
+                                        <span style={styles.imageTypeBadge}>{img.image_type || "Figure"}</span>
+                                        {img.page_number && (
+                                          <button 
+                                            onClick={() => onSelectPage && onSelectPage(img.page_number)}
+                                            style={styles.imagePageBadge}
+                                            title="Jump to document page"
+                                          >
+                                            Page {img.page_number}
+                                          </button>
+                                        )}
+                                      </div>
+                                      <div style={styles.imageEvidenceCaption} title={img.caption}>
+                                        {img.caption || `Figure on Page ${img.page_number}`}
+                                      </div>
+                                    </div>
+                                  </div>
+                                );
+                              })}
+                            </div>
+                          </div>
+                        )}
 
                         {/* Page References */}
                         {msg.pageReferences && msg.pageReferences.length > 0 && (
@@ -656,6 +713,94 @@ const styles = {
   assistantText: {
     fontSize: 13,
     color: "var(--text-primary)"
+  },
+
+  imageEvidenceSection: {
+    marginTop: 12,
+    padding: "10px 12px",
+    background: "var(--bg-card)",
+    border: "1px solid var(--border)",
+    borderRadius: 8,
+    display: "flex",
+    flexDirection: "column",
+    gap: 8
+  },
+  imageEvidenceHeader: {
+    display: "flex",
+    alignItems: "center",
+    justifyContent: "space-between"
+  },
+  imageEvidenceTitle: {
+    fontSize: 12,
+    fontWeight: 700,
+    color: "var(--text-primary)"
+  },
+  imageEvidenceGrid: {
+    display: "grid",
+    gridTemplateColumns: "repeat(auto-fill, minmax(200px, 1fr))",
+    gap: 10
+  },
+  imageEvidenceCard: {
+    background: "var(--bg-page)",
+    border: "1px solid var(--border)",
+    borderRadius: 6,
+    overflow: "hidden",
+    display: "flex",
+    flexDirection: "column",
+    transition: "transform 0.15s ease, box-shadow 0.15s ease"
+  },
+  imageEvidenceThumbLink: {
+    display: "block",
+    width: "100%",
+    height: 120,
+    background: "#f8f9fa",
+    overflow: "hidden",
+    borderBottom: "1px solid var(--border)"
+  },
+  imageEvidenceThumb: {
+    width: "100%",
+    height: "100%",
+    objectFit: "contain",
+    display: "block"
+  },
+  imageEvidenceInfo: {
+    padding: "6px 8px",
+    display: "flex",
+    flexDirection: "column",
+    gap: 4
+  },
+  imageEvidenceBadgeRow: {
+    display: "flex",
+    alignItems: "center",
+    justifyContent: "space-between",
+    gap: 6
+  },
+  imageTypeBadge: {
+    fontSize: 10,
+    fontWeight: 700,
+    textTransform: "uppercase",
+    background: "var(--brand-light)",
+    color: "var(--brand)",
+    padding: "1px 5px",
+    borderRadius: 4
+  },
+  imagePageBadge: {
+    background: "var(--border)",
+    color: "var(--text-primary)",
+    border: "none",
+    borderRadius: 4,
+    padding: "1px 6px",
+    fontSize: 10.5,
+    fontWeight: 600,
+    cursor: "pointer"
+  },
+  imageEvidenceCaption: {
+    fontSize: 11.5,
+    color: "var(--text-secondary)",
+    lineHeight: 1.3,
+    whiteSpace: "nowrap",
+    overflow: "hidden",
+    textOverflow: "ellipsis"
   },
 
   sourceFooter: {
