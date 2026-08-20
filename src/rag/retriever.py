@@ -58,138 +58,353 @@ class Retriever:
         return cls(config, query_processor, vector_store, reranker)
 
     def detect_intent(self, query: str) -> str:
+        import re
         q = query.lower()
-        if any(w in q for w in ["summarise", "summarize", "summary", "overview", "synopsis", "outline"]):
+        
+        def has_any(terms):
+            return any(re.search(rf"\b{re.escape(term)}\b", q) for term in terms)
+        
+        # 1. Visual / Image Intent
+        visual_terms = [
+            "chart", "graph", "diagram", "figure", "image", "illustration", "photo", "picture",
+            "flowchart", "architecture", "map", "plot", "layout", "visual", "look like",
+            "sketch", "infographic", "schematic", "trend", "pie chart", "bar chart"
+        ]
+        if has_any(visual_terms):
+            return "visual"
+            
+        # 2. Table / Tabular Intent
+        table_terms = ["table", "tabular", "column", "row", "metrics table", "comparison table", "schedule", "sprint progress"]
+        if has_any(table_terms):
+            return "table_based"
+
+        # 3. Leadership & Board Governance
+        board_terms = [
+            "board of directors", "composition of board", "board members", "directors",
+            "managing director", "whole-time director", "whole time director", "executive director",
+            "independent director", "non-executive director", "chairman", "chairperson",
+            "executive chairman", "key managerial personnel", "kmp", "audit committee",
+            "nomination committee", "stakeholder committee", "csr committee", "governance", "leadership"
+        ]
+        if has_any(board_terms):
+            return "leadership_board"
+
+        # 4. Entity / Person Lookup (Auditors, Executives, Founders)
+        person_lookup_terms = [
+            "who is", "who are", "who was", "name of the", "names of", "person", "people",
+            "auditor", "auditors", "statutory auditor", "statutory auditors", "internal auditor",
+            "secretarial auditor", "cost auditor", "cfo", "chief financial officer", "cs",
+            "company secretary", "compliance officer", "founder", "promoter"
+        ]
+        if has_any(person_lookup_terms):
+            return "entity_person_lookup"
+
+        # 5. Financial Metrics & Performance
+        financial_terms = [
+            "revenue", "turnover", "income", "sales", "earnings", "profit", "pat", "pbt", "ebitda",
+            "financial", "fy24", "fy25", "fy23", "crore", "lakh", "million", "billion", "balance sheet",
+            "p&l", "profit and loss", "cash flow", "dividend", "expenditure", "net worth", "borrowings",
+            "assets", "liabilities", "standalone", "consolidated"
+        ]
+        if has_any(financial_terms):
+            return "financial"
+
+        # 6. Direct Factual / Entity Lookups (Registered Office, CIN, Incorporation, Definition)
+        factual_terms = [
+            "registered office", "corporate office", "cin", "corporate identification number",
+            "founded", "established in", "year of incorporation", "date of incorporation",
+            "isin", "listing", "symbol", "pan", "tan", "gst", "address of", "contact details",
+            "headquarters", "where is the office", "incorporation", "when was", "what is the date"
+        ]
+        if has_any(factual_terms):
+            return "direct_factual"
+
+        # 7. Broad Summary & Syntheses
+        summary_terms = ["summarise", "summarize", "summary", "overview", "synopsis", "outline", "all divisions", "cross-page", "executive summary", "comprehensive"]
+        if has_any(summary_terms):
             if "detail" in q or "comprehensive" in q or "extensive" in q:
                 return "detailed_summary"
-            return "summary"
-        if any(w in q for w in ["timeline", "chronology", "history", "when did", "date of", "chronological", "sequence"]):
+            return "broad_summary"
+
+        # Secondary / Legacy Intent Mappings
+        if has_any(["timeline", "chronology", "history", "chronological", "sequence"]):
             return "timeline"
-        if any(w in q for w in ["compare", "comparison", "difference", "versus", "vs", "similarities"]):
+        if has_any(["compare", "comparison", "difference", "versus", "vs", "similarities"]):
             return "comparison"
-        if any(w in q for w in ["revenue", "turnover", "income", "sales", "earnings", "profit", "financial", "fy24", "fy25", "crore", "million", "billion"]):
-            return "financial"
-        if any(w in q for w in ["board", "director", "chairman", "managing director", "md", "ceo", "cfo", "chairperson"]):
-            return "board"
-        if any(w in q for w in ["leadership", "executive", "president", "management", "governance"]):
-            return "governance"
-        if any(w in q for w in ["committee", "board members", "independent director"]):
-            return "committee"
-        if any(w in q for w in ["product", "services", "offerings", "brands"]):
+        if has_any(["product", "services", "offerings", "brands"]):
             return "product"
-        if any(w in q for w in ["plant", "manufactur", "factory", "site", "production"]):
+        if has_any(["plant", "manufactur", "factory", "site", "production"]):
             return "manufacturing"
-        if any(w in q for w in ["table", "tabular", "column", "row"]):
-            return "table"
-        if any(w in q for w in ["chart", "graph", "diagram", "figure", "image", "illustration", "photo", "picture", "flowchart", "architecture", "map", "plot", "layout", "visual", "look like", "sketch", "infographic", "schematic", "trend", "pie chart", "bar chart"]):
-            return "image"
-        if any(w in q for w in ["list", "enumerate", "who are the", "name all", "what are the", "which people", "entities"]):
+        if has_any(["list", "enumerate", "name all", "what are the", "which people", "entities"]):
             return "list"
-        if any(w in q for w in ["how to", "procedure", "steps", "guide", "instructions", "process"]):
+        if has_any(["how to", "procedure", "steps", "guide", "instructions", "process"]):
             return "procedure"
-        if any(w in q for w in ["percent", "ratio", "statistics", "stats", "rate", "number of"]):
+        if has_any(["percent", "ratio", "statistics", "stats", "rate", "number of"]):
             return "statistics"
-        if any(w in q for w in ["section", "chapter", "page", "navigate", "go to", "find in"]):
+        if has_any(["section", "chapter", "page", "navigate", "go to", "find in"]):
             return "navigation"
-        if any(w in q for w in ["explain", "why", "how", "reason"]):
+        if has_any(["explain", "why", "how", "reason"]):
             return "explanation"
-        return "fact"
+            
+        return "direct_factual"
 
     def _get_intent_depth(self, intent: str) -> Tuple[int, int, int]:
         # returns (top_k_retrieve, top_k_rerank, top_k_final)
         depths = {
+            "direct_factual": (25, 15, 6),
+            "entity_person_lookup": (40, 25, 10),
+            "leadership_board": (45, 30, 12),
+            "financial": (45, 30, 12),
+            "table_based": (40, 25, 10),
+            "broad_summary": (60, 40, 20),
             "detailed_summary": (60, 40, 20),
+            "visual": (35, 20, 8),
+            "image": (35, 20, 8),
             "summary": (50, 30, 12),
             "timeline": (40, 25, 12),
             "comparison": (45, 25, 12),
-            "financial": (35, 20, 8),
-            "board": (40, 25, 10),
-            "governance": (40, 25, 10),
-            "committee": (40, 25, 10),
+            "board": (45, 30, 12),
+            "governance": (45, 30, 12),
+            "committee": (45, 30, 12),
             "product": (35, 20, 8),
             "manufacturing": (35, 20, 8),
-            "table": (25, 15, 6),
-            "image": (35, 20, 8),
-            "list": (40, 20, 10),
+            "table": (40, 25, 10),
+            "list": (40, 25, 10),
             "procedure": (30, 15, 8),
             "statistics": (30, 15, 8),
             "navigation": (30, 15, 8),
             "explanation": (30, 15, 8),
-            "fact": (20, 10, 5)
+            "fact": (25, 15, 6)
         }
         return depths.get(intent, (30, 15, 8))
 
     def expand_query(self, query: str) -> str:
+        """
+        Expands query terms with corporate, leadership, financial, and domain-specific aliases.
+        """
+        import re
         expanded = query
         synonyms = {
+            r"\b(managing director|md)\b": "managing director MD Ravi Todi promoter and managing director executive director",
+            r"\b(whole-time director|whole time director|wtd)\b": "whole-time director whole time director WTD Rhea Todi executive director",
+            r"\b(independent director|independent directors)\b": "independent director non-executive independent director Sourav Daspatnaik committee chairman",
+            r"\b(board of directors|board members|the board|directors)\b": "board of directors directors board members corporate governance composition of board executive committee",
+            r"\b(chairman|chairperson)\b": "board chairman chairperson executive chairman S.K. Todi Sourav Daspatnaik leadership",
+            r"\b(chief financial officer|cfo)\b": "chief financial officer CFO head of finance finance director",
+            r"\b(company secretary|cs)\b": "company secretary CS compliance officer",
+            r"\b(statutory auditor|statutory auditors|auditor's report|auditor opinion|auditors)\b": "statutory auditor statutory auditors independent auditor independent auditor's report audit report opinion Ind AS",
+            r"\b(registered office|corporate office)\b": "registered office corporate office address Kolkata West Bengal CIN",
+            r"\b(revenue|turnover|sales)\b": "revenue from operations total income turnover sales gross revenue financial performance",
+            r"\b(profit|pat|pbt)\b": "profit after tax PAT profit before tax PBT net profit net income operating profit",
+            r"\b(financial performance|financial results)\b": "standalone profit and loss consolidated profit and loss balance sheet revenue PAT financial statements",
+            r"\b(business divisions|divisions|businesses)\b": "business divisions ash handling water management solar epc agro machinery engineering division",
+            r"\b(projects|major projects|ongoing projects)\b": "major projects ongoing projects EPC projects Pakri Maitree Yadadri Adani",
+            r"\b(subsidiary|subsidiaries)\b": "subsidiary companies group company associate companies joint ventures",
+            r"\b(plant|factory|manufacturing facility)\b": "manufacturing plant factory site production facility works unit",
             r"\b(diagram|flowchart|architecture)\b": "diagram flowchart architecture visual figure illustration schematic workflow system diagram",
             r"\b(chart|graph|plot)\b": "chart graph plot visual trend curve data graphic figure",
             r"\b(figure|image|photo|illustration|picture)\b": "figure image photo illustration visual picture diagram graphic",
-            r"\bboard\b": "board of directors leadership corporate governance directors management",
-            r"\bchairman\b": "board chairman chairperson executive chairman leadership corporate governance",
-            r"\bleadership\b": "executive committee board of directors management corporate governance",
-            r"\brevenue\b": "turnover sales income financial performance",
-            r"\bsubsidiary\b": "group company associate joint venture subsidiary companies",
-            r"\bmanaging director\b": "managing director md executive leadership chief executive officer",
-            r"\bplant\b": "manufacturing plant factory site production facility manufacturing unit",
-            r"\bproduct\b": "products services brand solutions offerings",
-            r"\bcommittee\b": "audit committee nomination committee board committee",
+            r"\b(committee|committees)\b": "audit committee nomination and remuneration committee stakeholder relationship committee corporate social responsibility committee"
         }
-        import re
         for pattern, replacement in synonyms.items():
             if re.search(pattern, query, re.IGNORECASE):
                 expanded += " " + replacement
         return expanded
 
-    def _boost_candidates(self, clean_query: str, fused_results: List[Tuple[DocumentChunk, float, float]]) -> List[Tuple[DocumentChunk, float, float]]:
+    def _get_expanded_aliases(self, query: str) -> List[str]:
+        """
+        Extracts specific alias keywords and phrases for exact matching and candidate boosting.
+        """
+        import re
+        q = query.lower()
+        aliases = []
+        
+        if re.search(r"\b(managing director|md)\b", q):
+            aliases.extend(["managing director", "md", "ravi todi", "promoter and managing director"])
+        if re.search(r"\b(whole-time director|whole time director|wtd)\b", q):
+            aliases.extend(["whole-time director", "whole time director", "wtd", "rhea todi", "executive director"])
+        if re.search(r"\b(independent director|independent directors)\b", q):
+            aliases.extend(["independent director", "non-executive independent director", "sourav daspatnaik"])
+        if re.search(r"\b(board of directors|directors|board)\b", q):
+            aliases.extend(["board of directors", "directors", "board members", "composition of board", "corporate governance"])
+        if re.search(r"\b(auditor|statutory auditor|auditors)\b", q):
+            aliases.extend(["statutory auditor", "independent auditor", "independent auditor's report", "audit report", "auditor's opinion"])
+        if re.search(r"\b(registered office|corporate office|cin)\b", q):
+            aliases.extend(["registered office", "corporate office", "corporate identification number", "cin:"])
+        if re.search(r"\b(cfo|chief financial officer)\b", q):
+            aliases.extend(["chief financial officer", "cfo"])
+        if re.search(r"\b(cs|company secretary)\b", q):
+            aliases.extend(["company secretary", "compliance officer", "cs"])
+        if re.search(r"\b(revenue|turnover|sales)\b", q):
+            aliases.extend(["revenue from operations", "total income", "turnover", "sales"])
+        if re.search(r"\b(profit|pat|pbt)\b", q):
+            aliases.extend(["profit after tax", "pat", "profit before tax", "pbt", "net profit"])
+            
+        return aliases
+
+    def _search_exact_phrases(self, chunks: List[DocumentChunk], query: str) -> List[DocumentChunk]:
+        """
+        Searches for exact key multi-word phrases and role names from the query across all chunks.
+        """
+        import re
+        matched = []
+        q_lower = query.lower()
+        
+        # Extract quoted phrases or multi-word entity phrases
+        phrases = re.findall(r'"([^"]+)"', query)
+        if not phrases:
+            # Extract meaningful 2-3 word sequences
+            words = [w for w in re.findall(r'\b[a-zA-Z0-9_\-\.]{3,}\b', q_lower) if w not in ("what", "when", "where", "which", "who", "whom", "whose", "why", "how", "the", "and", "for", "with", "from", "about", "this", "that", "document", "report", "company")]
+            if len(words) >= 2:
+                for i in range(len(words) - 1):
+                    phrases.append(f"{words[i]} {words[i+1]}")
+            phrases.extend(self._get_expanded_aliases(query))
+
+        if not phrases:
+            return []
+
+        for c in chunks:
+            c_text = (c.content or "").lower()
+            c_heading = (c.metadata.heading or "").lower()
+            c_sec = (c.metadata.section or "").lower()
+            
+            for phrase in phrases:
+                p_clean = phrase.lower().strip()
+                if len(p_clean) < 3:
+                    continue
+                if p_clean in c_text or p_clean in c_heading or p_clean in c_sec:
+                    matched.append(c)
+                    break
+                    
+        return self._deduplicate_chunks(matched)
+
+    def _search_tables(self, all_chunks: List[DocumentChunk], query: str) -> List[DocumentChunk]:
+        """
+        Dedicated table chunk search for numerical, tabular, financial, and list-based questions.
+        Scans markdown table content, captions, headings, and column headers.
+        """
+        import re
+        matched = []
+        q_lower = query.lower()
+        q_words = [w for w in re.findall(r'\b[a-zA-Z0-9_\-\.]{3,}\b', q_lower) if w not in ("what", "when", "where", "which", "who", "the", "and", "for", "with", "from", "about", "this", "that", "document")]
+        aliases = self._get_expanded_aliases(query)
+        
+        for c in all_chunks:
+            if c.metadata.chunk_type != "table" and not c.metadata.table_id:
+                continue
+            
+            meta = c.metadata
+            content_lower = (c.content or "").lower()
+            heading_lower = (meta.heading or "").lower()
+            section_lower = (meta.section or "").lower()
+            caption_lower = (getattr(meta, "caption", None) or "").lower()
+            
+            score = 0
+            # Check exact aliases in table
+            for alias in aliases:
+                if alias in heading_lower or alias in caption_lower:
+                    score += 5
+                elif alias in content_lower or alias in section_lower:
+                    score += 3
+
+            # Check individual query words
+            for w in q_words:
+                if w in heading_lower or w in caption_lower:
+                    score += 3
+                elif w in section_lower:
+                    score += 2
+                elif w in content_lower:
+                    score += 1
+                    
+            if score > 0:
+                matched.append((c, score))
+                
+        matched.sort(key=lambda x: x[1], reverse=True)
+        return [c for c, _ in matched]
+
+    def _boost_candidates(
+        self, 
+        clean_query: str, 
+        fused_results: List[Tuple[DocumentChunk, float, float]],
+        intent: Optional[str] = None
+    ) -> List[Tuple[DocumentChunk, float, float]]:
+        """
+        Authority-aware candidate boosting: prioritizes exact factual statements, official tables,
+        entity-role matches, and relevant document sections over broad semantic matches.
+        """
+        import re
         q = clean_query.lower()
         boosted = []
         visual_terms = ["diagram", "chart", "graph", "figure", "image", "illustration", "photo", "picture", "flowchart", "architecture", "map", "plot", "layout", "visual", "look like", "workflow", "schematic", "trend"]
-        is_visual_query = any(vt in q for vt in visual_terms)
+        is_visual_query = (intent == "visual") or any(vt in q for vt in visual_terms)
+        
+        # Extract aliases for exact role/entity boost
+        aliases = self._get_expanded_aliases(q)
+        q_words = [w for w in re.findall(r'\b[a-zA-Z0-9_\-\.]{3,}\b', q) if w not in visual_terms and w not in ("what", "when", "where", "which", "who", "the", "and", "for", "with", "from", "about", "this", "that", "document")]
 
         for chunk, rrf, sem in fused_results:
             boost = 0.0
             meta = chunk.metadata
+            content_lower = (chunk.content or "").lower()
+            heading_lower = (meta.heading or "").lower()
+            section_lower = (meta.section or "").lower()
             
-            # 1. Table target
-            if "table" in q and meta.chunk_type == "table":
-                boost += 0.3
+            # 1. Exact Phrase & Entity-Role Match in Content or Heading (+0.45)
+            for alias in aliases:
+                if alias in heading_lower:
+                    boost += 0.45
+                    break
+                elif alias in content_lower:
+                    boost += 0.35
+                    break
+
+            # 2. Section Relevance Match (Official Sections) (+0.35)
+            if "auditor" in q and any(sec in section_lower or sec in heading_lower for sec in ["independent auditor", "auditor's report", "statutory auditor"]):
+                boost += 0.40
+            if any(term in q for term in ["board", "director", "governance", "kmp", "leadership"]) and any(sec in section_lower or sec in heading_lower for sec in ["board of directors", "board's report", "directors' report", "corporate governance", "corporate information"]):
+                boost += 0.40
+            if any(term in q for term in ["registered office", "cin", "corporate office", "incorporation"]) and any(sec in section_lower or sec in heading_lower for sec in ["corporate information", "general information", "company information"]):
+                boost += 0.40
+            if any(term in q for term in ["revenue", "profit", "financial", "pat", "pbt", "balance sheet"]) and any(sec in section_lower or sec in heading_lower for sec in ["financial statement", "profit and loss", "balance sheet", "financial highlights"]):
+                boost += 0.35
+
+            # 3. Table Target for Table/Financial/List queries (+0.40)
+            if meta.chunk_type == "table":
+                if intent in ("table_based", "table", "financial", "direct_factual", "list") or "table" in q:
+                    boost += 0.40
                 
-            # 2. Figure/Image target
+            # 4. Figure/Image Target for Visual queries (+0.50)
             if meta.chunk_type == "image":
                 if is_visual_query:
-                    boost += 0.5
+                    boost += 0.50
                 caption = (getattr(meta, "caption", None) or meta.heading or "").lower()
                 ocr = (getattr(meta, "ocr_text", None) or "").lower()
                 vlm = (getattr(meta, "semantic_description", None) or "").lower()
                 objs = [str(o).lower() for o in (getattr(meta, "objects", []) or [])]
                 
-                import re
-                q_words = [w for w in re.findall(r'\w+', q) if len(w) > 2 and w not in visual_terms]
                 if q_words and any(w in caption or w in ocr or w in vlm or any(w in o for o in objs) for w in q_words):
-                    boost += 0.4
+                    boost += 0.40
                 
-            # 3. People target
-            if any(term in q for term in ["people", "person", "who", "names"]) and (getattr(meta, "people", None) or meta.chunk_type == "text"):
-                boost += 0.2
+            # 5. People / Roles Target (+0.25)
+            if any(term in q for term in ["people", "person", "who", "names", "director", "auditor", "cfo", "cs"]) and (getattr(meta, "people", None) or meta.chunk_type == "text"):
+                boost += 0.25
                 
-            # 4. Location target
-            if any(term in q for term in ["location", "where", "place", "state", "region", "district", "country"]) and (getattr(meta, "locations", None) or getattr(meta, "state", None)):
-                boost += 0.2
+            # 6. Location Target (+0.20)
+            if any(term in q for term in ["location", "where", "place", "state", "region", "district", "country", "office", "address"]) and (getattr(meta, "locations", None) or getattr(meta, "state", None)):
+                boost += 0.20
                 
-            # 5. Date target
-            if any(term in q for term in ["date", "when", "year", "month", "timeline", "chronology"]) and getattr(meta, "dates", None):
-                boost += 0.2
+            # 7. Date Target (+0.20)
+            if any(term in q for term in ["date", "when", "year", "month", "timeline", "chronology", "incorporation", "founded"]) and getattr(meta, "dates", None):
+                boost += 0.20
                 
-            # 6. Report number target
-            import re
+            # 8. Report Number Target (+0.40)
             report_match = re.search(r'(?i)\breport\s*(\d+)\b', q)
             if report_match:
                 rep_str = f"Report {report_match.group(1)}"
                 if getattr(meta, "report_number", None) == rep_str:
-                    boost += 0.5
-                elif rep_str.lower() in (meta.section or "").lower():
-                    boost += 0.3
+                    boost += 0.50
+                elif rep_str.lower() in section_lower:
+                    boost += 0.30
             
             boosted.append((chunk, rrf + boost, sem))
             
@@ -252,15 +467,20 @@ class Retriever:
         query: str, 
         metadata_filter: Optional[Dict[str, Any]] = None
     ) -> RetrievalOutput:
+        """
+        Coordinates query classification, multi-stage candidate collection,
+        dedicated table and visual retrieval, hybrid fusion, authority-aware reranking,
+        two-pass fallback, and parent-child section expansion.
+        """
         import time
         start_time = time.time()
         
-        # 1. Intent Detection & Query Routing
+        # 1. Intent Detection & Depth Routing (Query-Aware Retrieval)
         intent = self.detect_intent(query)
         top_k_retrieve, top_k_rerank, top_k_final = self._get_intent_depth(intent)
         logger.info(f"Detected intent: {intent} -> (retrieve={top_k_retrieve}, rerank={top_k_rerank}, final={top_k_final})")
         
-        # 2. Query Expansion
+        # 2. Query Expansion (Entity & Alias Expansion)
         expanded_query = self.expand_query(query)
         clean_query = self.query_processor.preprocess_query(expanded_query)
         
@@ -271,9 +491,13 @@ class Retriever:
             return RetrievalOutput(question=query, retrieved_chunks=[], debug_info={"intent": intent})
             
         doc_struct = self._load_structured_document(document_id)
+        search_chunks = self._filter_chunks(all_chunks, metadata_filter)
+        if not search_chunks:
+            logger.warning(f"No chunks matched metadata filter {metadata_filter}.")
+            return RetrievalOutput(question=query, retrieved_chunks=[], debug_info={"intent": intent})
         
         # 4. Build Entity Index
-        entity_index = self._build_entity_index(all_chunks)
+        entity_index = self._build_entity_index(search_chunks)
         
         # 5. Multi-Stage Candidates Collection
         candidates_dict = {}
@@ -282,29 +506,36 @@ class Retriever:
                 if c and c.metadata and c.metadata.chunk_id:
                     candidates_dict[c.metadata.chunk_id] = c
         
-        # Stage A: Metadata-First Search
-        meta_candidates = self._search_metadata(all_chunks, query)
+        # Stage A: Metadata & Heading-Aware Search
+        meta_candidates = self._search_metadata(search_chunks, query)
         add_candidates(meta_candidates)
         
         # Stage B: Heading & TOC Search
-        toc_candidates = self._search_toc_and_headings(all_chunks, doc_struct, query)
+        toc_candidates = self._search_toc_and_headings(search_chunks, doc_struct, query)
         add_candidates(toc_candidates)
         
-        # Stage C: Entity Search
+        # Stage C: Entity Search (with expanded aliases)
         entity_candidates = self._search_entity_index(entity_index, query)
         add_candidates(entity_candidates)
         
-        # Stage D: Dedicated Image & Visual Search
-        image_candidates = self._search_images(all_chunks, query)
+        # Stage D: Dedicated Table Search
+        table_candidates = self._search_tables(search_chunks, query)
+        add_candidates(table_candidates)
+        
+        # Stage E: Dedicated Image & Visual Search
+        image_candidates = self._search_images(search_chunks, query)
         add_candidates(image_candidates)
         
-        # Stage E: BM25 Search
-        filtered_chunks = self._filter_chunks(all_chunks, metadata_filter)
-        bm25_search = BM25Search(filtered_chunks)
+        # Stage F: Exact Phrase Search
+        exact_candidates = self._search_exact_phrases(search_chunks, query)
+        add_candidates(exact_candidates)
+        
+        # Stage G: BM25 Search
+        bm25_search = BM25Search(search_chunks)
         bm25_results = bm25_search.search(clean_query, top_k=top_k_retrieve)
         add_candidates([chunk for chunk, _ in bm25_results])
         
-        # Stage F: Vector Search
+        # Stage H: Vector Search
         query_emb = self.query_processor.generate_query_embedding(query)
         vector_results = self._search_vector_store(document_id, query_emb, metadata_filter, n_results=top_k_retrieve)
         add_candidates([chunk for chunk, _ in vector_results])
@@ -322,27 +553,42 @@ class Retriever:
             if cid not in fused_chunk_ids:
                 fused_results.append((cand, 0.01, 0.01))
                 
-        fused_results = self._boost_candidates(clean_query, fused_results)
+        fused_results = self._boost_candidates(clean_query, fused_results, intent=intent)
         candidate_list = [chunk for chunk, _, _ in fused_results[:top_k_rerank]]
         
-        # Rerank candidates
+        # 7. First-Pass Reranking
         reranked = self.reranker.rerank(query, candidate_list)
         
-        # 7. Check if first retrieval is sufficient (Iterative Retrieval)
+        # 8. Two-Pass Retrieval Fallback
+        # If first-pass evidence is weak or lacks direct role/entity match, execute targeted fallback
         max_rerank_score = max([score for _, score in reranked]) if reranked else 0.0
-        if max_rerank_score < 0.15 and "board" in query.lower():
-            logger.info("First retrieval quality low. Running second iteration with refined terms...")
-            refined_query = query + " corporate governance board of directors members directors management"
+        aliases = self._get_expanded_aliases(query)
+        has_targeted_terms = bool(aliases or "board" in query.lower() or "director" in query.lower() or "auditor" in query.lower() or "office" in query.lower())
+        
+        if max_rerank_score < 0.20 and has_targeted_terms:
+            logger.info(f"First-pass retrieval score low ({max_rerank_score:.3f}). Running two-pass retrieval fallback...")
+            refined_terms = " ".join(aliases) if aliases else query
+            refined_query = f"{query} {refined_terms}"
+            
+            fallback_exact = self._search_exact_phrases(search_chunks, refined_query)
+            fallback_tables = self._search_tables(search_chunks, refined_query)
+            fallback_meta = self._search_metadata(search_chunks, refined_query)
+            
             refined_emb = self.query_processor.generate_query_embedding(refined_query)
             second_vector_results = self._search_vector_store(document_id, refined_emb, metadata_filter, n_results=top_k_retrieve)
             second_candidates = [chunk for chunk, _ in second_vector_results]
-            candidate_list = list({c.metadata.chunk_id: c for c in (candidate_list + second_candidates)}.values())[:top_k_rerank]
-            reranked = self.reranker.rerank(refined_query, candidate_list)
             
-        # 8. Relationship and Section Expansion
-        expanded_chunks = self._expand_context(reranked[:top_k_final], all_chunks, doc_struct)
+            all_fallback = fallback_exact + fallback_tables + fallback_meta + second_candidates
+            combined_dict = {c.metadata.chunk_id: c for c in (candidate_list + all_fallback)}
+            candidate_list = list(combined_dict.values())[:top_k_rerank]
+            
+            reranked = self.reranker.rerank(refined_query, candidate_list)
+            logger.info(f"Two-pass fallback completed. Top score: {max([s for _, s in reranked]) if reranked else 0.0:.3f}")
+            
+        # 9. Parent-Child & Structured Section Expansion
+        expanded_chunks = self._expand_context(reranked[:top_k_final], search_chunks, doc_struct)
         
-        # 9. Format output scored chunks
+        # 10. Format Output Scored Chunks
         scored_chunks = []
         semantic_score_map = {c.metadata.chunk_id: sem for c, _, sem in fused_results}
         rerank_score_map = {c.metadata.chunk_id: score for c, score in reranked}
@@ -368,6 +614,8 @@ class Retriever:
             "metadata_matches": len(meta_candidates),
             "toc_matches": len(toc_candidates),
             "entity_matches": len(entity_candidates),
+            "table_matches": len(table_candidates),
+            "exact_matches": len(exact_candidates),
             "bm25_count": len(bm25_results),
             "vector_count": len(vector_results),
             "expanded_count": len(expanded_chunks),
@@ -464,27 +712,34 @@ class Retriever:
     def _search_entity_index(self, index: Dict[str, List[DocumentChunk]], query: str) -> List[DocumentChunk]:
         matched = []
         q_lower = query.lower()
+        aliases = [a.lower() for a in self._get_expanded_aliases(query)]
+        
         for ent_name, chunks in index.items():
-            if ent_name in q_lower:
+            ent_clean = ent_name.lower()
+            if ent_clean in q_lower or any(alias in ent_clean or ent_clean in alias for alias in aliases):
                 matched.extend(chunks)
         return self._deduplicate_chunks(matched)
 
     def _search_metadata(self, chunks: List[DocumentChunk], query: str) -> List[DocumentChunk]:
         matched = []
         q = query.lower()
+        aliases = [a.lower() for a in self._get_expanded_aliases(query)]
         
         # Section Keyword Aliases
         alias_tokens = {
             "client": ["marquee", "client", "customer", "clientele"],
-            "board": ["director", "board", "governance", "managerial", "leadership"],
+            "board": ["director", "board", "governance", "managerial", "leadership", "kmp", "corporate governance"],
+            "auditor": ["auditor", "statutory auditor", "independent auditor", "audit report", "audit"],
+            "office": ["registered office", "corporate office", "cin", "corporate information", "general information"],
             "award": ["award", "recognition", "accreditation", "honor"],
-            "project": ["project", "order book", "contract", "turnkey"],
+            "project": ["project", "order book", "contract", "turnkey", "epc"],
             "certification": ["certification", "iso", "quality"],
             "subsidiary": ["subsidiary", "joint venture", "associate"],
-            "facility": ["facility", "plant", "factory", "works", "manufacturing"]
+            "facility": ["facility", "plant", "factory", "works", "manufacturing"],
+            "financial": ["financial statement", "profit and loss", "balance sheet", "revenue", "cash flow", "financial highlights"]
         }
         
-        target_keys = []
+        target_keys = list(aliases)
         for cat, keywords in alias_tokens.items():
             if any(k in q for k in keywords):
                 target_keys.extend(keywords)
@@ -506,19 +761,24 @@ class Retriever:
     def _search_toc_and_headings(self, chunks: List[DocumentChunk], doc_struct: Optional[StructuredDocument], query: str) -> List[DocumentChunk]:
         matched = []
         q = query.lower()
+        aliases = [a.lower() for a in self._get_expanded_aliases(query)]
         
         # Heading tokens to check
-        heading_keywords = ["marquee", "client", "customer", "director", "board", "award", "project", "certification", "subsidiary", "facility", "plant"]
-        matched_keywords = [k for k in heading_keywords if k in q]
+        heading_keywords = [
+            "marquee", "client", "customer", "director", "board", "award", "project",
+            "certification", "subsidiary", "facility", "plant", "auditor", "registered office",
+            "corporate information", "financial", "revenue", "governance"
+        ]
+        matched_keywords = [k for k in heading_keywords if k in q] + aliases
 
         for c in chunks:
             sec_title = (getattr(c.metadata, "section_heading", None) or c.metadata.heading or c.metadata.section or "").lower()
-            if any(mk in sec_title for mk in matched_keywords):
+            if any(mk in sec_title for mk in matched_keywords if len(mk) > 2):
                 matched.append(c)
                 
         if doc_struct:
             for el in doc_struct.elements:
-                if el.type == "heading" and (el.text.lower() in q or any(mk in el.text.lower() for mk in matched_keywords)):
+                if el.type == "heading" and (el.text.lower() in q or any(mk in el.text.lower() for mk in matched_keywords if len(mk) > 2)):
                     for c in chunks:
                         sec_title = (getattr(c.metadata, "section_heading", None) or c.metadata.heading or c.metadata.section or "").lower()
                         if el.text.lower() in sec_title:
@@ -553,6 +813,20 @@ class Retriever:
                         if (sec_id and sib_sec_id == sec_id) or (sec_heading and sib_sec_heading == sec_heading):
                             expanded.append(sibling)
                             seen.add(sib_id)
+
+            # Parent Section Header Expansion
+            heading = chunk.metadata.heading
+            section = chunk.metadata.section
+            if heading or section:
+                for parent_c in all_chunks:
+                    p_id = parent_c.metadata.chunk_id
+                    if p_id not in seen:
+                        if parent_c.metadata.chunk_type == "heading" and (
+                            (heading and parent_c.content.strip() == heading.strip()) or
+                            (section and parent_c.content.strip() in section)
+                        ):
+                            expanded.append(parent_c)
+                            seen.add(p_id)
 
             idx = chunk_indices.get(cid)
             if idx is not None:

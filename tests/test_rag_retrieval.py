@@ -203,3 +203,147 @@ def test_retrieval_pipeline():
         shutil.rmtree(output_dir)
     except Exception:
         pass
+
+
+def test_query_aware_intent_classification():
+    config = RagConfig(
+        embedding_model="BAAI/bge-small-en-v1.5",
+        embedding_device="cpu",
+        reranker_model="cross-encoder/ms-marco-MiniLM-L-6-v2",
+        reranker_device="cpu",
+        chroma_db_dir=TEMP_DB_DIR,
+        collection_prefix="test_retrieve_"
+    )
+    retriever = Retriever.from_config(config)
+
+    assert retriever.detect_intent("What is the registered office address and CIN of BTL EPC LIMITED?") == "direct_factual"
+    assert retriever.detect_intent("Who are the statutory auditors of the company?") == "entity_person_lookup"
+    assert retriever.detect_intent("List the members of the Board of Directors and Managing Director.") == "leadership_board"
+    assert retriever.detect_intent("What was the total revenue from operations and PAT in FY24?") == "financial"
+    assert retriever.detect_intent("Show the financial metrics comparison table.") == "table_based"
+    assert retriever.detect_intent("Provide a comprehensive executive summary of all business divisions.") == "detailed_summary"
+    assert retriever.detect_intent("Show me the architecture diagram and plant layout photo.") == "visual"
+
+
+def test_entity_and_alias_expansion():
+    config = RagConfig(
+        embedding_model="BAAI/bge-small-en-v1.5",
+        embedding_device="cpu",
+        reranker_model="cross-encoder/ms-marco-MiniLM-L-6-v2",
+        reranker_device="cpu",
+        chroma_db_dir=TEMP_DB_DIR,
+        collection_prefix="test_retrieve_"
+    )
+    retriever = Retriever.from_config(config)
+
+    expanded_md = retriever.expand_query("Who is the MD?").lower()
+    assert "managing director" in expanded_md or "ravi todi" in expanded_md
+
+    expanded_wtd = retriever.expand_query("Who is the Whole-time Director?").lower()
+    assert "executive director" in expanded_wtd or "rhea todi" in expanded_wtd or "wtd" in expanded_wtd
+
+    expanded_auditor = retriever.expand_query("Who are the statutory auditors?").lower()
+    assert "independent auditor" in expanded_auditor or "audit report" in expanded_auditor
+
+    expanded_rev = retriever.expand_query("What is the company's revenue?").lower()
+    assert "revenue from operations" in expanded_rev or "turnover" in expanded_rev or "total income" in expanded_rev
+
+
+def test_dedicated_table_and_authority_retrieval():
+    doc_id = "test_table_doc"
+    chunks = [
+        DocumentChunk(
+            content="General narrative text discussing company history and broad overview.",
+            metadata=ChunkMetadata(
+                chunk_id=f"{doc_id}_chunk_0",
+                document_id=doc_id,
+                page_number=1,
+                chunk_type="text",
+                heading="Overview",
+                section="Overview",
+                word_count=10,
+                token_estimate=15
+            )
+        ),
+        DocumentChunk(
+            content="| Metric | FY23 | FY24 |\n|---|---|---|\n| Revenue from Operations | 500 Cr | 620 Cr |\n| Profit After Tax (PAT) | 45 Cr | 60 Cr |\nTable 3: Audited Financial Metrics.",
+            metadata=ChunkMetadata(
+                chunk_id=f"{doc_id}_chunk_1",
+                document_id=doc_id,
+                page_number=45,
+                chunk_type="table",
+                heading="Financial Highlights Table",
+                section="Financial Statements > Highlights",
+                table_id="#/tables/3",
+                word_count=20,
+                token_estimate=30
+            )
+        ),
+        DocumentChunk(
+            content="INDEPENDENT AUDITOR'S REPORT: In our opinion, the accompanying financial statements give a true and fair view of the financial position.",
+            metadata=ChunkMetadata(
+                chunk_id=f"{doc_id}_chunk_2",
+                document_id=doc_id,
+                page_number=72,
+                chunk_type="text",
+                heading="Independent Auditor's Report",
+                section="Independent Auditor's Report",
+                word_count=18,
+                token_estimate=25
+            )
+        ),
+        DocumentChunk(
+            content="CORPORATE INFORMATION: Registered Office: 2/5, Sarat Bose Road, Kolkata - 700 020. CIN: U29249WB1992PLC054119.",
+            metadata=ChunkMetadata(
+                chunk_id=f"{doc_id}_chunk_3",
+                document_id=doc_id,
+                page_number=4,
+                chunk_type="text",
+                heading="Corporate Information",
+                section="Corporate Information",
+                word_count=16,
+                token_estimate=22
+            )
+        )
+    ]
+
+    config = RagConfig(
+        embedding_model="BAAI/bge-small-en-v1.5",
+        embedding_device="cpu",
+        reranker_model="cross-encoder/ms-marco-MiniLM-L-6-v2",
+        reranker_device="cpu",
+        chroma_db_dir=TEMP_DB_DIR,
+        collection_prefix="test_retrieve_"
+    )
+    index_manager = IndexManager.from_config(config)
+    index_manager.index_document(doc_id, chunks)
+
+    output_dir = TEMP_DB_DIR.parent / "output" / doc_id
+    output_dir.mkdir(parents=True, exist_ok=True)
+    chunks_output = {
+        "document_id": doc_id,
+        "file_name": "test_doc.pdf",
+        "chunks": [c.model_dump() if hasattr(c, "model_dump") else c.dict() for c in chunks]
+    }
+    with open(output_dir / "document_chunks.json", "w", encoding="utf-8") as f:
+        json.dump(chunks_output, f, indent=2)
+
+    retriever = Retriever.from_config(config)
+
+    # 1. Dedicated table retrieval test
+    res_table = retriever.retrieve(doc_id, "What was the revenue and profit in the financial metrics table?")
+    assert any(c.metadata.chunk_id == f"{doc_id}_chunk_1" for c in res_table.retrieved_chunks)
+
+    # 2. Authority-aware auditor section retrieval test
+    res_auditor = retriever.retrieve(doc_id, "What is the opinion of the statutory auditors in the audit report?")
+    assert res_auditor.retrieved_chunks[0].metadata.chunk_id == f"{doc_id}_chunk_2"
+
+    # 3. Direct factual registered office retrieval test
+    res_office = retriever.retrieve(doc_id, "What is the registered office address and CIN number?")
+    assert res_office.retrieved_chunks[0].metadata.chunk_id == f"{doc_id}_chunk_3"
+
+    try:
+        shutil.rmtree(output_dir)
+    except Exception:
+        pass
+
