@@ -475,7 +475,18 @@ class ChunkBuilder:
         if not img_path and element.metadata and hasattr(element.metadata, "image_path"):
             img_path = element.metadata.image_path
 
-        img_url = f"/outputs/{doc_id}/{img_path}" if (img_path and not img_path.startswith("http") and not img_path.startswith("/")) else (img_path or f"/outputs/{doc_id}/05_images/{element.id}.png")
+        # Resolve clean filename for static browser URL
+        img_filename = ""
+        if img_path:
+            clean_p = str(img_path).replace("\\", "/")
+            base = Path(clean_p).name
+            if base and ("." in base or base.startswith("image_")):
+                img_filename = base
+        if not img_filename and element.id:
+            clean_id = element.id.replace("#/", "").replace("/", "_")
+            img_filename = f"{clean_id}.png"
+
+        img_url = f"/outputs/{doc_id}/05_images/{img_filename}"
 
         if not caption_text.strip():
             clean_name = element.id.replace("#/", "").replace("/", " ").replace("_", " ").title()

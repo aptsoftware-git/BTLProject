@@ -112,7 +112,16 @@ class ChatService:
         self.memory.add_message(document_id, "user", question)
         self.memory.add_message(document_id, "assistant", answer)
 
-        # 6. Build and Return Structured Response
+        # 6. Filter & Deduplicate Image References based on genuine relevance to query/answer
+        final_image_references = self._filter_and_deduplicate_image_references(
+            question=question,
+            answer=answer,
+            image_references=image_references,
+            used_chunk_ids=used_chunk_ids,
+            page_references=page_references
+        )
+
+        # 7. Build and Return Structured Response
         logger.info("Returning structured response...")
         
         # Extract retrieval scores for statistics
@@ -122,7 +131,7 @@ class ChatService:
         retrieval_statistics = {
             "total_retrieved": len(retrieved_chunks),
             "used_chunks_count": len(used_chunk_ids),
-            "image_references_count": len(image_references),
+            "image_references_count": len(final_image_references),
             "retrieval_time_seconds": retrieval_time,
             "max_similarity_score": max(similarity_scores) if similarity_scores else 0.0,
             "min_similarity_score": min(similarity_scores) if similarity_scores else 0.0,
@@ -156,7 +165,7 @@ class ChatService:
             answer=answer.strip(),
             used_chunk_ids=used_chunk_ids,
             page_references=page_references,
-            image_references=image_references,
+            image_references=final_image_references,
             retrieval_statistics=retrieval_statistics,
             generation_time=generation_time,
             selected_model=selected_model,
@@ -165,3 +174,70 @@ class ChatService:
             fallback_reason=fallback_reason,
             metadata=metadata
         )
+
+    def _filter_and_deduplicate_image_references(
+        self,
+        question: str,
+        answer: str,
+        image_references: List[Dict[str, Any]],
+        used_chunk_ids: List[str],
+        page_references: List[int]
+    ) -> List[Dict[str, Any]]:
+        """
+        Deduplicates and conditionally filters image references to only include
+        visual assets that genuinely support the query or the answer.
+        """
+        import re
+        # 1. Fallback refusal check: never attach images to unsupported queries
+        ans_lower = answer.lower().strip()
+        if "could not find this information in the uploaded document" in ans_lower or not image_references:
+            return []
+
+        # 2. Check if query has visual intent
+        visual_triggers = [
+            "image", "images", "figure", "figures", "diagram", "diagrams", "chart", "charts",
+            "photo", "photos", "photograph", "photographs", "picture", "pictures",
+            "visual", "visuals", "graph", "graphs", "plot", "plots", "illustration",
+            "illustrations", "drawing", "drawings", "show me", "look like", "see"
+        ]
+        q_lower = question.lower()
+        has_visual_intent = any(re.search(rf"\b{re.escape(vt)}\b", q_lower) for vt in visual_triggers)
+
+        # 3. Check if the generated answer actively references or describes figures/images
+        answer_mentions_visuals = any(re.search(rf"\b{re.escape(vt)}\b", ans_lower) for vt in [
+            "figure", "image", "photo", "diagram", "chart", "graph", "illustration", "visual", "picture"
+        ])
+
+        # 4. Check if any used chunk was an image chunk
+        used_image_chunk = any("image" in cid.lower() for cid in used_chunk_ids)
+
+        # If pure text-only question with no visual intent and answer doesn't discuss visuals, suppress images
+        if not has_visual_intent and not answer_mentions_visuals and not used_image_chunk:
+            logger.info("Suppressing image references for text-only question without visual relevance.")
+            return []
+
+        # 5. Deduplicate and validate image references
+        deduped = []
+        seen_keys = set()
+        for img in image_references:
+            if not isinstance(img, dict):
+                continue
+            url = (img.get("image_url") or "").strip().replace("\\", "/")
+            page = img.get("page_number")
+            
+            if not url:
+                continue
+
+            dedup_key = (url, page)
+            if dedup_key in seen_keys:
+                continue
+            seen_keys.add(dedup_key)
+
+            # If question had visual intent or answer mentions visuals, check page/context relevance
+            if page_references and page:
+                if page in page_references or has_visual_intent or answer_mentions_visuals:
+                    deduped.append(img)
+            else:
+                deduped.append(img)
+
+        return deduped

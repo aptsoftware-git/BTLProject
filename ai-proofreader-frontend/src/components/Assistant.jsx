@@ -132,6 +132,98 @@ const getDynamicSuggestedQuestions = (docName) => {
   ];
 };
 
+export const resolveImageUrl = (url) => {
+  if (!url) return "";
+  let clean = url.trim().replace(/\\/g, "/");
+  
+  if (clean.startsWith("http://") || clean.startsWith("https://")) {
+    return clean;
+  }
+  
+  if (!clean.startsWith("/")) {
+    clean = "/" + clean;
+  }
+  
+  const apiBase = (typeof import.meta !== "undefined" && import.meta.env && import.meta.env.VITE_API_BASE_URL) || "";
+  if (apiBase.startsWith("http://") || apiBase.startsWith("https://")) {
+    const backendOrigin = apiBase.replace(/\/api\/?$/, "").replace(/\/+$/, "");
+    return `${backendOrigin}${clean}`;
+  }
+  
+  return clean;
+};
+
+function ImageEvidenceCard({ img, onSelectPage }) {
+  const [loadError, setLoadError] = useState(false);
+  const rawUrl = img.image_url || img.image_path || "";
+  const resolvedSrc = resolveImageUrl(rawUrl);
+
+  const handleError = (e) => {
+    console.error(`[Assistant] Failed to load image from URL: ${resolvedSrc}`, {
+      raw_image_url: img.image_url,
+      raw_image_path: img.image_path,
+      attempted_url: resolvedSrc,
+      page: img.page_number
+    });
+    setLoadError(true);
+  };
+
+  return (
+    <div style={styles.imageEvidenceCard}>
+      {resolvedSrc && !loadError ? (
+        <a 
+          href={resolvedSrc} 
+          target="_blank" 
+          rel="noopener noreferrer" 
+          style={styles.imageEvidenceThumbLink} 
+          title="Click to view full image in new tab"
+        >
+          <img 
+            src={resolvedSrc} 
+            alt={img.caption || `Figure on Page ${img.page_number}`}
+            style={styles.imageEvidenceThumb}
+            onError={handleError}
+            loading="lazy"
+          />
+        </a>
+      ) : (
+        <div style={styles.imageEvidenceFallback}>
+          <span style={{ fontSize: 22 }}>🖼️</span>
+          <span style={styles.imageEvidenceFallbackText}>Image preview unavailable</span>
+          {resolvedSrc && (
+            <a
+              href={resolvedSrc}
+              target="_blank"
+              rel="noopener noreferrer"
+              style={styles.imageEvidenceFallbackLink}
+              title={resolvedSrc}
+            >
+              Open Link
+            </a>
+          )}
+        </div>
+      )}
+      <div style={styles.imageEvidenceInfo}>
+        <div style={styles.imageEvidenceBadgeRow}>
+          <span style={styles.imageTypeBadge}>{img.image_type || "Figure"}</span>
+          {img.page_number && (
+            <button 
+              onClick={() => onSelectPage && onSelectPage(img.page_number)}
+              style={styles.imagePageBadge}
+              title="Jump to document page"
+            >
+              Page {img.page_number}
+            </button>
+          )}
+        </div>
+        <div style={styles.imageEvidenceCaption} title={img.caption}>
+          {img.caption || `Figure on Page ${img.page_number}`}
+        </div>
+      </div>
+    </div>
+  );
+}
+
 export default function Assistant({ propDoc, onSelectPage }) {
   const { id: routeDocId } = useParams();
   const navigate = useNavigate();
@@ -415,60 +507,42 @@ export default function Assistant({ propDoc, onSelectPage }) {
                         />
 
                         {/* Visual Evidence & Referenced Images */}
-                        {msg.imageReferences && msg.imageReferences.length > 0 && (
-                          <div style={styles.imageEvidenceSection}>
-                            <div style={styles.imageEvidenceHeader}>
-                              <span style={styles.imageEvidenceTitle}>
-                                🖼️ Visual Evidence & Figures ({msg.imageReferences.length})
-                              </span>
+                        {(() => {
+                          if (!msg.imageReferences || !Array.isArray(msg.imageReferences) || msg.imageReferences.length === 0) {
+                            return null;
+                          }
+                          const seen = new Set();
+                          const uniqueImages = msg.imageReferences.filter((img) => {
+                            if (!img) return false;
+                            const url = (img.image_url || img.image_path || "").trim().replace(/\\/g, "/");
+                            const page = img.page_number || "";
+                            const key = `${url}_p${page}`;
+                            if (!url || seen.has(key)) return false;
+                            seen.add(key);
+                            return true;
+                          });
+
+                          if (uniqueImages.length === 0) return null;
+
+                          return (
+                            <div style={styles.imageEvidenceSection}>
+                              <div style={styles.imageEvidenceHeader}>
+                                <span style={styles.imageEvidenceTitle}>
+                                  🖼️ Visual Evidence & Figures ({uniqueImages.length})
+                                </span>
+                              </div>
+                              <div style={styles.imageEvidenceGrid}>
+                                {uniqueImages.map((img, imgIdx) => (
+                                  <ImageEvidenceCard 
+                                    key={imgIdx} 
+                                    img={img} 
+                                    onSelectPage={onSelectPage} 
+                                  />
+                                ))}
+                              </div>
                             </div>
-                            <div style={styles.imageEvidenceGrid}>
-                              {msg.imageReferences.map((img, imgIdx) => {
-                                let cleanSrc = (img.image_url || img.image_path || "").trim();
-                                if (cleanSrc && !cleanSrc.startsWith("http") && !cleanSrc.startsWith("/")) {
-                                  cleanSrc = "/" + cleanSrc;
-                                }
-                                return (
-                                  <div key={imgIdx} style={styles.imageEvidenceCard}>
-                                    {cleanSrc && (
-                                      <a 
-                                        href={cleanSrc} 
-                                        target="_blank" 
-                                        rel="noopener noreferrer" 
-                                        style={styles.imageEvidenceThumbLink} 
-                                        title="Click to view full image in new tab"
-                                      >
-                                        <img 
-                                          src={cleanSrc} 
-                                          alt={img.caption || `Figure on Page ${img.page_number}`}
-                                          style={styles.imageEvidenceThumb}
-                                          onError={(e) => { e.target.style.display = 'none'; }}
-                                        />
-                                      </a>
-                                    )}
-                                    <div style={styles.imageEvidenceInfo}>
-                                      <div style={styles.imageEvidenceBadgeRow}>
-                                        <span style={styles.imageTypeBadge}>{img.image_type || "Figure"}</span>
-                                        {img.page_number && (
-                                          <button 
-                                            onClick={() => onSelectPage && onSelectPage(img.page_number)}
-                                            style={styles.imagePageBadge}
-                                            title="Jump to document page"
-                                          >
-                                            Page {img.page_number}
-                                          </button>
-                                        )}
-                                      </div>
-                                      <div style={styles.imageEvidenceCaption} title={img.caption}>
-                                        {img.caption || `Figure on Page ${img.page_number}`}
-                                      </div>
-                                    </div>
-                                  </div>
-                                );
-                              })}
-                            </div>
-                          </div>
-                        )}
+                          );
+                        })()}
 
                         {/* Page References */}
                         {msg.pageReferences && msg.pageReferences.length > 0 && (
@@ -762,6 +836,30 @@ const styles = {
     height: "100%",
     objectFit: "contain",
     display: "block"
+  },
+  imageEvidenceFallback: {
+    width: "100%",
+    height: 120,
+    background: "var(--bg-card)",
+    display: "flex",
+    flexDirection: "column",
+    alignItems: "center",
+    justifyContent: "center",
+    gap: 4,
+    borderBottom: "1px solid var(--border)",
+    padding: 8,
+    textAlign: "center"
+  },
+  imageEvidenceFallbackText: {
+    fontSize: 10.5,
+    color: "var(--text-muted)",
+    fontWeight: 500
+  },
+  imageEvidenceFallbackLink: {
+    fontSize: 10.5,
+    color: "var(--brand)",
+    textDecoration: "underline",
+    cursor: "pointer"
   },
   imageEvidenceInfo: {
     padding: "6px 8px",

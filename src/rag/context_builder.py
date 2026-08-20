@@ -31,19 +31,37 @@ class ContextBuilder:
         """
         Extracts structured image reference metadata from chunks for UI and citation.
         """
+        from pathlib import Path
         image_refs = []
-        seen_img_ids = set()
+        seen_keys = set()
         for chunk in chunks:
             meta = chunk.metadata
             if meta.chunk_type == "image" or meta.image_id or getattr(meta, "image_path", None):
                 img_id = meta.image_id or meta.chunk_id
-                if img_id not in seen_img_ids:
-                    seen_img_ids.add(img_id)
-                    img_path = getattr(meta, "image_path", None) or ""
-                    img_url = getattr(meta, "image_url", None)
-                    if not img_url and img_path:
-                        doc_id = meta.document_id
-                        img_url = f"/outputs/{doc_id}/{img_path}" if not img_path.startswith("http") and not img_path.startswith("/") else img_path
+                doc_id = meta.document_id
+                img_path = getattr(meta, "image_path", None) or ""
+                img_url = getattr(meta, "image_url", None) or ""
+
+                # Extract clean filename (e.g. image_090.png)
+                img_filename = ""
+                for candidate in [img_url, img_path]:
+                    if candidate:
+                        clean_c = str(candidate).replace("\\", "/")
+                        base = Path(clean_c).name
+                        if base and ("." in base or base.startswith("image_")):
+                            img_filename = base
+                            break
+                if not img_filename and img_id:
+                    clean_id = img_id.replace("#/", "").replace("/", "_")
+                    img_filename = f"{clean_id}.png"
+
+                # Construct standard browser-accessible static URL
+                resolved_img_url = f"/outputs/{doc_id}/05_images/{img_filename}"
+                
+                # Deduplicate by (resolved_img_url, page_number)
+                dedup_key = (resolved_img_url, meta.page_number)
+                if dedup_key not in seen_keys:
+                    seen_keys.add(dedup_key)
 
                     bboxes_list = []
                     for b in meta.bounding_boxes:
@@ -58,7 +76,7 @@ class ContextBuilder:
                         "image_id": img_id,
                         "page_number": meta.page_number,
                         "caption": getattr(meta, "caption", None) or meta.heading or f"Figure on Page {meta.page_number}",
-                        "image_url": img_url or "",
+                        "image_url": resolved_img_url,
                         "image_path": img_path,
                         "image_type": getattr(meta, "image_type", None) or "Figure",
                         "bounding_boxes": bboxes_list,

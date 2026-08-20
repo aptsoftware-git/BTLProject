@@ -51,6 +51,7 @@ from src.config import ROOT_DIR
 output_dir = ROOT_DIR / "data" / "output"
 output_dir.mkdir(parents=True, exist_ok=True)
 app.mount("/outputs", StaticFiles(directory=str(output_dir)), name="outputs")
+app.mount("/api/outputs", StaticFiles(directory=str(output_dir)), name="api_outputs")
 
 
 @app.get("/", summary="Health Check API")
