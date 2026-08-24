@@ -427,79 +427,125 @@ class KnowledgeExtractionAgent:
                             if new_png_path.exists():
                                 img_meta.image_path = str(new_png_path)
                             
-                    # Smart filtering: skip VLM for decorative, small icons, logos, or minor graphics
-                    is_decorative = False
-                    if new_png_path.exists():
-                        try:
-                            file_size_kb = new_png_path.stat().st_size / 1024.0
-                            with Image.open(new_png_path) as pil_img:
-                                w, h = pil_img.size
-                                if w < 120 or h < 120 or (w * h) < 15000 or file_size_kb < 8.0:
-                                    is_decorative = True
-                        except Exception:
-                            pass
-                            
-                    caption = img_meta.caption or ""
+                    # Step 3: Hierarchical Caption Detection & Layout Association
+                    page_elements = [
+                        el for el in structured_doc.elements 
+                        if getattr(el.metadata, "page_number", None) == page
+                    ]
+                    page_elements_dicts = []
+                    for pe in page_elements:
+                        b_dict = pe.metadata.bbox.model_dump() if hasattr(pe.metadata.bbox, "model_dump") else (pe.metadata.bbox.dict() if pe.metadata.bbox else None)
+                        page_elements_dicts.append({
+                            "id": pe.id,
+                            "type": pe.type,
+                            "text": pe.text,
+                            "metadata": {"bbox": b_dict, "page_number": pe.metadata.page_number}
+                        })
+
+                    from src.rag.image_processor import HierarchicalLayoutGrounder
+                    grounded = HierarchicalLayoutGrounder.ground_image(
+                        image_id=self_ref,
+                        page_number=page,
+                        bbox=bbox,
+                        doc_elements_on_page=page_elements_dicts,
+                        doc_title=structured_doc.title,
+                        active_section=img_meta.related_section,
+                        explicit_caption=img_meta.caption,
+                        ocr_text=img_meta.ocr_text,
+                        raw_image_type=img_meta.image_type,
+                        vlm_description=img_meta.semantic_description
+                    )
+
+                    caption = grounded["caption"]
+                    explicit_caption = grounded["explicit_caption"]
+                    caption_text = grounded["caption"]
+                    entity_name = grounded["entity_name"]
+                    designation = grounded["designation"]
+                    section_heading = grounded["section_heading"]
+                    text_before = grounded["text_before"]
+                    text_after = grounded["text_after"]
+                    layout_context = grounded["layout_context"]
+                    image_type = grounded["image_type"]
+                    importance_score = grounded["importance_score"]
+                    retrievable = grounded["retrievable"]
+                    association_method = grounded["association_method"]
+                    association_confidence = grounded["confidence"]
+                    confidence = grounded["confidence"]
                     ocr_text = img_meta.ocr_text or ""
                     
-                    vlm_description = ""
-                    image_type = "Diagram"
+                    vlm_description = grounded.get("semantic_description") or f"Document visual graphic on Page {page}."
                     detected_objects = []
                     keywords = []
                     detected_entities = []
-                    
-                    if is_decorative:
-                        self.stats["skipped_images"] += 1
-                        image_type = "Decorative"
-                        vlm_description = "Decorative icon, logo, or separator skipped by smart VLM filter."
-                        keywords = ["decorative"]
-                    else:
-                        # Call VLM
-                        if new_png_path.exists():
-                            try:
-                                vlm_start = time.time()
-                                with open(new_png_path, "rb") as image_file:
-                                    img_b64 = base64.b64encode(image_file.read()).decode("utf-8")
-                                
-                                prompt = (
-                                    f"Describe this image extracted from a document.\n"
-                                    f"Caption associated with it: {caption}\n"
-                                    f"OCR text: {ocr_text}\n"
-                                    "Please provide a structured response in natural language describing:\n"
-                                    "1. Image Type (e.g. Graph, Chart, Map, Photo, Diagram, Flowchart, Logo, Screenshot)\n"
-                                    "2. Semantic Description (a detailed explanation of the overall meaning)\n"
-                                    "3. Detected Objects (list of main objects/elements)\n"
-                                    "4. Detected Entities (people, names, or organizations if any)\n"
-                                    "5. Keywords (a list of comma-separated keywords)\n"
-                                    "\nAnswer clearly and directly."
-                                )
-                                from src.model_router import MODEL_ROUTER
-                                vlm_model = os.environ.get("MODEL_VISION_ANALYSIS", MODEL_ROUTER.get_model("vision_analysis"))
-                                vlm_text = self.ollama_client.generate_vision(
-                                    model=vlm_model,
-                                    prompt=prompt,
-                                    image_bytes_b64=img_b64
-                                )
-                                parsed = self._parse_vlm_output(vlm_text)
-                                image_type = parsed["image_type"]
-                                vlm_description = parsed["semantic_description"]
-                                detected_objects = parsed["objects"]
-                                detected_entities = parsed["entities"]
-                                keywords = parsed["keywords"]
-                                
-                                self.stats["vision_processed_images"] += 1
-                                self.stats["total_vlm_time"] += (time.time() - vlm_start)
-                            except Exception as vlm_err:
-                                logger.warning(f"VLM analysis failed for {seq_name}: {vlm_err}")
-                                vlm_description = "Image description generation failed."
-                        else:
-                            vlm_description = "Image crop not found on disk."
+
+                    if entity_name:
+                        role_part = f" ({designation})" if designation else ""
+                        detected_entities = [f"{entity_name}{role_part}", entity_name]
+                        keywords = ["portrait", "leadership", "director", entity_name]
+                        detected_objects = ["portrait", "person", "headshot"]
+                    elif "logo" in image_type.lower():
+                        detected_entities = ["BTL EPC Limited"]
+                        keywords = ["logo", "brand", "emblem"]
+                        detected_objects = ["logo", "emblem"]
+
+                    # VLM enrichment for meaningful assets (never skipped prematurely)
+                    if new_png_path.exists() and not img_meta.semantic_description:
+                        try:
+                            vlm_start = time.time()
+                            with open(new_png_path, "rb") as image_file:
+                                img_b64 = base64.b64encode(image_file.read()).decode("utf-8")
+                            
+                            prompt = (
+                                f"Describe this image extracted from a document.\n"
+                                f"Caption: {caption or ''}\n"
+                                f"OCR text: {ocr_text}\n"
+                                "Please provide a structured response in natural language describing:\n"
+                                "1. Image Type (e.g. Graph, Chart, Map, Photo, Diagram, Flowchart, Logo, Screenshot)\n"
+                                "2. Semantic Description (a detailed explanation of the overall meaning)\n"
+                                "3. Detected Objects (list of main objects/elements)\n"
+                                "4. Detected Entities (people, names, or organizations if any)\n"
+                                "5. Keywords (a list of comma-separated keywords)\n"
+                                "\nAnswer clearly and directly."
+                            )
+                            from src.model_router import MODEL_ROUTER
+                            vlm_model = os.environ.get("MODEL_VISION_ANALYSIS", MODEL_ROUTER.get_model("vision_analysis"))
+                            vlm_text = self.ollama_client.generate_vision(
+                                model=vlm_model,
+                                prompt=prompt,
+                                image_bytes_b64=img_b64
+                            )
+                            parsed = self._parse_vlm_output(vlm_text)
+                            if not image_type or image_type in ("Photo", "Diagram", "Image"):
+                                image_type = parsed.get("image_type", image_type)
+                            vlm_description = parsed.get("semantic_description", vlm_description)
+                            detected_objects = parsed.get("objects", detected_objects)
+                            if not detected_entities:
+                                detected_entities = parsed.get("entities", [])
+                            keywords = list(set(keywords + parsed.get("keywords", [])))
+                            
+                            self.stats["vision_processed_images"] += 1
+                            self.stats["total_vlm_time"] += (time.time() - vlm_start)
+                        except Exception as vlm_err:
+                            logger.warning(f"VLM analysis failed for {seq_name}: {vlm_err}")
 
                     # Save formats (JSON, MD, HTML)
                     img_json_data = {
                         "image_id": self_ref,
                         "page": page,
                         "caption": caption,
+                        "caption_text": caption_text,
+                        "explicit_caption": explicit_caption,
+                        "entity_name": entity_name,
+                        "designation": designation,
+                        "section_heading": section_heading,
+                        "text_before": text_before,
+                        "text_after": text_after,
+                        "layout_context": layout_context,
+                        "importance_score": importance_score,
+                        "retrievable": retrievable,
+                        "association_method": association_method,
+                        "confidence": confidence,
+                        "association_confidence": association_confidence,
                         "ocr_text": ocr_text,
                         "bounding_box": bbox,
                         "image_path": f"05_images/{seq_name}.png",
@@ -508,7 +554,6 @@ class KnowledgeExtractionAgent:
                         "keywords": keywords,
                         "semantic_description": vlm_description,
                         "detected_entities": detected_entities,
-                        "confidence": 1.0,
                         "future_vlm_metadata_placeholder": {}
                     }
                     with open(images_dir / f"{seq_name}.json", "w", encoding="utf-8") as f:

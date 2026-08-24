@@ -166,6 +166,213 @@ class PortraitSpatialValidator:
 
         return best_match
 
+class HierarchicalLayoutGrounder:
+    """
+    Implements a hierarchical caption and layout-grounding strategy for extracted document images.
+    
+    Association Priority Hierarchy:
+    1. explicit_caption: If a document caption is present, store it exactly as the highest-confidence association (0.95 - 1.0).
+    2. same_card_layout: For portraits, cards, grids, tables, or repeated layouts, associate the image with text inside
+       its own spatial region/card using bounding boxes, row/column alignment, and layout containment (0.85 - 0.95).
+    3. section_spatial_context: For uncaptioned large/full-width visuals (occupying significant portion of page),
+       store section heading, page title, and surrounding spatial context. Do NOT invent an explicit caption (0.75 - 0.85).
+    4. surrounding_text: Extract text_before and text_after on the same page/section (0.60 - 0.75).
+    5. vlm_semantic_description: VLM semantic description (0.40 - 0.60).
+    6. none: Never assign person/entity if confidence is insufficient.
+    
+    Importance Scoring:
+    - HIGH: Verified portraits, charts/graphs/diagrams, major logos, full-page/large visuals (>=20% page area)
+    - MEDIUM: Section photos, facility/equipment pictures, contextual figures
+    - LOW: Decorative line separators, tiny icons (<100x100), background borders, repeated ornamental graphics
+    
+    Retrieval Gating:
+    - retrievable = True for HIGH and MEDIUM
+    - retrievable = False for LOW / decorative elements (excluded from visual query retrieval)
+    """
+
+    @staticmethod
+    def ground_image(
+        image_id: str,
+        page_number: int,
+        bbox: Any,
+        doc_elements_on_page: List[Dict[str, Any]],
+        doc_title: Optional[str] = None,
+        active_section: Optional[str] = None,
+        explicit_caption: Optional[str] = None,
+        ocr_text: Optional[str] = None,
+        raw_image_type: Optional[str] = None,
+        vlm_description: Optional[str] = None,
+        page_width: float = 595.0,
+        page_height: float = 842.0
+    ) -> Dict[str, Any]:
+        """
+        Applies hierarchical caption and layout grounding to assign structured metadata,
+        importance scoring, and retrieval gating to an extracted image.
+        """
+        # 1. Geometry & Dimensions
+        w, h = 0.0, 0.0
+        il, ir, it, ib = 0.0, 0.0, 0.0, 0.0
+        if bbox:
+            if isinstance(bbox, dict):
+                il, ir = float(bbox.get("l", 0) or 0), float(bbox.get("r", 0) or 0)
+                it, ib = float(bbox.get("t", 0) or 0), float(bbox.get("b", 0) or 0)
+            else:
+                il, ir = float(getattr(bbox, "l", 0) or 0), float(getattr(bbox, "r", 0) or 0)
+                it, ib = float(getattr(bbox, "t", 0) or 0), float(getattr(bbox, "b", 0) or 0)
+            w = abs(ir - il)
+            h = abs(it - ib)
+
+        page_area = max(page_width * page_height, 1.0)
+        image_area = w * h
+        area_ratio = image_area / page_area
+        aspect_ratio = (w / h) if h > 0 else 1.0
+
+        # 2. Surrounding Text Extraction (text_before and text_after)
+        text_before = None
+        text_after = None
+        
+        # Sort text elements by vertical reading position
+        text_blocks = []
+        for el in doc_elements_on_page:
+            t_str = (el.get("text") or "").strip()
+            if not t_str or el.get("type") in ("image", "PictureItem", "ImageItem"):
+                continue
+            t_box = el.get("metadata", {}).get("bbox") or el.get("bbox") or {}
+            if isinstance(t_box, dict):
+                ty = float(t_box.get("t", 0) or 0)
+            else:
+                ty = float(getattr(t_box, "t", 0) or 0)
+            text_blocks.append((ty, t_str))
+
+        # Sort descending by top coordinate in Docling bottom-left coords (higher y = higher up on page)
+        text_blocks.sort(key=lambda x: x[0], reverse=True)
+        
+        # Identify text immediately preceding and following
+        for ty, t_str in text_blocks:
+            if ty > it and not text_before:
+                text_before = t_str
+            elif ty < ib and not text_after:
+                text_after = t_str
+
+        # 3. Association Priority Execution
+        entity_name = None
+        designation = None
+        final_caption = None
+        final_explicit_caption = None
+        layout_context = "unanchored_visual"
+        association_method = "none"
+        confidence = 0.50
+        image_type = raw_image_type or "Photo"
+
+        # Check Priority 1: Explicit Caption (ignore generic/synthetic strings)
+        synthetic_prefixes = ("figure on page", "portrait of", "visual graphic", "image on page", "picture on page")
+        if explicit_caption and explicit_caption.strip() and not explicit_caption.strip().lower().startswith(synthetic_prefixes):
+            final_explicit_caption = explicit_caption.strip()
+            final_caption = final_explicit_caption
+            association_method = "explicit_caption"
+            confidence = 0.98
+            layout_context = "explicit_captioned_figure"
+
+        # Check Priority 2: Structured Layouts (Cards / Portraits / Grids)
+        if not final_explicit_caption:
+            spatial_card_match = PortraitSpatialValidator.match_person_to_portrait_spatial(bbox, doc_elements_on_page)
+            if spatial_card_match:
+                entity_name = spatial_card_match["person_name"]
+                designation = spatial_card_match["designation"]
+                image_type = "Portrait Photo"
+                layout_context = f"portrait_card_{spatial_card_match.get('layout_alignment', 'card')}"
+                association_method = "same_card_layout"
+                confidence = 0.92
+                final_caption = f"Portrait of {entity_name} ({designation})" if designation else f"Portrait of {entity_name}"
+
+        # Check Priority 3: Section-Aware Spatial Context for Uncaptioned Large Visuals
+        if not final_explicit_caption and not entity_name:
+            if area_ratio >= 0.15 or w >= 350 or h >= 250:
+                layout_context = "full_page_visual" if area_ratio >= 0.40 else "section_figure"
+                association_method = "section_spatial_context"
+                confidence = 0.82
+                # Do NOT invent an explicit caption for uncaptioned visuals
+                final_explicit_caption = None
+                sec_display = active_section or doc_title or "General"
+                final_caption = f"Visual graphic on Page {page_number} ({sec_display})"
+
+        # Check Priority 4: Surrounding Text
+        if association_method == "none" and (text_before or text_after):
+            layout_context = "embedded_visual"
+            association_method = "surrounding_text"
+            confidence = 0.68
+            final_caption = f"Figure on Page {page_number}"
+
+        # Check Priority 5: VLM Semantic Description
+        if association_method == "none" and vlm_description:
+            layout_context = "vlm_contextual_visual"
+            association_method = "vlm_semantic_description"
+            confidence = 0.55
+            final_caption = f"Visual on Page {page_number}"
+
+        # Guard: Unassociated rule (never assign entity without card/caption match)
+        if association_method not in ("same_card_layout", "explicit_caption"):
+            entity_name = None
+            designation = None
+
+        # 4. Importance Scoring (HIGH, MEDIUM, LOW)
+        is_decorative = False
+        if (w > 0 and h > 0 and (w < 80 and h < 80)) or aspect_ratio > 6.0 or aspect_ratio < 0.15:
+            is_decorative = True
+
+        if image_type == "Portrait Photo" or "portrait" in image_type.lower() or association_method == "same_card_layout":
+            importance_score = "HIGH"
+            retrievable = True
+        elif association_method == "explicit_caption":
+            importance_score = "HIGH"
+            retrievable = True
+        elif image_type in ("Chart", "Graph", "Diagram", "Map", "Flowchart", "Architecture"):
+            importance_score = "HIGH"
+            retrievable = True
+        elif "logo" in (image_type or "").lower() or (page_number <= 5 and "logo" in (vlm_description or "").lower()):
+            image_type = "Logo"
+            importance_score = "HIGH"
+            retrievable = True
+        elif area_ratio >= 0.20 or (w >= 300 and h >= 200):
+            importance_score = "HIGH"
+            retrievable = True
+        elif is_decorative:
+            importance_score = "LOW"
+            retrievable = False
+            image_type = "Decorative"
+        elif w >= 100 and h >= 100 and area_ratio >= 0.03:
+            importance_score = "MEDIUM"
+            retrievable = True
+        else:
+            importance_score = "LOW"
+            retrievable = False
+
+        # If logo or decorative, ensure entity is clean
+        if is_decorative or image_type == "Decorative":
+            entity_name = None
+            designation = None
+            retrievable = False
+
+        return {
+            "image_id": image_id,
+            "page": page_number,
+            "bbox": bbox,
+            "image_type": image_type,
+            "explicit_caption": final_explicit_caption,
+            "caption": final_caption,
+            "entity_name": entity_name,
+            "designation": designation,
+            "section_heading": active_section,
+            "text_before": text_before,
+            "text_after": text_after,
+            "layout_context": layout_context,
+            "semantic_description": vlm_description or f"Document visual graphic on Page {page_number}.",
+            "importance_score": importance_score,
+            "retrievable": retrievable,
+            "association_method": association_method,
+            "confidence": confidence
+        }
+
 class ImageProcessor:
     """
     Processes Docling PictureItem elements and saves the images to disk.

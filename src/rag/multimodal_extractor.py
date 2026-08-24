@@ -643,55 +643,87 @@ class MultimodalExtractor:
                             if f"b{batch_index}_{img_id}" in master_structured_doc.images:
                                 master_structured_doc.images[f"b{batch_index}_{img_id}"].image_path = str(new_png_path)
                     
-                    # Smart VLM Skip Filter
-                    is_decorative = False
-                    # Smart filtering: skip VLM for decorative, small icons, logos, or minor graphics
-                    if new_png_path.exists():
+                    # Step 3: Hierarchical Caption Detection & Layout Association
+                    page_elements = [
+                        el for el in batch_structured_doc.elements 
+                        if getattr(el.metadata, "page_number", None) == img_meta.page_number
+                    ]
+                    page_elements_dicts = []
+                    for pe in page_elements:
+                        b_dict = pe.metadata.bbox.model_dump() if hasattr(pe.metadata.bbox, "model_dump") else (pe.metadata.bbox.dict() if pe.metadata.bbox else None)
+                        page_elements_dicts.append({
+                            "id": pe.id,
+                            "type": pe.type,
+                            "text": pe.text,
+                            "metadata": {"bbox": b_dict, "page_number": pe.metadata.page_number}
+                        })
+
+                    from src.rag.image_processor import HierarchicalLayoutGrounder
+                    grounded = HierarchicalLayoutGrounder.ground_image(
+                        image_id=img_meta.image_id,
+                        page_number=img_meta.page_number,
+                        bbox=img_meta.bbox,
+                        doc_elements_on_page=page_elements_dicts,
+                        doc_title=batch_structured_doc.title,
+                        active_section=img_meta.related_section,
+                        explicit_caption=img_meta.caption,
+                        ocr_text=img_meta.ocr_text,
+                        raw_image_type=img_meta.image_type,
+                        vlm_description=img_meta.semantic_description
+                    )
+
+                    # Update img_meta with grounded attributes
+                    img_meta.explicit_caption = grounded["explicit_caption"]
+                    img_meta.caption_text = grounded["caption"]
+                    img_meta.caption = grounded["caption"]
+                    img_meta.entity_name = grounded["entity_name"]
+                    img_meta.designation = grounded["designation"]
+                    img_meta.section_heading = grounded["section_heading"]
+                    img_meta.text_before = grounded["text_before"]
+                    img_meta.text_after = grounded["text_after"]
+                    img_meta.layout_context = grounded["layout_context"]
+                    img_meta.image_type = grounded["image_type"]
+                    img_meta.importance_score = grounded["importance_score"]
+                    img_meta.retrievable = grounded["retrievable"]
+                    img_meta.association_method = grounded["association_method"]
+                    img_meta.association_confidence = grounded["confidence"]
+                    img_meta.confidence = grounded["confidence"]
+
+                    # VLM enrichment for meaningful visual assets (never skipped prematurely)
+                    if new_png_path.exists() and not img_meta.semantic_description:
                         try:
-                            file_size_kb = new_png_path.stat().st_size / 1024.0
-                            with Image.open(new_png_path) as pil_img:
-                                w, h = pil_img.size
-                                if w < 120 or h < 120 or (w * h) < 15000 or file_size_kb < 8.0:
-                                    is_decorative = True
-                        except Exception:
-                            pass
-                    
-                    if is_decorative:
-                        img_meta.image_type = "Decorative"
-                        img_meta.semantic_description = "Decorative graphics skipped by smart VLM filter."
-                        img_meta.objects = []
-                        img_meta.keywords = ["decorative"]
-                    else:
-                        if new_png_path.exists():
-                            try:
-                                with open(new_png_path, "rb") as image_file:
-                                    img_b64 = base64.b64encode(image_file.read()).decode("utf-8")
-                                
-                                prompt = (
-                                    f"Describe this image extracted from a document.\n"
-                                    f"Caption associated with it: {img_meta.caption or ''}\n"
-                                    f"OCR text: {img_meta.ocr_text or ''}\n"
-                                    "Please provide a structured response in natural language describing:\n"
-                                    "1. Image Type (e.g. Graph, Chart, Map, Photo, Diagram, Flowchart, Logo, Screenshot)\n"
-                                    "2. Semantic Description (a detailed explanation of the overall meaning)\n"
-                                    "3. Detected Objects (list of main objects/elements)\n"
-                                    "4. Detected Entities (people, names, or organizations if any)\n"
-                                    "5. Keywords (a list of comma-separated keywords)\n"
-                                    "\nAnswer clearly and directly."
-                                )
-                                vlm_text = ollama_client.generate_vision(
-                                    model="qwen2.5vl:latest",
-                                    prompt=prompt,
-                                    image_bytes_b64=img_b64
-                                )
-                                parsed = self._parse_vlm_output(vlm_text)
-                                img_meta.image_type = parsed["image_type"]
-                                img_meta.semantic_description = parsed["semantic_description"]
-                                img_meta.objects = parsed["objects"]
-                                img_meta.detected_entities = parsed["entities"]
-                                img_meta.keywords = parsed["keywords"]
-                            except Exception as vlm_err:
-                                logger.warning(f"VLM analysis failed for {seq_name}: {vlm_err}")
+                            with open(new_png_path, "rb") as image_file:
+                                img_b64 = base64.b64encode(image_file.read()).decode("utf-8")
+                            
+                            prompt = (
+                                f"Describe this image extracted from a document.\n"
+                                f"Caption: {img_meta.caption or ''}\n"
+                                f"OCR text: {img_meta.ocr_text or ''}\n"
+                                "Please provide a structured response in natural language describing:\n"
+                                "1. Image Type (e.g. Graph, Chart, Map, Photo, Diagram, Flowchart, Logo, Screenshot)\n"
+                                "2. Semantic Description (a detailed explanation of the overall meaning)\n"
+                                "3. Detected Objects (list of main objects/elements)\n"
+                                "4. Detected Entities (people, names, or organizations if any)\n"
+                                "5. Keywords (a list of comma-separated keywords)\n"
+                                "\nAnswer clearly and directly."
+                            )
+                            vlm_text = ollama_client.generate_vision(
+                                model="qwen2.5vl:latest",
+                                prompt=prompt,
+                                image_bytes_b64=img_b64
+                            )
+                            parsed = self._parse_vlm_output(vlm_text)
+                            if not img_meta.image_type or img_meta.image_type in ("Photo", "Diagram", "Image"):
+                                img_meta.image_type = parsed.get("image_type", img_meta.image_type)
+                            img_meta.semantic_description = parsed.get("semantic_description", "")
+                            img_meta.objects = parsed.get("objects", [])
+                            img_meta.detected_entities = parsed.get("entities", [])
+                            img_meta.keywords = parsed.get("keywords", [])
+                        except Exception as vlm_err:
+                            logger.warning(f"VLM analysis failed for {seq_name}: {vlm_err}")
+
+                    if not img_meta.semantic_description:
+                        img_meta.semantic_description = grounded.get("semantic_description") or f"Document visual graphic on Page {img_meta.page_number}."
 
                     # Save image meta JSON/MD
                     image_json_path = output_dir / "05_images" / f"{seq_name}.json"
@@ -700,6 +732,19 @@ class MultimodalExtractor:
                         "image_id": img_meta.image_id,
                         "page": img_meta.page_number,
                         "caption": img_meta.caption,
+                        "caption_text": img_meta.caption_text,
+                        "explicit_caption": img_meta.explicit_caption,
+                        "entity_name": img_meta.entity_name,
+                        "designation": img_meta.designation,
+                        "section_heading": img_meta.section_heading,
+                        "text_before": img_meta.text_before,
+                        "text_after": img_meta.text_after,
+                        "layout_context": img_meta.layout_context,
+                        "importance_score": img_meta.importance_score,
+                        "retrievable": img_meta.retrievable,
+                        "association_method": img_meta.association_method,
+                        "confidence": img_meta.confidence,
+                        "association_confidence": img_meta.association_confidence,
                         "ocr_text": img_meta.ocr_text,
                         "bounding_box": bbox_data,
                         "image_path": f"05_images/{seq_name}.png",

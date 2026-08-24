@@ -479,8 +479,16 @@ class Retriever:
 
             # 5. Image & Visual Target
             if meta.chunk_type == "image":
-                if is_visual_query:
+                if hasattr(meta, "retrievable") and meta.retrievable is False:
+                    boost -= 1.50
+                elif getattr(meta, "importance_score", None) == "LOW" or (getattr(meta, "image_type", None) or "").lower() == "decorative":
+                    boost -= 1.50
+                elif is_visual_query:
                     boost += 0.50
+                    if getattr(meta, "importance_score", None) == "HIGH":
+                        boost += 0.30
+                    if getattr(meta, "association_method", None) in ("explicit_caption", "same_card_layout"):
+                        boost += 0.35
                     if intent == "person_portrait_visual" and page == 49:
                         boost += 0.40
                 else:
@@ -596,6 +604,14 @@ class Retriever:
                 continue
 
             meta = c.metadata
+            # Retrieval gating: only return retrievable images (skip decorative, separators, low-value graphics)
+            if hasattr(meta, "retrievable") and meta.retrievable is False:
+                continue
+            if getattr(meta, "importance_score", None) == "LOW":
+                continue
+            if (getattr(meta, "image_type", None) or "").lower() == "decorative":
+                continue
+
             caption = (getattr(meta, "caption", None) or meta.heading or "").lower()
             ocr = (getattr(meta, "ocr_text", None) or "").lower()
             vlm = (getattr(meta, "semantic_description", None) or "").lower()
@@ -798,8 +814,20 @@ class Retriever:
                 reranker_score=rerank_score_map.get(cid, 0.01)
             ))
             
-        scored_chunks.sort(key=lambda x: x.reranker_score, reverse=True)
-        
+        # Retrieval Gating: Filter out non-retrievable, LOW importance, and Decorative image chunks
+        gated_scored = []
+        for sc in scored_chunks:
+            if sc.metadata.chunk_type == "image":
+                meta = sc.metadata
+                if hasattr(meta, "retrievable") and meta.retrievable is False:
+                    continue
+                if getattr(meta, "importance_score", None) == "LOW":
+                    continue
+                if (getattr(meta, "image_type", None) or "").lower() == "decorative":
+                    continue
+            gated_scored.append(sc)
+        scored_chunks = gated_scored
+
         # When querying for a specific person's portrait, ensure image chunks match that person
         if intent == "person_portrait_visual":
             from src.rag.image_processor import PortraitSpatialValidator
@@ -1174,6 +1202,18 @@ class Retriever:
                         image_path=meta_data.get("image_path"),
                         image_url=meta_data.get("image_url"),
                         image_type=meta_data.get("image_type"),
+                        explicit_caption=meta_data.get("explicit_caption"),
+                        caption_text=meta_data.get("caption_text") or meta_data.get("caption"),
+                        entity_name=meta_data.get("entity_name"),
+                        designation=meta_data.get("designation"),
+                        text_before=meta_data.get("text_before"),
+                        text_after=meta_data.get("text_after"),
+                        layout_context=meta_data.get("layout_context"),
+                        importance_score=meta_data.get("importance_score", "MEDIUM") or "MEDIUM",
+                        retrievable=meta_data.get("retrievable", True) if isinstance(meta_data.get("retrievable"), bool) else (str(meta_data.get("retrievable")).lower() != "false"),
+                        association_method=meta_data.get("association_method", "none") or "none",
+                        confidence=float(meta_data.get("confidence", 1.0) or 1.0),
+                        association_confidence=float(meta_data.get("association_confidence", meta_data.get("confidence", 1.0)) or 1.0),
                         caption=meta_data.get("caption"),
                         ocr_text=meta_data.get("ocr_text"),
                         semantic_description=meta_data.get("semantic_description"),
@@ -1230,6 +1270,18 @@ class Retriever:
                     image_path=meta_data.get("image_path"),
                     image_url=meta_data.get("image_url"),
                     image_type=meta_data.get("image_type"),
+                    explicit_caption=meta_data.get("explicit_caption") or None,
+                    caption_text=meta_data.get("caption_text") or meta_data.get("caption") or None,
+                    entity_name=meta_data.get("entity_name") or None,
+                    designation=meta_data.get("designation") or None,
+                    text_before=meta_data.get("text_before") or None,
+                    text_after=meta_data.get("text_after") or None,
+                    layout_context=meta_data.get("layout_context") or None,
+                    importance_score=meta_data.get("importance_score", "MEDIUM") or "MEDIUM",
+                    retrievable=str(meta_data.get("retrievable", "True")).lower() != "false",
+                    association_method=meta_data.get("association_method", "none") or "none",
+                    confidence=float(meta_data.get("confidence", 1.0) or 1.0),
+                    association_confidence=float(meta_data.get("association_confidence", meta_data.get("confidence", 1.0)) or 1.0),
                     caption=meta_data.get("caption"),
                     ocr_text=meta_data.get("ocr_text"),
                     semantic_description=meta_data.get("semantic_description"),

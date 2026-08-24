@@ -74,6 +74,14 @@ class ContextBuilder:
                     logger.warning(f"Image asset {img_filename} for chunk {meta.chunk_id} does not physically exist on disk. Skipping.")
                     continue
 
+                # Gating: filter out non-retrievable / LOW importance decorative elements
+                if hasattr(meta, "retrievable") and meta.retrievable is False:
+                    continue
+                if getattr(meta, "importance_score", None) == "LOW":
+                    continue
+                if (getattr(meta, "image_type", None) or "").lower() == "decorative":
+                    continue
+
                 # Deduplicate by (resolved_img_url, page_number)
                 dedup_key = (resolved_img_url, meta.page_number)
                 if dedup_key not in seen_keys:
@@ -92,6 +100,16 @@ class ContextBuilder:
                         "image_id": img_id,
                         "page_number": meta.page_number,
                         "caption": getattr(meta, "caption", None) or meta.heading or f"Figure on Page {meta.page_number}",
+                        "explicit_caption": getattr(meta, "explicit_caption", None),
+                        "entity_name": getattr(meta, "entity_name", None),
+                        "designation": getattr(meta, "designation", None),
+                        "layout_context": getattr(meta, "layout_context", None),
+                        "importance_score": getattr(meta, "importance_score", "MEDIUM"),
+                        "retrievable": getattr(meta, "retrievable", True),
+                        "association_method": getattr(meta, "association_method", "none"),
+                        "confidence": float(getattr(meta, "confidence", 1.0) or 1.0),
+                        "text_before": getattr(meta, "text_before", None),
+                        "text_after": getattr(meta, "text_after", None),
                         "image_url": resolved_img_url,
                         "image_path": img_path,
                         "image_type": getattr(meta, "image_type", None) or "Figure",

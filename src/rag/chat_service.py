@@ -291,7 +291,7 @@ class ChatService:
             img_type = (img.get("image_type") or "").lower()
             detected_ents = [str(e).lower() for e in (img.get("detected_entities") or [])]
             
-            if not url or "decorative" in img_type:
+            if not url or "decorative" in img_type or img.get("retrievable") is False or img.get("importance_score") == "LOW":
                 continue
 
             dedup_key = (url, page)
