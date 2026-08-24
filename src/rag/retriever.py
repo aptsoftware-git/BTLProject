@@ -64,25 +64,24 @@ class Retriever:
         def has_any(terms):
             return any(re.search(rf"\b{re.escape(term)}\b", q) for term in terms)
         
-        # 1. General Visual / Diagram / Chart Intent
-        visual_terms = [
-            "chart", "graph", "diagram", "figure", "image", "illustration",
-            "flowchart", "architecture", "map", "plot", "layout", "visual", "look like",
-            "sketch", "infographic", "schematic", "trend", "pie chart", "bar chart", "logo"
-        ]
-        if has_any(visual_terms):
-            return "visual"
-
-        # 2. Person Portrait / Visual Entity Intent (Explicitly asking for person photos/portraits)
+        # 1. Person Portrait / Visual Entity Intent (Explicitly asking for person photos/portraits)
         person_visual_triggers = [
             "portrait", "portraits", "headshot", "headshots", "along with their photos",
             "along with photos", "with photos", "with photo", "show photo", "show photos",
-            "show portrait", "show picture", "director's photo", "directors photo", "photo of", "photos of"
+            "show portrait", "show picture", "director's photo", "directors photo", "photo of", "photos of",
+            "picture of", "pictures of", "image of", "images of"
         ]
-        if has_any(person_visual_triggers) or (("photo" in q or "picture" in q) and any(d in q for d in ["director", "board", "sunil", "ravi", "avik", "rhea", "subrata", "arundhuti", "sandipan", "ketan", "sourav", "sourab", "utkarsh", "person", "people", "man", "woman"])):
+        if has_any(person_visual_triggers) or (("photo" in q or "picture" in q or "image" in q) and any(d in q for d in ["director", "board", "sunil", "ravi", "avik", "aviik", "rhea", "subrata", "arundhuti", "sandipan", "ketan", "sourav", "sourab", "utkarsh", "person", "people", "man", "woman"])):
             return "person_portrait_visual"
 
-        if has_any(["photo", "photos", "picture", "pictures", "photograph", "photographs"]):
+        # 2. General Visual / Diagram / Chart Intent
+        visual_terms = [
+            "chart", "graph", "diagram", "figure", "image", "illustration",
+            "flowchart", "architecture", "map", "plot", "layout", "visual", "look like",
+            "sketch", "infographic", "schematic", "trend", "pie chart", "bar chart", "logo",
+            "photo", "photos", "picture", "pictures", "photograph", "photographs"
+        ]
+        if has_any(visual_terms):
             return "visual"
             
         # 3. Table / Tabular Intent
@@ -309,6 +308,11 @@ class Retriever:
             aliases.extend(["revenue from operations", "total income", "turnover", "sales"])
         if re.search(r"\b(profit|pat|pbt)\b", q):
             aliases.extend(["profit after tax", "pat", "profit before tax", "pbt", "net profit"])
+
+        from src.rag.image_processor import PortraitSpatialValidator
+        for d in PortraitSpatialValidator.KNOWN_DIRECTORS:
+            if any(v in q for v in d["variants"]) or d["name"].lower() in q:
+                aliases.extend([d["name"].lower()] + [v.lower() for v in d["variants"]])
             
         return aliases
 
@@ -555,13 +559,18 @@ class Retriever:
                 break
 
         if queried_person:
-            # Return ONLY the portrait image matching this specific person
+            # Return ONLY the verified portrait image matching this specific person
             for c in chunks:
                 if c.metadata.chunk_type == "image":
                     meta = c.metadata
                     i_type = (getattr(meta, "image_type", None) or "").lower()
                     if "logo" in i_type or "decorative" in i_type:
                         continue
+                    
+                    # Strict portrait gating: require verified Portrait Photo or Page 49 director portrait
+                    if meta.page_number != 49 and "portrait" not in i_type:
+                        continue
+
                     p_name = getattr(meta, "person_name", None) or ""
                     cap = (getattr(meta, "caption", None) or "").lower()
                     ents = getattr(meta, "detected_entities", []) or []
@@ -572,9 +581,7 @@ class Retriever:
                         (p_name and Retriever.fuzzy_match_entity(queried_person, p_name)) or
                         Retriever.fuzzy_match_entity(queried_person, cap) or
                         any(Retriever.fuzzy_match_entity(queried_person, str(e)) for e in ents) or
-                        any(Retriever.fuzzy_match_entity(queried_person, str(k)) for k in kws) or
-                        queried_person in vlm or
-                        (meta.page_number == 49 and any(part in cap or part in vlm for part in queried_person.split() if len(part) > 3))
+                        any(Retriever.fuzzy_match_entity(queried_person, str(k)) for k in kws)
                     )
                     if is_person_match:
                         matched.append(c)
@@ -756,6 +763,16 @@ class Retriever:
                 if "u29100wb1992plc054541" in c_text or "cin:" in c_text:
                     score = max(score, 0.98)
                     
+            if intent == "person_portrait_visual":
+                if meta.chunk_type == "image":
+                    if meta.page_number == 49 and (
+                        (p_name and any(Retriever.fuzzy_match_entity(alias, p_name) for alias in aliases)) or
+                        any(alias in c_text for alias in aliases)
+                    ):
+                        score = 0.99
+                    else:
+                        score = 0.05
+
             if p_name and any(Retriever.fuzzy_match_entity(alias, p_name) for alias in aliases):
                 score = max(score, 0.95)
                 
@@ -782,6 +799,38 @@ class Retriever:
             ))
             
         scored_chunks.sort(key=lambda x: x.reranker_score, reverse=True)
+        
+        # When querying for a specific person's portrait, ensure image chunks match that person
+        if intent == "person_portrait_visual":
+            from src.rag.image_processor import PortraitSpatialValidator
+            queried_director = None
+            for d in PortraitSpatialValidator.KNOWN_DIRECTORS:
+                if any(v in clean_query.lower() for v in d["variants"]) or d["name"].lower() in clean_query.lower():
+                    queried_director = d
+                    break
+
+            filtered_scored = []
+            for sc in scored_chunks:
+                if sc.metadata.chunk_type == "image":
+                    if queried_director:
+                        # MUST match this specific person's name or variants (not general role titles)
+                        p_name = (getattr(sc.metadata, "person_name", None) or "").lower()
+                        cap = (getattr(sc.metadata, "caption", None) or "").lower()
+                        ents = [str(e).lower() for e in (getattr(sc.metadata, "detected_entities", []) or [])]
+                        
+                        person_matches = any(
+                            v in p_name or v in cap or any(v in ent for ent in ents)
+                            for v in queried_director["variants"]
+                        )
+                        if person_matches and (sc.metadata.page_number == 49 or "portrait" in (sc.metadata.image_type or "").lower()):
+                            filtered_scored.append(sc)
+                    else:
+                        # Board collection query (all directors)
+                        if sc.metadata.page_number == 49 or "portrait" in (sc.metadata.image_type or "").lower():
+                            filtered_scored.append(sc)
+                else:
+                    filtered_scored.append(sc)
+            scored_chunks = filtered_scored
             
         # Debug Logging
         retrieval_time = time.time() - start_time

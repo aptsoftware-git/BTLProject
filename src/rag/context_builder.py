@@ -58,6 +58,22 @@ class ContextBuilder:
                 # Construct standard browser-accessible static URL
                 resolved_img_url = f"/outputs/{doc_id}/05_images/{img_filename}"
                 
+                # Validate that the physical image asset actually exists on disk
+                from src.config import ROOT_DIR
+                exists_on_disk = False
+                if img_path and Path(img_path).exists():
+                    exists_on_disk = True
+                elif img_path and (ROOT_DIR / img_path).exists():
+                    exists_on_disk = True
+                elif doc_id and img_filename:
+                    target_disk_path = ROOT_DIR / "data" / "output" / doc_id / "05_images" / img_filename
+                    if target_disk_path.exists():
+                        exists_on_disk = True
+
+                if not exists_on_disk:
+                    logger.warning(f"Image asset {img_filename} for chunk {meta.chunk_id} does not physically exist on disk. Skipping.")
+                    continue
+
                 # Deduplicate by (resolved_img_url, page_number)
                 dedup_key = (resolved_img_url, meta.page_number)
                 if dedup_key not in seen_keys:

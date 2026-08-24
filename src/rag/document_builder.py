@@ -20,8 +20,13 @@ class DocumentBuilder:
     Builds a StructuredDocument from a converted Docling document.
     """
 
-    def __init__(self, output_images_dir: Optional[Path] = None) -> None:
+    def __init__(
+        self, 
+        output_images_dir: Optional[Path] = None,
+        pdf_path: Optional[Path] = None
+    ) -> None:
         self.output_images_dir = output_images_dir
+        self.pdf_path = Path(pdf_path) if pdf_path else None
 
     def build(self, docling_doc: Any, file_name: str, file_type: str) -> StructuredDocument:
         """
@@ -106,7 +111,12 @@ class DocumentBuilder:
                 image_id = self_ref
                 # Process detailed image metadata and save crop if configured
                 try:
-                    img_meta = ImageProcessor.process_image(element, docling_doc, self.output_images_dir)
+                    img_meta = ImageProcessor.process_image(
+                        element, 
+                        docling_doc, 
+                        output_images_dir=self.output_images_dir,
+                        pdf_path=self.pdf_path
+                    )
                     images_dict[self_ref] = img_meta
                     if img_meta.caption:
                         text = f"Image: {img_meta.caption}"

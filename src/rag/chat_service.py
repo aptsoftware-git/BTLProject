@@ -307,15 +307,38 @@ class ChatService:
 
             # If this is a specific person query, verify that the image matches that person
             if queried_person and not is_board_collection:
-                if "logo" in img_type:
+                if "logo" in img_type or "decorative" in img_type:
                     continue
+                # Strict portrait gating: require verified Portrait Photo or Page 49 director portrait
+                if page != 49 and "portrait" not in img_type:
+                    continue  # Reject non-portrait / landscape scenes / industrial photos
+                
                 is_match = (
                     Retriever.fuzzy_match_entity(queried_person, caption) or
-                    any(Retriever.fuzzy_match_entity(queried_person, ent) for ent in detected_ents) or
-                    (page == 49 and any(part in caption for part in queried_person.split() if len(part) > 3))
+                    any(Retriever.fuzzy_match_entity(queried_person, ent) for ent in detected_ents)
                 )
                 if not is_match:
                     continue  # Discard images of other persons
+
+            # Validate that the physical image asset actually exists on disk
+            img_path = img.get("image_path")
+            from pathlib import Path
+            from src.config import ROOT_DIR
+            exists_on_disk = False
+            if img_path and Path(img_path).exists():
+                exists_on_disk = True
+            elif img_path and (ROOT_DIR / img_path).exists():
+                exists_on_disk = True
+            elif url.startswith("/outputs/"):
+                rel_parts = url.replace("/outputs/", "").split("/")
+                if len(rel_parts) >= 3:
+                    doc_id, subfolder, filename = rel_parts[0], rel_parts[1], rel_parts[2]
+                    target_file = ROOT_DIR / "data" / "output" / doc_id / subfolder / filename
+                    exists_on_disk = target_file.exists()
+
+            if not exists_on_disk:
+                logger.warning(f"Image asset {url} does not physically exist on disk. Discarding reference.")
+                continue
 
             # If board collection query, keep only Page 49 portraits
             if is_board_collection and not is_logo_query:

@@ -412,6 +412,20 @@ class KnowledgeExtractionAgent:
                             img_meta.image_path = str(new_png_path)
                         except Exception as move_err:
                             logger.error(f"Failed to move image crop: {move_err}")
+
+                    # Fallback extraction: If new_png_path still does not exist, crop directly from source PDF
+                    if not new_png_path.exists() and output_dir and img_meta.bbox:
+                        doc_files = list((output_dir / "01_document").glob("*.pdf")) if (output_dir / "01_document").exists() else []
+                        if doc_files:
+                            from src.rag.image_processor import ImageProcessor
+                            ImageProcessor.crop_image_from_pdf(
+                                pdf_path=doc_files[0],
+                                page_number=page,
+                                bbox=bbox,
+                                target_path=new_png_path
+                            )
+                            if new_png_path.exists():
+                                img_meta.image_path = str(new_png_path)
                             
                     # Smart filtering: skip VLM for decorative, small icons, logos, or minor graphics
                     is_decorative = False

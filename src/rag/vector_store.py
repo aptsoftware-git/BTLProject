@@ -16,8 +16,11 @@ class VectorStore:
 
     _clients = {}
 
-    def __init__(self, db_dir: Path, collection_prefix: str = "doc_") -> None:
-        self.db_dir = db_dir
+    def __init__(self, db_dir: Optional[Path] = None, collection_prefix: str = "doc_") -> None:
+        if db_dir is None:
+            from src.config import ROOT_DIR
+            db_dir = ROOT_DIR / "data" / "chromadb"
+        self.db_dir = Path(db_dir)
         self.collection_prefix = collection_prefix
         self._collections = {}
         # Initialize persistent ChromaDB client as singleton per directory path

@@ -606,11 +606,10 @@ class MultimodalExtractor:
             # Persist master layout on disk
             if output_dir:
                 try:
-                    if hasattr(master_structured_doc, "model_dump_json"):
-                        json_data = master_structured_doc.model_dump_json(indent=2)
-                    else:
-                        json_data = master_structured_doc.json(indent=2)
-                    (output_dir / "02_docling" / "structured_document.json").write_text(json_data, encoding="utf-8")
+                    structured_doc_path = output_dir / "02_docling" / "structured_document.json"
+                    structured_doc_path.parent.mkdir(parents=True, exist_ok=True)
+                    with open(structured_doc_path, "w", encoding="utf-8") as f:
+                        json.dump(master_structured_doc.model_dump(), f, indent=2, ensure_ascii=False)
                 except Exception as save_err:
                     logger.error(f"Failed to save intermediate structured document: {save_err}")
 
@@ -630,6 +629,19 @@ class MultimodalExtractor:
                             master_structured_doc.images[f"b{batch_index}_{img_id}"].image_path = str(new_png_path)
                         except Exception as move_err:
                             logger.error(f"Failed to sequentialize image {seq_name}: {move_err}")
+
+                    # Fallback extraction: If new_png_path still does not exist, crop directly from source PDF
+                    if not new_png_path.exists() and file_path and img_meta.bbox:
+                        ImageProcessor.crop_image_from_pdf(
+                            pdf_path=Path(file_path),
+                            page_number=img_meta.page_number,
+                            bbox=img_meta.bbox,
+                            target_path=new_png_path
+                        )
+                        if new_png_path.exists():
+                            img_meta.image_path = str(new_png_path)
+                            if f"b{batch_index}_{img_id}" in master_structured_doc.images:
+                                master_structured_doc.images[f"b{batch_index}_{img_id}"].image_path = str(new_png_path)
                     
                     # Smart VLM Skip Filter
                     is_decorative = False

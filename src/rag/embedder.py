@@ -1,7 +1,8 @@
 import logging
-from typing import List
+from typing import List, Optional
 from src.rag.chunk_schema import DocumentChunk
-from src.rag.embedding_provider import EmbeddingProvider
+from src.rag.embedding_provider import EmbeddingProvider, SentenceTransformersEmbeddingProvider
+from src.rag.config import RagConfig
 
 logger = logging.getLogger("pipeline")
 
@@ -10,8 +11,13 @@ class Embedder:
     Manages the generation of embeddings using a configured EmbeddingProvider.
     """
 
-    def __init__(self, provider: EmbeddingProvider) -> None:
-        self.provider = provider
+    def __init__(self, provider: Optional[EmbeddingProvider] = None) -> None:
+        if provider is None:
+            self.provider = SentenceTransformersEmbeddingProvider(
+                model_name=getattr(RagConfig, "EMBEDDING_MODEL", "BAAI/bge-small-en-v1.5")
+            )
+        else:
+            self.provider = provider
 
     def generate_embeddings(
         self, 

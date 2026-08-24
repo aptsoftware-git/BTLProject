@@ -175,14 +175,86 @@ def test_sunil_mittra_portrait_verified_association():
     image_chunks = [c for c in res.retrieved_chunks if c.metadata.chunk_type == "image"]
     assert len(image_chunks) > 0
     
-    # Verify Sunil Kumar Mittra's portrait on page 49
-    sunil_img = image_chunks[0]
-    assert sunil_img.metadata.page_number == 49
-    caption = (getattr(sunil_img.metadata, "caption", None) or sunil_img.metadata.heading or "").lower()
-    vlm = (getattr(sunil_img.metadata, "semantic_description", None) or "").lower()
-    ocr = (getattr(sunil_img.metadata, "ocr_text", None) or "").lower()
+    # Verify Sunil Kumar Mittra's portrait on page 49 (image_146.png)
+    for img in image_chunks:
+        assert img.metadata.page_number == 49, "Must return Page 49 portrait"
+        assert "image_146" in (img.metadata.image_path or img.metadata.image_url or "")
+        assert "image_097" not in (img.metadata.image_path or img.metadata.image_url or "")
+        assert "image_098" not in (img.metadata.image_path or img.metadata.image_url or "")
+        assert "image_099" not in (img.metadata.image_path or img.metadata.image_url or "")
+
+def test_rhea_todi_portrait_strict_spatial_association():
+    config = RagConfig()
+    retriever = Retriever.from_config(config)
     
-    assert "sunil" in caption or "mittra" in caption or "sunil" in vlm or "sunil" in ocr
+    query = "Show the photo of Ms. Rhea Todi"
+    res = retriever.retrieve(DOC_ID, query)
+    
+    image_chunks = [c for c in res.retrieved_chunks if c.metadata.chunk_type == "image"]
+    assert len(image_chunks) > 0
+    
+    # Verify that Ms. Rhea Todi is paired ONLY with her verified Page 49 portrait (image_148.png)
+    # and NEVER with the Page 45 industrial/collage scene (image_135.png) or Page 37 graphic (image_115.png)
+    for img in image_chunks:
+        assert img.metadata.page_number == 49, f"Must return Page 49 portrait, got page {img.metadata.page_number}"
+        img_ref = img.metadata.image_path or img.metadata.image_url or ""
+        assert "image_148" in img_ref, f"Expected image_148.png for Rhea Todi, got {img_ref}"
+        assert "image_135" not in img_ref, "Must NEVER return Page 45 collage image_135.png for Rhea Todi"
+        assert "image_115" not in img_ref, "Must NEVER return Page 37 graphic image_115.png for Rhea Todi"
+
+def test_all_9_board_directors_exact_portrait_pairing():
+    from src.rag.image_processor import PortraitSpatialValidator
+    
+    # Load Page 49 image metadata and verify exact 1-to-1 director mapping
+    img_dir = Path("data/output/btl_216_page_run/05_images")
+    expected_pairs = {
+        "image_146": "Sunil Kumar Mittra",
+        "image_147": "Ravi Todi",
+        "image_148": "Rhea Todi",
+        "image_149": "Aviik Mukherjee",
+        "image_150": "Subrata Paul",
+        "image_151": "Arundhuti Dhar",
+        "image_152": "Sandipan Chakravortty",
+        "image_153": "Ketan Mangaldas Shanghavi",
+        "image_154": "Sourav Daspatnaik"
+    }
+    
+    for img_name, expected_person in expected_pairs.items():
+        jf = img_dir / f"{img_name}.json"
+        assert jf.exists(), f"Missing metadata file {jf}"
+        with open(jf, "r", encoding="utf-8") as f:
+            data = json.load(f)
+            
+        assert data.get("page") == 49
+        assert data.get("image_type") == "Portrait Photo"
+        assert any(expected_person.lower() in str(e).lower() for e in data.get("detected_entities", []))
+        
+        # Verify geometry
+        is_geom, reason = PortraitSpatialValidator.validate_portrait_geometry(data.get("bounding_box"))
+        assert is_geom is True, f"{img_name} failed portrait geometry: {reason}"
+
+def test_portrait_spatial_validator_rejects_non_portraits():
+    from src.rag.image_processor import PortraitSpatialValidator
+    
+    # 1. Page 45 landscape / collage (image_135) -> size (383x269, aspect 1.42)
+    is_valid_135, r135 = PortraitSpatialValidator.validate_portrait_geometry(
+        bbox={"l": 765.87, "t": 608.55, "r": 1148.97, "b": 339.76}
+    )
+    assert is_valid_135 is False
+    assert "Landscape" in r135 or "large" in r135
+    
+    # 2. Page 33 header banner (image_097) -> size (108x15, aspect 7.2)
+    is_valid_097, r097 = PortraitSpatialValidator.validate_portrait_geometry(
+        bbox={"l": 42.30, "t": 806.57, "r": 150.05, "b": 791.83}
+    )
+    assert is_valid_097 is False
+    assert "banner" in r097.lower() or "aspect" in r097.lower()
+    
+    # 3. Page 49 genuine portrait (image_148) -> size (93.5x100.6, aspect 0.93)
+    is_valid_148, r148 = PortraitSpatialValidator.validate_portrait_geometry(
+        bbox={"l": 40.52, "t": 408.41, "r": 134.05, "b": 307.84}
+    )
+    assert is_valid_148 is True
 
 def test_board_collection_photos_retrieval():
     config = RagConfig()
