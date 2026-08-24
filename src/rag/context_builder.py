@@ -151,11 +151,16 @@ class ContextBuilder:
         # 5. Section-level Context Assembly & Merging
         sections_dict = {}
         used_chunk_ids = []
-        page_references = set()
+        
+        # Track page references prioritized by reranker relevance (avoiding noisy pages)
+        top_relevant_pages = []
+        for chunk in deduplicated_chunks[:6]:
+            p = chunk.metadata.page_number
+            if p and p not in top_relevant_pages:
+                top_relevant_pages.append(p)
         
         for chunk in selected_chunks:
             used_chunk_ids.append(chunk.metadata.chunk_id)
-            page_references.add(chunk.metadata.page_number)
             sec_key = getattr(chunk.metadata, "section_heading", None) or chunk.metadata.section or "General Context"
             if sec_key not in sections_dict:
                 sections_dict[sec_key] = []
@@ -177,7 +182,9 @@ class ContextBuilder:
             context_parts.append(context_part)
 
         context_str = "\n\n".join(context_parts)
-        sorted_pages = sorted(list(page_references))
+        
+        # Sorted concise page references (capped to the most relevant pages)
+        sorted_pages = sorted(top_relevant_pages) if top_relevant_pages else sorted(list(set(c.metadata.page_number for c in selected_chunks)))
         
         logger.info(f"Context constructed using {len(used_chunk_ids)} chunks across pages {sorted_pages} with {len(image_references)} visual assets in {len(sections_dict)} section blocks.")
         return context_str, used_chunk_ids, sorted_pages, image_references

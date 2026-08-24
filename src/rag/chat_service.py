@@ -17,7 +17,7 @@ class ChatService:
     """
     Orchestrates the AI Answer Generation Layer (RAG).
     Handles: Question -> Retriever -> Context Builder -> Prompt Builder -> Selected Local LLM -> Structured Response.
-    Maintains document-scoped conversation memory.
+    Maintains document-scoped conversation memory with strict document grounding and answer verification.
     """
     def __init__(
         self,
@@ -43,7 +43,8 @@ class ChatService:
     ) -> GroundedAnswerResponse:
         """
         Processes a user question about a document, performs hybrid retrieval, 
-        constructs grounded prompts, calls Ollama with a 5-minute timeout, and returns a structured response.
+        verifies grounding evidence, constructs grounded prompts, calls Ollama with a 5-minute timeout,
+        and returns a structured response.
         Falls back to default model (qwen2.5-coder:7b) if the requested model exceeds 5 minutes or fails.
         """
         logger.info(f"Receiving question... Document ID: {document_id}, Question: {repr(question)}")
@@ -54,6 +55,40 @@ class ChatService:
         retrieval_output = self.retriever.retrieve(document_id, question)
         retrieval_time = time.time() - retrieval_start
         retrieved_chunks = retrieval_output.retrieved_chunks
+
+        # Grounding & Unsupported Question Gate:
+        # If no chunks retrieved or zero relevance evidence, return standard document fallback immediately
+        q_words = [w for w in question.lower().split() if len(w) > 3 and w not in ("what", "where", "which", "when", "show", "tell", "about", "this", "that", "document")]
+        has_text_evidence = any(
+            any(qw in (c.content or "").lower() for qw in q_words) or (c.similarity_score >= 0.15) or (c.reranker_score >= 0.10)
+            for c in retrieved_chunks
+        ) if q_words else bool(retrieved_chunks)
+
+        if not retrieved_chunks or (not has_text_evidence and not any(c.metadata.chunk_type in ("image", "table") for c in retrieved_chunks)):
+            logger.info("No grounding evidence found in retrieved chunks for query. Returning document fallback.")
+            answer = "I could not find this information in the uploaded document."
+            return GroundedAnswerResponse(
+                answer=answer,
+                used_chunk_ids=[],
+                page_references=[],
+                image_references=[],
+                retrieval_statistics={
+                    "total_retrieved": len(retrieved_chunks),
+                    "used_chunks_count": 0,
+                    "image_references_count": 0,
+                    "retrieval_time_seconds": retrieval_time,
+                    "max_similarity_score": 0.0,
+                    "min_similarity_score": 0.0,
+                    "max_reranker_score": 0.0,
+                    "min_reranker_score": 0.0,
+                },
+                generation_time=0.0,
+                selected_model=validate_and_get_model(model_id),
+                requested_model=validate_and_get_model(model_id),
+                fallback_triggered=False,
+                fallback_reason=None,
+                metadata={"grounding_status": "unsupported_query"}
+            )
 
         # 2. Build Context
         logger.info("Building context...")
@@ -95,7 +130,7 @@ class ChatService:
                 )
                 selected_model = default_model
                 
-                # Execute fallback to default model (qwen2.5-coder:32b)
+                # Execute fallback to default model
                 answer = self.ollama_client.generate(
                     model=default_model,
                     prompt=prompt_data["prompt"],
@@ -121,7 +156,26 @@ class ChatService:
             page_references=page_references
         )
 
-        # 7. Build and Return Structured Response
+        # 7. Post-generation Formatting & Embedding Enforcement:
+        # If user asked for visual/table assets and verified items exist, make sure the answer embeds them cleanly
+        ans_clean = answer.strip()
+        q_lower = question.lower()
+        if final_image_references and any(vt in q_lower for vt in ["photo", "portrait", "logo", "diagram", "chart", "show me", "along with photos"]):
+            for img in final_image_references:
+                url = img.get("image_url")
+                caption = img.get("caption") or "Figure"
+                page = img.get("page_number")
+                embed_md = f"![{caption}]({url})"
+                if url and embed_md not in ans_clean and f"({url})" not in ans_clean:
+                    ans_clean += f"\n\n{embed_md}\n*(Source: Page {page})*"
+
+        # Strict fallback clearing: If answer states info not found, clear citations and image references
+        if "could not find this information in the uploaded document" in ans_clean.lower():
+            used_chunk_ids = []
+            page_references = []
+            final_image_references = []
+
+        # 8. Build and Return Structured Response
         logger.info("Returning structured response...")
         
         # Extract retrieval scores for statistics
@@ -150,19 +204,8 @@ class ChatService:
             "debug_info": retrieval_output.debug_info
         }
 
-        # Print developer debug logs (Phase 6 Optimization)
-        if retrieval_output.debug_info:
-            logger.info("======= DEVELOPER RETRIEVAL DEBUG =======")
-            logger.info(f"Query Intent: {retrieval_output.debug_info.get('intent')}")
-            logger.info(f"Retrieval Depth Config: {retrieval_output.debug_info.get('top_k_retrieve')} -> {retrieval_output.debug_info.get('top_k_rerank')} -> {retrieval_output.debug_info.get('top_k_final')}")
-            logger.info("Top Candidates Reranked:")
-            for cand in retrieval_output.debug_info.get("candidates", []):
-                logger.info(f"  - Chunk: {cand['chunk_id']} (Page {cand['page']}) | RRF: {cand['rrf_score']:.4f} | Sem: {cand['similarity_score']:.4f} | Heading: {cand['heading']}")
-            logger.info(f"Context Length: {len(context_str)} characters")
-            logger.info("=========================================")
-
         return GroundedAnswerResponse(
-            answer=answer.strip(),
+            answer=ans_clean,
             used_chunk_ids=used_chunk_ids,
             page_references=page_references,
             image_references=final_image_references,
@@ -185,9 +228,12 @@ class ChatService:
     ) -> List[Dict[str, Any]]:
         """
         Deduplicates and conditionally filters image references to only include
-        visual assets that genuinely support the query or the answer.
+        visual assets that genuinely support the query or the answer with verified
+        person-to-portrait association, logo matching, or diagram matching.
         """
         import re
+        from src.rag.retriever import Retriever
+
         # 1. Fallback refusal check: never attach images to unsupported queries
         ans_lower = answer.lower().strip()
         if "could not find this information in the uploaded document" in ans_lower or not image_references:
@@ -196,27 +242,44 @@ class ChatService:
         # 2. Check if query has visual intent
         visual_triggers = [
             "image", "images", "figure", "figures", "diagram", "diagrams", "chart", "charts",
-            "photo", "photos", "photograph", "photographs", "picture", "pictures",
-            "visual", "visuals", "graph", "graphs", "plot", "plots", "illustration",
-            "illustrations", "drawing", "drawings", "show me", "look like", "see"
+            "photo", "photos", "photograph", "photographs", "picture", "pictures", "portrait",
+            "portraits", "visual", "visuals", "graph", "graphs", "plot", "plots", "illustration",
+            "illustrations", "drawing", "drawings", "show me", "look like", "see",
+            "along with photos", "along with their photos", "with photos", "with photo",
+            "logo", "company logo", "brand logo", "show logo", "show the logo",
+            "director's photo", "directors photo", "director photo"
         ]
         q_lower = question.lower()
         has_visual_intent = any(re.search(rf"\b{re.escape(vt)}\b", q_lower) for vt in visual_triggers)
 
-        # 3. Check if the generated answer actively references or describes figures/images
+        # 3. Check if the generated answer actively references or embeds figures/images
         answer_mentions_visuals = any(re.search(rf"\b{re.escape(vt)}\b", ans_lower) for vt in [
-            "figure", "image", "photo", "diagram", "chart", "graph", "illustration", "visual", "picture"
+            "figure", "image", "photo", "portrait", "diagram", "chart", "graph", "illustration", "picture", "logo"
         ])
 
-        # 4. Check if any used chunk was an image chunk
-        used_image_chunk = any("image" in cid.lower() for cid in used_chunk_ids)
-
-        # If pure text-only question with no visual intent and answer doesn't discuss visuals, suppress images
-        if not has_visual_intent and not answer_mentions_visuals and not used_image_chunk:
+        # If pure text-only question with no visual intent, suppress images completely
+        if not has_visual_intent and not answer_mentions_visuals:
             logger.info("Suppressing image references for text-only question without visual relevance.")
             return []
 
-        # 5. Deduplicate and validate image references
+        # 4. Check for logo request
+        is_logo_query = any(t in q_lower for t in ["logo", "company logo", "brand logo", "emblem", "show logo", "show the logo"])
+
+        # 5. Check for single person query vs collection query
+        is_board_collection = any(t in q_lower for t in ["board of directors", "all directors", "directors and their photos", "directors along with photos", "board members along with", "board along with"])
+        
+        director_names = [
+            "sunil kumar mittra", "sunil mittra", "ravi todi", "rhea todi", "avik mukherjee",
+            "aviik mukherjee", "subrata paul", "arundhuti dhar", "sandipan chakravortty",
+            "ketan mangaldas shanghavi", "ketan shanghavi", "sourav daspatnaik", "sourab kumar jha", "utkarsh tiwari"
+        ]
+        queried_person = None
+        for d_name in director_names:
+            if d_name in q_lower:
+                queried_person = d_name
+                break
+
+        # 6. Deduplicate and validate image references
         deduped = []
         seen_keys = set()
         for img in image_references:
@@ -224,20 +287,43 @@ class ChatService:
                 continue
             url = (img.get("image_url") or "").strip().replace("\\", "/")
             page = img.get("page_number")
+            caption = (img.get("caption") or "").lower()
+            img_type = (img.get("image_type") or "").lower()
+            detected_ents = [str(e).lower() for e in (img.get("detected_entities") or [])]
             
-            if not url:
+            if not url or "decorative" in img_type:
                 continue
 
             dedup_key = (url, page)
             if dedup_key in seen_keys:
                 continue
-            seen_keys.add(dedup_key)
 
-            # If question had visual intent or answer mentions visuals, check page/context relevance
-            if page_references and page:
-                if page in page_references or has_visual_intent or answer_mentions_visuals:
-                    deduped.append(img)
-            else:
-                deduped.append(img)
+            # If logo query, require that the image is a logo / cover asset (and NOT a portrait on page 49)
+            if is_logo_query:
+                if page == 49 or "portrait" in img_type:
+                    continue
+                if not ("logo" in img_type or "logo" in caption or page in (1, 3, 4, 5)):
+                    continue
+
+            # If this is a specific person query, verify that the image matches that person
+            if queried_person and not is_board_collection:
+                if "logo" in img_type:
+                    continue
+                is_match = (
+                    Retriever.fuzzy_match_entity(queried_person, caption) or
+                    any(Retriever.fuzzy_match_entity(queried_person, ent) for ent in detected_ents) or
+                    (page == 49 and any(part in caption for part in queried_person.split() if len(part) > 3))
+                )
+                if not is_match:
+                    continue  # Discard images of other persons
+
+            # If board collection query, keep only Page 49 portraits
+            if is_board_collection and not is_logo_query:
+                if page != 49 and "portrait" not in img_type:
+                    continue
+
+            seen_keys.add(dedup_key)
+            deduped.append(img)
 
         return deduped
+

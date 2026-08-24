@@ -1,0 +1,238 @@
+[
+  {
+    "index": 1,
+    "category": "Company & Office",
+    "question": "What is the company name?",
+    "passed": true,
+    "kw_pass": true,
+    "img_pass": true,
+    "duration": 44.15,
+    "pages": [
+      2,
+      4,
+      89
+    ],
+    "image_count": 0,
+    "answer": "BTL EPC Limited"
+  },
+  {
+    "index": 2,
+    "category": "Company & Office",
+    "question": "What is the registered office address of BTL EPC?",
+    "passed": true,
+    "kw_pass": true,
+    "img_pass": true,
+    "duration": 4.96,
+    "pages": [
+      50,
+      89,
+      157
+    ],
+    "image_count": 0,
+    "answer": "2, Jessore Road, Dumdum Kolkata-700028"
+  },
+  {
+    "index": 3,
+    "category": "Company & Office",
+    "question": "Where is the corporate office located?",
+    "passed": true,
+    "kw_pass": true,
+    "img_pass": true,
+    "duration": 4.78,
+    "pages": [
+      50,
+      89
+    ],
+    "image_count": 0,
+    "answer": "The corporate office of BTL EPC Limited is located at 'Shrachi Tower', 7th Floor 686, Anandapur, E. M Bypass, Kolkata-700107."
+  },
+  {
+    "index": 4,
+    "category": "Leadership",
+    "question": "Who is the Managing Director of BTL EPC?",
+    "passed": true,
+    "kw_pass": true,
+    "img_pass": true,
+    "duration": 18.52,
+    "pages": [
+      35,
+      49,
+      70,
+      71
+    ],
+    "image_count": 0,
+    "answer": "The Managing Director of BTL EPC is Mr. Ravi Todi."
+  },
+  {
+    "index": 5,
+    "category": "Leadership",
+    "question": "Give me the names of the Board of Directors",
+    "passed": true,
+    "kw_pass": true,
+    "img_pass": true,
+    "duration": 19.26,
+    "pages": [
+      49
+    ],
+    "image_count": 0,
+    "answer": "The names of the Board of Directors are:\n\n1. Mr. Sunil Kumar Mittra (Chairman)\n2. Mr. Ravi Todi (Managing Director)\n3. Ms. Rhea Todi (Whole time Director)\n4. Mr. Aviik Mukherjee (Whole time Director as of 01.04.2025)\n5. Mr. Subrata Paul (Independent Director)\n6. Ms. Arundhuti Dhar (Independent Director)\n7. Mr. Sandipan Chakravortty (Additional Director)\n8. Mr. Ketan Mangaldas Shanghavi (Independent Director)\n9. Mr. Sourav Daspatnaik (Independent Director)"
+  },
+  {
+    "index": 6,
+    "category": "Person Biography",
+    "question": "Who is Ravi Todi?",
+    "passed": true,
+    "kw_pass": true,
+    "img_pass": true,
+    "duration": 13.39,
+    "pages": [
+      35,
+      49,
+      50,
+      60,
+      62
+    ],
+    "image_count": 0,
+    "answer": "Ravi Todi is the Managing Director of BTL EPC Limited. He also serves as a Whole time Director since April 1, 2025. Additionally, he holds the title of Chairman of BTL EPC Limited's Board of Directors and is listed as having significant influence over various enterprises such as Bengal Shrachi Housing Development Ltd., Twamev Construction and Infrastructure Limited, and others mentioned in the document context."
+  },
+  {
+    "index": 7,
+    "category": "Person Biography",
+    "question": "Who is Avik Mukherjee?",
+    "passed": false,
+    "kw_pass": false,
+    "img_pass": true,
+    "duration": 13.33,
+    "pages": [
+      49,
+      56,
+      58
+    ],
+    "image_count": 0,
+    "answer": "Avik Mukherjee is a seasoned HR professional with over 35 years of experience in Corporate and Plant-level HR across various sectors including Engineering, Chemical, Fertiliser, FMCG, and EPC. He specialises in strategic management, employee relations, and organisational development. He has worked with leading Indian and multinational companies in Northern and Eastern India. As of April 1, 2025, his designation changed to Executive Director at BTL EPC Limited."
+  },
+  {
+    "index": 8,
+    "category": "Person Biography",
+    "question": "Who is Sunil Kumar Mittra?",
+    "passed": true,
+    "kw_pass": true,
+    "img_pass": true,
+    "duration": 13.77,
+    "pages": [
+      32,
+      49,
+      50
+    ],
+    "image_count": 0,
+    "answer": "Mr. Sunil Kumar Mittra is the Chairman and an Independent Director of BTL EPC Limited. He possesses a distinguished academic background with a Bachelor of Engineering (Mechanical) from IIT-BHU and an MBA from Calcutta University. His career is marked by extensive experience in the industry, including a postgraduate certificate in Statistical Quality Control and a Three Tier Program at the Indian Institute of Management, Ahmedabad."
+  },
+  {
+    "index": 9,
+    "category": "Individual Portrait",
+    "question": "Show me the photo of Ravi Todi",
+    "passed": true,
+    "kw_pass": true,
+    "img_pass": true,
+    "duration": 19.34,
+    "pages": [
+      49,
+      50
+    ],
+    "image_count": 1,
+    "answer": "**Image Caption:** Portrait photograph of Mr. Ravi Todi (Managing Director)  \n**Page:** 49\n\n![Portrait of Mr. Ravi Todi (Managing Director)](/outputs/cff0427c29e541d496d067247fba5c52/05_images/image_147.png)\n\n**Image Semantic Description:** The image shows a portrait photograph of Mr. Ravi Todi, identified as the Managing Director of BTL EPC Limited, on page 49 under the \"Board of Directors\" section."
+  },
+  {
+    "index": 10,
+    "category": "Individual Portrait",
+    "question": "Show me the portrait of Sunil Kumar Mittra",
+    "passed": true,
+    "kw_pass": true,
+    "img_pass": true,
+    "duration": 19.91,
+    "pages": [
+      33,
+      49,
+      50
+    ],
+    "image_count": 4,
+    "answer": "**Image Caption:** Portrait photograph of Mr. Sunil Kumar Mittra (Chairman)  \n**Page:** 33\n\n![Portrait of Mr. Sunil Kumar Mittra (Chairman)](/outputs/btl_216_page_run/05_images/image_097.png)\n\n**Image Semantic Description:** The image shows a portrait photograph of Mr. Sunil Kumar Mittra, identified as the Chairman of BTL EPC Limited, on page 33 under the \"Our Management's Perspective\" section."
+  },
+  {
+    "index": 11,
+    "category": "Individual Portrait",
+    "question": "Show photo of Avik Mukherjee",
+    "passed": false,
+    "kw_pass": false,
+    "img_pass": false,
+    "duration": 18.87,
+    "pages": [
+      8,
+      49,
+      50,
+      56
+    ],
+    "image_count": 0,
+    "answer": "I could not find this information in the uploaded document."
+  },
+  {
+    "index": 12,
+    "category": "Board Collection with Photos",
+    "question": "Give me the names of the Board of Directors along with their photos",
+    "passed": true,
+    "kw_pass": true,
+    "img_pass": true,
+    "duration": 23.25,
+    "pages": [
+      49
+    ],
+    "image_count": 9,
+    "answer": "**Board of Directors (Names and Photos):**\n\n- **Mr. Sunil Kumar Mittra (Chairman)**\n  - ![Portrait of Mr. Sunil Kumar Mittra (Chairman)](/outputs/cff0427c29e541d496d067247fba5c52/05_images/image_146.png)\n  - **Page:** 49\n\n- **Mr. Ravi Todi (Managing Director)**\n  - ![Portrait of Mr. Ravi Todi (Managing Director)](/outputs/cff0427c29e541d496d067247fba5c52/05_images/image_147.png)\n  - **Page:** 49\n\n- **Ms. Rhea Todi (Whole time Director)**\n  - ![Portrait of Ms. Rhea Todi (Whole time Director)](/outputs/cff0427c29e541d496d067247fba5c52/05_images/image_148.png)\n  - **Page:** 49\n\n- **Mr. Aviik Mukherjee (Whole time Director)**\n  - ![Portrait of Mr. Aviik Mukherjee (Whole time Director)](/outputs/cff0427c29e541d496d067247fba5c52/05_images/image_149.png)\n  - **Page:** 49\n\n- **Mr. Subrata Paul (Independent Director)**\n  - ![Portrait of Mr. Subrata Paul (Independent Director)](/outputs/cff0427c29e541d496d067247fba5c52/05_images/image_150.png)\n  - **Page:** 49\n\n- **Ms. Arundhuti Dhar (Independent Director)**\n  - ![Portrait of Ms. Arundhuti Dhar (Independent Director)](/outputs/cff0427c29e541d496d067247fba5c52/05_images/image_151.png)\n  - **Page:** 49\n\n- **Mr. Sandipan Chakravortty (Additional Director)**\n  - ![Portrait of Mr. Sandipan Chakravortty (Additional Director)](/outputs/cff0427c29e541d496d067247fba5c52/05_images/image_152.png)\n  - **Page:** 49\n\n- **Mr. Ketan Mangaldas Shanghavi (Independent Director)**\n  - ![Portrait of Mr. Ketan Mangaldas Shanghavi (Independent Director)](/outputs/cff0427c29e541d496d067247fba5c52/05_images/image_153.png)\n  - **Page:** 49\n\n- **Mr. Sourav Daspatnaik (Independent Director)**\n  - ![Portrait of Mr. Sourav Daspatnaik (Independent Director)](/outputs/cff0427c29e541d496d067247fba5c52/05_images/image_154.png)\n  - **Page:** 49"
+  },
+  {
+    "index": 13,
+    "category": "Text-Only Factual",
+    "question": "What is the CIN of BTL EPC?",
+    "passed": false,
+    "kw_pass": false,
+    "img_pass": true,
+    "duration": 9.82,
+    "pages": [
+      50,
+      89
+    ],
+    "image_count": 0,
+    "answer": "I could not find this information in the uploaded document."
+  },
+  {
+    "index": 14,
+    "category": "Text-Only Factual",
+    "question": "Who is the statutory auditor of BTL EPC?",
+    "passed": true,
+    "kw_pass": true,
+    "img_pass": true,
+    "duration": 20.92,
+    "pages": [
+      50,
+      89
+    ],
+    "image_count": 0,
+    "answer": "**Statutory Auditor:** M/s. JKVS & Co.\n\n**Address:** 5A, Nandalal Jew Road, Kolkata- 700026"
+  },
+  {
+    "index": 15,
+    "category": "Text-Only Factual",
+    "question": "What are the core business divisions of BTL EPC?",
+    "passed": true,
+    "kw_pass": true,
+    "img_pass": true,
+    "duration": 9.04,
+    "pages": [
+      4,
+      33,
+      50
+    ],
+    "image_count": 0,
+    "answer": "The core business divisions of BTL EPC include:\n\n- **Engineering Division**\n- **Agri-mech Division**"
+  }
+]
