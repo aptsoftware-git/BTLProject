@@ -18,41 +18,25 @@ export default function IssueCardList({
   onUndoFinding,
   documentStatus,
 }) {
-  const groundedFindings = useMemo(() => {
-    return (findings || []).filter((f) => {
-      if (!f) return false;
-      if (f.pdf_grounded !== true) return false;
-      if (!f.bbox || f.bbox === null) return false;
-      if (f.status === "Unanchored" || f.status === "unanchored") return false;
-      let bboxes = [];
-      if (typeof f.bbox === "object" && !Array.isArray(f.bbox) && "x0" in f.bbox) {
-        bboxes = [f.bbox];
-      } else if (Array.isArray(f.bbox)) {
-        if (f.bbox.length === 4 && typeof f.bbox[0] === "number") {
-          bboxes = [{ x0: f.bbox[0], y0: f.bbox[1], x1: f.bbox[2], y1: f.bbox[3] }];
-        } else {
-          bboxes = f.bbox.filter((b) => b && (typeof b.x0 === "number" || (Array.isArray(b) && b.length === 4)));
-        }
-      }
-      return bboxes.length > 0;
-    });
+  const allFindings = useMemo(() => {
+    return (findings || []).filter(Boolean);
   }, [findings]);
 
   const reviewedCount = useMemo(
-    () => groundedFindings.filter((f) => f.status === "accepted" || f.status === "rejected").length,
-    [groundedFindings]
+    () => allFindings.filter((f) => f.status === "accepted" || f.status === "rejected").length,
+    [allFindings]
   );
-  const total = groundedFindings.length;
+  const total = allFindings.length;
   const pct = total > 0 ? Math.round((reviewedCount / total) * 100) : 0;
 
   const counts = useMemo(() => {
     let accepted = 0, rejected = 0;
-    for (const f of groundedFindings) {
+    for (const f of allFindings) {
       if (f.status === "accepted") accepted++;
       else if (f.status === "rejected") rejected++;
     }
-    return { accepted, rejected, pending: groundedFindings.length - accepted - rejected };
-  }, [groundedFindings]);
+    return { accepted, rejected, pending: allFindings.length - accepted - rejected };
+  }, [allFindings]);
 
   const emptyStateMessage = () => {
     if (documentStatus === "processing" || documentStatus === "pending") {
@@ -70,17 +54,17 @@ export default function IssueCardList({
     return "No findings yet.";
   };
 
-  const selectedIndex = groundedFindings.findIndex((f) => f.finding_id === selectedFindingId);
+  const selectedIndex = allFindings.findIndex((f) => f.finding_id === selectedFindingId);
 
   const goPrev = () => {
     if (total === 0) return;
     const idx = selectedIndex <= 0 ? total - 1 : selectedIndex - 1;
-    onSelectFinding && onSelectFinding(groundedFindings[idx].finding_id, groundedFindings[idx]);
+    onSelectFinding && onSelectFinding(allFindings[idx].finding_id, allFindings[idx]);
   };
   const goNext = () => {
     if (total === 0) return;
     const idx = selectedIndex >= total - 1 ? 0 : selectedIndex + 1;
-    onSelectFinding && onSelectFinding(groundedFindings[idx].finding_id, groundedFindings[idx]);
+    onSelectFinding && onSelectFinding(allFindings[idx].finding_id, allFindings[idx]);
   };
 
   return (
@@ -129,7 +113,7 @@ export default function IssueCardList({
           {emptyStateMessage()}
         </div>
       ) : (
-        groundedFindings.map((f) => {
+        allFindings.map((f) => {
           const isSelected = f.finding_id === selectedFindingId;
           const isDone = f.status === "accepted" || f.status === "rejected";
           const origText = f.original_text || f.original || "";
@@ -171,12 +155,21 @@ export default function IssueCardList({
                     Page {f.page_number}
                   </span>
                 </div>
-                <span
-                  title="Located at exact bounding box on original PDF page"
-                  style={{ fontSize: "10px", fontWeight: 800, color: "#166534", background: "#dcfce7", border: "1px solid #86efac", padding: "1px 7px", borderRadius: "999px" }}
-                >
-                  PDF Grounded
-                </span>
+                {isGrounded ? (
+                  <span
+                    title="Located at exact bounding box on original PDF page"
+                    style={{ fontSize: "10px", fontWeight: 800, color: "#166534", background: "#dcfce7", border: "1px solid #86efac", padding: "1px 7px", borderRadius: "999px" }}
+                  >
+                    PDF Grounded
+                  </span>
+                ) : (
+                  <span
+                    title="Located at sentence level on page"
+                    style={{ fontSize: "10px", fontWeight: 700, color: "#1e40af", background: "#dbeafe", border: "1px solid #93c5fd", padding: "1px 7px", borderRadius: "999px" }}
+                  >
+                    Sentence Grounded
+                  </span>
+                )}
               </div>
 
               {/* Original Text -> Suggested Correction */}

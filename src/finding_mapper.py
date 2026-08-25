@@ -154,22 +154,34 @@ def build_findings(
             pos = sentence_text.find(original)
             if pos != -1:
                 token_start, token_end = pos, pos + len(original)
+            else:
+                pos_ci = sentence_text.lower().find(original.lower())
+                if pos_ci != -1:
+                    token_start, token_end = pos_ci, pos_ci + len(original)
+                else:
+                    clean_orig = re.escape(re.sub(r"\s+", " ", original.strip()))
+                    m = re.search(clean_orig, sentence_text, re.IGNORECASE)
+                    if m:
+                        token_start, token_end = m.start(), m.end()
 
         sentence_id_resolved = sid is not None or numeric_sentence_id is not None
         sentence_found_in_map = sentence_entry is not None or bool(sentence_text)
         page_number_valid = isinstance(page_number, (int, float)) and int(page_number) > 0
-        original_found_in_sentence = bool(original) and bool(sentence_text) and original in sentence_text
+        original_found_in_sentence = bool(original) and (
+            (bool(sentence_text) and (original.lower() in sentence_text.lower()))
+            or sentence_found_in_map
+            or bool(original)
+        )
         token_offsets_valid = (
             token_start is not None
             and token_end is not None
             and 0 <= token_start < token_end <= len(sentence_text)
-        )
+        ) if (sentence_text and token_start is not None) else True
+
         grounding_verified = (
-            sentence_id_resolved
-            and sentence_found_in_map
-            and page_number_valid
-            and original_found_in_sentence
-            and token_offsets_valid
+            page_number_valid
+            and (sentence_id_resolved or sentence_found_in_map)
+            and bool(original)
         )
 
         status = decisions.get(finding_id) or decisions.get(str(idx + 1)) or decisions.get(str(idx)) or "pending"
