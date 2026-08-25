@@ -160,7 +160,9 @@ class ChatService:
         # If user asked for visual/table assets and verified items exist, make sure the answer embeds them cleanly
         ans_clean = answer.strip()
         q_lower = question.lower()
-        if final_image_references and any(vt in q_lower for vt in ["photo", "portrait", "logo", "diagram", "chart", "show me", "along with photos"]):
+        if final_image_references and any(vt in q_lower for vt in ["photo", "portrait", "logo", "diagram", "chart", "show me", "along with photos", "image of", "give the logo"]):
+            if "could not find this information in the uploaded document" in ans_clean.lower():
+                ans_clean = "Here is the requested visual information from the uploaded document:"
             for img in final_image_references:
                 url = img.get("image_url")
                 caption = img.get("caption") or "Figure"
@@ -169,8 +171,8 @@ class ChatService:
                 if url and embed_md not in ans_clean and f"({url})" not in ans_clean:
                     ans_clean += f"\n\n{embed_md}\n*(Source: Page {page})*"
 
-        # Strict fallback clearing: If answer states info not found, clear citations and image references
-        if "could not find this information in the uploaded document" in ans_clean.lower():
+        # Strict fallback clearing: If answer states info not found and no verified visual references exist, clear citations
+        if "could not find this information in the uploaded document" in ans_clean.lower() and not final_image_references:
             used_chunk_ids = []
             page_references = []
             final_image_references = []
@@ -235,11 +237,13 @@ class ChatService:
 
         # 1. Fallback refusal check: never attach images to unsupported queries or empty refs
         ans_lower = answer.lower().strip()
-        if "could not find this information in the uploaded document" in ans_lower or not image_references:
+        target_info = ImageRetrievalValidator.detect_query_target(question)
+        if not image_references:
+            return []
+        if not target_info.get("is_visual", False) and "could not find this information in the uploaded document" in ans_lower:
             return []
 
         # 2. Query target detection & pure text guard
-        target_info = ImageRetrievalValidator.detect_query_target(question)
         if not target_info.get("is_visual", False) or target_info.get("target_type") == "pure_text":
             logger.info("Suppressing image references for text-only question without visual intent.")
             return []
@@ -264,7 +268,8 @@ class ChatService:
                 continue
 
             # Run 5-stage validation suite
-            if not ImageRetrievalValidator.validate_image_candidate(img, question):
+            doc_id_val = img.get("document_id") or (img.get("image_url", "").split("/")[2] if img.get("image_url", "").startswith("/outputs/") else None)
+            if not ImageRetrievalValidator.validate_image_candidate(img, question, doc_id=doc_id_val):
                 continue
 
             seen_keys.add(dedup_key)

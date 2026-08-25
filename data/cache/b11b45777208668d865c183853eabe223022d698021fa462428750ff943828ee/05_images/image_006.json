@@ -25,7 +25,7 @@
     "photo",
     "Its operations play a crucial role in supporting the country's energy security"
   ],
-  "importance_score": "HIGH",
+  "importance_score": "MEDIUM",
   "retrievable": true,
   "association_method": "spatially_nearest_text",
   "association_confidence": 0.85,

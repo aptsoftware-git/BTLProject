@@ -87,6 +87,7 @@ class OllamaConfig:
 class ValidationConfig:
     protected_entity_labels: frozenset = frozenset({
         "PERSON", "ORG", "GPE", "PRODUCT", "WORK_OF_ART", "FAC", "NORP", "LOC",
+        "MONEY", "PERCENT", "DATE", "TIME", "QUANTITY", "CARDINAL", "ORDINAL", "LAW"
     })
     auto_whitelist_min_occurrences: int = 2
 

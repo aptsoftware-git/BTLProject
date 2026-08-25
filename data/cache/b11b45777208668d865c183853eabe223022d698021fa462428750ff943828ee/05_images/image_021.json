@@ -13,7 +13,7 @@
   "image_type": "Logo",
   "title": "Company Logo - 6a1f1c571432456e92a961e1a0f4b70c_BTL AR SS 09-10-2025 (c2c)-1-10",
   "subtitle": "Official Brand Identity",
-  "explicit_caption": null,
+  "explicit_caption": "Company Logo of 6a1f1c571432456e92a961e1a0f4b70c_BTL AR SS 09-10-2025 (c2c)-1-10",
   "caption_text": "Company Logo of 6a1f1c571432456e92a961e1a0f4b70c_BTL AR SS 09-10-2025 (c2c)-1-10",
   "entity_name": null,
   "designation": null,
@@ -23,19 +23,23 @@
   "semantic_description": "This image is a logo for the \"United Registrar of Systems\" (URS), which is associated with the ISO 45001 standard. The logo includes the acronym \"URS\" and the ISO 45001 certification mark, indicating that the organization is certified under this standard.",
   "keywords": [
     "logo",
+    "company logo",
     "brand",
     "emblem",
     "insignia",
-    "company logo",
+    "BTL",
+    "EPC",
+    "BTL EPC",
+    "BTL EPC Limited",
     "6a1f1c571432456e92a961e1a0f4b70c_BTL AR SS 09-10-2025 (c2c)-1-10"
   ],
   "importance_score": "HIGH",
   "retrievable": true,
-  "association_method": "section_spatial_context",
-  "association_confidence": 0.75,
+  "association_method": "explicit_caption",
+  "association_confidence": 0.96,
   "caption": "Company Logo of 6a1f1c571432456e92a961e1a0f4b70c_BTL AR SS 09-10-2025 (c2c)-1-10",
-  "confidence": 0.75,
-  "layout_context": "section_figure",
+  "confidence": 0.96,
+  "layout_context": "brand_identity_asset",
   "ocr_text": null,
   "objects": [
     "logo",
@@ -43,6 +47,7 @@
     "brand mark"
   ],
   "detected_entities": [
-    "6a1f1c571432456e92a961e1a0f4b70c_BTL AR SS 09-10-2025 (c2c)-1-10"
+    "6a1f1c571432456e92a961e1a0f4b70c_BTL AR SS 09-10-2025 (c2c)-1-10",
+    "BTL EPC"
   ]
 }

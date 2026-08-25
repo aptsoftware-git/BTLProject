@@ -25,8 +25,8 @@
     "decorative",
     "Mini Company Handbook -Employee Reference Edition, v4"
   ],
-  "importance_score": "MEDIUM",
-  "retrievable": true,
+  "importance_score": "LOW",
+  "retrievable": false,
   "association_method": "spatially_nearest_text",
   "association_confidence": 0.85,
   "caption": "Figure on Page 1 (Mini Company Handbook -Employee Reference Edition, v4)",

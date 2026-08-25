@@ -25,7 +25,7 @@
     "screenshot",
     "Steel Authority of India Limited: A Maharatna PSU under the Ministry of Steel, the Co"
   ],
-  "importance_score": "HIGH",
+  "importance_score": "MEDIUM",
   "retrievable": true,
   "association_method": "spatially_nearest_text",
   "association_confidence": 0.85,

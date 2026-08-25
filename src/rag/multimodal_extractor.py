@@ -558,7 +558,10 @@ class MultimodalExtractor:
                 try:
                     docling_doc, raw_text, page_count = self._run_docling_conversion(converter, temp_pdf_path, output_dir)
                     if docling_doc is not None:
-                        builder = DocumentBuilder(output_images_dir=output_dir / "05_images" if output_dir else None)
+                        builder = DocumentBuilder(
+                            output_images_dir=output_dir / "05_images" if output_dir else None,
+                            pdf_path=file_path
+                        )
                         batch_structured_doc = builder.build(docling_doc, file_name, file_type)
                         docling_success = True
                         break
@@ -630,19 +633,24 @@ class MultimodalExtractor:
                         except Exception as move_err:
                             logger.error(f"Failed to sequentialize image {seq_name}: {move_err}")
 
-                    # Fallback extraction: If new_png_path still does not exist, crop directly from source PDF
-                    if not new_png_path.exists() and file_path and img_meta.bbox:
+                    # Fallback extraction: If new_png_path still does not exist or is empty, crop directly from source PDF
+                    if (not new_png_path.exists() or new_png_path.stat().st_size == 0) and file_path and img_meta.bbox:
                         ImageProcessor.crop_image_from_pdf(
                             pdf_path=Path(file_path),
                             page_number=img_meta.page_number,
                             bbox=img_meta.bbox,
                             target_path=new_png_path
                         )
-                        if new_png_path.exists():
+                        if new_png_path.exists() and new_png_path.stat().st_size > 0:
                             img_meta.image_path = str(new_png_path)
                             if f"b{batch_index}_{img_id}" in master_structured_doc.images:
                                 master_structured_doc.images[f"b{batch_index}_{img_id}"].image_path = str(new_png_path)
                     
+                    # Strictly ensure physical PNG existence before continuing
+                    if not new_png_path.exists() or new_png_path.stat().st_size == 0:
+                        logger.warning(f"Physical image file could not be created for {seq_name} (Page {img_meta.page_number}). Skipping metadata save to enforce 1:1 mapping.")
+                        continue
+
                     # Step 3: Hierarchical Caption Detection & Layout Association
                     page_elements = [
                         el for el in batch_structured_doc.elements 
@@ -727,7 +735,30 @@ class MultimodalExtractor:
                     if not img_meta.semantic_description:
                         img_meta.semantic_description = grounded.get("semantic_description") or f"Document visual graphic on Page {img_meta.page_number}."
 
-                    # Save image meta JSON/MD
+                    # Post-VLM Retrievability & Score Re-evaluation
+                    is_logo_semantic = (
+                        img_meta.image_type == "Logo" or
+                        "logo" in (img_meta.semantic_description or "").lower() or
+                        any("logo" in str(k).lower() for k in (img_meta.keywords or []))
+                    )
+                    if is_logo_semantic:
+                        img_meta.image_type = "Logo"
+                        img_meta.importance_score = "HIGH"
+                        img_meta.retrievable = True
+                        img_meta.title = f"Company Logo - {batch_structured_doc.title or 'BTL EPC Limited'}"
+                        img_meta.subtitle = "Official Brand Identity"
+                        img_meta.caption_text = f"Company Logo of {batch_structured_doc.title or 'BTL EPC Limited'}"
+                        img_meta.caption = img_meta.caption_text
+                        img_meta.keywords = list(set((img_meta.keywords or []) + ["logo", "company logo", "brand", "emblem", "insignia", "BTL", "EPC", "BTL EPC", "BTL EPC Limited"]))
+                        img_meta.detected_entities = list(set((img_meta.detected_entities or []) + ["BTL EPC Limited", "BTL EPC"]))
+                    elif img_meta.image_type in ("Portrait", "Portrait Photo") or img_meta.entity_name:
+                        img_meta.importance_score = "HIGH"
+                        img_meta.retrievable = True
+                    elif img_meta.image_type in ("Chart", "Graph", "Chart/Graph", "Diagram", "Table", "Map"):
+                        img_meta.importance_score = "HIGH"
+                        img_meta.retrievable = True
+
+                    # Save image meta JSON strictly conforming to 20-field unified schema
                     image_json_path = output_dir / "05_images" / f"{seq_name}.json"
                     bbox_data = img_meta.bbox.model_dump() if hasattr(img_meta.bbox, "model_dump") else (img_meta.bbox.dict() if img_meta.bbox else None)
                     img_json_data = {

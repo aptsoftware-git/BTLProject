@@ -23,7 +23,10 @@
   "semantic_description": "The image shows a series of photographs related to the National Thermal Power Corporation (NTPC) Pakri project. It appears to depict various stages or aspects of the project, possibly including construction, infrastructure, and possibly the surrounding environment.",
   "keywords": [
     "chart/graph",
-    "Overcome: BTL EPC ensured milestoned progress through effective site management and o"
+    "metrics",
+    "financial",
+    "data",
+    "report"
   ],
   "importance_score": "HIGH",
   "retrievable": true,
@@ -34,9 +37,9 @@
   "layout_context": "spatially_anchored_figure",
   "ocr_text": null,
   "objects": [
-    "image",
-    "figure",
-    "visual graphic"
+    "chart/graph",
+    "chart",
+    "graphic"
   ],
   "detected_entities": []
 }

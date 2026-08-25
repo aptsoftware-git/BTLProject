@@ -25,7 +25,7 @@
     "photo",
     "Figure 4: Two attention heads, also in layer 5 of 6, apparently involved in anaphora "
   ],
-  "importance_score": "HIGH",
+  "importance_score": "MEDIUM",
   "retrievable": true,
   "association_method": "spatially_nearest_text",
   "association_confidence": 0.85,

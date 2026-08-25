@@ -19,11 +19,15 @@ from typing import Dict, List, Tuple
 from src.models import MergedIssue, Sentence
 
 
+from src.false_positive_rejection import FalsePositiveRejectionLayer
+
+
 class ReportGenerator:
     def __init__(self, full_text: str, sentences: List[Sentence]) -> None:
         self.full_text = full_text
         self.sentences = sentences
         self._sentence_by_id: Dict[int, Sentence] = {s.sentence_id: s for s in sentences}
+        self.rejection_layer = FalsePositiveRejectionLayer()
 
     def build(self, issues: List[MergedIssue]) -> Tuple[dict, str, str]:
         """Returns (report_dict, changes_markdown, summary_csv)."""
@@ -56,6 +60,21 @@ class ReportGenerator:
                 continue
 
             s = self._sentence_by_id.get(issue.sentence_id)
+            s_text = s.text if s else ""
+
+            # Check FalsePositiveRejectionLayer
+            is_rejected, reject_reason, _ = self.rejection_layer.evaluate_candidate(
+                original=getattr(issue, "original_text", ""),
+                suggestion=getattr(issue, "suggested_text", ""),
+                sentence_text=s_text,
+                issue_type=type_str,
+                source=str(getattr(issue, "source", "gramformer")),
+                confidence=getattr(issue, "final_confidence", None),
+                char_start=getattr(issue, "char_start", None),
+                char_end=getattr(issue, "char_end", None),
+            )
+            if is_rejected:
+                continue
             page = s.page if (s and getattr(s, "page", None)) else (getattr(issue, "page_number", None) or getattr(issue, "page", 1))
 
             bbox = getattr(issue, "bbox", None)

@@ -25,7 +25,7 @@
     "photo",
     "To be the engineering partner of choice in India's infrastructure journey of value th"
   ],
-  "importance_score": "HIGH",
+  "importance_score": "MEDIUM",
   "retrievable": true,
   "association_method": "spatially_nearest_text",
   "association_confidence": 0.85,

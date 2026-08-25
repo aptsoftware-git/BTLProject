@@ -56,12 +56,16 @@ BRITISH_AMERICAN_PAIRS = {
 import re
 
 
+from src.false_positive_rejection import FalsePositiveRejectionLayer
+
+
 class ValidationAgent:
     """Filters candidate corrections against protected terms and strict proofreading scope."""
 
     def __init__(self, protected_terms: List[ProtectedTerm]) -> None:
         self.protected_terms = protected_terms
         self.protected_texts = {p.text.lower().strip(): p for p in protected_terms if p.text}
+        self.rejection_layer = FalsePositiveRejectionLayer(protected_terms)
 
     def _is_british_american_swap(self, orig: str, sug: str) -> bool:
         if (orig, sug) in BRITISH_AMERICAN_PAIRS or (sug, orig) in BRITISH_AMERICAN_PAIRS:
@@ -110,30 +114,47 @@ class ValidationAgent:
         rejected: List[ValidatedIssue] = []
         for item in candidates:
             candidate = Candidate(**item) if isinstance(item, dict) else item
-            orig_lower = (candidate.original_text or "").strip().lower()
-            sug_lower = (candidate.suggested_text or "").strip().lower()
+            orig = (candidate.original_text or "").strip()
+            sug = (candidate.suggested_text or "").strip()
+            orig_lower = orig.lower()
+            sug_lower = sug.lower()
             type_str = str(candidate.issue_type or "").lower()
             reason_str = str(candidate.reason or "").lower()
 
-            hit = self._find_protected_match(orig_lower, sug_lower, candidate.char_start, candidate.char_end)
+            # Run False Positive Rejection Layer check
+            is_rejected, reject_reason, _ = self.rejection_layer.evaluate_candidate(
+                original=orig,
+                suggestion=sug,
+                sentence_text="",
+                issue_type=type_str,
+                source=str(candidate.source),
+                confidence=candidate.confidence,
+                char_start=candidate.char_start,
+                char_end=candidate.char_end,
+            )
 
-            reject_reason = None
-            if hit:
-                reason_name = str(hit.reason or "PROTECTED_TERM").upper().replace(" ", "_")
-                reject_reason = f"PROTECTED_{reason_name}"
-            elif self._is_british_american_swap(orig_lower, sug_lower):
-                reject_reason = "Out of Scope (British/American Spelling Preference)"
-            elif any(kw in type_str or kw in reason_str for kw in REJECTED_KEYWORDS):
-                reject_reason = "Out of Scope (Style/Tone/Rewrite Suggestion)"
-            elif orig_lower == sug_lower and len(orig_lower) > 0:
-                reject_reason = "Out of Scope (Capitalization Preference Only)"
+            if not is_rejected:
+                hit = self._find_protected_match(orig_lower, sug_lower, candidate.char_start, candidate.char_end)
+                if hit:
+                    is_rejected = True
+                    reason_name = str(hit.reason or "PROTECTED_TERM").upper().replace(" ", "_")
+                    reject_reason = f"PROTECTED_{reason_name}"
+                elif self._is_british_american_swap(orig_lower, sug_lower):
+                    is_rejected = True
+                    reject_reason = "Out of Scope (British/American Spelling Preference)"
+                elif any(kw in type_str or kw in reason_str for kw in REJECTED_KEYWORDS):
+                    is_rejected = True
+                    reject_reason = "Out of Scope (Style/Tone/Rewrite Suggestion)"
+                elif orig_lower == sug_lower and len(orig_lower) > 0:
+                    is_rejected = True
+                    reject_reason = "Out of Scope (Capitalization Preference Only)"
 
             issue = ValidatedIssue(
                 **dataclass_kwargs(candidate),
-                is_protected=reject_reason is not None,
-                protected_reason=reject_reason if reject_reason else (hit.reason if hit else None),
+                is_protected=is_rejected,
+                protected_reason=reject_reason,
             )
-            if reject_reason:
+            if is_rejected:
                 rejected.append(issue)
             else:
                 accepted.append(issue)

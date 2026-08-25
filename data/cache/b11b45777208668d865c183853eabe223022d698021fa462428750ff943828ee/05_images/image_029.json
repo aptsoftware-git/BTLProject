@@ -23,7 +23,10 @@
   "semantic_description": "This image appears to be an aerial photograph of a large industrial or commercial complex. The structures are characterized by flat roofs with visible branding or signage, suggesting it might be a factory or warehouse. The surrounding area includes urban buildings, indicating the complex is located in an urban environment.",
   "keywords": [
     "chart/graph",
-    "Manufacturing"
+    "metrics",
+    "financial",
+    "data",
+    "report"
   ],
   "importance_score": "HIGH",
   "retrievable": true,
@@ -34,9 +37,9 @@
   "layout_context": "spatially_anchored_figure",
   "ocr_text": null,
   "objects": [
-    "image",
-    "figure",
-    "visual graphic"
+    "chart/graph",
+    "chart",
+    "graphic"
   ],
   "detected_entities": []
 }

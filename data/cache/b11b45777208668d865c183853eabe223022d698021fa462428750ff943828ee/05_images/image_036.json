@@ -25,7 +25,7 @@
     "photo",
     "The ash handling division at BTL EPC Ltd"
   ],
-  "importance_score": "HIGH",
+  "importance_score": "MEDIUM",
   "retrievable": true,
   "association_method": "spatially_nearest_text",
   "association_confidence": 0.85,

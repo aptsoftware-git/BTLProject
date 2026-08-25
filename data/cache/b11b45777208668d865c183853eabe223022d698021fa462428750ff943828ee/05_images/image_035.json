@@ -25,8 +25,8 @@
     "decorative",
     "6a1f1c571432456e92a961e1a0f4b70c_BTL AR SS 09-10-2025 (c2c)-1-10"
   ],
-  "importance_score": "MEDIUM",
-  "retrievable": true,
+  "importance_score": "LOW",
+  "retrievable": false,
   "association_method": "section_spatial_context",
   "association_confidence": 0.75,
   "caption": "Figure on Page 8 (6a1f1c571432456e92a961e1a0f4b70c_BTL AR SS 09-10-2025 (c2c)-1-10)",

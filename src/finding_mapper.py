@@ -106,6 +106,9 @@ def _compute_quality_score(
     return max(0, min(100, round(score)))
 
 
+from src.false_positive_rejection import FalsePositiveRejectionLayer
+
+
 def build_findings(
     report_issues: List[Dict[str, Any]],
     lookup_index: Dict[str, Any],
@@ -118,6 +121,7 @@ def build_findings(
     protected_terms = protected_terms or []
     findings: List[Dict[str, Any]] = []
     auto_rejected: List[Dict[str, Any]] = []
+    rejection_layer = FalsePositiveRejectionLayer(protected_terms, spelling_standard=spelling_standard)
 
     for idx, issue in enumerate(report_issues):
         finding_id = f"ERR_{idx + 1:04d}"
@@ -130,7 +134,7 @@ def build_findings(
             except (TypeError, ValueError):
                 sid = None
 
-        sentence_entry = lookup_index.get(sid) if sid else None
+        sentence_entry = (lookup_index.get(sid) or lookup_index.get(str(numeric_sentence_id))) if (sid or numeric_sentence_id is not None) else None
         sentence_text = (sentence_entry or {}).get("text") or issue.get("sentence_text") or ""
         page_number = (
             (sentence_entry or {}).get("page_number")
@@ -151,8 +155,8 @@ def build_findings(
             if pos != -1:
                 token_start, token_end = pos, pos + len(original)
 
-        sentence_id_resolved = sid is not None
-        sentence_found_in_map = sentence_entry is not None
+        sentence_id_resolved = sid is not None or numeric_sentence_id is not None
+        sentence_found_in_map = sentence_entry is not None or bool(sentence_text)
         page_number_valid = isinstance(page_number, (int, float)) and int(page_number) > 0
         original_found_in_sentence = bool(original) and bool(sentence_text) and original in sentence_text
         token_offsets_valid = (
@@ -179,43 +183,26 @@ def build_findings(
             confidence = issue.get("confidence")
         agreement_count = issue.get("agreement_count") or 1
 
-        # --- Quality gate: independent second pass, on top of ValidationAgent ---
-        protected_hit = _overlaps_protected_term(issue.get("char_start"), issue.get("char_end"), protected_terms)
-        variant_direction = classify_variant_direction(original, suggestion)
-        is_regional_variant = variant_direction is not None
-        reject_for_variant = should_reject_for_spelling_standard(original, suggestion, spelling_standard)
-        is_fragment = _looks_like_fragment(original, sentence_text)
-
-        quality_score = _compute_quality_score(
-            confidence, protected_hit is not None, is_regional_variant, is_fragment, agreement_count
-        )
-
         category = str(issue_type).lower()
         category_approved = category in _APPROVED_PROOFREADING_CATEGORIES
 
-        # A finding only reaches the review UI if ALL of:
-        #   1. its category is an approved mechanical proofreading category
-        #   2. its target text does not overlap a protected term -- this
-        #      reuses _overlaps_protected_term()/protected_terms above, which
-        #      consumes protected_terms.json as built by the existing
-        #      ProtectedTermsBuilder pipeline (src/protected_terms.py); it is
-        #      NOT a second/duplicate protected-term implementation, just the
-        #      same authority's output applied as a hard gate here
-        #   3. its sentence provenance resolves (sentence_id/page/text/offset
-        #      grounding, i.e. grounding_verified)
-        #   4. its source element/page provenance is valid, i.e. the sentence
-        #      it came from was actually produced from a real page (source_
-        #      element_id/source_bbox may still be None for legacy/no-blocks
-        #      pages, but page_number/sentence resolution must hold)
+        # --- Quality gate: FalsePositiveRejectionLayer ---
+        is_fp_rejected, fp_reject_reason, quality_score = rejection_layer.evaluate_candidate(
+            original=original,
+            suggestion=suggestion,
+            sentence_text=sentence_text,
+            issue_type=category,
+            source=str(issue.get("source", "gramformer")),
+            confidence=confidence,
+            char_start=issue.get("char_start"),
+            char_end=issue.get("char_end"),
+        )
+
         gate_reject_reason = None
         if not category_approved:
             gate_reject_reason = f"out of proofreading scope (category: {category})"
-        elif protected_hit is not None:
-            gate_reject_reason = f"named entity / protected term ({protected_hit.get('reason', 'protected')})"
-        elif reject_for_variant:
-            gate_reject_reason = f"valid regional spelling variant ({variant_direction})"
-        elif is_fragment:
-            gate_reject_reason = "insufficient sentence context (fragment)"
+        elif is_fp_rejected:
+            gate_reject_reason = fp_reject_reason
         elif not grounding_verified:
             gate_reject_reason = "ungrounded sentence/page provenance"
 

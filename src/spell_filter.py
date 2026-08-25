@@ -253,7 +253,8 @@ class SpellCandidateFilter:
     """
 
     PROTECTED_NER_LABELS = {
-        "PERSON", "ORG", "GPE", "LOC", "FAC", "PRODUCT", "EVENT", "NORP", "LAW", "WORK_OF_ART"
+        "PERSON", "ORG", "GPE", "LOC", "FAC", "PRODUCT", "EVENT", "NORP", "LAW", "WORK_OF_ART",
+        "MONEY", "PERCENT", "DATE", "TIME", "QUANTITY", "CARDINAL", "ORDINAL"
     }
 
     _ACRONYM_REGEX = re.compile(r"\b[A-Z0-9/&.-]{2,}s?\b")
@@ -302,7 +303,7 @@ class SpellCandidateFilter:
         if is_genuine_proper_misspelling:
             return None
 
-        # 1. OCR Artifacts, Single-Letter Fragments, Symbols, Numbers
+        # 1. OCR Artifacts, Single-Letter Fragments, Symbols, Numbers, Financial Values
         if len(orig) < 2:
             return "SINGLE_LETTER_OR_OCR_ARTIFACT"
         if not re.search(r"[A-Za-z]", orig):
@@ -311,6 +312,12 @@ class SpellCandidateFilter:
             return "ORDINAL_OR_NUMERIC_CODE"
         if orig_lower in ROMAN_NUMERALS:
             return "ROMAN_NUMERAL"
+
+        # Financial, Currency, Percentage, Date & Measurement Unit expressions
+        from src.false_positive_rejection import FalsePositiveRejectionLayer
+        fin_reason = FalsePositiveRejectionLayer.is_protected_financial_or_numeric_expression(orig)
+        if fin_reason:
+            return fin_reason
 
         # 2. Capitalization / British-American Swap
         if orig_lower == sug_lower and len(orig_lower) > 0:
@@ -541,7 +548,7 @@ class SpellCandidateFilter:
             )
 
             # ---------------------------------------------------------
-            # 1. OCR Artifacts, Single-Letter Fragments, Symbols, Numbers
+            # 1. OCR Artifacts, Single-Letter Fragments, Symbols, Numbers, Financial Values
             # ---------------------------------------------------------
             if not rejection_reason:
                 if len(orig) < 2:
@@ -556,6 +563,14 @@ class SpellCandidateFilter:
                 elif orig_lower in ROMAN_NUMERALS:
                     rejection_reason = "ROMAN_NUMERAL"
                     matched_term = orig
+                else:
+                    from src.false_positive_rejection import FalsePositiveRejectionLayer
+                    sent_obj = sentence_map.get(sid)
+                    s_text = sent_obj.text if sent_obj else ""
+                    fin_reason = FalsePositiveRejectionLayer.is_protected_financial_or_numeric_expression(orig, s_text)
+                    if fin_reason:
+                        rejection_reason = fin_reason
+                        matched_term = orig
 
             # ---------------------------------------------------------
             # 2. Trivial Identical / Capitalization / British-American Swap

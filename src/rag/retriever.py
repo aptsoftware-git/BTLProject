@@ -444,6 +444,16 @@ class Retriever:
                 if any(alias in heading_lower or alias in content_lower for alias in ["registered office", "corporate office", "statutory auditors", "jkvs", "business division"]):
                     boost += 0.45
 
+            # 2.2 Statutory Auditor & Auditor's Report Boosting
+            if any(k in q for k in ["auditor", "audit report", "statutory auditor", "independent auditor"]):
+                if "auditor" in heading_lower or "auditor" in section_lower or "auditor" in content_lower:
+                    boost += 0.80
+
+            # 2.3 Table Chunk Boosting
+            if intent == "table_based" or any(k in q for k in ["table", "metrics table", "comparison table", "financial highlights"]):
+                if meta.chunk_type == "table" or meta.table_id:
+                    boost += 0.70
+
             # 2.5 CIN Direct Search (Pages 66, 69, 216)
             if any(k in q for k in ["cin", "corporate identification number"]):
                 if "u29100wb1992plc054541" in content_lower or "cin:" in content_lower:
@@ -547,15 +557,30 @@ class Retriever:
                         matched.append(c)
             return self._deduplicate_chunks(matched)
 
-        # 3. Check for Single Individual Portrait Query
-        if target_type == "portrait":
+        # 3. Check for Individual or Multi-Director Portrait Query
+        if target_type == "multi_portrait":
+            target_directors = target_info.get("target_directors", [])
+            for d in target_directors:
+                d_matched = []
+                for c in chunks:
+                    if c.metadata.chunk_type == "image":
+                        meta = c.metadata
+                        meta_dict = meta.model_dump() if hasattr(meta, "model_dump") else (meta.dict() if hasattr(meta, "dict") else meta.__dict__)
+                        if ImageRetrievalValidator.validate_single_director_image(meta_dict, d, doc_id=meta.document_id):
+                            d_matched.append(c)
+                if d_matched:
+                    matched.extend(d_matched)
+            if matched:
+                return self._deduplicate_chunks(matched)
+
+        elif target_type == "portrait":
             target_director = target_info.get("target_director")
             if target_director:
                 for c in chunks:
                     if c.metadata.chunk_type == "image":
                         meta = c.metadata
                         meta_dict = meta.model_dump() if hasattr(meta, "model_dump") else (meta.dict() if hasattr(meta, "dict") else meta.__dict__)
-                        if ImageRetrievalValidator.validate_image_candidate(meta_dict, query, intent=intent, doc_id=meta.document_id):
+                        if ImageRetrievalValidator.validate_single_director_image(meta_dict, target_director, doc_id=meta.document_id):
                             matched.append(c)
                 return self._deduplicate_chunks(matched)
 
@@ -633,6 +658,7 @@ class Retriever:
         # 1. Intent Detection & Depth Routing (Query-Aware Retrieval)
         intent = self.detect_intent(query)
         top_k_retrieve, top_k_rerank, top_k_final = self._get_intent_depth(intent)
+        is_visual_query = (intent in ("visual", "person_portrait_visual") or any(vt in query.lower() for vt in ["photo", "portrait", "logo", "diagram", "chart", "image of", "picture of"]))
         logger.info(f"Detected intent: {intent} -> (retrieve={top_k_retrieve}, rerank={top_k_rerank}, final={top_k_final})")
         
         # 2. Query Expansion (Entity & Alias Expansion)
@@ -709,10 +735,42 @@ class Retriever:
                 fused_results.append((cand, 0.01, 0.01))
                 
         fused_results = self._boost_candidates(clean_query, fused_results, intent=intent)
-        candidate_list = [chunk for chunk, _, _ in fused_results[:top_k_rerank]]
+        
+        # For visual queries with verified image candidates, ensure they are preserved in candidate_list
+        is_visual_query = (intent in ("visual", "person_portrait_visual") or "photo" in query.lower() or "logo" in query.lower() or "image of" in query.lower())
+        if is_visual_query and image_candidates:
+            cand_dict = {c.metadata.chunk_id: c for c, _, _ in fused_results}
+            for ic in image_candidates:
+                cand_dict[ic.metadata.chunk_id] = ic
+            candidate_list = list(image_candidates) + [c for cid, c in cand_dict.items() if cid not in {ic.metadata.chunk_id for ic in image_candidates}][:top_k_rerank]
+        else:
+            candidate_list = [chunk for chunk, _, _ in fused_results[:top_k_rerank]]
         
         # 7. First-Pass Reranking
         reranked = self.reranker.rerank(query, candidate_list)
+        
+        # Apply structured intent weights (e.g. tables for table queries, auditor sections for auditor queries, visual for image queries)
+        weighted_reranked = []
+        for chunk, score in reranked:
+            adj_score = score
+            meta = chunk.metadata
+            c_lower = (chunk.content or "").lower()
+            h_lower = (meta.heading or "").lower()
+            t_lower = (getattr(meta, "title", "") or "").lower()
+            
+            if (intent == "table_based" or "table" in query.lower()) and (meta.chunk_type == "table" or meta.table_id):
+                adj_score += 2.0
+            if any(k in query.lower() for k in ["auditor", "audit report", "statutory auditor"]) and ("auditor" in h_lower or "auditor" in c_lower):
+                adj_score += 2.0
+            if (intent in ("visual", "person_portrait_visual") or "photo" in query.lower() or "logo" in query.lower() or "image of" in query.lower()) and meta.chunk_type == "image":
+                adj_score += 3.0
+                if "logo" in query.lower() and (getattr(meta, "image_type", None) == "Logo" or "logo" in t_lower):
+                    adj_score += 3.0
+                
+            weighted_reranked.append((chunk, adj_score))
+            
+        weighted_reranked.sort(key=lambda x: x[1], reverse=True)
+        reranked = weighted_reranked
         
         # 8. Two-Pass Retrieval Fallback
         max_rerank_score = max([score for _, score in reranked]) if reranked else 0.0
@@ -746,7 +804,7 @@ class Retriever:
             meta = chunk.metadata
             c_text = (chunk.content or "").lower()
             c_head = (meta.heading or "").lower()
-            p_name = (getattr(meta, "person_name", None) or "").lower()
+            p_name = (getattr(meta, "entity_name", None) or getattr(meta, "title", None) or getattr(meta, "person_name", None) or "").lower()
             
             # If chunk is on authoritative pages with exact matches, give a score floor
             if meta.page_number in (49, 50, 89):
@@ -763,14 +821,14 @@ class Retriever:
             if intent == "person_portrait_visual":
                 if meta.chunk_type == "image":
                     if meta.page_number == 49 and (
-                        (p_name and any(Retriever.fuzzy_match_entity(alias, p_name) for alias in aliases)) or
+                        (p_name and any(Retriever.fuzzy_match_entity(alias, p_name) or alias in p_name or p_name in alias for alias in aliases)) or
                         any(alias in c_text for alias in aliases)
                     ):
                         score = 0.99
                     else:
                         score = 0.05
 
-            if p_name and any(Retriever.fuzzy_match_entity(alias, p_name) for alias in aliases):
+            if p_name and any(Retriever.fuzzy_match_entity(alias, p_name) or alias in p_name or p_name in alias for alias in aliases):
                 score = max(score, 0.95)
                 
             adjusted_reranked.append((chunk, score))
@@ -779,7 +837,13 @@ class Retriever:
         reranked = adjusted_reranked
             
         # 9. Parent-Child & Structured Section Expansion
-        expanded_chunks = self._expand_context(reranked[:top_k_final], search_chunks, doc_struct)
+        top_ranked = list(reranked[:top_k_final])
+        if is_visual_query and image_candidates:
+            top_ids = {c.metadata.chunk_id for c, _ in top_ranked}
+            for ic in image_candidates:
+                if ic.metadata.chunk_id not in top_ids:
+                    top_ranked.insert(0, (ic, 0.99))
+        expanded_chunks = self._expand_context(top_ranked, search_chunks, doc_struct)
         
         # 10. Format Output Scored Chunks
         scored_chunks = []
@@ -1046,7 +1110,14 @@ class Retriever:
         
         chunk_indices = {c.metadata.chunk_id: idx for idx, c in enumerate(all_chunks)}
         
-        for chunk, score in scored_results:
+        for item in scored_results:
+            if isinstance(item, tuple):
+                chunk = item[0]
+                score = item[1] if len(item) > 1 else 0.99
+            else:
+                chunk = item
+                score = 0.99
+
             cid = chunk.metadata.chunk_id
             if cid in seen:
                 continue

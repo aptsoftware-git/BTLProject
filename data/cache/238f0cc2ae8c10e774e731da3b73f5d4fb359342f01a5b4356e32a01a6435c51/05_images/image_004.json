@@ -23,7 +23,10 @@
   "semantic_description": "This is an organizational chart for Vertexa Solutions, illustrating the hierarchical structure of the company. It shows the reporting relationships between various departments and their respective leaders, including the Chief Executive Officer (CEO) and other vice presidents (VPs) such as VP Engineering, VP Human Resources, VP Finance, VP Sales & Marketing, and VP Operations. The chart also includes levels of management and individual contributors, indicating a detailed breakdown of the company's structure.",
   "keywords": [
     "chart/graph",
-    "Fig 3 -Organization chart (Appendix A)"
+    "metrics",
+    "financial",
+    "data",
+    "report"
   ],
   "importance_score": "HIGH",
   "retrievable": true,
@@ -34,9 +37,9 @@
   "layout_context": "spatially_anchored_figure",
   "ocr_text": null,
   "objects": [
-    "image",
-    "figure",
-    "visual graphic"
+    "chart/graph",
+    "chart",
+    "graphic"
   ],
   "detected_entities": []
 }

@@ -121,6 +121,22 @@ class ProtectedTermsBuilder:
         terms += self._regex_matches(full_text, _SCIENTIFIC_NOTATION_RE, "scientific notation")
         terms += self._regex_matches(full_text, _FILE_NAME_RE, "file name")
         
+        # Financial, Currency, Percentage, Date & Measurement Unit regex protection
+        from src.false_positive_rejection import (
+            _FINANCIAL_VALUE_RE,
+            _STANDALONE_CURRENCY_RE,
+            _PERCENTAGE_RE,
+            _FISCAL_YEAR_RE,
+            _CALENDAR_DATE_RE,
+            _MEASUREMENT_RE,
+        )
+        terms += self._regex_matches(full_text, _FINANCIAL_VALUE_RE, "FINANCIAL_VALUE")
+        terms += self._regex_matches(full_text, _STANDALONE_CURRENCY_RE, "CURRENCY", min_len=1)
+        terms += self._regex_matches(full_text, _PERCENTAGE_RE, "PERCENTAGE")
+        terms += self._regex_matches(full_text, _FISCAL_YEAR_RE, "FISCAL_YEAR")
+        terms += self._regex_matches(full_text, _CALENDAR_DATE_RE, "DATE")
+        terms += self._regex_matches(full_text, _MEASUREMENT_RE, "MEASUREMENT_UNIT")
+        
         # Custom logic for single letter variables
         terms += self._single_letter_variables(full_text)
         
@@ -214,6 +230,13 @@ class ProtectedTermsBuilder:
             "WORK_OF_ART": "PROJECT_NAME",
             "NORP": "PROPER_NOUN",
             "LAW": "TECHNICAL_TERM",
+            "MONEY": "FINANCIAL_VALUE",
+            "PERCENT": "PERCENTAGE",
+            "DATE": "DATE",
+            "TIME": "TIME",
+            "QUANTITY": "MEASUREMENT_UNIT",
+            "CARDINAL": "NUMERIC_VALUE",
+            "ORDINAL": "ORDINAL_NUMBER",
         }
         return [
             ProtectedTerm(

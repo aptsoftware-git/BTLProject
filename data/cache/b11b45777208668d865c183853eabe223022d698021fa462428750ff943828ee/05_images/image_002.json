@@ -23,7 +23,10 @@
   "semantic_description": "The image is a photograph of a coal handling plant located at Yadadri, Telangana. It shows industrial structures, including large cylindrical tanks and blue-roofed buildings, indicative of a processing facility. The surrounding area includes open land and some industrial equipment.",
   "keywords": [
     "chart/graph",
-    "BTL EPC Limited, the engineering arm of the Kolkata-based Shrachi Group, was founded "
+    "metrics",
+    "financial",
+    "data",
+    "report"
   ],
   "importance_score": "HIGH",
   "retrievable": true,
@@ -34,9 +37,9 @@
   "layout_context": "spatially_anchored_figure",
   "ocr_text": null,
   "objects": [
-    "image",
-    "figure",
-    "visual graphic"
+    "chart/graph",
+    "chart",
+    "graphic"
   ],
   "detected_entities": []
 }

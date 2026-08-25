@@ -112,14 +112,19 @@ class QueryProcessor:
             return any(re.search(rf"\b{re.escape(p)}\b", q) for p in phrases)
 
         # 1. Visual request detection
-        logo_triggers = ["logo", "company logo", "brand logo", "emblem", "insignia", "show logo", "show the logo"]
+        logo_triggers = [
+            "logo", "company logo", "brand logo", "emblem", "insignia", "show logo", "show the logo",
+            "give the logo", "give logo", "give the logo of", "can you give the logo", "can you show the logo"
+        ]
         is_logo_query = has_phrase(logo_triggers)
 
         portrait_triggers = [
             "photo of", "photos of", "portrait", "portraits", "photograph of", "photographs of",
-            "picture of", "pictures of", "headshot", "headshots", "along with their photos",
-            "along with photos", "with photos", "with photo", "show photo", "show photos",
-            "show portrait", "show picture", "director's photo", "directors photo", "director photo"
+            "picture of", "pictures of", "image of", "images of", "headshot", "headshots",
+            "along with their photos", "along with photos", "with photos", "with photo",
+            "show photo", "show photos", "show portrait", "show picture", "show the image",
+            "show the image of", "show image of", "show image", "can you show the photo",
+            "director's photo", "directors photo", "director photo"
         ]
         is_portrait_query = has_phrase(portrait_triggers)
 
@@ -187,17 +192,19 @@ class QueryProcessor:
         ]
         is_leadership = has_phrase(leadership_triggers)
 
-        # Detect specific person mention
-        detected_person = None
+        # Detect all specific persons mentioned (including multi-person queries)
+        detected_persons = []
         for d_name in self.KNOWN_DIRECTORS:
             if re.search(rf"\b{re.escape(d_name)}\b", q):
-                detected_person = d_name
-                break
+                if d_name not in detected_persons:
+                    detected_persons.append(d_name)
+
+        detected_person = detected_persons[0] if detected_persons else None
 
         # Check for target entities
         target_entities = []
-        if detected_person:
-            target_entities.append(detected_person.title())
+        for dp in detected_persons:
+            target_entities.append(dp.title())
         if is_cin or "u29100wb1992plc054541" in q:
             target_entities.append("CIN")
         if is_office:
@@ -211,7 +218,7 @@ class QueryProcessor:
         target_visual_type = None
         if is_logo_query:
             target_visual_type = "logo"
-        elif is_portrait_query or (has_visual_intent and (detected_person or is_leadership)):
+        elif is_portrait_query or (has_visual_intent and (detected_persons or is_leadership)):
             target_visual_type = "portrait"
         elif is_diagram_query:
             target_visual_type = "diagram"

@@ -23,7 +23,10 @@
   "semantic_description": "This image appears to be a visualization of a natural language processing (NLP) model's output, specifically a sequence of words and their corresponding probabilities or scores. The diagram shows a sequence of words, with each word having a probability distribution represented by a bar chart. The model seems to be analyzing a sentence or a sequence of text, and the probabilities are likely used to predict the next word in the sequence or to classify the text into categories such as \"registration,\" \"voting,\" or \"default.\" The colors and shading suggest different categories or classes, with some words having higher probabilities for certain categories.",
   "keywords": [
     "chart/graph",
-    "Figure 3: An example of the attention mechanism following long-distance dependencies "
+    "metrics",
+    "financial",
+    "data",
+    "report"
   ],
   "importance_score": "HIGH",
   "retrievable": true,
@@ -34,9 +37,9 @@
   "layout_context": "spatially_anchored_figure",
   "ocr_text": null,
   "objects": [
-    "image",
-    "figure",
-    "visual graphic"
+    "chart/graph",
+    "chart",
+    "graphic"
   ],
   "detected_entities": []
 }

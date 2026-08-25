@@ -25,8 +25,8 @@
     "decorative",
     "Adani-Raigarh CHP and AHP projects"
   ],
-  "importance_score": "MEDIUM",
-  "retrievable": true,
+  "importance_score": "LOW",
+  "retrievable": false,
   "association_method": "spatially_nearest_text",
   "association_confidence": 0.85,
   "caption": "Figure on Page 10 (Adani-Raigarh CHP and AHP projects)",
