@@ -1,8 +1,8 @@
 {
   "image_id": "#/pictures/37",
+  "image_path": "05_images/image_038.png",
+  "image_url": "/outputs/b11b45777208668d865c183853eabe223022d698021fa462428750ff943828ee/05_images/image_038.png",
   "page": 9,
-  "caption": null,
-  "ocr_text": null,
   "bounding_box": {
     "l": 42.57984161376953,
     "t": 806.4721870422363,
@@ -10,12 +10,33 @@
     "b": 791.906307220459,
     "coord_origin": "BOTTOMLEFT"
   },
-  "image_path": "05_images/image_038.png",
   "image_type": "Decorative",
-  "objects": [],
+  "title": "6a1f1c571432456e92a961e1a0f4b70c_BTL AR SS 09-10-2025 (c2c)-1-10",
+  "subtitle": "We have demonstrated a commitment to embrace challenging projects and outperform",
+  "explicit_caption": null,
+  "caption_text": "Figure on Page 9 (6a1f1c571432456e92a961e1a0f4b70c_BTL AR SS 09-10-2025 (c2c)-1-10)",
+  "entity_name": null,
+  "designation": null,
+  "section_heading": null,
+  "text_before": null,
+  "text_after": "We have demonstrated a commitment to embrace challenging projects and outperform",
+  "semantic_description": "Decorative on Page 9 under section 'Document Content'.",
   "keywords": [
-    "decorative"
+    "decorative",
+    "6a1f1c571432456e92a961e1a0f4b70c_BTL AR SS 09-10-2025 (c2c)-1-10"
   ],
-  "semantic_description": "Decorative graphics skipped by smart VLM filter.",
+  "importance_score": "MEDIUM",
+  "retrievable": true,
+  "association_method": "section_spatial_context",
+  "association_confidence": 0.75,
+  "caption": "Figure on Page 9 (6a1f1c571432456e92a961e1a0f4b70c_BTL AR SS 09-10-2025 (c2c)-1-10)",
+  "confidence": 0.75,
+  "layout_context": "section_figure",
+  "ocr_text": null,
+  "objects": [
+    "image",
+    "figure",
+    "visual graphic"
+  ],
   "detected_entities": []
 }

@@ -1,8 +1,8 @@
 {
   "image_id": "#/pictures/6",
+  "image_path": "05_images/image_007.png",
+  "image_url": "/outputs/b11b45777208668d865c183853eabe223022d698021fa462428750ff943828ee/05_images/image_007.png",
   "page": 6,
-  "caption": null,
-  "ocr_text": null,
   "bounding_box": {
     "l": 649.989990234375,
     "t": 329.13134765625,
@@ -10,23 +10,39 @@
     "b": 277.56463623046875,
     "coord_origin": "BOTTOMLEFT"
   },
-  "image_path": "05_images/image_007.png",
   "image_type": "Logo",
-  "objects": [
-    "The logo itself",
-    "which is a stylized design."
-  ],
-  "keywords": [
-    "ThyssenKrupp",
-    "company",
-    "engineering",
-    "global",
-    "industrial",
-    "interconnected",
-    "logo"
-  ],
+  "title": "Company Logo - 6a1f1c571432456e92a961e1a0f4b70c_BTL AR SS 09-10-2025 (c2c)-1-10",
+  "subtitle": "Official Brand Identity",
+  "explicit_caption": null,
+  "caption_text": "Company Logo of 6a1f1c571432456e92a961e1a0f4b70c_BTL AR SS 09-10-2025 (c2c)-1-10",
+  "entity_name": null,
+  "designation": null,
+  "section_heading": null,
+  "text_before": "Our consultants",
+  "text_after": "Power Transmission Corporation of Uttarakhand Limited (PTCUL):",
   "semantic_description": "This image is a logo for ThyssenKrupp, a multinational engineering and industrial company. The logo consists of a stylized, interconnected design with a central circular element and four smaller circular shapes surrounding it, symbolizing the company's global presence and interconnectedness.",
+  "keywords": [
+    "logo",
+    "brand",
+    "emblem",
+    "insignia",
+    "company logo",
+    "6a1f1c571432456e92a961e1a0f4b70c_BTL AR SS 09-10-2025 (c2c)-1-10"
+  ],
+  "importance_score": "HIGH",
+  "retrievable": true,
+  "association_method": "spatially_nearest_text",
+  "association_confidence": 0.85,
+  "caption": "Company Logo of 6a1f1c571432456e92a961e1a0f4b70c_BTL AR SS 09-10-2025 (c2c)-1-10",
+  "confidence": 0.85,
+  "layout_context": "spatially_anchored_figure",
+  "ocr_text": null,
+  "objects": [
+    "logo",
+    "emblem",
+    "brand mark"
+  ],
   "detected_entities": [
-    "ThyssenKrupp"
+    "6a1f1c571432456e92a961e1a0f4b70c_BTL AR SS 09-10-2025 (c2c)-1-10"
   ]
 }

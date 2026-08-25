@@ -1,8 +1,8 @@
 {
   "image_id": "#/pictures/4",
+  "image_path": "05_images/image_005.png",
+  "image_url": "/outputs/b11b45777208668d865c183853eabe223022d698021fa462428750ff943828ee/05_images/image_005.png",
   "page": 5,
-  "caption": null,
-  "ocr_text": null,
   "bounding_box": {
     "l": 38.82040786743164,
     "t": 352.68634033203125,
@@ -10,44 +10,39 @@
     "b": 103.05413818359375,
     "coord_origin": "BOTTOMLEFT"
   },
-  "image_path": "05_images/image_005.png",
-  "image_type": "Logo Grid",
-  "objects": [
-    "Logos of various Indian companies."
-  ],
-  "keywords": [
-    "Adani",
-    "Aditya Birla",
-    "BCPL",
-    "DVC",
-    "IICDPL",
-    "Indian companies",
-    "IndianOil",
-    "Indu.",
-    "Kribhco",
-    "NINL",
-    "NTPC",
-    "ONGC",
-    "Tata Steel",
-    "Tather Fertilizers",
-    "grid",
-    "logos"
-  ],
+  "image_type": "Logo",
+  "title": "Company Logo - 6a1f1c571432456e92a961e1a0f4b70c_BTL AR SS 09-10-2025 (c2c)-1-10",
+  "subtitle": "Official Brand Identity",
+  "explicit_caption": null,
+  "caption_text": "Company Logo of 6a1f1c571432456e92a961e1a0f4b70c_BTL AR SS 09-10-2025 (c2c)-1-10",
+  "entity_name": null,
+  "designation": null,
+  "section_heading": null,
+  "text_before": "Neelachal Ispat Nigam Limited:",
+  "text_after": null,
   "semantic_description": "This image is a grid of logos representing various Indian companies. Each logo is placed in a separate cell, suggesting a collection of different entities, likely for comparison or categorization purposes.",
+  "keywords": [
+    "logo",
+    "brand",
+    "emblem",
+    "insignia",
+    "company logo",
+    "6a1f1c571432456e92a961e1a0f4b70c_BTL AR SS 09-10-2025 (c2c)-1-10"
+  ],
+  "importance_score": "HIGH",
+  "retrievable": true,
+  "association_method": "spatially_nearest_text",
+  "association_confidence": 0.85,
+  "caption": "Company Logo of 6a1f1c571432456e92a961e1a0f4b70c_BTL AR SS 09-10-2025 (c2c)-1-10",
+  "confidence": 0.85,
+  "layout_context": "spatially_anchored_figure",
+  "ocr_text": null,
+  "objects": [
+    "logo",
+    "emblem",
+    "brand mark"
+  ],
   "detected_entities": [
-    "Adani Power",
-    "Aditya Birla",
-    "BCPL",
-    "DVC",
-    "IICDPL",
-    "IndianOil",
-    "Indu",
-    "Kribhco",
-    "NINL",
-    "NTPC",
-    "ONGC",
-    "Tata Steel",
-    "Tather Fertilizers",
-    "and others."
+    "6a1f1c571432456e92a961e1a0f4b70c_BTL AR SS 09-10-2025 (c2c)-1-10"
   ]
 }

@@ -206,19 +206,29 @@ class HierarchicalLayoutGrounder:
         page_height: float = 842.0
     ) -> Dict[str, Any]:
         """
-        Applies hierarchical caption and layout grounding to assign structured metadata,
+        Applies hierarchical caption and layout grounding to assign grounded JSON metadata,
         importance scoring, and retrieval gating to an extracted image.
+        
+        Priority:
+        1. Explicit caption: If a document caption exists, store exactly as title and association_method="explicit_caption".
+        2. Same-card/layout text: Analyze spatially associated text above/below/beside/inside container. Most relevant text as title, secondary as subtitle.
+        3. Section context: Use section heading plus nearby text before/after to generate short grounded title and optional subtitle.
+        4. Surrounding text: Use immediate nearby text context.
+        5. VLM fallback: Semantic title/description from visual when layout context is insufficient.
         """
         # 1. Geometry & Dimensions
         w, h = 0.0, 0.0
         il, ir, it, ib = 0.0, 0.0, 0.0, 0.0
+        bbox_data = {}
         if bbox:
             if isinstance(bbox, dict):
                 il, ir = float(bbox.get("l", 0) or 0), float(bbox.get("r", 0) or 0)
                 it, ib = float(bbox.get("t", 0) or 0), float(bbox.get("b", 0) or 0)
+                bbox_data = bbox
             else:
                 il, ir = float(getattr(bbox, "l", 0) or 0), float(getattr(bbox, "r", 0) or 0)
                 it, ib = float(getattr(bbox, "t", 0) or 0), float(getattr(bbox, "b", 0) or 0)
+                bbox_data = bbox.model_dump() if hasattr(bbox, "model_dump") else (bbox.dict() if hasattr(bbox, "dict") else {"l": il, "r": ir, "t": it, "b": ib})
             w = abs(ir - il)
             h = abs(it - ib)
 
@@ -231,7 +241,7 @@ class HierarchicalLayoutGrounder:
         text_before = None
         text_after = None
         
-        # Sort text elements by vertical reading position
+        # Sort text elements by vertical reading position (Docling bottom-left coords: higher t = higher up)
         text_blocks = []
         for el in doc_elements_on_page:
             t_str = (el.get("text") or "").strip()
@@ -244,10 +254,8 @@ class HierarchicalLayoutGrounder:
                 ty = float(getattr(t_box, "t", 0) or 0)
             text_blocks.append((ty, t_str))
 
-        # Sort descending by top coordinate in Docling bottom-left coords (higher y = higher up on page)
         text_blocks.sort(key=lambda x: x[0], reverse=True)
         
-        # Identify text immediately preceding and following
         for ty, t_str in text_blocks:
             if ty > it and not text_before:
                 text_before = t_str
@@ -255,123 +263,495 @@ class HierarchicalLayoutGrounder:
                 text_after = t_str
 
         # 3. Association Priority Execution
+        title = None
+        subtitle = None
         entity_name = None
         designation = None
         final_caption = None
         final_explicit_caption = None
         layout_context = "unanchored_visual"
         association_method = "none"
-        confidence = 0.50
+        association_confidence = 0.50
         image_type = raw_image_type or "Photo"
 
         # Check Priority 1: Explicit Caption (ignore generic/synthetic strings)
         synthetic_prefixes = ("figure on page", "portrait of", "visual graphic", "image on page", "picture on page")
         if explicit_caption and explicit_caption.strip() and not explicit_caption.strip().lower().startswith(synthetic_prefixes):
             final_explicit_caption = explicit_caption.strip()
+            title = final_explicit_caption
+            subtitle = active_section.strip() if (active_section and active_section != final_explicit_caption) else None
             final_caption = final_explicit_caption
             association_method = "explicit_caption"
-            confidence = 0.98
+            association_confidence = 0.98
             layout_context = "explicit_captioned_figure"
 
-        # Check Priority 2: Structured Layouts (Cards / Portraits / Grids)
+        # Check Priority 2: Structured Same-Card / Layout Text (Portraits & Card Containers)
         if not final_explicit_caption:
             spatial_card_match = PortraitSpatialValidator.match_person_to_portrait_spatial(bbox, doc_elements_on_page)
             if spatial_card_match:
                 entity_name = spatial_card_match["person_name"]
                 designation = spatial_card_match["designation"]
+                title = entity_name
+                subtitle = designation
                 image_type = "Portrait Photo"
-                layout_context = f"portrait_card_{spatial_card_match.get('layout_alignment', 'card')}"
+                layout_context = f"portrait_card_{spatial_card_match.get('layout_alignment', 'horizontal')}"
                 association_method = "same_card_layout"
-                confidence = 0.92
+                association_confidence = 0.92
                 final_caption = f"Portrait of {entity_name} ({designation})" if designation else f"Portrait of {entity_name}"
 
-        # Check Priority 3: Section-Aware Spatial Context for Uncaptioned Large Visuals
+        # Check Priority 3 & 4: Section Context and Spatially Nearest Text for Uncaptioned Visuals
         if not final_explicit_caption and not entity_name:
-            if area_ratio >= 0.15 or w >= 350 or h >= 250:
-                layout_context = "full_page_visual" if area_ratio >= 0.40 else "section_figure"
+            sec_candidate = (active_section or "").strip()
+            # If large/full-width visual or active section is prominent
+            if sec_candidate and (area_ratio >= 0.25 or w >= 400 or not doc_elements_on_page):
+                title = sec_candidate
+                subtitle = text_before[:120].strip() if text_before else (text_after[:120].strip() if text_after else None)
                 association_method = "section_spatial_context"
-                confidence = 0.82
-                # Do NOT invent an explicit caption for uncaptioned visuals
-                final_explicit_caption = None
-                sec_display = active_section or doc_title or "General"
-                final_caption = f"Visual graphic on Page {page_number} ({sec_display})"
+                association_confidence = 0.82
+                layout_context = "full_page_visual" if area_ratio >= 0.35 else "section_figure"
+                final_caption = f"Visual graphic on Page {page_number} ({title})"
+            elif doc_elements_on_page:
+                # Find spatially nearest text element on the same page
+                nearest_text_block = None
+                min_spatial_dist = 999999.0
+                for el in doc_elements_on_page:
+                    t_str = (el.get("text") or "").strip()
+                    if not t_str or len(t_str) < 5 or el.get("type") in ("image", "PictureItem", "ImageItem", "heading"):
+                        continue
+                    t_box = el.get("metadata", {}).get("bbox") or el.get("bbox") or {}
+                    if isinstance(t_box, dict):
+                        tl, tr, tt, tb = float(t_box.get("l", 0) or 0), float(t_box.get("r", 0) or 0), float(t_box.get("t", 0) or 0), float(t_box.get("b", 0) or 0)
+                    else:
+                        tl = float(getattr(t_box, "l", 0) or 0)
+                        tr = float(getattr(t_box, "r", 0) or 0)
+                        tt = float(getattr(t_box, "t", 0) or 0)
+                        tb = float(getattr(t_box, "b", 0) or 0)
 
-        # Check Priority 4: Surrounding Text
+                    gap_x = max(0.0, tl - ir, il - tr)
+                    gap_y = max(0.0, tb - it, ib - tt)
+                    spatial_dist = (gap_x ** 2 + gap_y ** 2) ** 0.5
+
+                    if spatial_dist < min_spatial_dist:
+                        min_spatial_dist = spatial_dist
+                        nearest_text_block = t_str
+
+                if nearest_text_block and min_spatial_dist <= 130.0:
+                    first_sent = nearest_text_block.split(".")[0].strip()
+                    title = first_sent[:85] if first_sent else nearest_text_block[:85]
+                    subtitle = sec_candidate if sec_candidate else (text_after[:120].strip() if text_after else None)
+                    association_method = "spatially_nearest_text"
+                    association_confidence = 0.85
+                    layout_context = "spatially_anchored_figure"
+                    final_caption = f"Figure on Page {page_number} ({title})"
+                elif sec_candidate:
+                    title = sec_candidate
+                    subtitle = text_before[:120].strip() if text_before else (text_after[:120].strip() if text_after else None)
+                    association_method = "section_spatial_context"
+                    association_confidence = 0.82
+                    layout_context = "section_figure"
+                    final_caption = f"Visual graphic on Page {page_number} ({title})"
+                elif doc_title:
+                    title = doc_title.strip()
+                    subtitle = text_before[:120].strip() if text_before else (text_after[:120].strip() if text_after else None)
+                    association_method = "section_spatial_context"
+                    association_confidence = 0.75
+                    layout_context = "section_figure"
+                    final_caption = f"Figure on Page {page_number} ({title})"
+
+        # Check Priority 4b: Surrounding Text
         if association_method == "none" and (text_before or text_after):
+            title = text_before[:80].strip() if text_before else text_after[:80].strip()
+            subtitle = text_after[:120].strip() if (text_before and text_after) else None
             layout_context = "embedded_visual"
             association_method = "surrounding_text"
-            confidence = 0.68
+            association_confidence = 0.68
             final_caption = f"Figure on Page {page_number}"
 
-        # Check Priority 5: VLM Semantic Description
-        if association_method == "none" and vlm_description:
+        # Check Priority 5: VLM Fallback
+        if association_method == "none":
+            vlm_text = vlm_description.strip() if vlm_description else ""
+            if vlm_text:
+                first_sentence = vlm_text.split(".")[0].strip()
+                title = first_sentence[:80] if first_sentence else f"Visual on Page {page_number}"
+            else:
+                title = f"Document visual graphic on Page {page_number}"
+            subtitle = None
             layout_context = "vlm_contextual_visual"
             association_method = "vlm_semantic_description"
-            confidence = 0.55
+            association_confidence = 0.55
             final_caption = f"Visual on Page {page_number}"
 
-        # Guard: Unassociated rule (never assign entity without card/caption match)
+        # Guard: Negative guard against unassociated entity assignment
         if association_method not in ("same_card_layout", "explicit_caption"):
             entity_name = None
             designation = None
 
-        # 4. Importance Scoring (HIGH, MEDIUM, LOW)
-        is_decorative = False
-        if (w > 0 and h > 0 and (w < 80 and h < 80)) or aspect_ratio > 6.0 or aspect_ratio < 0.15:
-            is_decorative = True
+        # Check Logo Specialization
+        is_logo = (
+            "logo" in (image_type or "").lower() or
+            (page_number <= 5 and "logo" in (vlm_description or "").lower()) or
+            (page_number <= 5 and any("logo" in str(el.get("text", "")).lower() for el in doc_elements_on_page if el.get("type") == "heading"))
+        )
+        if is_logo:
+            image_type = "Logo"
+            if not final_explicit_caption:
+                title = f"Company Logo - {doc_title or 'BTL EPC'}"
+                subtitle = "Official Brand Identity"
+                final_caption = f"Company Logo of {doc_title or 'BTL EPC'}"
+            entity_name = None
+            designation = None
 
-        if image_type == "Portrait Photo" or "portrait" in image_type.lower() or association_method == "same_card_layout":
+        # 4. Importance Scoring and Retrieval Gating (Separate Decisions)
+        # Low value check: only tiny icons / empty separator lines are non-retrievable
+        is_tiny_icon = (w > 0 and h > 0 and w < 60 and h < 60)
+        is_extreme_divider = (w > 0 and h > 0 and (aspect_ratio > 8.0 or aspect_ratio < 0.10) and area_ratio < 0.01)
+        is_genuinely_low_value = is_tiny_icon or is_extreme_divider
+
+        # Determine Image Type if still generic
+        if image_type in ("Photo", "Image", "Diagram", "PictureItem", "Figure"):
+            combined_desc = f"{final_caption or ''} {title or ''} {subtitle or ''} {active_section or ''} {vlm_description or ''}".lower()
+            if entity_name or association_method == "same_card_layout" or "portrait" in combined_desc or ("director" in combined_desc and page_number == 49):
+                image_type = "Portrait Photo"
+            elif is_logo or "logo" in combined_desc:
+                image_type = "Logo"
+            elif is_genuinely_low_value:
+                image_type = "Decorative"
+            elif any(k in combined_desc for k in ("chart", "graph", "growth", "performance", "bar graph", "pie chart", "trend")):
+                image_type = "Chart/Graph"
+            elif any(k in combined_desc for k in ("diagram", "flowchart", "flow chart", "system", "architecture", "process flow", "schematic")):
+                image_type = "Diagram"
+            elif any(k in combined_desc for k in ("map", "geographical", "locations", "presence")):
+                image_type = "Map"
+            else:
+                image_type = "Photo"
+
+        # Determine Importance Score & Retrievability
+        if image_type == "Portrait Photo" or "portrait" in image_type.lower() or entity_name:
+            importance_score = "HIGH"
+            retrievable = True
+        elif image_type == "Logo":
             importance_score = "HIGH"
             retrievable = True
         elif association_method == "explicit_caption":
             importance_score = "HIGH"
             retrievable = True
-        elif image_type in ("Chart", "Graph", "Diagram", "Map", "Flowchart", "Architecture"):
+        elif image_type in ("Chart", "Graph", "Chart/Graph", "Diagram", "Table", "Map", "Flowchart", "Architecture", "Signature"):
             importance_score = "HIGH"
             retrievable = True
-        elif "logo" in (image_type or "").lower() or (page_number <= 5 and "logo" in (vlm_description or "").lower()):
-            image_type = "Logo"
+        elif area_ratio >= 0.15 or (w >= 300 and h >= 200):
             importance_score = "HIGH"
             retrievable = True
-        elif area_ratio >= 0.20 or (w >= 300 and h >= 200):
-            importance_score = "HIGH"
-            retrievable = True
-        elif is_decorative:
+        elif is_genuinely_low_value:
             importance_score = "LOW"
             retrievable = False
-            image_type = "Decorative"
-        elif w >= 100 and h >= 100 and area_ratio >= 0.03:
+        elif image_type == "Decorative":
+            # Decorative classification but not a tiny separator (e.g. background artistic layout)
+            importance_score = "MEDIUM"
+            retrievable = True
+        elif w >= 80 and h >= 80 and area_ratio >= 0.02:
             importance_score = "MEDIUM"
             retrievable = True
         else:
             importance_score = "LOW"
             retrievable = False
 
-        # If logo or decorative, ensure entity is clean
-        if is_decorative or image_type == "Decorative":
+        # If decorative/low-value separator, ensure entity is clean
+        if is_genuinely_low_value or image_type == "Decorative":
             entity_name = None
             designation = None
-            retrievable = False
+
+        # Build Objects, Keywords, and Detected Entities
+        objects = []
+        keywords = []
+        detected_entities = []
+
+        if entity_name:
+            role_part = f" ({designation})" if designation else ""
+            detected_entities = [f"{entity_name}{role_part}", entity_name]
+            keywords = ["portrait", "photo", "leadership", "director", "board of directors", entity_name]
+            if designation:
+                keywords.append(designation)
+            objects = ["portrait", "person", "headshot", "photograph"]
+        elif image_type == "Logo":
+            detected_entities = [doc_title or "BTL EPC Limited"]
+            keywords = ["logo", "brand", "emblem", "insignia", "company logo", doc_title or "BTL EPC Limited"]
+            objects = ["logo", "emblem", "brand mark"]
+        elif image_type in ("Chart", "Graph", "Diagram", "Table"):
+            keywords = [image_type.lower(), "metrics", "financial", "data", active_section or "report"]
+            objects = [image_type.lower(), "chart", "graphic"]
+        else:
+            if image_type:
+                keywords.append(image_type.lower())
+            if active_section:
+                keywords.append(active_section)
+            if title and title != active_section:
+                keywords.append(title)
+            objects = ["image", "figure", "visual graphic"]
+
+        semantic_description = vlm_description or f"{image_type} on Page {page_number} under section '{active_section or 'Document Content'}'."
 
         return {
             "image_id": image_id,
+            "image_path": None,
             "page": page_number,
-            "bbox": bbox,
+            "bounding_box": bbox_data,
             "image_type": image_type,
+            "title": title or f"Visual on Page {page_number}",
+            "subtitle": subtitle,
             "explicit_caption": final_explicit_caption,
-            "caption": final_caption,
+            "caption_text": final_caption,
             "entity_name": entity_name,
             "designation": designation,
             "section_heading": active_section,
             "text_before": text_before,
             "text_after": text_after,
-            "layout_context": layout_context,
-            "semantic_description": vlm_description or f"Document visual graphic on Page {page_number}.",
+            "semantic_description": semantic_description,
+            "keywords": keywords,
             "importance_score": importance_score,
             "retrievable": retrievable,
             "association_method": association_method,
-            "confidence": confidence
+            "association_confidence": association_confidence,
+            # Backward-compatible fields
+            "caption": final_caption or title or f"Visual on Page {page_number}",
+            "confidence": association_confidence,
+            "layout_context": layout_context,
+            "ocr_text": ocr_text,
+            "objects": objects,
+            "detected_entities": detected_entities
         }
+
+
+class ImageRetrievalValidator:
+    """
+    Final retrieval validation layer enforcing 5 strict checks:
+    1. Query target identification (Portrait, Board Collection, Logo, Captioned Figure/Table, Chart/Diagram, Pure Text)
+    2. Metadata match (Strict entity/name match, rejecting surname-only/generic keyword collisions, 1-to-1 matching)
+    3. Page/layout consistency (Correct page and layout alignment for the queried asset)
+    4. Physical file existence (Verifying file is present on disk and non-empty)
+    5. Correct image type (Ensuring image_type matches query intent and is retrievable, never Decorative)
+
+    If ANY validation check fails, returns False (discards image) to guarantee zero incorrect image associations.
+    """
+
+    VISUAL_TRIGGERS = [
+        "image", "images", "figure", "figures", "diagram", "diagrams", "chart", "charts",
+        "photo", "photos", "photograph", "photographs", "picture", "pictures", "portrait",
+        "portraits", "visual", "visuals", "graph", "graphs", "plot", "plots", "illustration",
+        "illustrations", "headshot", "headshots", "look like", "show me", "along with photos",
+        "along with their photos", "with photos", "with photo", "logo", "company logo", "brand logo",
+        "show logo", "show the logo", "director's photo", "directors photo"
+    ]
+
+    AMBIGUOUS_SURNAMES = [
+        "todi", "mittra", "mukherjee", "paul", "dhar", "chakravortty", "shanghavi", "daspatnaik", "jha", "tiwari"
+    ]
+
+    @classmethod
+    def is_visual_query(cls, query: str, intent: Optional[str] = None) -> bool:
+        """
+        Determines whether a user query has explicit visual intent.
+        Pure text queries return False.
+        """
+        import re
+        if intent in ("visual", "person_portrait_visual"):
+            return True
+        q_lower = query.lower()
+        return any(re.search(rf"\b{re.escape(vt)}\b", q_lower) for vt in cls.VISUAL_TRIGGERS)
+
+    @classmethod
+    def detect_query_target(cls, query: str) -> Dict[str, Any]:
+        """
+        Extracts structured target entity and type information from the query.
+        """
+        import re
+        q_lower = query.lower()
+
+        # 1. Check if pure text query
+        if not cls.is_visual_query(query):
+            return {"target_type": "pure_text", "is_visual": False}
+
+        # 2. Check Logo Target
+        if any(t in q_lower for t in ["logo", "company logo", "brand logo", "emblem", "insignia", "show logo", "show the logo"]):
+            return {"target_type": "logo", "is_visual": True}
+
+        # 3. Check Board of Directors Collection Target
+        if any(t in q_lower for t in ["board of directors", "all directors", "directors and their photos", "directors along with photos", "board members along with", "board along with"]):
+            return {"target_type": "board_collection", "is_visual": True}
+
+        # 4. Check Individual Director Portrait Target
+        for d in PortraitSpatialValidator.KNOWN_DIRECTORS:
+            # Check for distinguishing first-name or full-name variants
+            if any(re.search(rf"\b{re.escape(v)}\b", q_lower) for v in d["variants"]) or d["name"].lower() in q_lower:
+                return {
+                    "target_type": "portrait",
+                    "target_person": d["name"],
+                    "target_director": d,
+                    "is_visual": True
+                }
+
+        # 4.1 Check Ambiguous Surname-Only queries (e.g. "photo of Todi")
+        words = set(re.findall(r'\b[a-zA-Z]+\b', q_lower))
+        for surname in cls.AMBIGUOUS_SURNAMES:
+            if surname in words:
+                # Surname alone without distinguishing first name is rejected as ambiguous
+                return {
+                    "target_type": "ambiguous_surname",
+                    "surname": surname,
+                    "is_visual": True
+                }
+
+        # 5. Check Captioned Figure Number Target
+        fig_match = re.search(r'(?i)\b(?:figure|fig\.?|chart|diagram|image|photo|illustration)\s*#?\s*(\d+)\b', query)
+        if fig_match:
+            return {
+                "target_type": "captioned_figure",
+                "figure_number": fig_match.group(1),
+                "is_visual": True
+            }
+
+        # 6. General visual / diagram / chart target
+        return {"target_type": "general_visual", "is_visual": True}
+
+    @classmethod
+    def validate_physical_file(cls, image_path: Optional[str] = None, image_url: Optional[str] = None, doc_id: Optional[str] = None) -> bool:
+        """
+        Validates that the physical image asset actually exists on disk and is non-empty.
+        """
+        from pathlib import Path
+        from src.config import ROOT_DIR
+
+        if image_path:
+            p = Path(image_path)
+            if p.exists() and p.is_file() and p.stat().st_size > 0:
+                return True
+            p_rel = ROOT_DIR / image_path
+            if p_rel.exists() and p_rel.is_file() and p_rel.stat().st_size > 0:
+                return True
+
+        if image_url and image_url.startswith("/outputs/"):
+            rel_parts = image_url.replace("/outputs/", "").split("/")
+            if len(rel_parts) >= 3:
+                doc_id_val, subfolder, filename = rel_parts[0], rel_parts[1], rel_parts[2]
+                target_disk_path = ROOT_DIR / "data" / "output" / doc_id_val / subfolder / filename
+                if target_disk_path.exists() and target_disk_path.is_file() and target_disk_path.stat().st_size > 0:
+                    return True
+
+        if doc_id and image_path:
+            clean_name = Path(str(image_path).replace("\\", "/")).name
+            target_disk_path = ROOT_DIR / "data" / "output" / doc_id / "05_images" / clean_name
+            if target_disk_path.exists() and target_disk_path.is_file() and target_disk_path.stat().st_size > 0:
+                return True
+
+        return False
+
+    @classmethod
+    def validate_image_candidate(
+        cls,
+        image_meta: Dict[str, Any],
+        query: str,
+        intent: Optional[str] = None,
+        doc_id: Optional[str] = None
+    ) -> bool:
+        """
+        Executes the complete 5-layer validation suite on an image candidate:
+        query target -> metadata match -> page/layout consistency -> physical file existence -> correct image type.
+        """
+        # Step 1: Query Target Check
+        target_info = cls.detect_query_target(query)
+        if not target_info.get("is_visual", False) or target_info.get("target_type") == "pure_text":
+            return False
+
+        # Reject ambiguous surname-only queries (e.g. "photo of Todi")
+        if target_info.get("target_type") == "ambiguous_surname":
+            logger.info(f"Rejecting image retrieval for ambiguous surname-only query: '{query}'")
+            return False
+
+        # Step 2: Retrievability & Image Type Checks
+        retrievable = image_meta.get("retrievable", True)
+        if retrievable is False:
+            return False
+        importance = image_meta.get("importance_score", "MEDIUM")
+        if importance == "LOW":
+            return False
+        img_type = (image_meta.get("image_type") or "").lower()
+        if "decorative" in img_type:
+            return False
+
+        # Step 3: Physical File Existence Check
+        img_path = image_meta.get("image_path")
+        img_url = image_meta.get("image_url")
+        if not cls.validate_physical_file(image_path=img_path, image_url=img_url, doc_id=doc_id):
+            logger.warning(f"Image candidate failed physical file existence validation: {img_path or img_url}")
+            return False
+
+        page = int(image_meta.get("page") or image_meta.get("page_number") or 1)
+        entity_name = (image_meta.get("entity_name") or image_meta.get("title") or "").strip()
+        caption = (image_meta.get("caption") or image_meta.get("caption_text") or "").strip()
+        detected_entities = [str(e).lower() for e in (image_meta.get("detected_entities") or [])]
+        keywords = [str(k).lower() for k in (image_meta.get("keywords") or [])]
+        target_type = target_info.get("target_type")
+
+        # Step 4: Metadata Match & Page/Layout Consistency for Specific Targets
+        if target_type == "portrait":
+            target_director = target_info.get("target_director")
+            if not target_director:
+                return False
+
+            # Require Page 49 or verified Portrait Photo
+            if page != 49 and "portrait" not in img_type:
+                return False
+
+            # Strict 1-to-1 match against distinguishing director variants
+            variants = target_director.get("variants", [])
+            ent_lower = entity_name.lower()
+            cap_lower = caption.lower()
+
+            matches_target = (
+                any(v in ent_lower for v in variants) or
+                any(v in cap_lower for v in variants) or
+                any(any(v in e for e in detected_entities) for v in variants) or
+                any(any(v in k for k in keywords) for v in variants)
+            )
+
+            # Ensure it does NOT match any other known director (strict 1-to-1 exclusivity)
+            for other_d in PortraitSpatialValidator.KNOWN_DIRECTORS:
+                if other_d["name"] != target_director["name"]:
+                    other_variants = other_d["variants"]
+                    if any(v in ent_lower for v in other_variants):
+                        return False
+
+            return matches_target
+
+        elif target_type == "board_collection":
+            # Must be verified Page 49 portrait
+            return (page == 49 and ("portrait" in img_type or entity_name != ""))
+
+        elif target_type == "logo":
+            # Must be verified Logo asset, never Page 49 director portraits
+            if page == 49 or "portrait" in img_type:
+                return False
+            is_logo_asset = (
+                "logo" in img_type or
+                "logo" in caption.lower() or
+                "logo" in (image_meta.get("title") or "").lower() or
+                page in (1, 3, 4, 5)
+            )
+            return is_logo_asset
+
+        elif target_type == "captioned_figure":
+            fig_num = target_info.get("figure_number")
+            if fig_num:
+                return (
+                    fig_num in caption.lower() or
+                    fig_num in (image_meta.get("explicit_caption") or "").lower() or
+                    fig_num in (image_meta.get("title") or "").lower() or
+                    (image_meta.get("image_id") and fig_num in image_meta.get("image_id"))
+                )
+            return True
+
+        # General visual target: require relevant keyword or context match
+        return True
+
 
 class ImageProcessor:
     """

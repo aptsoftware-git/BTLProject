@@ -41,10 +41,10 @@ def test_all_16_metadata_fields_stored_in_json():
     assert len(json_files) == 208, f"Expected 208 image JSONs, found {len(json_files)}"
 
     required_fields = [
-        "image_id", "page", "bounding_box", "image_type", "explicit_caption",
-        "entity_name", "designation", "section_heading", "text_before",
-        "text_after", "layout_context", "semantic_description",
-        "importance_score", "retrievable", "association_method", "confidence"
+        "image_id", "image_path", "page", "bounding_box", "image_type", "title", "subtitle",
+        "explicit_caption", "caption_text", "entity_name", "designation", "section_heading",
+        "text_before", "text_after", "semantic_description", "keywords", "importance_score",
+        "retrievable", "association_method", "association_confidence"
     ]
 
     for jf in json_files:
@@ -56,8 +56,8 @@ def test_all_16_metadata_fields_stored_in_json():
         assert data["importance_score"] in ("HIGH", "MEDIUM", "LOW")
         assert isinstance(data["retrievable"], bool)
         assert data["association_method"] in (
-            "explicit_caption", "same_card_layout", "section_spatial_context",
-            "surrounding_text", "vlm_semantic_description", "none"
+            "explicit_caption", "same_card_layout", "spatially_nearest_text",
+            "section_spatial_context", "surrounding_text", "vlm_semantic_description", "none"
         )
         assert 0.0 <= data["confidence"] <= 1.0
 

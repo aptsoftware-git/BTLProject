@@ -1,8 +1,8 @@
 {
   "image_id": "#/pictures/5",
+  "image_path": "05_images/image_006.png",
+  "image_url": "/outputs/bdfaa68d8984f0dc02beaca527b76f207d99b666d31d1da728ee0728182df697/05_images/image_006.png",
   "page": 15,
-  "caption": null,
-  "ocr_text": null,
   "bounding_box": {
     "l": 120.3704605102539,
     "t": 607.4371490478516,
@@ -10,29 +10,36 @@
     "b": 202.76763916015625,
     "coord_origin": "BOTTOMLEFT"
   },
-  "image_path": "05_images/image_006.png",
   "image_type": "Graph",
-  "objects": [
-    "Words",
-    "and the text \"The Law will never be perfect\" and \"The missing out on his opinion's ECS-ve but its application should be just this is what we are missing in my opinion\".",
-    "lines (edges)",
-    "nodes (representing words)"
-  ],
-  "keywords": [
-    "Neural network",
-    "green lines",
-    "input sentence",
-    "machine translation",
-    "natural language processing",
-    "output sentence",
-    "probability",
-    "red lines",
-    "sequence-to-sequence model",
-    "text generation",
-    "word mapping."
-  ],
+  "title": "Figure 5: Many of the attention heads exhibit behaviour that seems related to the str",
+  "subtitle": "Figure 5: Many of the attention heads exhibit behaviour that seems related to the structure of the sentence. We give two",
+  "explicit_caption": null,
+  "caption_text": "Figure on Page 15 (Figure 5: Many of the attention heads exhibit behaviour that seems related to the str)",
+  "entity_name": null,
+  "designation": null,
+  "section_heading": null,
+  "text_before": "Input-Input Layer5",
+  "text_after": "Figure 5: Many of the attention heads exhibit behaviour that seems related to the structure of the sentence. We give two such examples above, from two different heads from the encoder self-attention at layer 5 of 6. The heads clearly learned to perform different tasks.",
   "semantic_description": "The image is a visualization of a neural network or a machine learning model's output, specifically a sequence-to-sequence model, likely used for natural language processing tasks such as machine translation or text generation. The graph shows the probability of each word in the input sentence \"The Law will never be perfect\" being mapped to the corresponding word in the output sentence \"The missing out on his opinion's ECS-ve but its application should be just this is what we are missing in my opinion\". The green lines represent the highest probability paths, while the red lines represent alternative paths with lower probabilities.",
-  "detected_entities": [
-    "None"
-  ]
+  "keywords": [
+    "graph",
+    "metrics",
+    "financial",
+    "data",
+    "report"
+  ],
+  "importance_score": "HIGH",
+  "retrievable": true,
+  "association_method": "spatially_nearest_text",
+  "association_confidence": 0.85,
+  "caption": "Figure on Page 15 (Figure 5: Many of the attention heads exhibit behaviour that seems related to the str)",
+  "confidence": 0.85,
+  "layout_context": "spatially_anchored_figure",
+  "ocr_text": null,
+  "objects": [
+    "graph",
+    "chart",
+    "graphic"
+  ],
+  "detected_entities": []
 }

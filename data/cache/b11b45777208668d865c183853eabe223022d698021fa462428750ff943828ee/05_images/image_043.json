@@ -1,8 +1,8 @@
 {
   "image_id": "#/pictures/42",
+  "image_path": "05_images/image_043.png",
+  "image_url": "/outputs/b11b45777208668d865c183853eabe223022d698021fa462428750ff943828ee/05_images/image_043.png",
   "page": 10,
-  "caption": null,
-  "ocr_text": null,
   "bounding_box": {
     "l": 0.5398368835449219,
     "t": 419.908203125,
@@ -10,29 +10,36 @@
     "b": 56.77142333984375,
     "coord_origin": "BOTTOMLEFT"
   },
-  "image_path": "05_images/image_043.png",
-  "image_type": "Photo",
-  "objects": [
-    "Tall red and white striped chimney",
-    "construction debris.",
-    "conveyor belt system",
-    "large blue and white building",
-    "open land"
-  ],
-  "keywords": [
-    "BHEL",
-    "Coal handling plant",
-    "Telangana",
-    "Yadadri",
-    "chimney.",
-    "construction",
-    "conveyor belt",
-    "industrial"
-  ],
+  "image_type": "Diagram",
+  "title": "Overcome: BTL EPC overcame the typical bottlenecks of delayed design and sluggish pro",
+  "subtitle": null,
+  "explicit_caption": null,
+  "caption_text": "Figure on Page 10 (Overcome: BTL EPC overcame the typical bottlenecks of delayed design and sluggish pro)",
+  "entity_name": null,
+  "designation": null,
+  "section_heading": null,
+  "text_before": "Our business: Coal Chemical Division",
+  "text_after": null,
   "semantic_description": "The image depicts a coal handling plant for BHEL (Bharat Heavy Electricals Limited) located in Yadadri, Telangana. The facility includes industrial structures such as a tall red and white striped chimney, a large blue and white building, and a long conveyor belt system. The surrounding area appears to be under development or maintenance, with open land and some construction debris visible.",
-  "detected_entities": [
-    "BHEL (Bharat Heavy Electricals Limited)",
-    "Telangana.",
-    "Yadadri"
-  ]
+  "keywords": [
+    "diagram",
+    "metrics",
+    "financial",
+    "data",
+    "report"
+  ],
+  "importance_score": "HIGH",
+  "retrievable": true,
+  "association_method": "spatially_nearest_text",
+  "association_confidence": 0.85,
+  "caption": "Figure on Page 10 (Overcome: BTL EPC overcame the typical bottlenecks of delayed design and sluggish pro)",
+  "confidence": 0.85,
+  "layout_context": "spatially_anchored_figure",
+  "ocr_text": null,
+  "objects": [
+    "diagram",
+    "chart",
+    "graphic"
+  ],
+  "detected_entities": []
 }

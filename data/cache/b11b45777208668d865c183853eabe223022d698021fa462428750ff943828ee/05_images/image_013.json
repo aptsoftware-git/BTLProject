@@ -1,8 +1,8 @@
 {
   "image_id": "#/pictures/12",
+  "image_path": "05_images/image_013.png",
+  "image_url": "/outputs/b11b45777208668d865c183853eabe223022d698021fa462428750ff943828ee/05_images/image_013.png",
   "page": 6,
-  "caption": null,
-  "ocr_text": null,
   "bounding_box": {
     "l": 802.0123291015625,
     "t": 250.85906982421875,
@@ -10,12 +10,33 @@
     "b": 225.349853515625,
     "coord_origin": "BOTTOMLEFT"
   },
-  "image_path": "05_images/image_013.png",
   "image_type": "Decorative",
-  "objects": [],
+  "title": "6a1f1c571432456e92a961e1a0f4b70c_BTL AR SS 09-10-2025 (c2c)-1-10",
+  "subtitle": "Our consultants",
+  "explicit_caption": null,
+  "caption_text": "Figure on Page 6 (6a1f1c571432456e92a961e1a0f4b70c_BTL AR SS 09-10-2025 (c2c)-1-10)",
+  "entity_name": null,
+  "designation": null,
+  "section_heading": null,
+  "text_before": "Our consultants",
+  "text_after": "Power Transmission Corporation of Uttarakhand Limited (PTCUL):",
+  "semantic_description": "Decorative on Page 6 under section 'Document Content'.",
   "keywords": [
-    "decorative"
+    "decorative",
+    "6a1f1c571432456e92a961e1a0f4b70c_BTL AR SS 09-10-2025 (c2c)-1-10"
   ],
-  "semantic_description": "Decorative graphics skipped by smart VLM filter.",
+  "importance_score": "MEDIUM",
+  "retrievable": true,
+  "association_method": "section_spatial_context",
+  "association_confidence": 0.75,
+  "caption": "Figure on Page 6 (6a1f1c571432456e92a961e1a0f4b70c_BTL AR SS 09-10-2025 (c2c)-1-10)",
+  "confidence": 0.75,
+  "layout_context": "section_figure",
+  "ocr_text": null,
+  "objects": [
+    "image",
+    "figure",
+    "visual graphic"
+  ],
   "detected_entities": []
 }

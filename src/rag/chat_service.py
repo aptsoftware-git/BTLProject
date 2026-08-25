@@ -231,122 +231,45 @@ class ChatService:
         visual assets that genuinely support the query or the answer with verified
         person-to-portrait association, logo matching, or diagram matching.
         """
-        import re
-        from src.rag.retriever import Retriever
+        from src.rag.image_processor import ImageRetrievalValidator
 
-        # 1. Fallback refusal check: never attach images to unsupported queries
+        # 1. Fallback refusal check: never attach images to unsupported queries or empty refs
         ans_lower = answer.lower().strip()
         if "could not find this information in the uploaded document" in ans_lower or not image_references:
             return []
 
-        # 2. Check if query has visual intent
-        visual_triggers = [
-            "image", "images", "figure", "figures", "diagram", "diagrams", "chart", "charts",
-            "photo", "photos", "photograph", "photographs", "picture", "pictures", "portrait",
-            "portraits", "visual", "visuals", "graph", "graphs", "plot", "plots", "illustration",
-            "illustrations", "drawing", "drawings", "show me", "look like", "see",
-            "along with photos", "along with their photos", "with photos", "with photo",
-            "logo", "company logo", "brand logo", "show logo", "show the logo",
-            "director's photo", "directors photo", "director photo"
-        ]
-        q_lower = question.lower()
-        has_visual_intent = any(re.search(rf"\b{re.escape(vt)}\b", q_lower) for vt in visual_triggers)
-
-        # 3. Check if the generated answer actively references or embeds figures/images
-        answer_mentions_visuals = any(re.search(rf"\b{re.escape(vt)}\b", ans_lower) for vt in [
-            "figure", "image", "photo", "portrait", "diagram", "chart", "graph", "illustration", "picture", "logo"
-        ])
-
-        # If pure text-only question with no visual intent, suppress images completely
-        if not has_visual_intent and not answer_mentions_visuals:
-            logger.info("Suppressing image references for text-only question without visual relevance.")
+        # 2. Query target detection & pure text guard
+        target_info = ImageRetrievalValidator.detect_query_target(question)
+        if not target_info.get("is_visual", False) or target_info.get("target_type") == "pure_text":
+            logger.info("Suppressing image references for text-only question without visual intent.")
             return []
 
-        # 4. Check for logo request
-        is_logo_query = any(t in q_lower for t in ["logo", "company logo", "brand logo", "emblem", "show logo", "show the logo"])
+        # Reject ambiguous surname-only queries (e.g. "photo of Todi")
+        if target_info.get("target_type") == "ambiguous_surname":
+            logger.info(f"Chat service rejecting image references for ambiguous surname query: '{question}'")
+            return []
 
-        # 5. Check for single person query vs collection query
-        is_board_collection = any(t in q_lower for t in ["board of directors", "all directors", "directors and their photos", "directors along with photos", "board members along with", "board along with"])
-        
-        director_names = [
-            "sunil kumar mittra", "sunil mittra", "ravi todi", "rhea todi", "avik mukherjee",
-            "aviik mukherjee", "subrata paul", "arundhuti dhar", "sandipan chakravortty",
-            "ketan mangaldas shanghavi", "ketan shanghavi", "sourav daspatnaik", "sourab kumar jha", "utkarsh tiwari"
-        ]
-        queried_person = None
-        for d_name in director_names:
-            if d_name in q_lower:
-                queried_person = d_name
-                break
-
-        # 6. Deduplicate and validate image references
+        # 3. Deduplicate and validate image references using ImageRetrievalValidator
         deduped = []
         seen_keys = set()
+
         for img in image_references:
             if not isinstance(img, dict):
                 continue
+
             url = (img.get("image_url") or "").strip().replace("\\", "/")
             page = img.get("page_number")
-            caption = (img.get("caption") or "").lower()
-            img_type = (img.get("image_type") or "").lower()
-            detected_ents = [str(e).lower() for e in (img.get("detected_entities") or [])]
-            
-            if not url or "decorative" in img_type or img.get("retrievable") is False or img.get("importance_score") == "LOW":
-                continue
-
             dedup_key = (url, page)
             if dedup_key in seen_keys:
                 continue
 
-            # If logo query, require that the image is a logo / cover asset (and NOT a portrait on page 49)
-            if is_logo_query:
-                if page == 49 or "portrait" in img_type:
-                    continue
-                if not ("logo" in img_type or "logo" in caption or page in (1, 3, 4, 5)):
-                    continue
-
-            # If this is a specific person query, verify that the image matches that person
-            if queried_person and not is_board_collection:
-                if "logo" in img_type or "decorative" in img_type:
-                    continue
-                # Strict portrait gating: require verified Portrait Photo or Page 49 director portrait
-                if page != 49 and "portrait" not in img_type:
-                    continue  # Reject non-portrait / landscape scenes / industrial photos
-                
-                is_match = (
-                    Retriever.fuzzy_match_entity(queried_person, caption) or
-                    any(Retriever.fuzzy_match_entity(queried_person, ent) for ent in detected_ents)
-                )
-                if not is_match:
-                    continue  # Discard images of other persons
-
-            # Validate that the physical image asset actually exists on disk
-            img_path = img.get("image_path")
-            from pathlib import Path
-            from src.config import ROOT_DIR
-            exists_on_disk = False
-            if img_path and Path(img_path).exists():
-                exists_on_disk = True
-            elif img_path and (ROOT_DIR / img_path).exists():
-                exists_on_disk = True
-            elif url.startswith("/outputs/"):
-                rel_parts = url.replace("/outputs/", "").split("/")
-                if len(rel_parts) >= 3:
-                    doc_id, subfolder, filename = rel_parts[0], rel_parts[1], rel_parts[2]
-                    target_file = ROOT_DIR / "data" / "output" / doc_id / subfolder / filename
-                    exists_on_disk = target_file.exists()
-
-            if not exists_on_disk:
-                logger.warning(f"Image asset {url} does not physically exist on disk. Discarding reference.")
+            # Run 5-stage validation suite
+            if not ImageRetrievalValidator.validate_image_candidate(img, question):
                 continue
-
-            # If board collection query, keep only Page 49 portraits
-            if is_board_collection and not is_logo_query:
-                if page != 49 and "portrait" not in img_type:
-                    continue
 
             seen_keys.add(dedup_key)
             deduped.append(img)
 
         return deduped
+
 

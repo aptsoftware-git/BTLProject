@@ -1,8 +1,8 @@
 {
   "image_id": "#/pictures/2",
+  "image_path": "05_images/image_003.png",
+  "image_url": "/outputs/bdfaa68d8984f0dc02beaca527b76f207d99b666d31d1da728ee0728182df697/05_images/image_003.png",
   "page": 4,
-  "caption": null,
-  "ocr_text": null,
   "bounding_box": {
     "l": 346.6820373535156,
     "t": 721.2792739868164,
@@ -10,23 +10,36 @@
     "b": 553.9322357177734,
     "coord_origin": "BOTTOMLEFT"
   },
-  "image_path": "05_images/image_003.png",
   "image_type": "Diagram",
-  "objects": [
-    "Concat",
-    "Linear",
-    "Multi-Head Attention",
-    "Scaled Dot-Product Attention"
-  ],
-  "keywords": [
-    "Machine Learning",
-    "Multi-Head Attention",
-    "Natural Language Processing",
-    "Scaled Dot-Product Attention",
-    "Transformer"
-  ],
+  "title": "Figure 2: (left) Scaled Dot-Product Attention",
+  "subtitle": "Figure 2: (left) Scaled Dot-Product Attention. (right) Multi-Head Attention consists of several attention layers running",
+  "explicit_caption": null,
+  "caption_text": "Figure on Page 4 (Figure 2: (left) Scaled Dot-Product Attention)",
+  "entity_name": null,
+  "designation": null,
+  "section_heading": null,
+  "text_before": null,
+  "text_after": "Figure 2: (left) Scaled Dot-Product Attention. (right) Multi-Head Attention consists of several attention layers running in parallel.",
   "semantic_description": "This diagram illustrates the architecture of a Multi-Head Attention mechanism, a key component in transformer models used in natural language processing and machine learning. It shows how the mechanism processes input vectors (V, K, Q) through linear transformations and then combines the results using scaled dot-product attention. The output is then concatenated and fed into another linear transformation.",
-  "detected_entities": [
-    "None"
-  ]
+  "keywords": [
+    "diagram",
+    "metrics",
+    "financial",
+    "data",
+    "report"
+  ],
+  "importance_score": "HIGH",
+  "retrievable": true,
+  "association_method": "spatially_nearest_text",
+  "association_confidence": 0.85,
+  "caption": "Figure on Page 4 (Figure 2: (left) Scaled Dot-Product Attention)",
+  "confidence": 0.85,
+  "layout_context": "spatially_anchored_figure",
+  "ocr_text": null,
+  "objects": [
+    "diagram",
+    "chart",
+    "graphic"
+  ],
+  "detected_entities": []
 }

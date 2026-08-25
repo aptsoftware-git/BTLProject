@@ -1,12 +1,106 @@
 {
-  "document_id": "a8619fd4ae194817a13dad90f43659f8",
-  "file_name": "20eb0c7e0de84aa48ddd91284014d85e_Vertexa_Mini_Company_Handbook.pdf",
+  "document_id": "238f0cc2ae8c10e774e731da3b73f5d4fb359342f01a5b4356e32a01a6435c51",
+  "file_name": "20eb0c7e0de84aa48ddd91284014d85e_Vertexa_Mini_Company_Handbook",
   "chunks": [
+    {
+      "content": "Document Section: Root\nContent:\nImage ID: b1_#/pictures/0\nImage Type: Image\nPage: 1\nImage Title: Figure on Page 1 (B1 Pictures 0)\nSection Heading: Root\nImportance: MEDIUM\nImage URL: /outputs/238f0cc2ae8c10e774e731da3b73f5d4fb359342f01a5b4356e32a01a6435c51/05_images/pictures_0.png\nImage Semantic Description: Visual graphic / image on Page 1 under section 'Root'.",
+      "metadata": {
+        "chunk_id": "238f0cc2ae8c10e774e731da3b73f5d4fb359342f01a5b4356e32a01a6435c51_chunk_0000",
+        "document_id": "238f0cc2ae8c10e774e731da3b73f5d4fb359342f01a5b4356e32a01a6435c51",
+        "page_number": 1,
+        "chunk_type": "image",
+        "heading": null,
+        "section": "Root",
+        "hierarchy_path": [],
+        "source_element_ids": [
+          "b1_#/pictures/0"
+        ],
+        "word_count": 47,
+        "token_estimate": 126,
+        "bounding_boxes": [
+          {
+            "l": 241.65342712402344,
+            "t": 735.4346542358398,
+            "r": 350.96795654296875,
+            "b": 695.7740783691406,
+            "coord_origin": "BOTTOMLEFT"
+          }
+        ],
+        "image_id": "b1_#/pictures/0",
+        "image_path": "C:\\Users\\sanju\\INTERNSHIP-APT\\BTLProject\\data\\output\\a8619fd4ae194817a13dad90f43659f8\\05_images\\pictures_0.png",
+        "image_url": "/outputs/238f0cc2ae8c10e774e731da3b73f5d4fb359342f01a5b4356e32a01a6435c51/05_images/pictures_0.png",
+        "image_type": "Image",
+        "title": "Figure on Page 1 (B1 Pictures 0)",
+        "subtitle": null,
+        "explicit_caption": null,
+        "caption_text": "Figure on Page 1 (B1 Pictures 0)",
+        "entity_name": null,
+        "designation": null,
+        "text_before": null,
+        "text_after": null,
+        "layout_context": null,
+        "importance_score": "MEDIUM",
+        "retrievable": true,
+        "association_method": "none",
+        "confidence": 1.0,
+        "association_confidence": 1.0,
+        "caption": "Figure on Page 1 (B1 Pictures 0)",
+        "ocr_text": "",
+        "semantic_description": "Visual graphic / image on Page 1 under section 'Root'.",
+        "objects": [],
+        "detected_entities": [],
+        "table_id": null,
+        "element_types": [
+          "image"
+        ],
+        "relationships": {
+          "belongs_to": "body"
+        },
+        "section_id": "sec_root",
+        "section_heading": "Root",
+        "subsection_heading": null,
+        "is_section_root": false,
+        "child_chunk_ids": [],
+        "report_number": null,
+        "state": null,
+        "region": null,
+        "district": null,
+        "people": [
+          "Image ID",
+          "Image Semantic Description",
+          "Image Title",
+          "Image Type",
+          "MEDIUM\nImage URL",
+          "Root\nImportance",
+          "Section Heading"
+        ],
+        "organizations": [
+          "B1 Pictures 0",
+          "Image Semantic Description"
+        ],
+        "groups": [],
+        "dates": [],
+        "weapons": [],
+        "locations": [],
+        "keywords": [
+          "pictures",
+          "title",
+          "heading",
+          "importance",
+          "medium",
+          "outputs",
+          "semantic",
+          "description",
+          "visual",
+          "graphic"
+        ]
+      }
+    },
     {
       "content": "Document Section: Vertexa Solutions Pvt. Ltd.\nContent:\nVertexa Solutions Pvt. Ltd.",
       "metadata": {
-        "chunk_id": "a8619fd4ae194817a13dad90f43659f8_chunk_0000",
-        "document_id": "a8619fd4ae194817a13dad90f43659f8",
+        "chunk_id": "238f0cc2ae8c10e774e731da3b73f5d4fb359342f01a5b4356e32a01a6435c51_chunk_0001",
+        "document_id": "238f0cc2ae8c10e774e731da3b73f5d4fb359342f01a5b4356e32a01a6435c51",
         "page_number": 1,
         "chunk_type": "heading",
         "heading": "Vertexa Solutions Pvt. Ltd.",
@@ -28,12 +122,46 @@
             "coord_origin": "BOTTOMLEFT"
           }
         ],
+        "image_id": null,
+        "image_path": null,
+        "image_url": null,
+        "image_type": null,
+        "title": null,
+        "subtitle": null,
+        "explicit_caption": null,
+        "caption_text": null,
+        "entity_name": null,
+        "designation": null,
+        "text_before": null,
+        "text_after": null,
+        "layout_context": null,
+        "importance_score": "MEDIUM",
+        "retrievable": true,
+        "association_method": "none",
+        "confidence": 1.0,
+        "association_confidence": 1.0,
+        "caption": null,
+        "ocr_text": null,
+        "semantic_description": null,
+        "objects": [],
+        "detected_entities": [],
+        "table_id": null,
         "element_types": [
           "heading"
         ],
         "relationships": {
-          "belongs_to": "body"
+          "belongs_to": "body",
+          "previous": "238f0cc2ae8c10e774e731da3b73f5d4fb359342f01a5b4356e32a01a6435c51_chunk_0000"
         },
+        "section_id": "sec_vertexa_solutions_pvt_ltd",
+        "section_heading": "Vertexa Solutions Pvt. Ltd.",
+        "subsection_heading": null,
+        "is_section_root": false,
+        "child_chunk_ids": [],
+        "report_number": null,
+        "state": null,
+        "region": null,
+        "district": null,
         "people": [
           "Vertexa Solutions Pvt"
         ],
@@ -53,8 +181,8 @@
     {
       "content": "Document Section: Vertexa Solutions Pvt. Ltd.\nContent:\nMini Company Handbook -Employee Reference Edition, v4.2\n\nInternal Use Only. If in doubt, check with there reporting manager before acting on any policy below.",
       "metadata": {
-        "chunk_id": "a8619fd4ae194817a13dad90f43659f8_chunk_0001",
-        "document_id": "a8619fd4ae194817a13dad90f43659f8",
+        "chunk_id": "238f0cc2ae8c10e774e731da3b73f5d4fb359342f01a5b4356e32a01a6435c51_chunk_0002",
+        "document_id": "238f0cc2ae8c10e774e731da3b73f5d4fb359342f01a5b4356e32a01a6435c51",
         "page_number": 1,
         "chunk_type": "text",
         "heading": "Vertexa Solutions Pvt. Ltd.",
@@ -84,14 +212,47 @@
             "coord_origin": "BOTTOMLEFT"
           }
         ],
+        "image_id": null,
+        "image_path": null,
+        "image_url": null,
+        "image_type": null,
+        "title": null,
+        "subtitle": null,
+        "explicit_caption": null,
+        "caption_text": null,
+        "entity_name": null,
+        "designation": null,
+        "text_before": null,
+        "text_after": null,
+        "layout_context": null,
+        "importance_score": "MEDIUM",
+        "retrievable": true,
+        "association_method": "none",
+        "confidence": 1.0,
+        "association_confidence": 1.0,
+        "caption": null,
+        "ocr_text": null,
+        "semantic_description": null,
+        "objects": [],
+        "detected_entities": [],
+        "table_id": null,
         "element_types": [
           "paragraph",
           "paragraph"
         ],
         "relationships": {
           "belongs_to": "b1_#/texts/0",
-          "previous": "a8619fd4ae194817a13dad90f43659f8_chunk_0000"
+          "previous": "238f0cc2ae8c10e774e731da3b73f5d4fb359342f01a5b4356e32a01a6435c51_chunk_0001"
         },
+        "section_id": "sec_vertexa_solutions_pvt_ltd",
+        "section_heading": "Vertexa Solutions Pvt. Ltd.",
+        "subsection_heading": null,
+        "is_section_root": false,
+        "child_chunk_ids": [],
+        "report_number": null,
+        "state": null,
+        "region": null,
+        "district": null,
         "people": [
           "Employee Reference Edition",
           "Internal Use Only",
@@ -119,8 +280,8 @@
     {
       "content": "Document Section: 1  Company Overview\nContent:\n1  Company Overview",
       "metadata": {
-        "chunk_id": "a8619fd4ae194817a13dad90f43659f8_chunk_0002",
-        "document_id": "a8619fd4ae194817a13dad90f43659f8",
+        "chunk_id": "238f0cc2ae8c10e774e731da3b73f5d4fb359342f01a5b4356e32a01a6435c51_chunk_0003",
+        "document_id": "238f0cc2ae8c10e774e731da3b73f5d4fb359342f01a5b4356e32a01a6435c51",
         "page_number": 1,
         "chunk_type": "heading",
         "heading": "1  Company Overview",
@@ -142,13 +303,46 @@
             "coord_origin": "BOTTOMLEFT"
           }
         ],
+        "image_id": null,
+        "image_path": null,
+        "image_url": null,
+        "image_type": null,
+        "title": null,
+        "subtitle": null,
+        "explicit_caption": null,
+        "caption_text": null,
+        "entity_name": null,
+        "designation": null,
+        "text_before": null,
+        "text_after": null,
+        "layout_context": null,
+        "importance_score": "MEDIUM",
+        "retrievable": true,
+        "association_method": "none",
+        "confidence": 1.0,
+        "association_confidence": 1.0,
+        "caption": null,
+        "ocr_text": null,
+        "semantic_description": null,
+        "objects": [],
+        "detected_entities": [],
+        "table_id": null,
         "element_types": [
           "heading"
         ],
         "relationships": {
           "belongs_to": "body",
-          "previous": "a8619fd4ae194817a13dad90f43659f8_chunk_0001"
+          "previous": "238f0cc2ae8c10e774e731da3b73f5d4fb359342f01a5b4356e32a01a6435c51_chunk_0002"
         },
+        "section_id": "sec_1_company_overview",
+        "section_heading": "1  Company Overview",
+        "subsection_heading": null,
+        "is_section_root": false,
+        "child_chunk_ids": [],
+        "report_number": null,
+        "state": null,
+        "region": null,
+        "district": null,
         "people": [
           "Company Overview"
         ],
@@ -166,8 +360,8 @@
     {
       "content": "Document Section: 1.1 History  |  1.2 Mission  |  1.3 Vision  |  1.4 Values\nContent:\n1.1 History  |  1.2 Mission  |  1.3 Vision  |  1.4 Values",
       "metadata": {
-        "chunk_id": "a8619fd4ae194817a13dad90f43659f8_chunk_0003",
-        "document_id": "a8619fd4ae194817a13dad90f43659f8",
+        "chunk_id": "238f0cc2ae8c10e774e731da3b73f5d4fb359342f01a5b4356e32a01a6435c51_chunk_0004",
+        "document_id": "238f0cc2ae8c10e774e731da3b73f5d4fb359342f01a5b4356e32a01a6435c51",
         "page_number": 1,
         "chunk_type": "heading",
         "heading": "1.1 History  |  1.2 Mission  |  1.3 Vision  |  1.4 Values",
@@ -189,13 +383,46 @@
             "coord_origin": "BOTTOMLEFT"
           }
         ],
+        "image_id": null,
+        "image_path": null,
+        "image_url": null,
+        "image_type": null,
+        "title": null,
+        "subtitle": null,
+        "explicit_caption": null,
+        "caption_text": null,
+        "entity_name": null,
+        "designation": null,
+        "text_before": null,
+        "text_after": null,
+        "layout_context": null,
+        "importance_score": "MEDIUM",
+        "retrievable": true,
+        "association_method": "none",
+        "confidence": 1.0,
+        "association_confidence": 1.0,
+        "caption": null,
+        "ocr_text": null,
+        "semantic_description": null,
+        "objects": [],
+        "detected_entities": [],
+        "table_id": null,
         "element_types": [
           "heading"
         ],
         "relationships": {
           "belongs_to": "body",
-          "previous": "a8619fd4ae194817a13dad90f43659f8_chunk_0002"
+          "previous": "238f0cc2ae8c10e774e731da3b73f5d4fb359342f01a5b4356e32a01a6435c51_chunk_0003"
         },
+        "section_id": "sec_1_1_history_1_2_mission_1_3_vision_1_4_values",
+        "section_heading": "1.1 History  |  1.2 Mission  |  1.3 Vision  |  1.4 Values",
+        "subsection_heading": null,
+        "is_section_root": false,
+        "child_chunk_ids": [],
+        "report_number": null,
+        "state": null,
+        "region": null,
+        "district": null,
         "people": [],
         "organizations": [],
         "groups": [],
@@ -213,8 +440,8 @@
     {
       "content": "Document Section: 1.1 History  |  1.2 Mission  |  1.3 Vision  |  1.4 Values\nContent:\nVertexa Solutions Pvt. Ltd. was founded in 2011 by six engineers who set out to build tools that helps enterprises make sense of unstructured documents. The company was incorporated in Bengaluru; it's first office was a two-room facility above a printing shop. Vertexa now serves over 300 clients accross 14 countries.\n\nNote: Section 9 (Compliance) references a founding year of 2009 in a regulatory filing summary, though 2011 is the year on official incorporation records.\n\nMission: to help organizations unlock the value trapped in there documents by combining rigorous engineering with respect for the people who rely on our software everyday.\n\nVision: a future in which no employee ever has to manually search hundreds of pages to find a single fact.",
       "metadata": {
-        "chunk_id": "a8619fd4ae194817a13dad90f43659f8_chunk_0004",
-        "document_id": "a8619fd4ae194817a13dad90f43659f8",
+        "chunk_id": "238f0cc2ae8c10e774e731da3b73f5d4fb359342f01a5b4356e32a01a6435c51_chunk_0005",
+        "document_id": "238f0cc2ae8c10e774e731da3b73f5d4fb359342f01a5b4356e32a01a6435c51",
         "page_number": 1,
         "chunk_type": "text",
         "heading": "1.1 History  |  1.2 Mission  |  1.3 Vision  |  1.4 Values",
@@ -260,6 +487,30 @@
             "coord_origin": "BOTTOMLEFT"
           }
         ],
+        "image_id": null,
+        "image_path": null,
+        "image_url": null,
+        "image_type": null,
+        "title": null,
+        "subtitle": null,
+        "explicit_caption": null,
+        "caption_text": null,
+        "entity_name": null,
+        "designation": null,
+        "text_before": null,
+        "text_after": null,
+        "layout_context": null,
+        "importance_score": "MEDIUM",
+        "retrievable": true,
+        "association_method": "none",
+        "confidence": 1.0,
+        "association_confidence": 1.0,
+        "caption": null,
+        "ocr_text": null,
+        "semantic_description": null,
+        "objects": [],
+        "detected_entities": [],
+        "table_id": null,
         "element_types": [
           "paragraph",
           "paragraph",
@@ -268,8 +519,17 @@
         ],
         "relationships": {
           "belongs_to": "b1_#/texts/4",
-          "previous": "a8619fd4ae194817a13dad90f43659f8_chunk_0003"
+          "previous": "238f0cc2ae8c10e774e731da3b73f5d4fb359342f01a5b4356e32a01a6435c51_chunk_0004"
         },
+        "section_id": "sec_1_1_history_1_2_mission_1_3_vision_1_4_values",
+        "section_heading": "1.1 History  |  1.2 Mission  |  1.3 Vision  |  1.4 Values",
+        "subsection_heading": null,
+        "is_section_root": false,
+        "child_chunk_ids": [],
+        "report_number": null,
+        "state": null,
+        "region": null,
+        "district": null,
         "people": [
           "Vertexa Solutions Pvt"
         ],
@@ -304,8 +564,8 @@
     {
       "content": "Document Section: 1.1 History  |  1.2 Mission  |  1.3 Vision  |  1.4 Values\nContent:\n* Customer Obsession -we start with the customer's problem.\n* Ownership -every employee fixes what they see is broken.\n* Integrity -we do the right thing even when its inconvenient.\n* Curiosity -we treat contradictions as learning opportunities.",
       "metadata": {
-        "chunk_id": "a8619fd4ae194817a13dad90f43659f8_chunk_0005",
-        "document_id": "a8619fd4ae194817a13dad90f43659f8",
+        "chunk_id": "238f0cc2ae8c10e774e731da3b73f5d4fb359342f01a5b4356e32a01a6435c51_chunk_0006",
+        "document_id": "238f0cc2ae8c10e774e731da3b73f5d4fb359342f01a5b4356e32a01a6435c51",
         "page_number": 1,
         "chunk_type": "list",
         "heading": "1.1 History  |  1.2 Mission  |  1.3 Vision  |  1.4 Values",
@@ -351,6 +611,30 @@
             "coord_origin": "BOTTOMLEFT"
           }
         ],
+        "image_id": null,
+        "image_path": null,
+        "image_url": null,
+        "image_type": null,
+        "title": null,
+        "subtitle": null,
+        "explicit_caption": null,
+        "caption_text": null,
+        "entity_name": null,
+        "designation": null,
+        "text_before": null,
+        "text_after": null,
+        "layout_context": null,
+        "importance_score": "MEDIUM",
+        "retrievable": true,
+        "association_method": "none",
+        "confidence": 1.0,
+        "association_confidence": 1.0,
+        "caption": null,
+        "ocr_text": null,
+        "semantic_description": null,
+        "objects": [],
+        "detected_entities": [],
+        "table_id": null,
         "element_types": [
           "list_item",
           "list_item",
@@ -359,8 +643,17 @@
         ],
         "relationships": {
           "belongs_to": "b1_#/texts/4",
-          "previous": "a8619fd4ae194817a13dad90f43659f8_chunk_0004"
+          "previous": "238f0cc2ae8c10e774e731da3b73f5d4fb359342f01a5b4356e32a01a6435c51_chunk_0005"
         },
+        "section_id": "sec_1_1_history_1_2_mission_1_3_vision_1_4_values",
+        "section_heading": "1.1 History  |  1.2 Mission  |  1.3 Vision  |  1.4 Values",
+        "subsection_heading": null,
+        "is_section_root": false,
+        "child_chunk_ids": [],
+        "report_number": null,
+        "state": null,
+        "region": null,
+        "district": null,
         "people": [
           "Customer Obsession"
         ],
@@ -386,8 +679,8 @@
     {
       "content": "Document Section: 1.1 History  |  1.2 Mission  |  1.3 Vision  |  1.4 Values\nContent:\nThese four values were ratified in 2012; a 2019 internal memo claims a fifth value, 'Simplicity', was added that year -HR maintains the values have been constant since 2012.",
       "metadata": {
-        "chunk_id": "a8619fd4ae194817a13dad90f43659f8_chunk_0006",
-        "document_id": "a8619fd4ae194817a13dad90f43659f8",
+        "chunk_id": "238f0cc2ae8c10e774e731da3b73f5d4fb359342f01a5b4356e32a01a6435c51_chunk_0007",
+        "document_id": "238f0cc2ae8c10e774e731da3b73f5d4fb359342f01a5b4356e32a01a6435c51",
         "page_number": 1,
         "chunk_type": "text",
         "heading": "1.1 History  |  1.2 Mission  |  1.3 Vision  |  1.4 Values",
@@ -409,13 +702,46 @@
             "coord_origin": "BOTTOMLEFT"
           }
         ],
+        "image_id": null,
+        "image_path": null,
+        "image_url": null,
+        "image_type": null,
+        "title": null,
+        "subtitle": null,
+        "explicit_caption": null,
+        "caption_text": null,
+        "entity_name": null,
+        "designation": null,
+        "text_before": null,
+        "text_after": null,
+        "layout_context": null,
+        "importance_score": "MEDIUM",
+        "retrievable": true,
+        "association_method": "none",
+        "confidence": 1.0,
+        "association_confidence": 1.0,
+        "caption": null,
+        "ocr_text": null,
+        "semantic_description": null,
+        "objects": [],
+        "detected_entities": [],
+        "table_id": null,
         "element_types": [
           "paragraph"
         ],
         "relationships": {
           "belongs_to": "b1_#/texts/4",
-          "previous": "a8619fd4ae194817a13dad90f43659f8_chunk_0005"
+          "previous": "238f0cc2ae8c10e774e731da3b73f5d4fb359342f01a5b4356e32a01a6435c51_chunk_0006"
         },
+        "section_id": "sec_1_1_history_1_2_mission_1_3_vision_1_4_values",
+        "section_heading": "1.1 History  |  1.2 Mission  |  1.3 Vision  |  1.4 Values",
+        "subsection_heading": null,
+        "is_section_root": false,
+        "child_chunk_ids": [],
+        "report_number": null,
+        "state": null,
+        "region": null,
+        "district": null,
         "people": [
           "-HR"
         ],
@@ -444,8 +770,8 @@
     {
       "content": "Document Section: 2  Human Resources Policies\nContent:\n2  Human Resources Policies",
       "metadata": {
-        "chunk_id": "a8619fd4ae194817a13dad90f43659f8_chunk_0007",
-        "document_id": "a8619fd4ae194817a13dad90f43659f8",
+        "chunk_id": "238f0cc2ae8c10e774e731da3b73f5d4fb359342f01a5b4356e32a01a6435c51_chunk_0008",
+        "document_id": "238f0cc2ae8c10e774e731da3b73f5d4fb359342f01a5b4356e32a01a6435c51",
         "page_number": 1,
         "chunk_type": "heading",
         "heading": "2  Human Resources Policies",
@@ -467,13 +793,46 @@
             "coord_origin": "BOTTOMLEFT"
           }
         ],
+        "image_id": null,
+        "image_path": null,
+        "image_url": null,
+        "image_type": null,
+        "title": null,
+        "subtitle": null,
+        "explicit_caption": null,
+        "caption_text": null,
+        "entity_name": null,
+        "designation": null,
+        "text_before": null,
+        "text_after": null,
+        "layout_context": null,
+        "importance_score": "MEDIUM",
+        "retrievable": true,
+        "association_method": "none",
+        "confidence": 1.0,
+        "association_confidence": 1.0,
+        "caption": null,
+        "ocr_text": null,
+        "semantic_description": null,
+        "objects": [],
+        "detected_entities": [],
+        "table_id": null,
         "element_types": [
           "heading"
         ],
         "relationships": {
           "belongs_to": "body",
-          "previous": "a8619fd4ae194817a13dad90f43659f8_chunk_0006"
+          "previous": "238f0cc2ae8c10e774e731da3b73f5d4fb359342f01a5b4356e32a01a6435c51_chunk_0007"
         },
+        "section_id": "sec_2_human_resources_policies",
+        "section_heading": "2  Human Resources Policies",
+        "subsection_heading": null,
+        "is_section_root": false,
+        "child_chunk_ids": [],
+        "report_number": null,
+        "state": null,
+        "region": null,
+        "district": null,
         "people": [
           "Human Resources Policies"
         ],
@@ -492,8 +851,8 @@
     {
       "content": "Document Section: 2.1 Leave Policy  |  2.2 Attendance  |  2.3 Code of Conduct\nContent:\n2.1 Leave Policy  |  2.2 Attendance  |  2.3 Code of Conduct",
       "metadata": {
-        "chunk_id": "a8619fd4ae194817a13dad90f43659f8_chunk_0008",
-        "document_id": "a8619fd4ae194817a13dad90f43659f8",
+        "chunk_id": "238f0cc2ae8c10e774e731da3b73f5d4fb359342f01a5b4356e32a01a6435c51_chunk_0009",
+        "document_id": "238f0cc2ae8c10e774e731da3b73f5d4fb359342f01a5b4356e32a01a6435c51",
         "page_number": 1,
         "chunk_type": "heading",
         "heading": "2.1 Leave Policy  |  2.2 Attendance  |  2.3 Code of Conduct",
@@ -515,13 +874,46 @@
             "coord_origin": "BOTTOMLEFT"
           }
         ],
+        "image_id": null,
+        "image_path": null,
+        "image_url": null,
+        "image_type": null,
+        "title": null,
+        "subtitle": null,
+        "explicit_caption": null,
+        "caption_text": null,
+        "entity_name": null,
+        "designation": null,
+        "text_before": null,
+        "text_after": null,
+        "layout_context": null,
+        "importance_score": "MEDIUM",
+        "retrievable": true,
+        "association_method": "none",
+        "confidence": 1.0,
+        "association_confidence": 1.0,
+        "caption": null,
+        "ocr_text": null,
+        "semantic_description": null,
+        "objects": [],
+        "detected_entities": [],
+        "table_id": null,
         "element_types": [
           "heading"
         ],
         "relationships": {
           "belongs_to": "body",
-          "previous": "a8619fd4ae194817a13dad90f43659f8_chunk_0007"
+          "previous": "238f0cc2ae8c10e774e731da3b73f5d4fb359342f01a5b4356e32a01a6435c51_chunk_0008"
         },
+        "section_id": "sec_2_1_leave_policy_2_2_attendance_2_3_code_of_conduct",
+        "section_heading": "2.1 Leave Policy  |  2.2 Attendance  |  2.3 Code of Conduct",
+        "subsection_heading": null,
+        "is_section_root": false,
+        "child_chunk_ids": [],
+        "report_number": null,
+        "state": null,
+        "region": null,
+        "district": null,
         "people": [
           "Leave Policy"
         ],
@@ -541,8 +933,8 @@
     {
       "content": "Document Section: 2.1 Leave Policy  |  2.2 Attendance  |  2.3 Code of Conduct\nContent:\nPage 4 of the original policy circular: Employees receive 18 annual leaves per calendar year, credited pro-rata for employees joining mid-year, plus 10 sick and 5 casual leaves.\n\nPage 18 of the same circular (Annexure update): Employees receive 20 annual leaves per calendar year following the FY23 revision.\n\nStandard hours are 9:30 AM -6:30 PM. Repeated unexplained absences may effect an employee's rating. Employees who's conduct\n\nviolates the Code of Conduct may face disciplinary action; their are no exceptions based on seniority.",
       "metadata": {
-        "chunk_id": "a8619fd4ae194817a13dad90f43659f8_chunk_0009",
-        "document_id": "a8619fd4ae194817a13dad90f43659f8",
+        "chunk_id": "238f0cc2ae8c10e774e731da3b73f5d4fb359342f01a5b4356e32a01a6435c51_chunk_0010",
+        "document_id": "238f0cc2ae8c10e774e731da3b73f5d4fb359342f01a5b4356e32a01a6435c51",
         "page_number": 1,
         "chunk_type": "text",
         "heading": "2.1 Leave Policy  |  2.2 Attendance  |  2.3 Code of Conduct",
@@ -588,6 +980,30 @@
             "coord_origin": "BOTTOMLEFT"
           }
         ],
+        "image_id": null,
+        "image_path": null,
+        "image_url": null,
+        "image_type": null,
+        "title": null,
+        "subtitle": null,
+        "explicit_caption": null,
+        "caption_text": null,
+        "entity_name": null,
+        "designation": null,
+        "text_before": null,
+        "text_after": null,
+        "layout_context": null,
+        "importance_score": "MEDIUM",
+        "retrievable": true,
+        "association_method": "none",
+        "confidence": 1.0,
+        "association_confidence": 1.0,
+        "caption": null,
+        "ocr_text": null,
+        "semantic_description": null,
+        "objects": [],
+        "detected_entities": [],
+        "table_id": null,
         "element_types": [
           "paragraph",
           "paragraph",
@@ -596,8 +1012,17 @@
         ],
         "relationships": {
           "belongs_to": "b1_#/texts/15",
-          "previous": "a8619fd4ae194817a13dad90f43659f8_chunk_0008"
+          "previous": "238f0cc2ae8c10e774e731da3b73f5d4fb359342f01a5b4356e32a01a6435c51_chunk_0009"
         },
+        "section_id": "sec_2_1_leave_policy_2_2_attendance_2_3_code_of_conduct",
+        "section_heading": "2.1 Leave Policy  |  2.2 Attendance  |  2.3 Code of Conduct",
+        "subsection_heading": null,
+        "is_section_root": false,
+        "child_chunk_ids": [],
+        "report_number": null,
+        "state": null,
+        "region": null,
+        "district": null,
         "people": [],
         "organizations": [],
         "groups": [],
@@ -624,8 +1049,8 @@
     {
       "content": "Document Section: 3  Work From Home\nContent:\n3  Work From Home",
       "metadata": {
-        "chunk_id": "a8619fd4ae194817a13dad90f43659f8_chunk_0010",
-        "document_id": "a8619fd4ae194817a13dad90f43659f8",
+        "chunk_id": "238f0cc2ae8c10e774e731da3b73f5d4fb359342f01a5b4356e32a01a6435c51_chunk_0011",
+        "document_id": "238f0cc2ae8c10e774e731da3b73f5d4fb359342f01a5b4356e32a01a6435c51",
         "page_number": 1,
         "chunk_type": "heading",
         "heading": "3  Work From Home",
@@ -647,13 +1072,46 @@
             "coord_origin": "BOTTOMLEFT"
           }
         ],
+        "image_id": null,
+        "image_path": null,
+        "image_url": null,
+        "image_type": null,
+        "title": null,
+        "subtitle": null,
+        "explicit_caption": null,
+        "caption_text": null,
+        "entity_name": null,
+        "designation": null,
+        "text_before": null,
+        "text_after": null,
+        "layout_context": null,
+        "importance_score": "MEDIUM",
+        "retrievable": true,
+        "association_method": "none",
+        "confidence": 1.0,
+        "association_confidence": 1.0,
+        "caption": null,
+        "ocr_text": null,
+        "semantic_description": null,
+        "objects": [],
+        "detected_entities": [],
+        "table_id": null,
         "element_types": [
           "heading"
         ],
         "relationships": {
           "belongs_to": "body",
-          "previous": "a8619fd4ae194817a13dad90f43659f8_chunk_0009"
+          "previous": "238f0cc2ae8c10e774e731da3b73f5d4fb359342f01a5b4356e32a01a6435c51_chunk_0010"
         },
+        "section_id": "sec_3_work_from_home",
+        "section_heading": "3  Work From Home",
+        "subsection_heading": null,
+        "is_section_root": false,
+        "child_chunk_ids": [],
+        "report_number": null,
+        "state": null,
+        "region": null,
+        "district": null,
         "people": [
           "Work From Home"
         ],
@@ -668,8 +1126,8 @@
     {
       "content": "Document Section: 3  Work From Home\nContent:\nPage 6: Employees may work remotely three days every week, subject to manager approval.\n\nPage 25 (FY24 operating-model update): Employees are expected to work from office full time, effective the date communicated by department heads -this supersedes informal remote arrangements. It is not stated in this handbook which of the two rules governs in case of conflict.",
       "metadata": {
-        "chunk_id": "a8619fd4ae194817a13dad90f43659f8_chunk_0011",
-        "document_id": "a8619fd4ae194817a13dad90f43659f8",
+        "chunk_id": "238f0cc2ae8c10e774e731da3b73f5d4fb359342f01a5b4356e32a01a6435c51_chunk_0012",
+        "document_id": "238f0cc2ae8c10e774e731da3b73f5d4fb359342f01a5b4356e32a01a6435c51",
         "page_number": 1,
         "chunk_type": "text",
         "heading": "3  Work From Home",
@@ -699,14 +1157,47 @@
             "coord_origin": "BOTTOMLEFT"
           }
         ],
+        "image_id": null,
+        "image_path": null,
+        "image_url": null,
+        "image_type": null,
+        "title": null,
+        "subtitle": null,
+        "explicit_caption": null,
+        "caption_text": null,
+        "entity_name": null,
+        "designation": null,
+        "text_before": null,
+        "text_after": null,
+        "layout_context": null,
+        "importance_score": "MEDIUM",
+        "retrievable": true,
+        "association_method": "none",
+        "confidence": 1.0,
+        "association_confidence": 1.0,
+        "caption": null,
+        "ocr_text": null,
+        "semantic_description": null,
+        "objects": [],
+        "detected_entities": [],
+        "table_id": null,
         "element_types": [
           "paragraph",
           "paragraph"
         ],
         "relationships": {
           "belongs_to": "b1_#/texts/20",
-          "previous": "a8619fd4ae194817a13dad90f43659f8_chunk_0010"
+          "previous": "238f0cc2ae8c10e774e731da3b73f5d4fb359342f01a5b4356e32a01a6435c51_chunk_0011"
         },
+        "section_id": "sec_3_work_from_home",
+        "section_heading": "3  Work From Home",
+        "subsection_heading": null,
+        "is_section_root": false,
+        "child_chunk_ids": [],
+        "report_number": null,
+        "state": null,
+        "region": null,
+        "district": null,
         "people": [],
         "organizations": [],
         "groups": [],
@@ -732,8 +1223,8 @@
     {
       "content": "Document Section: 4  Travel Policy\nContent:\n4  Travel Policy",
       "metadata": {
-        "chunk_id": "a8619fd4ae194817a13dad90f43659f8_chunk_0012",
-        "document_id": "a8619fd4ae194817a13dad90f43659f8",
+        "chunk_id": "238f0cc2ae8c10e774e731da3b73f5d4fb359342f01a5b4356e32a01a6435c51_chunk_0013",
+        "document_id": "238f0cc2ae8c10e774e731da3b73f5d4fb359342f01a5b4356e32a01a6435c51",
         "page_number": 2,
         "chunk_type": "heading",
         "heading": "4  Travel Policy",
@@ -755,13 +1246,46 @@
             "coord_origin": "BOTTOMLEFT"
           }
         ],
+        "image_id": null,
+        "image_path": null,
+        "image_url": null,
+        "image_type": null,
+        "title": null,
+        "subtitle": null,
+        "explicit_caption": null,
+        "caption_text": null,
+        "entity_name": null,
+        "designation": null,
+        "text_before": null,
+        "text_after": null,
+        "layout_context": null,
+        "importance_score": "MEDIUM",
+        "retrievable": true,
+        "association_method": "none",
+        "confidence": 1.0,
+        "association_confidence": 1.0,
+        "caption": null,
+        "ocr_text": null,
+        "semantic_description": null,
+        "objects": [],
+        "detected_entities": [],
+        "table_id": null,
         "element_types": [
           "heading"
         ],
         "relationships": {
           "belongs_to": "body",
-          "previous": "a8619fd4ae194817a13dad90f43659f8_chunk_0011"
+          "previous": "238f0cc2ae8c10e774e731da3b73f5d4fb359342f01a5b4356e32a01a6435c51_chunk_0012"
         },
+        "section_id": "sec_4_travel_policy",
+        "section_heading": "4  Travel Policy",
+        "subsection_heading": null,
+        "is_section_root": false,
+        "child_chunk_ids": [],
+        "report_number": null,
+        "state": null,
+        "region": null,
+        "district": null,
         "people": [
           "Travel Policy"
         ],
@@ -779,8 +1303,8 @@
     {
       "content": "Document Section: 4  Travel Policy\nContent:\nTravel should be approved whenever necessary -the policy does not specify who decides necessity, or according to whose judgement a trip qualifies. International travel needs ~4 weeks lead time for visa processing; travel insurance is mandatory. Employees below a certain grade may need additional sign-off, though the grade threshold is undefined here.",
       "metadata": {
-        "chunk_id": "a8619fd4ae194817a13dad90f43659f8_chunk_0013",
-        "document_id": "a8619fd4ae194817a13dad90f43659f8",
+        "chunk_id": "238f0cc2ae8c10e774e731da3b73f5d4fb359342f01a5b4356e32a01a6435c51_chunk_0014",
+        "document_id": "238f0cc2ae8c10e774e731da3b73f5d4fb359342f01a5b4356e32a01a6435c51",
         "page_number": 2,
         "chunk_type": "text",
         "heading": "4  Travel Policy",
@@ -802,13 +1326,46 @@
             "coord_origin": "BOTTOMLEFT"
           }
         ],
+        "image_id": null,
+        "image_path": null,
+        "image_url": null,
+        "image_type": null,
+        "title": null,
+        "subtitle": null,
+        "explicit_caption": null,
+        "caption_text": null,
+        "entity_name": null,
+        "designation": null,
+        "text_before": null,
+        "text_after": null,
+        "layout_context": null,
+        "importance_score": "MEDIUM",
+        "retrievable": true,
+        "association_method": "none",
+        "confidence": 1.0,
+        "association_confidence": 1.0,
+        "caption": null,
+        "ocr_text": null,
+        "semantic_description": null,
+        "objects": [],
+        "detected_entities": [],
+        "table_id": null,
         "element_types": [
           "paragraph"
         ],
         "relationships": {
           "belongs_to": "b1_#/texts/23",
-          "previous": "a8619fd4ae194817a13dad90f43659f8_chunk_0012"
+          "previous": "238f0cc2ae8c10e774e731da3b73f5d4fb359342f01a5b4356e32a01a6435c51_chunk_0013"
         },
+        "section_id": "sec_4_travel_policy",
+        "section_heading": "4  Travel Policy",
+        "subsection_heading": null,
+        "is_section_root": false,
+        "child_chunk_ids": [],
+        "report_number": null,
+        "state": null,
+        "region": null,
+        "district": null,
         "people": [],
         "organizations": [],
         "groups": [],
@@ -834,8 +1391,8 @@
     {
       "content": "Document Section: 5  IT Security\nContent:\n5  IT Security",
       "metadata": {
-        "chunk_id": "a8619fd4ae194817a13dad90f43659f8_chunk_0014",
-        "document_id": "a8619fd4ae194817a13dad90f43659f8",
+        "chunk_id": "238f0cc2ae8c10e774e731da3b73f5d4fb359342f01a5b4356e32a01a6435c51_chunk_0015",
+        "document_id": "238f0cc2ae8c10e774e731da3b73f5d4fb359342f01a5b4356e32a01a6435c51",
         "page_number": 2,
         "chunk_type": "heading",
         "heading": "5  IT Security",
@@ -857,13 +1414,46 @@
             "coord_origin": "BOTTOMLEFT"
           }
         ],
+        "image_id": null,
+        "image_path": null,
+        "image_url": null,
+        "image_type": null,
+        "title": null,
+        "subtitle": null,
+        "explicit_caption": null,
+        "caption_text": null,
+        "entity_name": null,
+        "designation": null,
+        "text_before": null,
+        "text_after": null,
+        "layout_context": null,
+        "importance_score": "MEDIUM",
+        "retrievable": true,
+        "association_method": "none",
+        "confidence": 1.0,
+        "association_confidence": 1.0,
+        "caption": null,
+        "ocr_text": null,
+        "semantic_description": null,
+        "objects": [],
+        "detected_entities": [],
+        "table_id": null,
         "element_types": [
           "heading"
         ],
         "relationships": {
           "belongs_to": "body",
-          "previous": "a8619fd4ae194817a13dad90f43659f8_chunk_0013"
+          "previous": "238f0cc2ae8c10e774e731da3b73f5d4fb359342f01a5b4356e32a01a6435c51_chunk_0014"
         },
+        "section_id": "sec_5_it_security",
+        "section_heading": "5  IT Security",
+        "subsection_heading": null,
+        "is_section_root": false,
+        "child_chunk_ids": [],
+        "report_number": null,
+        "state": null,
+        "region": null,
+        "district": null,
         "people": [
           "IT Security"
         ],
@@ -880,8 +1470,8 @@
     {
       "content": "Document Section: Password Policy | MFA | VPN | Device Encryption | USB Policy\nContent:\nPassword Policy | MFA | VPN | Device Encryption | USB Policy",
       "metadata": {
-        "chunk_id": "a8619fd4ae194817a13dad90f43659f8_chunk_0015",
-        "document_id": "a8619fd4ae194817a13dad90f43659f8",
+        "chunk_id": "238f0cc2ae8c10e774e731da3b73f5d4fb359342f01a5b4356e32a01a6435c51_chunk_0016",
+        "document_id": "238f0cc2ae8c10e774e731da3b73f5d4fb359342f01a5b4356e32a01a6435c51",
         "page_number": 2,
         "chunk_type": "heading",
         "heading": "Password Policy | MFA | VPN | Device Encryption | USB Policy",
@@ -903,13 +1493,46 @@
             "coord_origin": "BOTTOMLEFT"
           }
         ],
+        "image_id": null,
+        "image_path": null,
+        "image_url": null,
+        "image_type": null,
+        "title": null,
+        "subtitle": null,
+        "explicit_caption": null,
+        "caption_text": null,
+        "entity_name": null,
+        "designation": null,
+        "text_before": null,
+        "text_after": null,
+        "layout_context": null,
+        "importance_score": "MEDIUM",
+        "retrievable": true,
+        "association_method": "none",
+        "confidence": 1.0,
+        "association_confidence": 1.0,
+        "caption": null,
+        "ocr_text": null,
+        "semantic_description": null,
+        "objects": [],
+        "detected_entities": [],
+        "table_id": null,
         "element_types": [
           "heading"
         ],
         "relationships": {
           "belongs_to": "body",
-          "previous": "a8619fd4ae194817a13dad90f43659f8_chunk_0014"
+          "previous": "238f0cc2ae8c10e774e731da3b73f5d4fb359342f01a5b4356e32a01a6435c51_chunk_0015"
         },
+        "section_id": "sec_password_policy_mfa_vpn_device_encryption_usb_policy",
+        "section_heading": "Password Policy | MFA | VPN | Device Encryption | USB Policy",
+        "subsection_heading": null,
+        "is_section_root": false,
+        "child_chunk_ids": [],
+        "report_number": null,
+        "state": null,
+        "region": null,
+        "district": null,
         "people": [
           "Password Policy"
         ],
@@ -931,8 +1554,8 @@
     {
       "content": "Document Section: Password Policy | MFA | VPN | Device Encryption | USB Policy\nContent:\n* Passwords: atleast 12 characters, mixed case + numeric + special, rotated every 90 days.\n* MFA is mandatory for email, VPN, and internal apps within 48 hours of access being granted.\n* VPN required for all off-network access; split tunneling disabled by default.\n* Full-disk encryption mandatory on all company laptops.\n* Personal USB drives are prohibited unless approved by IT Security; see Appendix B for data-handling obligations on removable media.",
       "metadata": {
-        "chunk_id": "a8619fd4ae194817a13dad90f43659f8_chunk_0016",
-        "document_id": "a8619fd4ae194817a13dad90f43659f8",
+        "chunk_id": "238f0cc2ae8c10e774e731da3b73f5d4fb359342f01a5b4356e32a01a6435c51_chunk_0017",
+        "document_id": "238f0cc2ae8c10e774e731da3b73f5d4fb359342f01a5b4356e32a01a6435c51",
         "page_number": 2,
         "chunk_type": "list",
         "heading": "Password Policy | MFA | VPN | Device Encryption | USB Policy",
@@ -986,6 +1609,30 @@
             "coord_origin": "BOTTOMLEFT"
           }
         ],
+        "image_id": null,
+        "image_path": null,
+        "image_url": null,
+        "image_type": null,
+        "title": null,
+        "subtitle": null,
+        "explicit_caption": null,
+        "caption_text": null,
+        "entity_name": null,
+        "designation": null,
+        "text_before": null,
+        "text_after": null,
+        "layout_context": null,
+        "importance_score": "MEDIUM",
+        "retrievable": true,
+        "association_method": "none",
+        "confidence": 1.0,
+        "association_confidence": 1.0,
+        "caption": null,
+        "ocr_text": null,
+        "semantic_description": null,
+        "objects": [],
+        "detected_entities": [],
+        "table_id": null,
         "element_types": [
           "list_item",
           "list_item",
@@ -995,8 +1642,17 @@
         ],
         "relationships": {
           "belongs_to": "b1_#/texts/26",
-          "previous": "a8619fd4ae194817a13dad90f43659f8_chunk_0015"
+          "previous": "238f0cc2ae8c10e774e731da3b73f5d4fb359342f01a5b4356e32a01a6435c51_chunk_0016"
         },
+        "section_id": "sec_password_policy_mfa_vpn_device_encryption_usb_policy",
+        "section_heading": "Password Policy | MFA | VPN | Device Encryption | USB Policy",
+        "subsection_heading": null,
+        "is_section_root": false,
+        "child_chunk_ids": [],
+        "report_number": null,
+        "state": null,
+        "region": null,
+        "district": null,
         "people": [
           "Appendix B"
         ],
@@ -1024,10 +1680,109 @@
       }
     },
     {
+      "content": "Document Section: Password Policy | MFA | VPN | Device Encryption | USB Policy\nContent:\nImage ID: b1_#/pictures/1\nImage Type: Image\nPage: 2\nImage Title: Figure on Page 2 (Password Policy | MFA | VPN | Device Encryption | USB Policy)\nSection Heading: Password Policy | MFA | VPN | Device Encryption | USB Policy\nImportance: MEDIUM\nImage URL: /outputs/238f0cc2ae8c10e774e731da3b73f5d4fb359342f01a5b4356e32a01a6435c51/05_images/pictures_1.png\nImage Semantic Description: Visual graphic / image on Page 2 under section 'Password Policy | MFA | VPN | Device Encryption | USB Policy'.",
+      "metadata": {
+        "chunk_id": "238f0cc2ae8c10e774e731da3b73f5d4fb359342f01a5b4356e32a01a6435c51_chunk_0018",
+        "document_id": "238f0cc2ae8c10e774e731da3b73f5d4fb359342f01a5b4356e32a01a6435c51",
+        "page_number": 2,
+        "chunk_type": "image",
+        "heading": "Password Policy | MFA | VPN | Device Encryption | USB Policy",
+        "section": "Password Policy | MFA | VPN | Device Encryption | USB Policy",
+        "hierarchy_path": [
+          "b1_#/texts/26"
+        ],
+        "source_element_ids": [
+          "b1_#/pictures/1"
+        ],
+        "word_count": 73,
+        "token_estimate": 170,
+        "bounding_boxes": [
+          {
+            "l": 163.7975311279297,
+            "t": 548.2440795898438,
+            "r": 448.1711730957031,
+            "b": 350.2322082519531,
+            "coord_origin": "BOTTOMLEFT"
+          }
+        ],
+        "image_id": "b1_#/pictures/1",
+        "image_path": "C:\\Users\\sanju\\INTERNSHIP-APT\\BTLProject\\data\\output\\a8619fd4ae194817a13dad90f43659f8\\05_images\\pictures_1.png",
+        "image_url": "/outputs/238f0cc2ae8c10e774e731da3b73f5d4fb359342f01a5b4356e32a01a6435c51/05_images/pictures_1.png",
+        "image_type": "Image",
+        "title": "Figure on Page 2 (Password Policy | MFA | VPN | Device Encryption | USB Policy)",
+        "subtitle": null,
+        "explicit_caption": null,
+        "caption_text": "Figure on Page 2 (Password Policy | MFA | VPN | Device Encryption | USB Policy)",
+        "entity_name": null,
+        "designation": null,
+        "text_before": null,
+        "text_after": null,
+        "layout_context": null,
+        "importance_score": "MEDIUM",
+        "retrievable": true,
+        "association_method": "none",
+        "confidence": 1.0,
+        "association_confidence": 1.0,
+        "caption": "Figure on Page 2 (Password Policy | MFA | VPN | Device Encryption | USB Policy)",
+        "ocr_text": "",
+        "semantic_description": "Visual graphic / image on Page 2 under section 'Password Policy | MFA | VPN | Device Encryption | USB Policy'.",
+        "objects": [],
+        "detected_entities": [],
+        "table_id": null,
+        "element_types": [
+          "image"
+        ],
+        "relationships": {
+          "belongs_to": "b1_#/texts/26"
+        },
+        "section_id": "sec_password_policy_mfa_vpn_device_encryption_usb_policy",
+        "section_heading": "Password Policy | MFA | VPN | Device Encryption | USB Policy",
+        "subsection_heading": null,
+        "is_section_root": false,
+        "child_chunk_ids": [],
+        "report_number": null,
+        "state": null,
+        "region": null,
+        "district": null,
+        "people": [
+          "Device Encryption",
+          "Image ID",
+          "Image Semantic Description",
+          "Image Title",
+          "Image Type",
+          "MEDIUM\nImage URL",
+          "Password Policy",
+          "Section Heading",
+          "USB Policy",
+          "USB Policy\nImportance"
+        ],
+        "organizations": [
+          "Image Semantic Description",
+          "MFA"
+        ],
+        "groups": [],
+        "dates": [],
+        "weapons": [],
+        "locations": [],
+        "keywords": [
+          "policy",
+          "password",
+          "device",
+          "encryption",
+          "pictures",
+          "title",
+          "heading",
+          "importance",
+          "medium",
+          "outputs"
+        ]
+      }
+    },
+    {
       "content": "Document Section: Password Policy | MFA | VPN | Device Encryption | USB Policy\nContent:\nFig 1 -Vertexa AI Platform architecture (referenced in Sections 7 & 11)",
       "metadata": {
-        "chunk_id": "a8619fd4ae194817a13dad90f43659f8_chunk_0017",
-        "document_id": "a8619fd4ae194817a13dad90f43659f8",
+        "chunk_id": "238f0cc2ae8c10e774e731da3b73f5d4fb359342f01a5b4356e32a01a6435c51_chunk_0019",
+        "document_id": "238f0cc2ae8c10e774e731da3b73f5d4fb359342f01a5b4356e32a01a6435c51",
         "page_number": 2,
         "chunk_type": "text",
         "heading": "Password Policy | MFA | VPN | Device Encryption | USB Policy",
@@ -1049,13 +1804,46 @@
             "coord_origin": "BOTTOMLEFT"
           }
         ],
+        "image_id": null,
+        "image_path": null,
+        "image_url": null,
+        "image_type": null,
+        "title": null,
+        "subtitle": null,
+        "explicit_caption": null,
+        "caption_text": null,
+        "entity_name": null,
+        "designation": null,
+        "text_before": null,
+        "text_after": null,
+        "layout_context": null,
+        "importance_score": "MEDIUM",
+        "retrievable": true,
+        "association_method": "none",
+        "confidence": 1.0,
+        "association_confidence": 1.0,
+        "caption": null,
+        "ocr_text": null,
+        "semantic_description": null,
+        "objects": [],
+        "detected_entities": [],
+        "table_id": null,
         "element_types": [
           "paragraph"
         ],
         "relationships": {
           "belongs_to": "b1_#/texts/26",
-          "previous": "a8619fd4ae194817a13dad90f43659f8_chunk_0016"
+          "previous": "238f0cc2ae8c10e774e731da3b73f5d4fb359342f01a5b4356e32a01a6435c51_chunk_0018"
         },
+        "section_id": "sec_password_policy_mfa_vpn_device_encryption_usb_policy",
+        "section_heading": "Password Policy | MFA | VPN | Device Encryption | USB Policy",
+        "subsection_heading": null,
+        "is_section_root": false,
+        "child_chunk_ids": [],
+        "report_number": null,
+        "state": null,
+        "region": null,
+        "district": null,
         "people": [
           "Fig 1 -Vertexa AI Platform"
         ],
@@ -1078,8 +1866,8 @@
     {
       "content": "Document Section: 6  Finance\nContent:\n6  Finance",
       "metadata": {
-        "chunk_id": "a8619fd4ae194817a13dad90f43659f8_chunk_0018",
-        "document_id": "a8619fd4ae194817a13dad90f43659f8",
+        "chunk_id": "238f0cc2ae8c10e774e731da3b73f5d4fb359342f01a5b4356e32a01a6435c51_chunk_0020",
+        "document_id": "238f0cc2ae8c10e774e731da3b73f5d4fb359342f01a5b4356e32a01a6435c51",
         "page_number": 2,
         "chunk_type": "heading",
         "heading": "6  Finance",
@@ -1101,13 +1889,46 @@
             "coord_origin": "BOTTOMLEFT"
           }
         ],
+        "image_id": null,
+        "image_path": null,
+        "image_url": null,
+        "image_type": null,
+        "title": null,
+        "subtitle": null,
+        "explicit_caption": null,
+        "caption_text": null,
+        "entity_name": null,
+        "designation": null,
+        "text_before": null,
+        "text_after": null,
+        "layout_context": null,
+        "importance_score": "MEDIUM",
+        "retrievable": true,
+        "association_method": "none",
+        "confidence": 1.0,
+        "association_confidence": 1.0,
+        "caption": null,
+        "ocr_text": null,
+        "semantic_description": null,
+        "objects": [],
+        "detected_entities": [],
+        "table_id": null,
         "element_types": [
           "heading"
         ],
         "relationships": {
           "belongs_to": "body",
-          "previous": "a8619fd4ae194817a13dad90f43659f8_chunk_0017"
+          "previous": "238f0cc2ae8c10e774e731da3b73f5d4fb359342f01a5b4356e32a01a6435c51_chunk_0019"
         },
+        "section_id": "sec_6_finance",
+        "section_heading": "6  Finance",
+        "subsection_heading": null,
+        "is_section_root": false,
+        "child_chunk_ids": [],
+        "report_number": null,
+        "state": null,
+        "region": null,
+        "district": null,
         "people": [],
         "organizations": [],
         "groups": [],
@@ -1122,8 +1943,8 @@
     {
       "content": "Document Section: 6  Finance\nContent:\nQuarterly revenue and YoY growth (FY24), as reported to the Board:",
       "metadata": {
-        "chunk_id": "a8619fd4ae194817a13dad90f43659f8_chunk_0019",
-        "document_id": "a8619fd4ae194817a13dad90f43659f8",
+        "chunk_id": "238f0cc2ae8c10e774e731da3b73f5d4fb359342f01a5b4356e32a01a6435c51_chunk_0021",
+        "document_id": "238f0cc2ae8c10e774e731da3b73f5d4fb359342f01a5b4356e32a01a6435c51",
         "page_number": 2,
         "chunk_type": "text",
         "heading": "6  Finance",
@@ -1145,13 +1966,46 @@
             "coord_origin": "BOTTOMLEFT"
           }
         ],
+        "image_id": null,
+        "image_path": null,
+        "image_url": null,
+        "image_type": null,
+        "title": null,
+        "subtitle": null,
+        "explicit_caption": null,
+        "caption_text": null,
+        "entity_name": null,
+        "designation": null,
+        "text_before": null,
+        "text_after": null,
+        "layout_context": null,
+        "importance_score": "MEDIUM",
+        "retrievable": true,
+        "association_method": "none",
+        "confidence": 1.0,
+        "association_confidence": 1.0,
+        "caption": null,
+        "ocr_text": null,
+        "semantic_description": null,
+        "objects": [],
+        "detected_entities": [],
+        "table_id": null,
         "element_types": [
           "paragraph"
         ],
         "relationships": {
           "belongs_to": "b1_#/texts/33",
-          "previous": "a8619fd4ae194817a13dad90f43659f8_chunk_0018"
+          "previous": "238f0cc2ae8c10e774e731da3b73f5d4fb359342f01a5b4356e32a01a6435c51_chunk_0020"
         },
+        "section_id": "sec_6_finance",
+        "section_heading": "6  Finance",
+        "subsection_heading": null,
+        "is_section_root": false,
+        "child_chunk_ids": [],
+        "report_number": null,
+        "state": null,
+        "region": null,
+        "district": null,
         "people": [],
         "organizations": [
           "YoY"
@@ -1172,10 +2026,10 @@
       }
     },
     {
-      "content": "Document Section: 6  Finance\nContent:\nColumn Headers: None\nRow Headers: None\nMarkdown Table:\nTable 1 -Quarterly revenue, as published in the Q4 board deck.\n\n| Quarter   |   Revenue (₹ Cr) | YoY Growth   |\n|-----------|------------------|--------------|\n| Q1 FY24   |             42.6 | 18%          |\n| Q2 FY24   |             45.1 | 16%          |\n| Q3 FY24   |             48.9 | 17%          |\n| Q4 FY24   |             51.3 | 15%          |",
+      "content": "Document Section: 6  Finance\nContent:\nColumn Headers: Quarter, Revenue (₹ Cr), YoY Growth\nRow Headers: Quarter, Q1 FY24, Q2 FY24, Q3 FY24, Q4 FY24\nMarkdown Table:\nTable 1 -Quarterly revenue, as published in the Q4 board deck.\n\n| Quarter   |   Revenue (₹ Cr) | YoY Growth   |\n|-----------|------------------|--------------|\n| Q1 FY24   |             42.6 | 18%          |\n| Q2 FY24   |             45.1 | 16%          |\n| Q3 FY24   |             48.9 | 17%          |\n| Q4 FY24   |             51.3 | 15%          |",
       "metadata": {
-        "chunk_id": "a8619fd4ae194817a13dad90f43659f8_chunk_0020",
-        "document_id": "a8619fd4ae194817a13dad90f43659f8",
+        "chunk_id": "238f0cc2ae8c10e774e731da3b73f5d4fb359342f01a5b4356e32a01a6435c51_chunk_0022",
+        "document_id": "238f0cc2ae8c10e774e731da3b73f5d4fb359342f01a5b4356e32a01a6435c51",
         "page_number": 2,
         "chunk_type": "table",
         "heading": "6  Finance",
@@ -1186,8 +2040,8 @@
         "source_element_ids": [
           "b1_#/tables/0"
         ],
-        "word_count": 49,
-        "token_estimate": 137,
+        "word_count": 61,
+        "token_estimate": 167,
         "bounding_boxes": [
           {
             "l": 49.22380065917969,
@@ -1195,43 +2049,183 @@
             "r": 562.3059692382812,
             "b": 191.05572509765625,
             "coord_origin": "BOTTOMLEFT"
+          },
+          {
+            "l": 55.8,
+            "t": 548.08,
+            "r": 83.75412,
+            "b": 556.6,
+            "coord_origin": "TOPLEFT"
+          },
+          {
+            "l": 226.25,
+            "t": 548.08,
+            "r": 278.08567999999997,
+            "b": 556.6,
+            "coord_origin": "TOPLEFT"
+          },
+          {
+            "l": 396.67,
+            "t": 548.08,
+            "r": 438.92068,
+            "b": 556.6,
+            "coord_origin": "TOPLEFT"
+          },
+          {
+            "l": 55.8,
+            "t": 559.0,
+            "r": 84.45275999999998,
+            "b": 567.52,
+            "coord_origin": "TOPLEFT"
+          },
+          {
+            "l": 226.25,
+            "t": 559.0,
+            "r": 241.35595999999998,
+            "b": 567.52,
+            "coord_origin": "TOPLEFT"
+          },
+          {
+            "l": 396.67,
+            "t": 559.0,
+            "r": 411.4018,
+            "b": 567.52,
+            "coord_origin": "TOPLEFT"
+          },
+          {
+            "l": 55.8,
+            "t": 569.8,
+            "r": 84.45275999999998,
+            "b": 578.3199999999999,
+            "coord_origin": "TOPLEFT"
+          },
+          {
+            "l": 226.25,
+            "t": 569.8,
+            "r": 241.35595999999998,
+            "b": 578.3199999999999,
+            "coord_origin": "TOPLEFT"
+          },
+          {
+            "l": 396.67,
+            "t": 569.8,
+            "r": 411.4018,
+            "b": 578.3199999999999,
+            "coord_origin": "TOPLEFT"
+          },
+          {
+            "l": 55.8,
+            "t": 580.75,
+            "r": 84.45275999999998,
+            "b": 589.27,
+            "coord_origin": "TOPLEFT"
+          },
+          {
+            "l": 226.25,
+            "t": 580.75,
+            "r": 241.35595999999998,
+            "b": 589.27,
+            "coord_origin": "TOPLEFT"
+          },
+          {
+            "l": 396.67,
+            "t": 580.75,
+            "r": 411.4018,
+            "b": 589.27,
+            "coord_origin": "TOPLEFT"
+          },
+          {
+            "l": 55.8,
+            "t": 591.6700000000001,
+            "r": 84.45275999999998,
+            "b": 600.19,
+            "coord_origin": "TOPLEFT"
+          },
+          {
+            "l": 226.25,
+            "t": 591.6700000000001,
+            "r": 241.35595999999998,
+            "b": 600.19,
+            "coord_origin": "TOPLEFT"
+          },
+          {
+            "l": 396.67,
+            "t": 591.6700000000001,
+            "r": 411.4018,
+            "b": 600.19,
+            "coord_origin": "TOPLEFT"
           }
         ],
+        "image_id": null,
+        "image_path": null,
+        "image_url": null,
+        "image_type": null,
+        "title": null,
+        "subtitle": null,
+        "explicit_caption": null,
+        "caption_text": null,
+        "entity_name": null,
+        "designation": null,
+        "text_before": null,
+        "text_after": null,
+        "layout_context": null,
+        "importance_score": "MEDIUM",
+        "retrievable": true,
+        "association_method": "none",
+        "confidence": 1.0,
+        "association_confidence": 1.0,
+        "caption": null,
+        "ocr_text": null,
+        "semantic_description": null,
+        "objects": [],
+        "detected_entities": [],
+        "table_id": "b1_#/tables/0",
         "element_types": [
           "table"
         ],
         "relationships": {
           "belongs_to": "b1_#/texts/33"
         },
-        "table_id": "b1_#/tables/0",
+        "section_id": "sec_6_finance",
+        "section_heading": "6  Finance",
+        "subsection_heading": null,
+        "is_section_root": false,
+        "child_chunk_ids": [],
+        "report_number": null,
+        "state": null,
+        "region": null,
+        "district": null,
         "people": [
           "Column Headers",
-          "None\nRow Headers",
-          "YoY Growth"
+          "YoY Growth",
+          "YoY Growth\nRow"
         ],
-        "organizations": [],
+        "organizations": [
+          "Markdown Table",
+          "YoY Growth\nRow Headers"
+        ],
         "groups": [],
         "dates": [],
         "weapons": [],
         "locations": [],
         "keywords": [
-          "headers",
+          "quarter",
           "revenue",
+          "headers",
+          "growth",
           "column",
           "markdown",
           "quarterly",
           "published",
-          "board",
-          "quarter",
-          "growth"
+          "board"
         ]
       }
     },
     {
       "content": "Document Section: 6  Finance\nContent:\nTable 1 -Quarterly revenue, as published in the Q4 board deck.\n\nElsewhere in the same board deck, Q1 FY24 YoY growth is separately reported as 15% rather than the 18% shown in Table 1 above -the discrepancy has not been reconciled in this edition.",
       "metadata": {
-        "chunk_id": "a8619fd4ae194817a13dad90f43659f8_chunk_0021",
-        "document_id": "a8619fd4ae194817a13dad90f43659f8",
+        "chunk_id": "238f0cc2ae8c10e774e731da3b73f5d4fb359342f01a5b4356e32a01a6435c51_chunk_0023",
+        "document_id": "238f0cc2ae8c10e774e731da3b73f5d4fb359342f01a5b4356e32a01a6435c51",
         "page_number": 2,
         "chunk_type": "text",
         "heading": "6  Finance",
@@ -1261,14 +2255,47 @@
             "coord_origin": "BOTTOMLEFT"
           }
         ],
+        "image_id": null,
+        "image_path": null,
+        "image_url": null,
+        "image_type": null,
+        "title": null,
+        "subtitle": null,
+        "explicit_caption": null,
+        "caption_text": null,
+        "entity_name": null,
+        "designation": null,
+        "text_before": null,
+        "text_after": null,
+        "layout_context": null,
+        "importance_score": "MEDIUM",
+        "retrievable": true,
+        "association_method": "none",
+        "confidence": 1.0,
+        "association_confidence": 1.0,
+        "caption": null,
+        "ocr_text": null,
+        "semantic_description": null,
+        "objects": [],
+        "detected_entities": [],
+        "table_id": null,
         "element_types": [
           "caption",
           "paragraph"
         ],
         "relationships": {
           "belongs_to": "b1_#/texts/33",
-          "previous": "a8619fd4ae194817a13dad90f43659f8_chunk_0020"
+          "previous": "238f0cc2ae8c10e774e731da3b73f5d4fb359342f01a5b4356e32a01a6435c51_chunk_0022"
         },
+        "section_id": "sec_6_finance",
+        "section_heading": "6  Finance",
+        "subsection_heading": null,
+        "is_section_root": false,
+        "child_chunk_ids": [],
+        "report_number": null,
+        "state": null,
+        "region": null,
+        "district": null,
         "people": [],
         "organizations": [],
         "groups": [],
@@ -1292,8 +2319,8 @@
     {
       "content": "Document Section: 7  Product Documentation\nContent:\n7  Product Documentation",
       "metadata": {
-        "chunk_id": "a8619fd4ae194817a13dad90f43659f8_chunk_0022",
-        "document_id": "a8619fd4ae194817a13dad90f43659f8",
+        "chunk_id": "238f0cc2ae8c10e774e731da3b73f5d4fb359342f01a5b4356e32a01a6435c51_chunk_0024",
+        "document_id": "238f0cc2ae8c10e774e731da3b73f5d4fb359342f01a5b4356e32a01a6435c51",
         "page_number": 3,
         "chunk_type": "heading",
         "heading": "7  Product Documentation",
@@ -1315,13 +2342,46 @@
             "coord_origin": "BOTTOMLEFT"
           }
         ],
+        "image_id": null,
+        "image_path": null,
+        "image_url": null,
+        "image_type": null,
+        "title": null,
+        "subtitle": null,
+        "explicit_caption": null,
+        "caption_text": null,
+        "entity_name": null,
+        "designation": null,
+        "text_before": null,
+        "text_after": null,
+        "layout_context": null,
+        "importance_score": "MEDIUM",
+        "retrievable": true,
+        "association_method": "none",
+        "confidence": 1.0,
+        "association_confidence": 1.0,
+        "caption": null,
+        "ocr_text": null,
+        "semantic_description": null,
+        "objects": [],
+        "detected_entities": [],
+        "table_id": null,
         "element_types": [
           "heading"
         ],
         "relationships": {
           "belongs_to": "body",
-          "previous": "a8619fd4ae194817a13dad90f43659f8_chunk_0021"
+          "previous": "238f0cc2ae8c10e774e731da3b73f5d4fb359342f01a5b4356e32a01a6435c51_chunk_0023"
         },
+        "section_id": "sec_7_product_documentation",
+        "section_heading": "7  Product Documentation",
+        "subsection_heading": null,
+        "is_section_root": false,
+        "child_chunk_ids": [],
+        "report_number": null,
+        "state": null,
+        "region": null,
+        "district": null,
         "people": [
           "Product Documentation"
         ],
@@ -1339,8 +2399,8 @@
     {
       "content": "Document Section: 7  Product Documentation\nContent:\nThe platform (see Fig. 1) is organized into four layers: Presentation, AI Platform/API, Processing, and Data. Core modules:",
       "metadata": {
-        "chunk_id": "a8619fd4ae194817a13dad90f43659f8_chunk_0023",
-        "document_id": "a8619fd4ae194817a13dad90f43659f8",
+        "chunk_id": "238f0cc2ae8c10e774e731da3b73f5d4fb359342f01a5b4356e32a01a6435c51_chunk_0025",
+        "document_id": "238f0cc2ae8c10e774e731da3b73f5d4fb359342f01a5b4356e32a01a6435c51",
         "page_number": 3,
         "chunk_type": "text",
         "heading": "7  Product Documentation",
@@ -1362,13 +2422,46 @@
             "coord_origin": "BOTTOMLEFT"
           }
         ],
+        "image_id": null,
+        "image_path": null,
+        "image_url": null,
+        "image_type": null,
+        "title": null,
+        "subtitle": null,
+        "explicit_caption": null,
+        "caption_text": null,
+        "entity_name": null,
+        "designation": null,
+        "text_before": null,
+        "text_after": null,
+        "layout_context": null,
+        "importance_score": "MEDIUM",
+        "retrievable": true,
+        "association_method": "none",
+        "confidence": 1.0,
+        "association_confidence": 1.0,
+        "caption": null,
+        "ocr_text": null,
+        "semantic_description": null,
+        "objects": [],
+        "detected_entities": [],
+        "table_id": null,
         "element_types": [
           "paragraph"
         ],
         "relationships": {
           "belongs_to": "b1_#/texts/37",
-          "previous": "a8619fd4ae194817a13dad90f43659f8_chunk_0022"
+          "previous": "238f0cc2ae8c10e774e731da3b73f5d4fb359342f01a5b4356e32a01a6435c51_chunk_0024"
         },
+        "section_id": "sec_7_product_documentation",
+        "section_heading": "7  Product Documentation",
+        "subsection_heading": null,
+        "is_section_root": false,
+        "child_chunk_ids": [],
+        "report_number": null,
+        "state": null,
+        "region": null,
+        "district": null,
         "people": [
           "Fig"
         ],
@@ -1391,10 +2484,10 @@
       }
     },
     {
-      "content": "Document Section: 7  Product Documentation\nContent:\nColumn Headers: None\nRow Headers: None\nMarkdown Table:\n| Module            | Function                                                        |\n|-------------------|-----------------------------------------------------------------|\n| Docling Parser    | Extracts text, tables, and images with layout metadata          |\n| Chunking Engine   | Builds semantic chunks (heading+text, table+caption, image+OCR) |\n| Embedding Service | Generates vector embeddings for retrieval                       |\n| Vector Store      | ChromaDB collection per document                                |",
+      "content": "Document Section: 7  Product Documentation\nContent:\nColumn Headers: Module, Function\nRow Headers: Module, Docling Parser, Chunking Engine, Embedding Service, Vector Store\nMarkdown Table:\n| Module            | Function                                                        |\n|-------------------|-----------------------------------------------------------------|\n| Docling Parser    | Extracts text, tables, and images with layout metadata          |\n| Chunking Engine   | Builds semantic chunks (heading+text, table+caption, image+OCR) |\n| Embedding Service | Generates vector embeddings for retrieval                       |\n| Vector Store      | ChromaDB collection per document                                |",
       "metadata": {
-        "chunk_id": "a8619fd4ae194817a13dad90f43659f8_chunk_0024",
-        "document_id": "a8619fd4ae194817a13dad90f43659f8",
+        "chunk_id": "238f0cc2ae8c10e774e731da3b73f5d4fb359342f01a5b4356e32a01a6435c51_chunk_0026",
+        "document_id": "238f0cc2ae8c10e774e731da3b73f5d4fb359342f01a5b4356e32a01a6435c51",
         "page_number": 3,
         "chunk_type": "table",
         "heading": "7  Product Documentation",
@@ -1405,8 +2498,8 @@
         "source_element_ids": [
           "b1_#/tables/1"
         ],
-        "word_count": 50,
-        "token_estimate": 105,
+        "word_count": 59,
+        "token_estimate": 122,
         "bounding_boxes": [
           {
             "l": 49.36560821533203,
@@ -1414,45 +2507,149 @@
             "r": 562.3779907226562,
             "b": 654.4656219482422,
             "coord_origin": "BOTTOMLEFT"
+          },
+          {
+            "l": 55.8,
+            "t": 84.71000000000004,
+            "r": 83.2344,
+            "b": 93.23000000000002,
+            "coord_origin": "TOPLEFT"
+          },
+          {
+            "l": 311.45,
+            "t": 84.71000000000004,
+            "r": 342.30091999999996,
+            "b": 93.23000000000002,
+            "coord_origin": "TOPLEFT"
+          },
+          {
+            "l": 55.8,
+            "t": 95.63,
+            "r": 105.30119999999998,
+            "b": 104.14999999999998,
+            "coord_origin": "TOPLEFT"
+          },
+          {
+            "l": 311.45,
+            "t": 95.63,
+            "r": 498.7366399999999,
+            "b": 104.14999999999998,
+            "coord_origin": "TOPLEFT"
+          },
+          {
+            "l": 55.8,
+            "t": 106.55000000000007,
+            "r": 113.05439999999997,
+            "b": 115.07000000000005,
+            "coord_origin": "TOPLEFT"
+          },
+          {
+            "l": 311.45,
+            "t": 106.55000000000007,
+            "r": 539.7604399999999,
+            "b": 115.07000000000005,
+            "coord_origin": "TOPLEFT"
+          },
+          {
+            "l": 55.8,
+            "t": 117.35000000000002,
+            "r": 121.32731999999997,
+            "b": 125.87,
+            "coord_origin": "TOPLEFT"
+          },
+          {
+            "l": 311.45,
+            "t": 117.35000000000002,
+            "r": 458.1899599999998,
+            "b": 125.87,
+            "coord_origin": "TOPLEFT"
+          },
+          {
+            "l": 55.8,
+            "t": 128.26999999999998,
+            "r": 99.12419999999999,
+            "b": 136.78999999999996,
+            "coord_origin": "TOPLEFT"
+          },
+          {
+            "l": 311.45,
+            "t": 128.26999999999998,
+            "r": 434.8451600000001,
+            "b": 136.78999999999996,
+            "coord_origin": "TOPLEFT"
           }
         ],
+        "image_id": null,
+        "image_path": null,
+        "image_url": null,
+        "image_type": null,
+        "title": null,
+        "subtitle": null,
+        "explicit_caption": null,
+        "caption_text": null,
+        "entity_name": null,
+        "designation": null,
+        "text_before": null,
+        "text_after": null,
+        "layout_context": null,
+        "importance_score": "MEDIUM",
+        "retrievable": true,
+        "association_method": "none",
+        "confidence": 1.0,
+        "association_confidence": 1.0,
+        "caption": null,
+        "ocr_text": null,
+        "semantic_description": null,
+        "objects": [],
+        "detected_entities": [],
+        "table_id": "b1_#/tables/1",
         "element_types": [
           "table"
         ],
         "relationships": {
           "belongs_to": "b1_#/texts/37"
         },
-        "table_id": "b1_#/tables/1",
+        "section_id": "sec_7_product_documentation",
+        "section_heading": "7  Product Documentation",
+        "subsection_heading": null,
+        "is_section_root": false,
+        "child_chunk_ids": [],
+        "report_number": null,
+        "state": null,
+        "region": null,
+        "district": null,
         "people": [
+          "Docling Parser",
           "Vector Store",
           "metadata"
         ],
         "organizations": [
-          "Builds"
+          "Builds",
+          "Embedding Service"
         ],
         "groups": [],
         "dates": [],
         "weapons": [],
         "locations": [],
         "keywords": [
-          "headers",
-          "vector",
-          "column",
-          "markdown",
           "module",
+          "vector",
+          "headers",
           "function",
           "docling",
           "parser",
-          "extracts",
-          "tables"
+          "chunking",
+          "engine",
+          "embedding",
+          "service"
         ]
       }
     },
     {
       "content": "Document Section: 7  Product Documentation\nContent:\nTable 2 - Core platform modules.",
       "metadata": {
-        "chunk_id": "a8619fd4ae194817a13dad90f43659f8_chunk_0025",
-        "document_id": "a8619fd4ae194817a13dad90f43659f8",
+        "chunk_id": "238f0cc2ae8c10e774e731da3b73f5d4fb359342f01a5b4356e32a01a6435c51_chunk_0027",
+        "document_id": "238f0cc2ae8c10e774e731da3b73f5d4fb359342f01a5b4356e32a01a6435c51",
         "page_number": 3,
         "chunk_type": "text",
         "heading": "7  Product Documentation",
@@ -1474,13 +2671,46 @@
             "coord_origin": "BOTTOMLEFT"
           }
         ],
+        "image_id": null,
+        "image_path": null,
+        "image_url": null,
+        "image_type": null,
+        "title": null,
+        "subtitle": null,
+        "explicit_caption": null,
+        "caption_text": null,
+        "entity_name": null,
+        "designation": null,
+        "text_before": null,
+        "text_after": null,
+        "layout_context": null,
+        "importance_score": "MEDIUM",
+        "retrievable": true,
+        "association_method": "none",
+        "confidence": 1.0,
+        "association_confidence": 1.0,
+        "caption": null,
+        "ocr_text": null,
+        "semantic_description": null,
+        "objects": [],
+        "detected_entities": [],
+        "table_id": null,
         "element_types": [
           "paragraph"
         ],
         "relationships": {
           "belongs_to": "b1_#/texts/37",
-          "previous": "a8619fd4ae194817a13dad90f43659f8_chunk_0024"
+          "previous": "238f0cc2ae8c10e774e731da3b73f5d4fb359342f01a5b4356e32a01a6435c51_chunk_0026"
         },
+        "section_id": "sec_7_product_documentation",
+        "section_heading": "7  Product Documentation",
+        "subsection_heading": null,
+        "is_section_root": false,
+        "child_chunk_ids": [],
+        "report_number": null,
+        "state": null,
+        "region": null,
+        "district": null,
         "people": [],
         "organizations": [],
         "groups": [],
@@ -1496,8 +2726,8 @@
     {
       "content": "Document Section: 8  Customer Support\nContent:\n8  Customer Support",
       "metadata": {
-        "chunk_id": "a8619fd4ae194817a13dad90f43659f8_chunk_0026",
-        "document_id": "a8619fd4ae194817a13dad90f43659f8",
+        "chunk_id": "238f0cc2ae8c10e774e731da3b73f5d4fb359342f01a5b4356e32a01a6435c51_chunk_0028",
+        "document_id": "238f0cc2ae8c10e774e731da3b73f5d4fb359342f01a5b4356e32a01a6435c51",
         "page_number": 3,
         "chunk_type": "heading",
         "heading": "8  Customer Support",
@@ -1519,13 +2749,46 @@
             "coord_origin": "BOTTOMLEFT"
           }
         ],
+        "image_id": null,
+        "image_path": null,
+        "image_url": null,
+        "image_type": null,
+        "title": null,
+        "subtitle": null,
+        "explicit_caption": null,
+        "caption_text": null,
+        "entity_name": null,
+        "designation": null,
+        "text_before": null,
+        "text_after": null,
+        "layout_context": null,
+        "importance_score": "MEDIUM",
+        "retrievable": true,
+        "association_method": "none",
+        "confidence": 1.0,
+        "association_confidence": 1.0,
+        "caption": null,
+        "ocr_text": null,
+        "semantic_description": null,
+        "objects": [],
+        "detected_entities": [],
+        "table_id": null,
         "element_types": [
           "heading"
         ],
         "relationships": {
           "belongs_to": "body",
-          "previous": "a8619fd4ae194817a13dad90f43659f8_chunk_0025"
+          "previous": "238f0cc2ae8c10e774e731da3b73f5d4fb359342f01a5b4356e32a01a6435c51_chunk_0027"
         },
+        "section_id": "sec_8_customer_support",
+        "section_heading": "8  Customer Support",
+        "subsection_heading": null,
+        "is_section_root": false,
+        "child_chunk_ids": [],
+        "report_number": null,
+        "state": null,
+        "region": null,
+        "district": null,
         "people": [
           "Customer Support"
         ],
@@ -1541,10 +2804,106 @@
       }
     },
     {
+      "content": "Document Section: 8  Customer Support\nContent:\nImage ID: b1_#/pictures/2\nImage Type: Image\nPage: 3\nImage Title: Figure on Page 3 (8  Customer Support)\nSection Heading: 8  Customer Support\nImportance: MEDIUM\nImage URL: /outputs/238f0cc2ae8c10e774e731da3b73f5d4fb359342f01a5b4356e32a01a6435c51/05_images/pictures_2.png\nImage Semantic Description: Visual graphic / image on Page 3 under section '8  Customer Support'.",
+      "metadata": {
+        "chunk_id": "238f0cc2ae8c10e774e731da3b73f5d4fb359342f01a5b4356e32a01a6435c51_chunk_0029",
+        "document_id": "238f0cc2ae8c10e774e731da3b73f5d4fb359342f01a5b4356e32a01a6435c51",
+        "page_number": 3,
+        "chunk_type": "image",
+        "heading": "8  Customer Support",
+        "section": "8  Customer Support",
+        "hierarchy_path": [
+          "b1_#/texts/40"
+        ],
+        "source_element_ids": [
+          "b1_#/pictures/2"
+        ],
+        "word_count": 53,
+        "token_estimate": 136,
+        "bounding_boxes": [
+          {
+            "l": 165.1762237548828,
+            "t": 552.8823394775391,
+            "r": 432.48504638671875,
+            "b": 448.98565673828125,
+            "coord_origin": "BOTTOMLEFT"
+          }
+        ],
+        "image_id": "b1_#/pictures/2",
+        "image_path": "C:\\Users\\sanju\\INTERNSHIP-APT\\BTLProject\\data\\output\\a8619fd4ae194817a13dad90f43659f8\\05_images\\pictures_2.png",
+        "image_url": "/outputs/238f0cc2ae8c10e774e731da3b73f5d4fb359342f01a5b4356e32a01a6435c51/05_images/pictures_2.png",
+        "image_type": "Image",
+        "title": "Figure on Page 3 (8  Customer Support)",
+        "subtitle": null,
+        "explicit_caption": null,
+        "caption_text": "Figure on Page 3 (8  Customer Support)",
+        "entity_name": null,
+        "designation": null,
+        "text_before": null,
+        "text_after": null,
+        "layout_context": null,
+        "importance_score": "MEDIUM",
+        "retrievable": true,
+        "association_method": "none",
+        "confidence": 1.0,
+        "association_confidence": 1.0,
+        "caption": "Figure on Page 3 (8  Customer Support)",
+        "ocr_text": "",
+        "semantic_description": "Visual graphic / image on Page 3 under section '8  Customer Support'.",
+        "objects": [],
+        "detected_entities": [],
+        "table_id": null,
+        "element_types": [
+          "image"
+        ],
+        "relationships": {
+          "belongs_to": "b1_#/texts/40"
+        },
+        "section_id": "sec_8_customer_support",
+        "section_heading": "8  Customer Support",
+        "subsection_heading": null,
+        "is_section_root": false,
+        "child_chunk_ids": [],
+        "report_number": null,
+        "state": null,
+        "region": null,
+        "district": null,
+        "people": [
+          "Customer Support",
+          "Customer Support\nImportance",
+          "Image ID",
+          "Image Semantic Description",
+          "Image Title",
+          "Image Type",
+          "MEDIUM\nImage URL",
+          "Section Heading"
+        ],
+        "organizations": [
+          "Image Semantic Description"
+        ],
+        "groups": [],
+        "dates": [],
+        "weapons": [],
+        "locations": [],
+        "keywords": [
+          "customer",
+          "support",
+          "pictures",
+          "title",
+          "heading",
+          "importance",
+          "medium",
+          "outputs",
+          "semantic",
+          "description"
+        ]
+      }
+    },
+    {
       "content": "Document Section: 8  Customer Support\nContent:\nFig 2 -Support escalation workflow\n\nEscalation note: Alex informed Jordan that he would contact the customer directly to confirm the resolution timeline before the ticket is closed.\n\nStandard SLA is first response within 4 business hours for Tier 1 tickets.",
       "metadata": {
-        "chunk_id": "a8619fd4ae194817a13dad90f43659f8_chunk_0027",
-        "document_id": "a8619fd4ae194817a13dad90f43659f8",
+        "chunk_id": "238f0cc2ae8c10e774e731da3b73f5d4fb359342f01a5b4356e32a01a6435c51_chunk_0030",
+        "document_id": "238f0cc2ae8c10e774e731da3b73f5d4fb359342f01a5b4356e32a01a6435c51",
         "page_number": 3,
         "chunk_type": "text",
         "heading": "8  Customer Support",
@@ -1582,6 +2941,30 @@
             "coord_origin": "BOTTOMLEFT"
           }
         ],
+        "image_id": null,
+        "image_path": null,
+        "image_url": null,
+        "image_type": null,
+        "title": null,
+        "subtitle": null,
+        "explicit_caption": null,
+        "caption_text": null,
+        "entity_name": null,
+        "designation": null,
+        "text_before": null,
+        "text_after": null,
+        "layout_context": null,
+        "importance_score": "MEDIUM",
+        "retrievable": true,
+        "association_method": "none",
+        "confidence": 1.0,
+        "association_confidence": 1.0,
+        "caption": null,
+        "ocr_text": null,
+        "semantic_description": null,
+        "objects": [],
+        "detected_entities": [],
+        "table_id": null,
         "element_types": [
           "caption",
           "paragraph",
@@ -1589,8 +2972,17 @@
         ],
         "relationships": {
           "belongs_to": "b1_#/texts/40",
-          "previous": "a8619fd4ae194817a13dad90f43659f8_chunk_0026"
+          "previous": "238f0cc2ae8c10e774e731da3b73f5d4fb359342f01a5b4356e32a01a6435c51_chunk_0029"
         },
+        "section_id": "sec_8_customer_support",
+        "section_heading": "8  Customer Support",
+        "subsection_heading": null,
+        "is_section_root": false,
+        "child_chunk_ids": [],
+        "report_number": null,
+        "state": null,
+        "region": null,
+        "district": null,
         "people": [
           "Alex informed",
           "Fig 2 -Support",
@@ -1620,8 +3012,8 @@
     {
       "content": "Document Section: 9  Compliance\nContent:\n9  Compliance",
       "metadata": {
-        "chunk_id": "a8619fd4ae194817a13dad90f43659f8_chunk_0028",
-        "document_id": "a8619fd4ae194817a13dad90f43659f8",
+        "chunk_id": "238f0cc2ae8c10e774e731da3b73f5d4fb359342f01a5b4356e32a01a6435c51_chunk_0031",
+        "document_id": "238f0cc2ae8c10e774e731da3b73f5d4fb359342f01a5b4356e32a01a6435c51",
         "page_number": 3,
         "chunk_type": "heading",
         "heading": "9  Compliance",
@@ -1643,13 +3035,46 @@
             "coord_origin": "BOTTOMLEFT"
           }
         ],
+        "image_id": null,
+        "image_path": null,
+        "image_url": null,
+        "image_type": null,
+        "title": null,
+        "subtitle": null,
+        "explicit_caption": null,
+        "caption_text": null,
+        "entity_name": null,
+        "designation": null,
+        "text_before": null,
+        "text_after": null,
+        "layout_context": null,
+        "importance_score": "MEDIUM",
+        "retrievable": true,
+        "association_method": "none",
+        "confidence": 1.0,
+        "association_confidence": 1.0,
+        "caption": null,
+        "ocr_text": null,
+        "semantic_description": null,
+        "objects": [],
+        "detected_entities": [],
+        "table_id": null,
         "element_types": [
           "heading"
         ],
         "relationships": {
           "belongs_to": "body",
-          "previous": "a8619fd4ae194817a13dad90f43659f8_chunk_0027"
+          "previous": "238f0cc2ae8c10e774e731da3b73f5d4fb359342f01a5b4356e32a01a6435c51_chunk_0030"
         },
+        "section_id": "sec_9_compliance",
+        "section_heading": "9  Compliance",
+        "subsection_heading": null,
+        "is_section_root": false,
+        "child_chunk_ids": [],
+        "report_number": null,
+        "state": null,
+        "region": null,
+        "district": null,
         "people": [],
         "organizations": [],
         "groups": [],
@@ -1664,8 +3089,8 @@
     {
       "content": "Document Section: 9  Compliance\nContent:\nVertexa's data protection obligations are summarized here; for the full clause list and retention schedule, see Appendix B. Audit findings are reviewed quarterly by the Compliance Committee.",
       "metadata": {
-        "chunk_id": "a8619fd4ae194817a13dad90f43659f8_chunk_0029",
-        "document_id": "a8619fd4ae194817a13dad90f43659f8",
+        "chunk_id": "238f0cc2ae8c10e774e731da3b73f5d4fb359342f01a5b4356e32a01a6435c51_chunk_0032",
+        "document_id": "238f0cc2ae8c10e774e731da3b73f5d4fb359342f01a5b4356e32a01a6435c51",
         "page_number": 3,
         "chunk_type": "text",
         "heading": "9  Compliance",
@@ -1687,13 +3112,46 @@
             "coord_origin": "BOTTOMLEFT"
           }
         ],
+        "image_id": null,
+        "image_path": null,
+        "image_url": null,
+        "image_type": null,
+        "title": null,
+        "subtitle": null,
+        "explicit_caption": null,
+        "caption_text": null,
+        "entity_name": null,
+        "designation": null,
+        "text_before": null,
+        "text_after": null,
+        "layout_context": null,
+        "importance_score": "MEDIUM",
+        "retrievable": true,
+        "association_method": "none",
+        "confidence": 1.0,
+        "association_confidence": 1.0,
+        "caption": null,
+        "ocr_text": null,
+        "semantic_description": null,
+        "objects": [],
+        "detected_entities": [],
+        "table_id": null,
         "element_types": [
           "paragraph"
         ],
         "relationships": {
           "belongs_to": "b1_#/texts/44",
-          "previous": "a8619fd4ae194817a13dad90f43659f8_chunk_0028"
+          "previous": "238f0cc2ae8c10e774e731da3b73f5d4fb359342f01a5b4356e32a01a6435c51_chunk_0031"
         },
+        "section_id": "sec_9_compliance",
+        "section_heading": "9  Compliance",
+        "subsection_heading": null,
+        "is_section_root": false,
+        "child_chunk_ids": [],
+        "report_number": null,
+        "state": null,
+        "region": null,
+        "district": null,
         "people": [
           "Appendix B. Audit"
         ],
@@ -1724,8 +3182,8 @@
     {
       "content": "Document Section: 10  Disaster Recovery\nContent:\n10  Disaster Recovery",
       "metadata": {
-        "chunk_id": "a8619fd4ae194817a13dad90f43659f8_chunk_0030",
-        "document_id": "a8619fd4ae194817a13dad90f43659f8",
+        "chunk_id": "238f0cc2ae8c10e774e731da3b73f5d4fb359342f01a5b4356e32a01a6435c51_chunk_0033",
+        "document_id": "238f0cc2ae8c10e774e731da3b73f5d4fb359342f01a5b4356e32a01a6435c51",
         "page_number": 3,
         "chunk_type": "heading",
         "heading": "10  Disaster Recovery",
@@ -1747,13 +3205,46 @@
             "coord_origin": "BOTTOMLEFT"
           }
         ],
+        "image_id": null,
+        "image_path": null,
+        "image_url": null,
+        "image_type": null,
+        "title": null,
+        "subtitle": null,
+        "explicit_caption": null,
+        "caption_text": null,
+        "entity_name": null,
+        "designation": null,
+        "text_before": null,
+        "text_after": null,
+        "layout_context": null,
+        "importance_score": "MEDIUM",
+        "retrievable": true,
+        "association_method": "none",
+        "confidence": 1.0,
+        "association_confidence": 1.0,
+        "caption": null,
+        "ocr_text": null,
+        "semantic_description": null,
+        "objects": [],
+        "detected_entities": [],
+        "table_id": null,
         "element_types": [
           "heading"
         ],
         "relationships": {
           "belongs_to": "body",
-          "previous": "a8619fd4ae194817a13dad90f43659f8_chunk_0029"
+          "previous": "238f0cc2ae8c10e774e731da3b73f5d4fb359342f01a5b4356e32a01a6435c51_chunk_0032"
         },
+        "section_id": "sec_10_disaster_recovery",
+        "section_heading": "10  Disaster Recovery",
+        "subsection_heading": null,
+        "is_section_root": false,
+        "child_chunk_ids": [],
+        "report_number": null,
+        "state": null,
+        "region": null,
+        "district": null,
         "people": [
           "Disaster Recovery"
         ],
@@ -1771,8 +3262,8 @@
     {
       "content": "Document Section: 10  Disaster Recovery\nContent:\nRecovery Time Objective (RTO), per the DR runbook summary: critical systems must be restored within 4 hours of a declared incident.\n\nLater in the same runbook (Section 10.3, Extended Scenarios): recovery of the same critical systems is instead targeted within 12 hours for a 'major' incident -the threshold distinguishing a standard incident from a 'major' one is not defined.",
       "metadata": {
-        "chunk_id": "a8619fd4ae194817a13dad90f43659f8_chunk_0031",
-        "document_id": "a8619fd4ae194817a13dad90f43659f8",
+        "chunk_id": "238f0cc2ae8c10e774e731da3b73f5d4fb359342f01a5b4356e32a01a6435c51_chunk_0034",
+        "document_id": "238f0cc2ae8c10e774e731da3b73f5d4fb359342f01a5b4356e32a01a6435c51",
         "page_number": 3,
         "chunk_type": "text",
         "heading": "10  Disaster Recovery",
@@ -1802,14 +3293,47 @@
             "coord_origin": "BOTTOMLEFT"
           }
         ],
+        "image_id": null,
+        "image_path": null,
+        "image_url": null,
+        "image_type": null,
+        "title": null,
+        "subtitle": null,
+        "explicit_caption": null,
+        "caption_text": null,
+        "entity_name": null,
+        "designation": null,
+        "text_before": null,
+        "text_after": null,
+        "layout_context": null,
+        "importance_score": "MEDIUM",
+        "retrievable": true,
+        "association_method": "none",
+        "confidence": 1.0,
+        "association_confidence": 1.0,
+        "caption": null,
+        "ocr_text": null,
+        "semantic_description": null,
+        "objects": [],
+        "detected_entities": [],
+        "table_id": null,
         "element_types": [
           "paragraph",
           "paragraph"
         ],
         "relationships": {
           "belongs_to": "b1_#/texts/46",
-          "previous": "a8619fd4ae194817a13dad90f43659f8_chunk_0030"
+          "previous": "238f0cc2ae8c10e774e731da3b73f5d4fb359342f01a5b4356e32a01a6435c51_chunk_0033"
         },
+        "section_id": "sec_10_disaster_recovery",
+        "section_heading": "10  Disaster Recovery",
+        "subsection_heading": null,
+        "is_section_root": false,
+        "child_chunk_ids": [],
+        "report_number": null,
+        "state": null,
+        "region": null,
+        "district": null,
         "people": [
           "Extended Scenarios",
           "Recovery Time Objective"
@@ -1839,8 +3363,8 @@
     {
       "content": "Document Section: 11  Technical Architecture\nContent:\n11  Technical Architecture",
       "metadata": {
-        "chunk_id": "a8619fd4ae194817a13dad90f43659f8_chunk_0032",
-        "document_id": "a8619fd4ae194817a13dad90f43659f8",
+        "chunk_id": "238f0cc2ae8c10e774e731da3b73f5d4fb359342f01a5b4356e32a01a6435c51_chunk_0035",
+        "document_id": "238f0cc2ae8c10e774e731da3b73f5d4fb359342f01a5b4356e32a01a6435c51",
         "page_number": 3,
         "chunk_type": "heading",
         "heading": "11  Technical Architecture",
@@ -1862,13 +3386,46 @@
             "coord_origin": "BOTTOMLEFT"
           }
         ],
+        "image_id": null,
+        "image_path": null,
+        "image_url": null,
+        "image_type": null,
+        "title": null,
+        "subtitle": null,
+        "explicit_caption": null,
+        "caption_text": null,
+        "entity_name": null,
+        "designation": null,
+        "text_before": null,
+        "text_after": null,
+        "layout_context": null,
+        "importance_score": "MEDIUM",
+        "retrievable": true,
+        "association_method": "none",
+        "confidence": 1.0,
+        "association_confidence": 1.0,
+        "caption": null,
+        "ocr_text": null,
+        "semantic_description": null,
+        "objects": [],
+        "detected_entities": [],
+        "table_id": null,
         "element_types": [
           "heading"
         ],
         "relationships": {
           "belongs_to": "body",
-          "previous": "a8619fd4ae194817a13dad90f43659f8_chunk_0031"
+          "previous": "238f0cc2ae8c10e774e731da3b73f5d4fb359342f01a5b4356e32a01a6435c51_chunk_0034"
         },
+        "section_id": "sec_11_technical_architecture",
+        "section_heading": "11  Technical Architecture",
+        "subsection_heading": null,
+        "is_section_root": false,
+        "child_chunk_ids": [],
+        "report_number": null,
+        "state": null,
+        "region": null,
+        "district": null,
         "people": [
           "Technical Architecture"
         ],
@@ -1886,8 +3443,8 @@
     {
       "content": "Document Section: 11  Technical Architecture\nContent:\nVertexa's AI Platform (also referred to elsewhere in this handbook as the AI Engine, the Artificial Intelligence Platform, and the AI Solution) underpins Document AI, RAG retrieval, and the Auth Gateway shown in Fig. 1.",
       "metadata": {
-        "chunk_id": "a8619fd4ae194817a13dad90f43659f8_chunk_0033",
-        "document_id": "a8619fd4ae194817a13dad90f43659f8",
+        "chunk_id": "238f0cc2ae8c10e774e731da3b73f5d4fb359342f01a5b4356e32a01a6435c51_chunk_0036",
+        "document_id": "238f0cc2ae8c10e774e731da3b73f5d4fb359342f01a5b4356e32a01a6435c51",
         "page_number": 3,
         "chunk_type": "text",
         "heading": "11  Technical Architecture",
@@ -1909,13 +3466,46 @@
             "coord_origin": "BOTTOMLEFT"
           }
         ],
+        "image_id": null,
+        "image_path": null,
+        "image_url": null,
+        "image_type": null,
+        "title": null,
+        "subtitle": null,
+        "explicit_caption": null,
+        "caption_text": null,
+        "entity_name": null,
+        "designation": null,
+        "text_before": null,
+        "text_after": null,
+        "layout_context": null,
+        "importance_score": "MEDIUM",
+        "retrievable": true,
+        "association_method": "none",
+        "confidence": 1.0,
+        "association_confidence": 1.0,
+        "caption": null,
+        "ocr_text": null,
+        "semantic_description": null,
+        "objects": [],
+        "detected_entities": [],
+        "table_id": null,
         "element_types": [
           "paragraph"
         ],
         "relationships": {
           "belongs_to": "b1_#/texts/49",
-          "previous": "a8619fd4ae194817a13dad90f43659f8_chunk_0032"
+          "previous": "238f0cc2ae8c10e774e731da3b73f5d4fb359342f01a5b4356e32a01a6435c51_chunk_0035"
         },
+        "section_id": "sec_11_technical_architecture",
+        "section_heading": "11  Technical Architecture",
+        "subsection_heading": null,
+        "is_section_root": false,
+        "child_chunk_ids": [],
+        "report_number": null,
+        "state": null,
+        "region": null,
+        "district": null,
         "people": [
           "Document AI",
           "Fig",
@@ -1947,10 +3537,101 @@
       }
     },
     {
+      "content": "Document Section: 11  Technical Architecture\nContent:\nImage ID: b1_#/pictures/3\nImage Type: Image\nPage: 4\nImage Title: Figure on Page 4 (11  Technical Architecture)\nSection Heading: 11  Technical Architecture\nImportance: MEDIUM\nImage URL: /outputs/238f0cc2ae8c10e774e731da3b73f5d4fb359342f01a5b4356e32a01a6435c51/05_images/pictures_3.png\nImage Semantic Description: Visual graphic / image on Page 4 under section '11  Technical Architecture'.",
+      "metadata": {
+        "chunk_id": "238f0cc2ae8c10e774e731da3b73f5d4fb359342f01a5b4356e32a01a6435c51_chunk_0037",
+        "document_id": "238f0cc2ae8c10e774e731da3b73f5d4fb359342f01a5b4356e32a01a6435c51",
+        "page_number": 4,
+        "chunk_type": "image",
+        "heading": "11  Technical Architecture",
+        "section": "11  Technical Architecture",
+        "hierarchy_path": [
+          "b1_#/texts/49"
+        ],
+        "source_element_ids": [
+          "b1_#/pictures/3"
+        ],
+        "word_count": 53,
+        "token_estimate": 136,
+        "bounding_boxes": [
+          {
+            "l": 143.46627807617188,
+            "t": 746.693977355957,
+            "r": 450.5592956542969,
+            "b": 531.7311401367188,
+            "coord_origin": "BOTTOMLEFT"
+          }
+        ],
+        "image_id": "b1_#/pictures/3",
+        "image_path": "C:\\Users\\sanju\\INTERNSHIP-APT\\BTLProject\\data\\output\\a8619fd4ae194817a13dad90f43659f8\\05_images\\pictures_3.png",
+        "image_url": "/outputs/238f0cc2ae8c10e774e731da3b73f5d4fb359342f01a5b4356e32a01a6435c51/05_images/pictures_3.png",
+        "image_type": "Image",
+        "title": "Figure on Page 4 (11  Technical Architecture)",
+        "subtitle": null,
+        "explicit_caption": null,
+        "caption_text": "Figure on Page 4 (11  Technical Architecture)",
+        "entity_name": null,
+        "designation": null,
+        "text_before": null,
+        "text_after": null,
+        "layout_context": null,
+        "importance_score": "MEDIUM",
+        "retrievable": true,
+        "association_method": "none",
+        "confidence": 1.0,
+        "association_confidence": 1.0,
+        "caption": "Figure on Page 4 (11  Technical Architecture)",
+        "ocr_text": "",
+        "semantic_description": "Visual graphic / image on Page 4 under section '11  Technical Architecture'.",
+        "objects": [],
+        "detected_entities": [],
+        "table_id": null,
+        "element_types": [
+          "image"
+        ],
+        "relationships": {
+          "belongs_to": "b1_#/texts/49"
+        },
+        "section_id": "sec_11_technical_architecture",
+        "section_heading": "11  Technical Architecture",
+        "subsection_heading": null,
+        "is_section_root": false,
+        "child_chunk_ids": [],
+        "report_number": null,
+        "state": null,
+        "region": null,
+        "district": null,
+        "people": [
+          "Page"
+        ],
+        "organizations": [
+          "Image Semantic Description",
+          "Technical Architecture",
+          "Technical Architecture\nImportance"
+        ],
+        "groups": [],
+        "dates": [],
+        "weapons": [],
+        "locations": [],
+        "keywords": [
+          "technical",
+          "architecture",
+          "pictures",
+          "title",
+          "heading",
+          "importance",
+          "medium",
+          "outputs",
+          "semantic",
+          "description"
+        ]
+      }
+    },
+    {
       "content": "Document Section: 11  Technical Architecture\nContent:\nFig 3 -Organization chart (Appendix A)",
       "metadata": {
-        "chunk_id": "a8619fd4ae194817a13dad90f43659f8_chunk_0034",
-        "document_id": "a8619fd4ae194817a13dad90f43659f8",
+        "chunk_id": "238f0cc2ae8c10e774e731da3b73f5d4fb359342f01a5b4356e32a01a6435c51_chunk_0038",
+        "document_id": "238f0cc2ae8c10e774e731da3b73f5d4fb359342f01a5b4356e32a01a6435c51",
         "page_number": 4,
         "chunk_type": "text",
         "heading": "11  Technical Architecture",
@@ -1972,13 +3653,46 @@
             "coord_origin": "BOTTOMLEFT"
           }
         ],
+        "image_id": null,
+        "image_path": null,
+        "image_url": null,
+        "image_type": null,
+        "title": null,
+        "subtitle": null,
+        "explicit_caption": null,
+        "caption_text": null,
+        "entity_name": null,
+        "designation": null,
+        "text_before": null,
+        "text_after": null,
+        "layout_context": null,
+        "importance_score": "MEDIUM",
+        "retrievable": true,
+        "association_method": "none",
+        "confidence": 1.0,
+        "association_confidence": 1.0,
+        "caption": null,
+        "ocr_text": null,
+        "semantic_description": null,
+        "objects": [],
+        "detected_entities": [],
+        "table_id": null,
         "element_types": [
           "caption"
         ],
         "relationships": {
           "belongs_to": "b1_#/texts/49",
-          "previous": "a8619fd4ae194817a13dad90f43659f8_chunk_0033"
+          "previous": "238f0cc2ae8c10e774e731da3b73f5d4fb359342f01a5b4356e32a01a6435c51_chunk_0037"
         },
+        "section_id": "sec_11_technical_architecture",
+        "section_heading": "11  Technical Architecture",
+        "subsection_heading": null,
+        "is_section_root": false,
+        "child_chunk_ids": [],
+        "report_number": null,
+        "state": null,
+        "region": null,
+        "district": null,
         "people": [],
         "organizations": [],
         "groups": [],
@@ -1995,8 +3709,8 @@
     {
       "content": "Document Section: 12  Procurement\nContent:\n12  Procurement",
       "metadata": {
-        "chunk_id": "a8619fd4ae194817a13dad90f43659f8_chunk_0035",
-        "document_id": "a8619fd4ae194817a13dad90f43659f8",
+        "chunk_id": "238f0cc2ae8c10e774e731da3b73f5d4fb359342f01a5b4356e32a01a6435c51_chunk_0039",
+        "document_id": "238f0cc2ae8c10e774e731da3b73f5d4fb359342f01a5b4356e32a01a6435c51",
         "page_number": 4,
         "chunk_type": "heading",
         "heading": "12  Procurement",
@@ -2018,13 +3732,46 @@
             "coord_origin": "BOTTOMLEFT"
           }
         ],
+        "image_id": null,
+        "image_path": null,
+        "image_url": null,
+        "image_type": null,
+        "title": null,
+        "subtitle": null,
+        "explicit_caption": null,
+        "caption_text": null,
+        "entity_name": null,
+        "designation": null,
+        "text_before": null,
+        "text_after": null,
+        "layout_context": null,
+        "importance_score": "MEDIUM",
+        "retrievable": true,
+        "association_method": "none",
+        "confidence": 1.0,
+        "association_confidence": 1.0,
+        "caption": null,
+        "ocr_text": null,
+        "semantic_description": null,
+        "objects": [],
+        "detected_entities": [],
+        "table_id": null,
         "element_types": [
           "heading"
         ],
         "relationships": {
           "belongs_to": "body",
-          "previous": "a8619fd4ae194817a13dad90f43659f8_chunk_0034"
+          "previous": "238f0cc2ae8c10e774e731da3b73f5d4fb359342f01a5b4356e32a01a6435c51_chunk_0038"
         },
+        "section_id": "sec_12_procurement",
+        "section_heading": "12  Procurement",
+        "subsection_heading": null,
+        "is_section_root": false,
+        "child_chunk_ids": [],
+        "report_number": null,
+        "state": null,
+        "region": null,
+        "district": null,
         "people": [],
         "organizations": [],
         "groups": [],
@@ -2039,8 +3786,8 @@
     {
       "content": "Document Section: 12  Procurement\nContent:\nPurchase approval steps:",
       "metadata": {
-        "chunk_id": "a8619fd4ae194817a13dad90f43659f8_chunk_0036",
-        "document_id": "a8619fd4ae194817a13dad90f43659f8",
+        "chunk_id": "238f0cc2ae8c10e774e731da3b73f5d4fb359342f01a5b4356e32a01a6435c51_chunk_0040",
+        "document_id": "238f0cc2ae8c10e774e731da3b73f5d4fb359342f01a5b4356e32a01a6435c51",
         "page_number": 4,
         "chunk_type": "text",
         "heading": "12  Procurement",
@@ -2062,13 +3809,46 @@
             "coord_origin": "BOTTOMLEFT"
           }
         ],
+        "image_id": null,
+        "image_path": null,
+        "image_url": null,
+        "image_type": null,
+        "title": null,
+        "subtitle": null,
+        "explicit_caption": null,
+        "caption_text": null,
+        "entity_name": null,
+        "designation": null,
+        "text_before": null,
+        "text_after": null,
+        "layout_context": null,
+        "importance_score": "MEDIUM",
+        "retrievable": true,
+        "association_method": "none",
+        "confidence": 1.0,
+        "association_confidence": 1.0,
+        "caption": null,
+        "ocr_text": null,
+        "semantic_description": null,
+        "objects": [],
+        "detected_entities": [],
+        "table_id": null,
         "element_types": [
           "paragraph"
         ],
         "relationships": {
           "belongs_to": "b1_#/texts/52",
-          "previous": "a8619fd4ae194817a13dad90f43659f8_chunk_0035"
+          "previous": "238f0cc2ae8c10e774e731da3b73f5d4fb359342f01a5b4356e32a01a6435c51_chunk_0039"
         },
+        "section_id": "sec_12_procurement",
+        "section_heading": "12  Procurement",
+        "subsection_heading": null,
+        "is_section_root": false,
+        "child_chunk_ids": [],
+        "report_number": null,
+        "state": null,
+        "region": null,
+        "district": null,
         "people": [],
         "organizations": [],
         "groups": [],
@@ -2085,8 +3865,8 @@
     {
       "content": "Document Section: 12  Procurement\nContent:\n* 1. Raise a purchase requisition in the procurement portal.\n* 2. Obtain budget sign-off from the department head.\n* 3. Finance issues a purchase order to the approved vendor.\n* 4. Goods/services are received and matched against the PO before payment.",
       "metadata": {
-        "chunk_id": "a8619fd4ae194817a13dad90f43659f8_chunk_0037",
-        "document_id": "a8619fd4ae194817a13dad90f43659f8",
+        "chunk_id": "238f0cc2ae8c10e774e731da3b73f5d4fb359342f01a5b4356e32a01a6435c51_chunk_0041",
+        "document_id": "238f0cc2ae8c10e774e731da3b73f5d4fb359342f01a5b4356e32a01a6435c51",
         "page_number": 4,
         "chunk_type": "list",
         "heading": "12  Procurement",
@@ -2132,6 +3912,30 @@
             "coord_origin": "BOTTOMLEFT"
           }
         ],
+        "image_id": null,
+        "image_path": null,
+        "image_url": null,
+        "image_type": null,
+        "title": null,
+        "subtitle": null,
+        "explicit_caption": null,
+        "caption_text": null,
+        "entity_name": null,
+        "designation": null,
+        "text_before": null,
+        "text_after": null,
+        "layout_context": null,
+        "importance_score": "MEDIUM",
+        "retrievable": true,
+        "association_method": "none",
+        "confidence": 1.0,
+        "association_confidence": 1.0,
+        "caption": null,
+        "ocr_text": null,
+        "semantic_description": null,
+        "objects": [],
+        "detected_entities": [],
+        "table_id": null,
         "element_types": [
           "list_item",
           "list_item",
@@ -2140,8 +3944,17 @@
         ],
         "relationships": {
           "belongs_to": "b1_#/texts/52",
-          "previous": "a8619fd4ae194817a13dad90f43659f8_chunk_0036"
+          "previous": "238f0cc2ae8c10e774e731da3b73f5d4fb359342f01a5b4356e32a01a6435c51_chunk_0040"
         },
+        "section_id": "sec_12_procurement",
+        "section_heading": "12  Procurement",
+        "subsection_heading": null,
+        "is_section_root": false,
+        "child_chunk_ids": [],
+        "report_number": null,
+        "state": null,
+        "region": null,
+        "district": null,
         "people": [],
         "organizations": [],
         "groups": [],
@@ -2163,10 +3976,10 @@
       }
     },
     {
-      "content": "Document Section: 12  Procurement\nContent:\nColumn Headers: None\nRow Headers: None\nMarkdown Table:\n| Category              | Preferred Vendor   | Approval Limit (₹)   |\n|-----------------------|--------------------|----------------------|\n| Laptops & IT Hardware | See Appendix C     | 5,00,000             |\n| Office Supplies       | Local vendor panel | 50,000               |\n| Software Licenses     | See Appendix C     | 10,00,000            |",
+      "content": "Document Section: 12  Procurement\nContent:\nColumn Headers: Category, Preferred Vendor, Approval Limit (₹)\nRow Headers: Category, Laptops & IT Hardware, Office Supplies, Software Licenses\nMarkdown Table:\n| Category              | Preferred Vendor   | Approval Limit (₹)   |\n|-----------------------|--------------------|----------------------|\n| Laptops & IT Hardware | See Appendix C     | 5,00,000             |\n| Office Supplies       | Local vendor panel | 50,000               |\n| Software Licenses     | See Appendix C     | 10,00,000            |",
       "metadata": {
-        "chunk_id": "a8619fd4ae194817a13dad90f43659f8_chunk_0038",
-        "document_id": "a8619fd4ae194817a13dad90f43659f8",
+        "chunk_id": "238f0cc2ae8c10e774e731da3b73f5d4fb359342f01a5b4356e32a01a6435c51_chunk_0042",
+        "document_id": "238f0cc2ae8c10e774e731da3b73f5d4fb359342f01a5b4356e32a01a6435c51",
         "page_number": 4,
         "chunk_type": "table",
         "heading": "12  Procurement",
@@ -2177,8 +3990,8 @@
         "source_element_ids": [
           "b1_#/tables/2"
         ],
-        "word_count": 42,
-        "token_estimate": 103,
+        "word_count": 53,
+        "token_estimate": 125,
         "bounding_boxes": [
           {
             "l": 49.23304748535156,
@@ -2186,49 +3999,168 @@
             "r": 562.2182006835938,
             "b": 340.512939453125,
             "coord_origin": "BOTTOMLEFT"
+          },
+          {
+            "l": 55.8,
+            "t": 409.24,
+            "r": 87.4092,
+            "b": 417.76,
+            "coord_origin": "TOPLEFT"
+          },
+          {
+            "l": 226.25,
+            "t": 409.24,
+            "r": 287.92627999999996,
+            "b": 417.76,
+            "coord_origin": "TOPLEFT"
+          },
+          {
+            "l": 396.67,
+            "t": 409.24,
+            "r": 459.9139599999999,
+            "b": 417.76,
+            "coord_origin": "TOPLEFT"
+          },
+          {
+            "l": 55.8,
+            "t": 420.04,
+            "r": 135.12972000000002,
+            "b": 428.56,
+            "coord_origin": "TOPLEFT"
+          },
+          {
+            "l": 226.25,
+            "t": 420.04,
+            "r": 279.5000000000001,
+            "b": 428.56,
+            "coord_origin": "TOPLEFT"
+          },
+          {
+            "l": 396.67,
+            "t": 420.04,
+            "r": 426.89895999999993,
+            "b": 428.56,
+            "coord_origin": "TOPLEFT"
+          },
+          {
+            "l": 55.8,
+            "t": 430.96000000000004,
+            "r": 106.97112000000001,
+            "b": 439.48,
+            "coord_origin": "TOPLEFT"
+          },
+          {
+            "l": 226.25,
+            "t": 430.96000000000004,
+            "r": 291.30872000000005,
+            "b": 439.48,
+            "coord_origin": "TOPLEFT"
+          },
+          {
+            "l": 396.67,
+            "t": 430.96000000000004,
+            "r": 420.42375999999996,
+            "b": 439.48,
+            "coord_origin": "TOPLEFT"
+          },
+          {
+            "l": 55.8,
+            "t": 441.88,
+            "r": 117.63816000000001,
+            "b": 450.4,
+            "coord_origin": "TOPLEFT"
+          },
+          {
+            "l": 226.25,
+            "t": 441.88,
+            "r": 279.5000000000001,
+            "b": 450.4,
+            "coord_origin": "TOPLEFT"
+          },
+          {
+            "l": 396.67,
+            "t": 441.88,
+            "r": 431.2185999999999,
+            "b": 450.4,
+            "coord_origin": "TOPLEFT"
           }
         ],
+        "image_id": null,
+        "image_path": null,
+        "image_url": null,
+        "image_type": null,
+        "title": null,
+        "subtitle": null,
+        "explicit_caption": null,
+        "caption_text": null,
+        "entity_name": null,
+        "designation": null,
+        "text_before": null,
+        "text_after": null,
+        "layout_context": null,
+        "importance_score": "MEDIUM",
+        "retrievable": true,
+        "association_method": "none",
+        "confidence": 1.0,
+        "association_confidence": 1.0,
+        "caption": null,
+        "ocr_text": null,
+        "semantic_description": null,
+        "objects": [],
+        "detected_entities": [],
+        "table_id": "b1_#/tables/2",
         "element_types": [
           "table"
         ],
         "relationships": {
           "belongs_to": "b1_#/texts/52"
         },
-        "table_id": "b1_#/tables/2",
+        "section_id": "sec_12_procurement",
+        "section_heading": "12  Procurement",
+        "subsection_heading": null,
+        "is_section_root": false,
+        "child_chunk_ids": [],
+        "report_number": null,
+        "state": null,
+        "region": null,
+        "district": null,
         "people": [
           "Approval Limit",
           "Column Headers",
           "IT Hardware",
-          "None\nRow Headers",
           "Office Supplies",
           "Preferred Vendor",
+          "Row Headers",
           "See Appendix",
-          "Software Licenses"
+          "Software Licenses",
+          "Software Licenses\nMarkdown"
         ],
-        "organizations": [],
+        "organizations": [
+          "Office Supplies"
+        ],
         "groups": [],
         "dates": [],
         "weapons": [],
         "locations": [],
         "keywords": [
-          "headers",
-          "vendor",
-          "appendix",
-          "column",
-          "markdown",
           "category",
+          "vendor",
+          "headers",
           "preferred",
           "approval",
           "limit",
-          "laptops"
+          "laptops",
+          "hardware",
+          "office",
+          "supplies"
         ]
       }
     },
     {
       "content": "Document Section: 12  Procurement\nContent:\nTable 3 -Procurement categories and limits.",
       "metadata": {
-        "chunk_id": "a8619fd4ae194817a13dad90f43659f8_chunk_0039",
-        "document_id": "a8619fd4ae194817a13dad90f43659f8",
+        "chunk_id": "238f0cc2ae8c10e774e731da3b73f5d4fb359342f01a5b4356e32a01a6435c51_chunk_0043",
+        "document_id": "238f0cc2ae8c10e774e731da3b73f5d4fb359342f01a5b4356e32a01a6435c51",
         "page_number": 4,
         "chunk_type": "footnote",
         "heading": "12  Procurement",
@@ -2250,13 +4182,46 @@
             "coord_origin": "BOTTOMLEFT"
           }
         ],
+        "image_id": null,
+        "image_path": null,
+        "image_url": null,
+        "image_type": null,
+        "title": null,
+        "subtitle": null,
+        "explicit_caption": null,
+        "caption_text": null,
+        "entity_name": null,
+        "designation": null,
+        "text_before": null,
+        "text_after": null,
+        "layout_context": null,
+        "importance_score": "MEDIUM",
+        "retrievable": true,
+        "association_method": "none",
+        "confidence": 1.0,
+        "association_confidence": 1.0,
+        "caption": null,
+        "ocr_text": null,
+        "semantic_description": null,
+        "objects": [],
+        "detected_entities": [],
+        "table_id": null,
         "element_types": [
           "footnote"
         ],
         "relationships": {
           "belongs_to": "b1_#/texts/52",
-          "previous": "a8619fd4ae194817a13dad90f43659f8_chunk_0038"
+          "previous": "238f0cc2ae8c10e774e731da3b73f5d4fb359342f01a5b4356e32a01a6435c51_chunk_0042"
         },
+        "section_id": "sec_12_procurement",
+        "section_heading": "12  Procurement",
+        "subsection_heading": null,
+        "is_section_root": false,
+        "child_chunk_ids": [],
+        "report_number": null,
+        "state": null,
+        "region": null,
+        "district": null,
         "people": [],
         "organizations": [],
         "groups": [],
@@ -2273,8 +4238,8 @@
     {
       "content": "Document Section: 13  Employee Benefits\nContent:\n13  Employee Benefits",
       "metadata": {
-        "chunk_id": "a8619fd4ae194817a13dad90f43659f8_chunk_0040",
-        "document_id": "a8619fd4ae194817a13dad90f43659f8",
+        "chunk_id": "238f0cc2ae8c10e774e731da3b73f5d4fb359342f01a5b4356e32a01a6435c51_chunk_0044",
+        "document_id": "238f0cc2ae8c10e774e731da3b73f5d4fb359342f01a5b4356e32a01a6435c51",
         "page_number": 4,
         "chunk_type": "heading",
         "heading": "13  Employee Benefits",
@@ -2296,13 +4261,46 @@
             "coord_origin": "BOTTOMLEFT"
           }
         ],
+        "image_id": null,
+        "image_path": null,
+        "image_url": null,
+        "image_type": null,
+        "title": null,
+        "subtitle": null,
+        "explicit_caption": null,
+        "caption_text": null,
+        "entity_name": null,
+        "designation": null,
+        "text_before": null,
+        "text_after": null,
+        "layout_context": null,
+        "importance_score": "MEDIUM",
+        "retrievable": true,
+        "association_method": "none",
+        "confidence": 1.0,
+        "association_confidence": 1.0,
+        "caption": null,
+        "ocr_text": null,
+        "semantic_description": null,
+        "objects": [],
+        "detected_entities": [],
+        "table_id": null,
         "element_types": [
           "heading"
         ],
         "relationships": {
           "belongs_to": "body",
-          "previous": "a8619fd4ae194817a13dad90f43659f8_chunk_0039"
+          "previous": "238f0cc2ae8c10e774e731da3b73f5d4fb359342f01a5b4356e32a01a6435c51_chunk_0043"
         },
+        "section_id": "sec_13_employee_benefits",
+        "section_heading": "13  Employee Benefits",
+        "subsection_heading": null,
+        "is_section_root": false,
+        "child_chunk_ids": [],
+        "report_number": null,
+        "state": null,
+        "region": null,
+        "district": null,
         "people": [
           "Employee Benefits"
         ],
@@ -2320,8 +4318,8 @@
     {
       "content": "Document Section: 13  Employee Benefits\nContent:\nPer the Benefits Guide: Health insurance coverage begins after 30 days of continuous employment.\n\nPer the updated Total Rewards page circulated separately: health insurance coverage begins after 90 days of continuous employment -the two documents have not been reconciled.",
       "metadata": {
-        "chunk_id": "a8619fd4ae194817a13dad90f43659f8_chunk_0041",
-        "document_id": "a8619fd4ae194817a13dad90f43659f8",
+        "chunk_id": "238f0cc2ae8c10e774e731da3b73f5d4fb359342f01a5b4356e32a01a6435c51_chunk_0045",
+        "document_id": "238f0cc2ae8c10e774e731da3b73f5d4fb359342f01a5b4356e32a01a6435c51",
         "page_number": 4,
         "chunk_type": "text",
         "heading": "13  Employee Benefits",
@@ -2351,14 +4349,47 @@
             "coord_origin": "BOTTOMLEFT"
           }
         ],
+        "image_id": null,
+        "image_path": null,
+        "image_url": null,
+        "image_type": null,
+        "title": null,
+        "subtitle": null,
+        "explicit_caption": null,
+        "caption_text": null,
+        "entity_name": null,
+        "designation": null,
+        "text_before": null,
+        "text_after": null,
+        "layout_context": null,
+        "importance_score": "MEDIUM",
+        "retrievable": true,
+        "association_method": "none",
+        "confidence": 1.0,
+        "association_confidence": 1.0,
+        "caption": null,
+        "ocr_text": null,
+        "semantic_description": null,
+        "objects": [],
+        "detected_entities": [],
+        "table_id": null,
         "element_types": [
           "paragraph",
           "paragraph"
         ],
         "relationships": {
           "belongs_to": "b1_#/texts/59",
-          "previous": "a8619fd4ae194817a13dad90f43659f8_chunk_0040"
+          "previous": "238f0cc2ae8c10e774e731da3b73f5d4fb359342f01a5b4356e32a01a6435c51_chunk_0044"
         },
+        "section_id": "sec_13_employee_benefits",
+        "section_heading": "13  Employee Benefits",
+        "subsection_heading": null,
+        "is_section_root": false,
+        "child_chunk_ids": [],
+        "report_number": null,
+        "state": null,
+        "region": null,
+        "district": null,
         "people": [
           "Benefits Guide",
           "Total Rewards"
@@ -2390,8 +4421,8 @@
     {
       "content": "Document Section: 14  Legal\nContent:\n14  Legal",
       "metadata": {
-        "chunk_id": "a8619fd4ae194817a13dad90f43659f8_chunk_0042",
-        "document_id": "a8619fd4ae194817a13dad90f43659f8",
+        "chunk_id": "238f0cc2ae8c10e774e731da3b73f5d4fb359342f01a5b4356e32a01a6435c51_chunk_0046",
+        "document_id": "238f0cc2ae8c10e774e731da3b73f5d4fb359342f01a5b4356e32a01a6435c51",
         "page_number": 4,
         "chunk_type": "heading",
         "heading": "14  Legal",
@@ -2413,13 +4444,46 @@
             "coord_origin": "BOTTOMLEFT"
           }
         ],
+        "image_id": null,
+        "image_path": null,
+        "image_url": null,
+        "image_type": null,
+        "title": null,
+        "subtitle": null,
+        "explicit_caption": null,
+        "caption_text": null,
+        "entity_name": null,
+        "designation": null,
+        "text_before": null,
+        "text_after": null,
+        "layout_context": null,
+        "importance_score": "MEDIUM",
+        "retrievable": true,
+        "association_method": "none",
+        "confidence": 1.0,
+        "association_confidence": 1.0,
+        "caption": null,
+        "ocr_text": null,
+        "semantic_description": null,
+        "objects": [],
+        "detected_entities": [],
+        "table_id": null,
         "element_types": [
           "heading"
         ],
         "relationships": {
           "belongs_to": "body",
-          "previous": "a8619fd4ae194817a13dad90f43659f8_chunk_0041"
+          "previous": "238f0cc2ae8c10e774e731da3b73f5d4fb359342f01a5b4356e32a01a6435c51_chunk_0045"
         },
+        "section_id": "sec_14_legal",
+        "section_heading": "14  Legal",
+        "subsection_heading": null,
+        "is_section_root": false,
+        "child_chunk_ids": [],
+        "report_number": null,
+        "state": null,
+        "region": null,
+        "district": null,
         "people": [],
         "organizations": [],
         "groups": [],
@@ -2434,8 +4498,8 @@
     {
       "content": "Document Section: 14  Legal\nContent:\nDefinitions used across this handbook include 'Confidential Information', 'Business Day', and 'Force Majeure Event'; a formal definition of 'Business Day' is not provided in this edition and should be read as per the employment contract.",
       "metadata": {
-        "chunk_id": "a8619fd4ae194817a13dad90f43659f8_chunk_0043",
-        "document_id": "a8619fd4ae194817a13dad90f43659f8",
+        "chunk_id": "238f0cc2ae8c10e774e731da3b73f5d4fb359342f01a5b4356e32a01a6435c51_chunk_0047",
+        "document_id": "238f0cc2ae8c10e774e731da3b73f5d4fb359342f01a5b4356e32a01a6435c51",
         "page_number": 4,
         "chunk_type": "text",
         "heading": "14  Legal",
@@ -2457,13 +4521,46 @@
             "coord_origin": "BOTTOMLEFT"
           }
         ],
+        "image_id": null,
+        "image_path": null,
+        "image_url": null,
+        "image_type": null,
+        "title": null,
+        "subtitle": null,
+        "explicit_caption": null,
+        "caption_text": null,
+        "entity_name": null,
+        "designation": null,
+        "text_before": null,
+        "text_after": null,
+        "layout_context": null,
+        "importance_score": "MEDIUM",
+        "retrievable": true,
+        "association_method": "none",
+        "confidence": 1.0,
+        "association_confidence": 1.0,
+        "caption": null,
+        "ocr_text": null,
+        "semantic_description": null,
+        "objects": [],
+        "detected_entities": [],
+        "table_id": null,
         "element_types": [
           "paragraph"
         ],
         "relationships": {
           "belongs_to": "b1_#/texts/62",
-          "previous": "a8619fd4ae194817a13dad90f43659f8_chunk_0042"
+          "previous": "238f0cc2ae8c10e774e731da3b73f5d4fb359342f01a5b4356e32a01a6435c51_chunk_0046"
         },
+        "section_id": "sec_14_legal",
+        "section_heading": "14  Legal",
+        "subsection_heading": null,
+        "is_section_root": false,
+        "child_chunk_ids": [],
+        "report_number": null,
+        "state": null,
+        "region": null,
+        "district": null,
         "people": [
           "Business Day",
           "Confidential Information"
@@ -2493,8 +4590,8 @@
     {
       "content": "Document Section: 15  Frequently Asked Questions\nContent:\n15  Frequently Asked Questions",
       "metadata": {
-        "chunk_id": "a8619fd4ae194817a13dad90f43659f8_chunk_0044",
-        "document_id": "a8619fd4ae194817a13dad90f43659f8",
+        "chunk_id": "238f0cc2ae8c10e774e731da3b73f5d4fb359342f01a5b4356e32a01a6435c51_chunk_0048",
+        "document_id": "238f0cc2ae8c10e774e731da3b73f5d4fb359342f01a5b4356e32a01a6435c51",
         "page_number": 4,
         "chunk_type": "heading",
         "heading": "15  Frequently Asked Questions",
@@ -2516,13 +4613,46 @@
             "coord_origin": "BOTTOMLEFT"
           }
         ],
+        "image_id": null,
+        "image_path": null,
+        "image_url": null,
+        "image_type": null,
+        "title": null,
+        "subtitle": null,
+        "explicit_caption": null,
+        "caption_text": null,
+        "entity_name": null,
+        "designation": null,
+        "text_before": null,
+        "text_after": null,
+        "layout_context": null,
+        "importance_score": "MEDIUM",
+        "retrievable": true,
+        "association_method": "none",
+        "confidence": 1.0,
+        "association_confidence": 1.0,
+        "caption": null,
+        "ocr_text": null,
+        "semantic_description": null,
+        "objects": [],
+        "detected_entities": [],
+        "table_id": null,
         "element_types": [
           "heading"
         ],
         "relationships": {
           "belongs_to": "body",
-          "previous": "a8619fd4ae194817a13dad90f43659f8_chunk_0043"
+          "previous": "238f0cc2ae8c10e774e731da3b73f5d4fb359342f01a5b4356e32a01a6435c51_chunk_0047"
         },
+        "section_id": "sec_15_frequently_asked_questions",
+        "section_heading": "15  Frequently Asked Questions",
+        "subsection_heading": null,
+        "is_section_root": false,
+        "child_chunk_ids": [],
+        "report_number": null,
+        "state": null,
+        "region": null,
+        "district": null,
         "people": [
           "Frequently Asked Questions"
         ],
@@ -2539,10 +4669,10 @@
       }
     },
     {
-      "content": "Document Section: 15  Frequently Asked Questions\nContent:\nColumn Headers: None\nRow Headers: None\nMarkdown Table:\nTable 4 -Department headcount and budget (from the FAQ appendix).\n\n| Department   |   Employees | Budget (₹)   |\n|--------------|-------------|--------------|\n| HR           |          32 | 8,00,000     |\n| IT           |          94 | 3,50,00,000  |\n| Finance      |          28 | 1,20,00,000  |\n| Support      |          61 | 95,00,000    |",
+      "content": "Document Section: 15  Frequently Asked Questions\nContent:\nColumn Headers: Department, Employees, Budget (₹)\nRow Headers: Department, HR, IT, Finance, Support\nMarkdown Table:\nTable 4 -Department headcount and budget (from the FAQ appendix).\n\n| Department   |   Employees | Budget (₹)   |\n|--------------|-------------|--------------|\n| HR           |          32 | 8,00,000     |\n| IT           |          94 | 3,50,00,000  |\n| Finance      |          28 | 1,20,00,000  |\n| Support      |          61 | 95,00,000    |",
       "metadata": {
-        "chunk_id": "a8619fd4ae194817a13dad90f43659f8_chunk_0045",
-        "document_id": "a8619fd4ae194817a13dad90f43659f8",
+        "chunk_id": "238f0cc2ae8c10e774e731da3b73f5d4fb359342f01a5b4356e32a01a6435c51_chunk_0049",
+        "document_id": "238f0cc2ae8c10e774e731da3b73f5d4fb359342f01a5b4356e32a01a6435c51",
         "page_number": 4,
         "chunk_type": "table",
         "heading": "15  Frequently Asked Questions",
@@ -2553,8 +4683,8 @@
         "source_element_ids": [
           "b1_#/tables/3"
         ],
-        "word_count": 50,
-        "token_estimate": 129,
+        "word_count": 56,
+        "token_estimate": 144,
         "bounding_boxes": [
           {
             "l": 49.12441635131836,
@@ -2562,18 +4692,155 @@
             "r": 562.18359375,
             "b": 94.82269287109375,
             "coord_origin": "BOTTOMLEFT"
+          },
+          {
+            "l": 55.8,
+            "t": 644.71,
+            "r": 98.93675999999999,
+            "b": 653.23,
+            "coord_origin": "TOPLEFT"
+          },
+          {
+            "l": 226.25,
+            "t": 644.71,
+            "r": 264.65815999999995,
+            "b": 653.23,
+            "coord_origin": "TOPLEFT"
+          },
+          {
+            "l": 396.67,
+            "t": 644.71,
+            "r": 433.5275199999999,
+            "b": 653.23,
+            "coord_origin": "TOPLEFT"
+          },
+          {
+            "l": 55.8,
+            "t": 655.51,
+            "r": 65.70632,
+            "b": 664.03,
+            "coord_origin": "TOPLEFT"
+          },
+          {
+            "l": 226.25,
+            "t": 655.51,
+            "r": 234.88963999999999,
+            "b": 664.03,
+            "coord_origin": "TOPLEFT"
+          },
+          {
+            "l": 396.67,
+            "t": 655.51,
+            "r": 426.89895999999993,
+            "b": 664.03,
+            "coord_origin": "TOPLEFT"
+          },
+          {
+            "l": 55.8,
+            "t": 666.43,
+            "r": 62.10927999999999,
+            "b": 674.95,
+            "coord_origin": "TOPLEFT"
+          },
+          {
+            "l": 226.25,
+            "t": 666.43,
+            "r": 234.88963999999999,
+            "b": 674.95,
+            "coord_origin": "TOPLEFT"
+          },
+          {
+            "l": 396.67,
+            "t": 666.43,
+            "r": 437.5830399999999,
+            "b": 674.95,
+            "coord_origin": "TOPLEFT"
+          },
+          {
+            "l": 55.8,
+            "t": 677.23,
+            "r": 82.47612,
+            "b": 685.75,
+            "coord_origin": "TOPLEFT"
+          },
+          {
+            "l": 226.25,
+            "t": 677.23,
+            "r": 234.88963999999999,
+            "b": 685.75,
+            "coord_origin": "TOPLEFT"
+          },
+          {
+            "l": 396.67,
+            "t": 677.23,
+            "r": 437.5830399999999,
+            "b": 685.75,
+            "coord_origin": "TOPLEFT"
+          },
+          {
+            "l": 55.8,
+            "t": 688.146,
+            "r": 83.35367999999998,
+            "b": 696.6659999999999,
+            "coord_origin": "TOPLEFT"
+          },
+          {
+            "l": 226.25,
+            "t": 688.146,
+            "r": 234.88963999999999,
+            "b": 696.6659999999999,
+            "coord_origin": "TOPLEFT"
+          },
+          {
+            "l": 396.67,
+            "t": 688.146,
+            "r": 431.2185999999999,
+            "b": 696.6659999999999,
+            "coord_origin": "TOPLEFT"
           }
         ],
+        "image_id": null,
+        "image_path": null,
+        "image_url": null,
+        "image_type": null,
+        "title": null,
+        "subtitle": null,
+        "explicit_caption": null,
+        "caption_text": null,
+        "entity_name": null,
+        "designation": null,
+        "text_before": null,
+        "text_after": null,
+        "layout_context": null,
+        "importance_score": "MEDIUM",
+        "retrievable": true,
+        "association_method": "none",
+        "confidence": 1.0,
+        "association_confidence": 1.0,
+        "caption": null,
+        "ocr_text": null,
+        "semantic_description": null,
+        "objects": [],
+        "detected_entities": [],
+        "table_id": "b1_#/tables/3",
         "element_types": [
           "table"
         ],
         "relationships": {
           "belongs_to": "b1_#/texts/64"
         },
-        "table_id": "b1_#/tables/3",
+        "section_id": "sec_15_frequently_asked_questions",
+        "section_heading": "15  Frequently Asked Questions",
+        "subsection_heading": null,
+        "is_section_root": false,
+        "child_chunk_ids": [],
+        "report_number": null,
+        "state": null,
+        "region": null,
+        "district": null,
         "people": [
           "Column Headers",
-          "None\nRow Headers"
+          "Row Headers"
         ],
         "organizations": [
           "Budget",
@@ -2585,24 +4852,24 @@
         "weapons": [],
         "locations": [],
         "keywords": [
-          "headers",
           "department",
           "budget",
+          "headers",
+          "employees",
+          "finance",
+          "support",
           "column",
           "markdown",
           "headcount",
-          "appendix",
-          "employees",
-          "finance",
-          "support"
+          "appendix"
         ]
       }
     },
     {
       "content": "Document Section: 15  Frequently Asked Questions\nContent:\nTable 4 -Department headcount and budget (from the FAQ appendix).",
       "metadata": {
-        "chunk_id": "a8619fd4ae194817a13dad90f43659f8_chunk_0046",
-        "document_id": "a8619fd4ae194817a13dad90f43659f8",
+        "chunk_id": "238f0cc2ae8c10e774e731da3b73f5d4fb359342f01a5b4356e32a01a6435c51_chunk_0050",
+        "document_id": "238f0cc2ae8c10e774e731da3b73f5d4fb359342f01a5b4356e32a01a6435c51",
         "page_number": 4,
         "chunk_type": "text",
         "heading": "15  Frequently Asked Questions",
@@ -2624,13 +4891,46 @@
             "coord_origin": "BOTTOMLEFT"
           }
         ],
+        "image_id": null,
+        "image_path": null,
+        "image_url": null,
+        "image_type": null,
+        "title": null,
+        "subtitle": null,
+        "explicit_caption": null,
+        "caption_text": null,
+        "entity_name": null,
+        "designation": null,
+        "text_before": null,
+        "text_after": null,
+        "layout_context": null,
+        "importance_score": "MEDIUM",
+        "retrievable": true,
+        "association_method": "none",
+        "confidence": 1.0,
+        "association_confidence": 1.0,
+        "caption": null,
+        "ocr_text": null,
+        "semantic_description": null,
+        "objects": [],
+        "detected_entities": [],
+        "table_id": null,
         "element_types": [
           "caption"
         ],
         "relationships": {
           "belongs_to": "b1_#/texts/64",
-          "previous": "a8619fd4ae194817a13dad90f43659f8_chunk_0045"
+          "previous": "238f0cc2ae8c10e774e731da3b73f5d4fb359342f01a5b4356e32a01a6435c51_chunk_0049"
         },
+        "section_id": "sec_15_frequently_asked_questions",
+        "section_heading": "15  Frequently Asked Questions",
+        "subsection_heading": null,
+        "is_section_root": false,
+        "child_chunk_ids": [],
+        "report_number": null,
+        "state": null,
+        "region": null,
+        "district": null,
         "people": [],
         "organizations": [
           "FAQ"
@@ -2650,8 +4950,8 @@
     {
       "content": "Document Section: 15  Frequently Asked Questions\nContent:\n* How many annual leaves do employees receive? -See Section 2.1 (18 vs. 20 -unresolved).\n* Is MFA mandatory? -Yes, for all employees (Section 5.2).\n* What was Q1 revenue growth? -Reported as both 18% and 15% (Section 6).\n* Which appendix is missing? -Appendix B is referenced in Sections 5 and 9 but does not appear in this edition.",
       "metadata": {
-        "chunk_id": "a8619fd4ae194817a13dad90f43659f8_chunk_0047",
-        "document_id": "a8619fd4ae194817a13dad90f43659f8",
+        "chunk_id": "238f0cc2ae8c10e774e731da3b73f5d4fb359342f01a5b4356e32a01a6435c51_chunk_0051",
+        "document_id": "238f0cc2ae8c10e774e731da3b73f5d4fb359342f01a5b4356e32a01a6435c51",
         "page_number": 5,
         "chunk_type": "list",
         "heading": "15  Frequently Asked Questions",
@@ -2697,6 +4997,30 @@
             "coord_origin": "BOTTOMLEFT"
           }
         ],
+        "image_id": null,
+        "image_path": null,
+        "image_url": null,
+        "image_type": null,
+        "title": null,
+        "subtitle": null,
+        "explicit_caption": null,
+        "caption_text": null,
+        "entity_name": null,
+        "designation": null,
+        "text_before": null,
+        "text_after": null,
+        "layout_context": null,
+        "importance_score": "MEDIUM",
+        "retrievable": true,
+        "association_method": "none",
+        "confidence": 1.0,
+        "association_confidence": 1.0,
+        "caption": null,
+        "ocr_text": null,
+        "semantic_description": null,
+        "objects": [],
+        "detected_entities": [],
+        "table_id": null,
         "element_types": [
           "list_item",
           "list_item",
@@ -2705,8 +5029,17 @@
         ],
         "relationships": {
           "belongs_to": "b1_#/texts/64",
-          "previous": "a8619fd4ae194817a13dad90f43659f8_chunk_0046"
+          "previous": "238f0cc2ae8c10e774e731da3b73f5d4fb359342f01a5b4356e32a01a6435c51_chunk_0050"
         },
+        "section_id": "sec_15_frequently_asked_questions",
+        "section_heading": "15  Frequently Asked Questions",
+        "subsection_heading": null,
+        "is_section_root": false,
+        "child_chunk_ids": [],
+        "report_number": null,
+        "state": null,
+        "region": null,
+        "district": null,
         "people": [
           "Is MFA",
           "See Section"
@@ -2737,8 +5070,8 @@
     {
       "content": "Document Section: Appendices\nContent:\nAppendices",
       "metadata": {
-        "chunk_id": "a8619fd4ae194817a13dad90f43659f8_chunk_0048",
-        "document_id": "a8619fd4ae194817a13dad90f43659f8",
+        "chunk_id": "238f0cc2ae8c10e774e731da3b73f5d4fb359342f01a5b4356e32a01a6435c51_chunk_0052",
+        "document_id": "238f0cc2ae8c10e774e731da3b73f5d4fb359342f01a5b4356e32a01a6435c51",
         "page_number": 6,
         "chunk_type": "heading",
         "heading": "Appendices",
@@ -2760,13 +5093,46 @@
             "coord_origin": "BOTTOMLEFT"
           }
         ],
+        "image_id": null,
+        "image_path": null,
+        "image_url": null,
+        "image_type": null,
+        "title": null,
+        "subtitle": null,
+        "explicit_caption": null,
+        "caption_text": null,
+        "entity_name": null,
+        "designation": null,
+        "text_before": null,
+        "text_after": null,
+        "layout_context": null,
+        "importance_score": "MEDIUM",
+        "retrievable": true,
+        "association_method": "none",
+        "confidence": 1.0,
+        "association_confidence": 1.0,
+        "caption": null,
+        "ocr_text": null,
+        "semantic_description": null,
+        "objects": [],
+        "detected_entities": [],
+        "table_id": null,
         "element_types": [
           "heading"
         ],
         "relationships": {
           "belongs_to": "body",
-          "previous": "a8619fd4ae194817a13dad90f43659f8_chunk_0047"
+          "previous": "238f0cc2ae8c10e774e731da3b73f5d4fb359342f01a5b4356e32a01a6435c51_chunk_0051"
         },
+        "section_id": "sec_appendices",
+        "section_heading": "Appendices",
+        "subsection_heading": null,
+        "is_section_root": false,
+        "child_chunk_ids": [],
+        "report_number": null,
+        "state": null,
+        "region": null,
+        "district": null,
         "people": [],
         "organizations": [],
         "groups": [],
@@ -2781,8 +5147,8 @@
     {
       "content": "Document Section: Appendices\nContent:\nAppendix A -Organization Chart (see Fig. 3, Section 11). Appendix C -Approved Vendor List (referenced in Section 12; full vendor table maintained by Procurement separately).\n\nAppendix B, referenced in Sections 5 and 9, is not included in this edition.",
       "metadata": {
-        "chunk_id": "a8619fd4ae194817a13dad90f43659f8_chunk_0049",
-        "document_id": "a8619fd4ae194817a13dad90f43659f8",
+        "chunk_id": "238f0cc2ae8c10e774e731da3b73f5d4fb359342f01a5b4356e32a01a6435c51_chunk_0053",
+        "document_id": "238f0cc2ae8c10e774e731da3b73f5d4fb359342f01a5b4356e32a01a6435c51",
         "page_number": 6,
         "chunk_type": "text",
         "heading": "Appendices",
@@ -2812,14 +5178,47 @@
             "coord_origin": "BOTTOMLEFT"
           }
         ],
+        "image_id": null,
+        "image_path": null,
+        "image_url": null,
+        "image_type": null,
+        "title": null,
+        "subtitle": null,
+        "explicit_caption": null,
+        "caption_text": null,
+        "entity_name": null,
+        "designation": null,
+        "text_before": null,
+        "text_after": null,
+        "layout_context": null,
+        "importance_score": "MEDIUM",
+        "retrievable": true,
+        "association_method": "none",
+        "confidence": 1.0,
+        "association_confidence": 1.0,
+        "caption": null,
+        "ocr_text": null,
+        "semantic_description": null,
+        "objects": [],
+        "detected_entities": [],
+        "table_id": null,
         "element_types": [
           "paragraph",
           "paragraph"
         ],
         "relationships": {
           "belongs_to": "b1_#/texts/70",
-          "previous": "a8619fd4ae194817a13dad90f43659f8_chunk_0048"
+          "previous": "238f0cc2ae8c10e774e731da3b73f5d4fb359342f01a5b4356e32a01a6435c51_chunk_0052"
         },
+        "section_id": "sec_appendices",
+        "section_heading": "Appendices",
+        "subsection_heading": null,
+        "is_section_root": false,
+        "child_chunk_ids": [],
+        "report_number": null,
+        "state": null,
+        "region": null,
+        "district": null,
         "people": [
           "Appendix C -Approved Vendor List",
           "Fig"

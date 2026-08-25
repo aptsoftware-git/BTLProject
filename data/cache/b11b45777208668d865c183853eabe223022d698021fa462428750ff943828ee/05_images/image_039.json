@@ -1,8 +1,8 @@
 {
   "image_id": "#/pictures/38",
+  "image_path": "05_images/image_039.png",
+  "image_url": "/outputs/b11b45777208668d865c183853eabe223022d698021fa462428750ff943828ee/05_images/image_039.png",
   "page": 9,
-  "caption": null,
-  "ocr_text": null,
   "bounding_box": {
     "l": 647.543212890625,
     "t": 706.6685028076172,
@@ -10,24 +10,33 @@
     "b": 554.5511474609375,
     "coord_origin": "BOTTOMLEFT"
   },
-  "image_path": "05_images/image_039.png",
-  "image_type": "Photo",
-  "objects": [
-    "Greenery (trees and vegetation)",
-    "Industrial structures (possibly power plants or related facilities)",
-    "Open land or construction areas",
-    "Railways or tracks"
-  ],
-  "keywords": [
-    "Construction",
-    "Environment",
-    "National Thermal Power Corporation (NTPC)",
-    "Pakri project",
-    "Power plant",
-    "Railways"
-  ],
+  "image_type": "Chart/Graph",
+  "title": "Overcome: BTL EPC ensured milestoned progress through effective site management and o",
+  "subtitle": "Overcome: BTL EPC ensured milestoned progress through effective site management and ongoing stakeholder engagement. The",
+  "explicit_caption": null,
+  "caption_text": "Figure on Page 9 (Overcome: BTL EPC ensured milestoned progress through effective site management and o)",
+  "entity_name": null,
+  "designation": null,
+  "section_heading": null,
+  "text_before": "We have demonstrated a commitment to embrace challenging projects and outperform",
+  "text_after": "Overcome: BTL EPC ensured milestoned progress through effective site management and ongoing stakeholder engagement. The project was completed successfully without any delay. NTPC appreciated BTL EPC's performance, positioning the latter as a preferred EPC partner.",
   "semantic_description": "The image shows a series of photographs related to the National Thermal Power Corporation (NTPC) Pakri project. It appears to depict various stages or aspects of the project, possibly including construction, infrastructure, and possibly the surrounding environment.",
-  "detected_entities": [
-    "National Thermal Power Corporation (NTPC)"
-  ]
+  "keywords": [
+    "chart/graph",
+    "Overcome: BTL EPC ensured milestoned progress through effective site management and o"
+  ],
+  "importance_score": "HIGH",
+  "retrievable": true,
+  "association_method": "spatially_nearest_text",
+  "association_confidence": 0.85,
+  "caption": "Figure on Page 9 (Overcome: BTL EPC ensured milestoned progress through effective site management and o)",
+  "confidence": 0.85,
+  "layout_context": "spatially_anchored_figure",
+  "ocr_text": null,
+  "objects": [
+    "image",
+    "figure",
+    "visual graphic"
+  ],
+  "detected_entities": []
 }

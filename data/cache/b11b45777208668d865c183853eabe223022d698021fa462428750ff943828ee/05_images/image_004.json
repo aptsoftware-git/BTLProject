@@ -1,8 +1,8 @@
 {
   "image_id": "#/pictures/3",
+  "image_path": "05_images/image_004.png",
+  "image_url": "/outputs/b11b45777208668d865c183853eabe223022d698021fa462428750ff943828ee/05_images/image_004.png",
   "page": 5,
-  "caption": null,
-  "ocr_text": null,
   "bounding_box": {
     "l": 0.0,
     "t": 841.8900146484375,
@@ -10,34 +10,33 @@
     "b": 546.6134338378906,
     "coord_origin": "BOTTOMLEFT"
   },
-  "image_path": "05_images/image_004.png",
   "image_type": "Screenshot",
-  "objects": [
-    "Blue pipes",
-    "Coal handling plant",
-    "Construction equipment",
-    "Construction sites",
-    "Industrial structures",
-    "Large cylindrical structures",
-    "Machinery",
-    "Process column"
-  ],
-  "keywords": [
-    "BHCL",
-    "BTL EPC Ltd.",
-    "Coal handling plant",
-    "Construction",
-    "Guwahati",
-    "Indian Oil Corporation",
-    "Industrial",
-    "Process column",
-    "Projects",
-    "Tamil Nadu"
-  ],
+  "title": "Steel Authority of India Limited: A Maharatna PSU under the Ministry of Steel, the Co",
+  "subtitle": "Neelachal Ispat Nigam Limited:",
+  "explicit_caption": null,
+  "caption_text": "Figure on Page 5 (Steel Authority of India Limited: A Maharatna PSU under the Ministry of Steel, the Co)",
+  "entity_name": null,
+  "designation": null,
+  "section_heading": null,
+  "text_before": null,
+  "text_after": "Neelachal Ispat Nigam Limited:",
   "semantic_description": "This image is a screenshot from a document showcasing various industrial projects and construction sites managed by BTL EPC Ltd. It highlights different stages of construction and completed projects, including a coal handling plant and a process column for the Indian Oil Corporation.",
-  "detected_entities": [
-    "BHCL, Udangudi, Tamil Nadu",
-    "BTL EPC Ltd.",
-    "Indian Oil Corporation, Guwahati"
-  ]
+  "keywords": [
+    "screenshot",
+    "Steel Authority of India Limited: A Maharatna PSU under the Ministry of Steel, the Co"
+  ],
+  "importance_score": "HIGH",
+  "retrievable": true,
+  "association_method": "spatially_nearest_text",
+  "association_confidence": 0.85,
+  "caption": "Figure on Page 5 (Steel Authority of India Limited: A Maharatna PSU under the Ministry of Steel, the Co)",
+  "confidence": 0.85,
+  "layout_context": "spatially_anchored_figure",
+  "ocr_text": null,
+  "objects": [
+    "image",
+    "figure",
+    "visual graphic"
+  ],
+  "detected_entities": []
 }

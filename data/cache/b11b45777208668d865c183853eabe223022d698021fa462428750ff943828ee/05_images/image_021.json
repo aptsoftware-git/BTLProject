@@ -1,8 +1,8 @@
 {
   "image_id": "#/pictures/20",
+  "image_path": "05_images/image_021.png",
+  "image_url": "/outputs/b11b45777208668d865c183853eabe223022d698021fa462428750ff943828ee/05_images/image_021.png",
   "page": 6,
-  "caption": null,
-  "ocr_text": null,
   "bounding_box": {
     "l": 936.73779296875,
     "t": 130.88507080078125,
@@ -10,19 +10,39 @@
     "b": 56.58001708984375,
     "coord_origin": "BOTTOMLEFT"
   },
-  "image_path": "05_images/image_021.png",
   "image_type": "Logo",
-  "objects": [
-    "The logo text \"United Registrar of Systems\" and the ISO 45001 certification mark."
-  ],
-  "keywords": [
-    "Certification",
-    "ISO 45001",
-    "Standard",
-    "United Registrar of Systems"
-  ],
+  "title": "Company Logo - 6a1f1c571432456e92a961e1a0f4b70c_BTL AR SS 09-10-2025 (c2c)-1-10",
+  "subtitle": "Official Brand Identity",
+  "explicit_caption": null,
+  "caption_text": "Company Logo of 6a1f1c571432456e92a961e1a0f4b70c_BTL AR SS 09-10-2025 (c2c)-1-10",
+  "entity_name": null,
+  "designation": null,
+  "section_heading": null,
+  "text_before": "Our consultants",
+  "text_after": null,
   "semantic_description": "This image is a logo for the \"United Registrar of Systems\" (URS), which is associated with the ISO 45001 standard. The logo includes the acronym \"URS\" and the ISO 45001 certification mark, indicating that the organization is certified under this standard.",
+  "keywords": [
+    "logo",
+    "brand",
+    "emblem",
+    "insignia",
+    "company logo",
+    "6a1f1c571432456e92a961e1a0f4b70c_BTL AR SS 09-10-2025 (c2c)-1-10"
+  ],
+  "importance_score": "HIGH",
+  "retrievable": true,
+  "association_method": "section_spatial_context",
+  "association_confidence": 0.75,
+  "caption": "Company Logo of 6a1f1c571432456e92a961e1a0f4b70c_BTL AR SS 09-10-2025 (c2c)-1-10",
+  "confidence": 0.75,
+  "layout_context": "section_figure",
+  "ocr_text": null,
+  "objects": [
+    "logo",
+    "emblem",
+    "brand mark"
+  ],
   "detected_entities": [
-    "United Registrar of Systems (URS)"
+    "6a1f1c571432456e92a961e1a0f4b70c_BTL AR SS 09-10-2025 (c2c)-1-10"
   ]
 }

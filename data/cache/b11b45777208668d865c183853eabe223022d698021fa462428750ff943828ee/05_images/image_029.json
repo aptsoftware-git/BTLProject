@@ -1,8 +1,8 @@
 {
   "image_id": "#/pictures/28",
+  "image_path": "05_images/image_029.png",
+  "image_url": "/outputs/b11b45777208668d865c183853eabe223022d698021fa462428750ff943828ee/05_images/image_029.png",
   "page": 7,
-  "caption": null,
-  "ocr_text": null,
   "bounding_box": {
     "l": 647.519287109375,
     "t": 758.2555084228516,
@@ -10,25 +10,33 @@
     "b": 562.1262512207031,
     "coord_origin": "BOTTOMLEFT"
   },
-  "image_path": "05_images/image_029.png",
-  "image_type": "Photo",
-  "objects": [
-    "Flat-roofed industrial buildings",
-    "Signage on the roofs",
-    "Trees and greenery",
-    "Urban buildings"
-  ],
-  "keywords": [
-    "Aerial",
-    "BT ELECTRO",
-    "Branding",
-    "Complex",
-    "Industrial",
-    "Roof",
-    "Urban"
-  ],
+  "image_type": "Chart/Graph",
+  "title": "Manufacturing",
+  "subtitle": "Manufacturing",
+  "explicit_caption": null,
+  "caption_text": "Figure on Page 7 (Manufacturing)",
+  "entity_name": null,
+  "designation": null,
+  "section_heading": null,
+  "text_before": null,
+  "text_after": "Manufacturing",
   "semantic_description": "This image appears to be an aerial photograph of a large industrial or commercial complex. The structures are characterized by flat roofs with visible branding or signage, suggesting it might be a factory or warehouse. The surrounding area includes urban buildings, indicating the complex is located in an urban environment.",
-  "detected_entities": [
-    "The branding on the roofs suggests the name \"BT ELECTRO,\" which could be the entity associated with the complex."
-  ]
+  "keywords": [
+    "chart/graph",
+    "Manufacturing"
+  ],
+  "importance_score": "HIGH",
+  "retrievable": true,
+  "association_method": "spatially_nearest_text",
+  "association_confidence": 0.85,
+  "caption": "Figure on Page 7 (Manufacturing)",
+  "confidence": 0.85,
+  "layout_context": "spatially_anchored_figure",
+  "ocr_text": null,
+  "objects": [
+    "image",
+    "figure",
+    "visual graphic"
+  ],
+  "detected_entities": []
 }

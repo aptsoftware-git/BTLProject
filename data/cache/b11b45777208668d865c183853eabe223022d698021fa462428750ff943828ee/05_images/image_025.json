@@ -1,8 +1,8 @@
 {
   "image_id": "#/pictures/24",
+  "image_path": "05_images/image_025.png",
+  "image_url": "/outputs/b11b45777208668d865c183853eabe223022d698021fa462428750ff943828ee/05_images/image_025.png",
   "page": 7,
-  "caption": null,
-  "ocr_text": null,
   "bounding_box": {
     "l": 40.944889068603516,
     "t": 520.5755310058594,
@@ -10,26 +10,36 @@
     "b": 324.02569580078125,
     "coord_origin": "BOTTOMLEFT"
   },
-  "image_path": "05_images/image_025.png",
-  "image_type": "Photo",
-  "objects": [
-    "Cooling tower",
-    "conveyor belt",
-    "industrial buildings",
-    "open field",
-    "sky."
-  ],
-  "keywords": [
-    "Industrial",
-    "conveyor belt",
-    "cooling tower",
-    "environment.",
-    "facility",
-    "infrastructure",
-    "power plant"
-  ],
+  "image_type": "Diagram",
+  "title": "Bulk Material Handling",
+  "subtitle": "Defense",
+  "explicit_caption": null,
+  "caption_text": "Figure on Page 7 (Bulk Material Handling)",
+  "entity_name": null,
+  "designation": null,
+  "section_heading": null,
+  "text_before": "Our businesses",
+  "text_after": "Defense",
   "semantic_description": "The image depicts an industrial facility, likely a power plant or a similar industrial complex, with a prominent cooling tower in the background. The foreground shows part of the industrial infrastructure, including what appears to be a conveyor belt system and some industrial buildings. The setting suggests an industrial or manufacturing environment.",
-  "detected_entities": [
-    "None"
-  ]
+  "keywords": [
+    "diagram",
+    "metrics",
+    "financial",
+    "data",
+    "report"
+  ],
+  "importance_score": "HIGH",
+  "retrievable": true,
+  "association_method": "spatially_nearest_text",
+  "association_confidence": 0.85,
+  "caption": "Figure on Page 7 (Bulk Material Handling)",
+  "confidence": 0.85,
+  "layout_context": "spatially_anchored_figure",
+  "ocr_text": null,
+  "objects": [
+    "diagram",
+    "chart",
+    "graphic"
+  ],
+  "detected_entities": []
 }

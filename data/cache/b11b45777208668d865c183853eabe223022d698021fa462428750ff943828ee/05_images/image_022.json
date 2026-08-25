@@ -1,8 +1,8 @@
 {
   "image_id": "#/pictures/21",
+  "image_path": "05_images/image_022.png",
+  "image_url": "/outputs/b11b45777208668d865c183853eabe223022d698021fa462428750ff943828ee/05_images/image_022.png",
   "page": 6,
-  "caption": null,
-  "ocr_text": null,
   "bounding_box": {
     "l": 1023.6113891601562,
     "t": 263.4197998046875,
@@ -10,12 +10,33 @@
     "b": 219.8853759765625,
     "coord_origin": "BOTTOMLEFT"
   },
-  "image_path": "05_images/image_022.png",
   "image_type": "Decorative",
-  "objects": [],
+  "title": "Steag: Steag is an engineering and project management firm known for providing consul",
+  "subtitle": "Power Transmission Corporation of Uttarakhand Limited (PTCUL):",
+  "explicit_caption": null,
+  "caption_text": "Figure on Page 6 (Steag: Steag is an engineering and project management firm known for providing consul)",
+  "entity_name": null,
+  "designation": null,
+  "section_heading": null,
+  "text_before": "Our consultants",
+  "text_after": "Power Transmission Corporation of Uttarakhand Limited (PTCUL):",
+  "semantic_description": "Decorative on Page 6 under section 'Document Content'.",
   "keywords": [
-    "decorative"
+    "decorative",
+    "Steag: Steag is an engineering and project management firm known for providing consul"
   ],
-  "semantic_description": "Decorative graphics skipped by smart VLM filter.",
+  "importance_score": "MEDIUM",
+  "retrievable": true,
+  "association_method": "spatially_nearest_text",
+  "association_confidence": 0.85,
+  "caption": "Figure on Page 6 (Steag: Steag is an engineering and project management firm known for providing consul)",
+  "confidence": 0.85,
+  "layout_context": "spatially_anchored_figure",
+  "ocr_text": null,
+  "objects": [
+    "image",
+    "figure",
+    "visual graphic"
+  ],
   "detected_entities": []
 }

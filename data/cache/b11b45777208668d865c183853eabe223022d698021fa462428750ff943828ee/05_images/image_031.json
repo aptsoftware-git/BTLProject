@@ -1,8 +1,8 @@
 {
   "image_id": "#/pictures/30",
+  "image_path": "05_images/image_031.png",
+  "image_url": "/outputs/b11b45777208668d865c183853eabe223022d698021fa462428750ff943828ee/05_images/image_031.png",
   "page": 7,
-  "caption": null,
-  "ocr_text": null,
   "bounding_box": {
     "l": 648.1835327148438,
     "t": 282.926025390625,
@@ -10,31 +10,33 @@
     "b": 86.21075439453125,
     "coord_origin": "BOTTOMLEFT"
   },
-  "image_path": "05_images/image_031.png",
   "image_type": "Photo",
-  "objects": [
-    "Red cylindrical machinery",
-    "and various mechanical components.",
-    "ceiling",
-    "floor",
-    "industrial setting",
-    "mechanical parts",
-    "pipes",
-    "walls"
-  ],
-  "keywords": [
-    "Industrial",
-    "equipment",
-    "facility.",
-    "factory",
-    "machinery",
-    "mechanical parts",
-    "pipes",
-    "red cylinder",
-    "workshop"
-  ],
+  "title": "Special Business",
+  "subtitle": "Special Business",
+  "explicit_caption": null,
+  "caption_text": "Figure on Page 7 (Special Business)",
+  "entity_name": null,
+  "designation": null,
+  "section_heading": null,
+  "text_before": "Our businesses",
+  "text_after": "Special Business",
   "semantic_description": "The image depicts a piece of industrial machinery, likely used for manufacturing or processing, with a red cylindrical component at the top and various pipes and mechanical parts surrounding it. The setting appears to be an industrial facility, possibly a factory or a workshop.",
-  "detected_entities": [
-    "None"
-  ]
+  "keywords": [
+    "photo",
+    "Special Business"
+  ],
+  "importance_score": "MEDIUM",
+  "retrievable": true,
+  "association_method": "spatially_nearest_text",
+  "association_confidence": 0.85,
+  "caption": "Figure on Page 7 (Special Business)",
+  "confidence": 0.85,
+  "layout_context": "spatially_anchored_figure",
+  "ocr_text": null,
+  "objects": [
+    "image",
+    "figure",
+    "visual graphic"
+  ],
+  "detected_entities": []
 }

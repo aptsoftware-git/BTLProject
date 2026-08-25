@@ -456,9 +456,11 @@ class KnowledgeExtractionAgent:
                         vlm_description=img_meta.semantic_description
                     )
 
+                    title = grounded.get("title")
+                    subtitle = grounded.get("subtitle")
                     caption = grounded["caption"]
                     explicit_caption = grounded["explicit_caption"]
-                    caption_text = grounded["caption"]
+                    caption_text = grounded["caption_text"]
                     entity_name = grounded["entity_name"]
                     designation = grounded["designation"]
                     section_heading = grounded["section_heading"]
@@ -469,24 +471,32 @@ class KnowledgeExtractionAgent:
                     importance_score = grounded["importance_score"]
                     retrievable = grounded["retrievable"]
                     association_method = grounded["association_method"]
-                    association_confidence = grounded["confidence"]
+                    association_confidence = grounded["association_confidence"]
                     confidence = grounded["confidence"]
                     ocr_text = img_meta.ocr_text or ""
+
+                    img_meta.title = title
+                    img_meta.subtitle = subtitle
+                    img_meta.explicit_caption = explicit_caption
+                    img_meta.caption_text = caption_text
+                    img_meta.caption = caption
+                    img_meta.entity_name = entity_name
+                    img_meta.designation = designation
+                    img_meta.section_heading = section_heading
+                    img_meta.text_before = text_before
+                    img_meta.text_after = text_after
+                    img_meta.layout_context = layout_context
+                    img_meta.image_type = image_type
+                    img_meta.importance_score = importance_score
+                    img_meta.retrievable = retrievable
+                    img_meta.association_method = association_method
+                    img_meta.association_confidence = association_confidence
+                    img_meta.confidence = confidence
                     
                     vlm_description = grounded.get("semantic_description") or f"Document visual graphic on Page {page}."
-                    detected_objects = []
-                    keywords = []
-                    detected_entities = []
-
-                    if entity_name:
-                        role_part = f" ({designation})" if designation else ""
-                        detected_entities = [f"{entity_name}{role_part}", entity_name]
-                        keywords = ["portrait", "leadership", "director", entity_name]
-                        detected_objects = ["portrait", "person", "headshot"]
-                    elif "logo" in image_type.lower():
-                        detected_entities = ["BTL EPC Limited"]
-                        keywords = ["logo", "brand", "emblem"]
-                        detected_objects = ["logo", "emblem"]
+                    detected_objects = grounded.get("objects", [])
+                    keywords = grounded.get("keywords", [])
+                    detected_entities = grounded.get("detected_entities", [])
 
                     # VLM enrichment for meaningful assets (never skipped prematurely)
                     if new_png_path.exists() and not img_meta.semantic_description:
@@ -529,30 +539,35 @@ class KnowledgeExtractionAgent:
                             logger.warning(f"VLM analysis failed for {seq_name}: {vlm_err}")
 
                     # Save formats (JSON, MD, HTML)
+                    bbox_data = bbox.model_dump() if hasattr(bbox, "model_dump") else (bbox.dict() if hasattr(bbox, "dict") else bbox)
                     img_json_data = {
                         "image_id": self_ref,
+                        "image_path": f"05_images/{seq_name}.png",
+                        "image_url": f"/outputs/{doc_id}/05_images/{seq_name}.png",
                         "page": page,
-                        "caption": caption,
-                        "caption_text": caption_text,
+                        "bounding_box": bbox_data,
+                        "image_type": image_type,
+                        "title": title or f"Visual on Page {page}",
+                        "subtitle": subtitle,
                         "explicit_caption": explicit_caption,
+                        "caption_text": caption_text,
                         "entity_name": entity_name,
                         "designation": designation,
                         "section_heading": section_heading,
                         "text_before": text_before,
                         "text_after": text_after,
-                        "layout_context": layout_context,
+                        "semantic_description": vlm_description,
+                        "keywords": keywords,
                         "importance_score": importance_score,
                         "retrievable": retrievable,
                         "association_method": association_method,
-                        "confidence": confidence,
                         "association_confidence": association_confidence,
+                        # Backward-compatible fields
+                        "caption": caption,
+                        "confidence": confidence,
+                        "layout_context": layout_context,
                         "ocr_text": ocr_text,
-                        "bounding_box": bbox,
-                        "image_path": f"05_images/{seq_name}.png",
-                        "image_type": image_type,
                         "objects": detected_objects,
-                        "keywords": keywords,
-                        "semantic_description": vlm_description,
                         "detected_entities": detected_entities,
                         "future_vlm_metadata_placeholder": {}
                     }

@@ -1,8 +1,8 @@
 {
   "image_id": "#/pictures/7",
+  "image_path": "05_images/image_008.png",
+  "image_url": "/outputs/b11b45777208668d865c183853eabe223022d698021fa462428750ff943828ee/05_images/image_008.png",
   "page": 6,
-  "caption": null,
-  "ocr_text": null,
   "bounding_box": {
     "l": 726.3428955078125,
     "t": 329.8980712890625,
@@ -10,24 +10,39 @@
     "b": 277.79071044921875,
     "coord_origin": "BOTTOMLEFT"
   },
-  "image_path": "05_images/image_008.png",
   "image_type": "Logo",
-  "objects": [
-    "The logo itself",
-    "including the text and the graphic element."
-  ],
-  "keywords": [
-    "Rajiv 2001 Company",
-    "building",
-    "company",
-    "graphic element.",
-    "logo",
-    "name",
-    "structure",
-    "text"
-  ],
+  "title": "Company Logo - 6a1f1c571432456e92a961e1a0f4b70c_BTL AR SS 09-10-2025 (c2c)-1-10",
+  "subtitle": "Official Brand Identity",
+  "explicit_caption": null,
+  "caption_text": "Company Logo of 6a1f1c571432456e92a961e1a0f4b70c_BTL AR SS 09-10-2025 (c2c)-1-10",
+  "entity_name": null,
+  "designation": null,
+  "section_heading": null,
+  "text_before": "Our consultants",
+  "text_after": "Power Transmission Corporation of Uttarakhand Limited (PTCUL):",
   "semantic_description": "This image is a logo for a company named \"Rajiv 2001 Company.\" The logo features a stylized design with the company name written in a sans-serif font, accompanied by a graphic element that appears to be a stylized representation of a building or structure, possibly symbolizing the company's industry or services.",
+  "keywords": [
+    "logo",
+    "brand",
+    "emblem",
+    "insignia",
+    "company logo",
+    "6a1f1c571432456e92a961e1a0f4b70c_BTL AR SS 09-10-2025 (c2c)-1-10"
+  ],
+  "importance_score": "HIGH",
+  "retrievable": true,
+  "association_method": "spatially_nearest_text",
+  "association_confidence": 0.85,
+  "caption": "Company Logo of 6a1f1c571432456e92a961e1a0f4b70c_BTL AR SS 09-10-2025 (c2c)-1-10",
+  "confidence": 0.85,
+  "layout_context": "spatially_anchored_figure",
+  "ocr_text": null,
+  "objects": [
+    "logo",
+    "emblem",
+    "brand mark"
+  ],
   "detected_entities": [
-    "Rajiv 2001 Company"
+    "6a1f1c571432456e92a961e1a0f4b70c_BTL AR SS 09-10-2025 (c2c)-1-10"
   ]
 }

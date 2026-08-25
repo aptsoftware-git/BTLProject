@@ -1,8 +1,8 @@
 {
   "image_id": "#/pictures/1",
+  "image_path": "05_images/image_002.png",
+  "image_url": "/outputs/b11b45777208668d865c183853eabe223022d698021fa462428750ff943828ee/05_images/image_002.png",
   "page": 4,
-  "caption": null,
-  "ocr_text": null,
   "bounding_box": {
     "l": 0.8153101801872253,
     "t": 841.3539912104607,
@@ -10,25 +10,33 @@
     "b": 547.9834899902344,
     "coord_origin": "BOTTOMLEFT"
   },
-  "image_path": "05_images/image_002.png",
-  "image_type": "Photo",
-  "objects": [
-    "Large cylindrical tanks",
-    "blue-roofed buildings",
-    "industrial equipment",
-    "open land",
-    "sky."
-  ],
-  "keywords": [
-    "BTL EPC LTD",
-    "Coal handling plant",
-    "Telangana",
-    "Yadadri",
-    "industrial",
-    "processing facility."
-  ],
+  "image_type": "Chart/Graph",
+  "title": "BTL EPC Limited, the engineering arm of the Kolkata-based Shrachi Group, was founded ",
+  "subtitle": "vendor network of 70+ vendor-partners, ensuring seamless materials procurement and timely projects completion.",
+  "explicit_caption": null,
+  "caption_text": "Figure on Page 4 (BTL EPC Limited, the engineering arm of the Kolkata-based Shrachi Group, was founded )",
+  "entity_name": null,
+  "designation": null,
+  "section_heading": null,
+  "text_before": null,
+  "text_after": "vendor network of 70+ vendor-partners, ensuring seamless materials procurement and timely projects completion.",
   "semantic_description": "The image is a photograph of a coal handling plant located at Yadadri, Telangana. It shows industrial structures, including large cylindrical tanks and blue-roofed buildings, indicative of a processing facility. The surrounding area includes open land and some industrial equipment.",
-  "detected_entities": [
-    "BTL EPC LTD."
-  ]
+  "keywords": [
+    "chart/graph",
+    "BTL EPC Limited, the engineering arm of the Kolkata-based Shrachi Group, was founded "
+  ],
+  "importance_score": "HIGH",
+  "retrievable": true,
+  "association_method": "spatially_nearest_text",
+  "association_confidence": 0.85,
+  "caption": "Figure on Page 4 (BTL EPC Limited, the engineering arm of the Kolkata-based Shrachi Group, was founded )",
+  "confidence": 0.85,
+  "layout_context": "spatially_anchored_figure",
+  "ocr_text": null,
+  "objects": [
+    "image",
+    "figure",
+    "visual graphic"
+  ],
+  "detected_entities": []
 }

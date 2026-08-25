@@ -1,8 +1,8 @@
 {
   "image_id": "#/pictures/32",
+  "image_path": "05_images/image_033.png",
+  "image_url": "/outputs/b11b45777208668d865c183853eabe223022d698021fa462428750ff943828ee/05_images/image_033.png",
   "page": 7,
-  "caption": null,
-  "ocr_text": null,
   "bounding_box": {
     "l": 907.02783203125,
     "t": 520.2628784179688,
@@ -10,27 +10,33 @@
     "b": 324.49664306640625,
     "coord_origin": "BOTTOMLEFT"
   },
-  "image_path": "05_images/image_033.png",
   "image_type": "Photo",
-  "objects": [
-    "Power transmission towers",
-    "insulators",
-    "natural landscape (trees",
-    "possibly a river/stream)",
-    "power lines",
-    "terrain."
-  ],
-  "keywords": [
-    "Power transmission",
-    "insulators",
-    "lines",
-    "natural landscape",
-    "remote area.",
-    "terrain",
-    "towers"
-  ],
+  "title": "Power Transmission",
+  "subtitle": "Defense",
+  "explicit_caption": null,
+  "caption_text": "Figure on Page 7 (Power Transmission)",
+  "entity_name": null,
+  "designation": null,
+  "section_heading": null,
+  "text_before": "Our businesses",
+  "text_after": "Defense",
   "semantic_description": "The image depicts a section of a power transmission line structure, likely part of an electrical grid, situated in a mountainous or hilly terrain. The structure consists of tall metal towers supporting multiple power lines, which are suspended by insulators. The background shows a natural landscape with trees and possibly a river or stream, indicating the infrastructure is located in a remote or rural area.",
-  "detected_entities": [
-    "None"
-  ]
+  "keywords": [
+    "photo",
+    "Power Transmission"
+  ],
+  "importance_score": "MEDIUM",
+  "retrievable": true,
+  "association_method": "spatially_nearest_text",
+  "association_confidence": 0.85,
+  "caption": "Figure on Page 7 (Power Transmission)",
+  "confidence": 0.85,
+  "layout_context": "spatially_anchored_figure",
+  "ocr_text": null,
+  "objects": [
+    "image",
+    "figure",
+    "visual graphic"
+  ],
+  "detected_entities": []
 }

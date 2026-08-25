@@ -673,8 +673,10 @@ class MultimodalExtractor:
                     )
 
                     # Update img_meta with grounded attributes
+                    img_meta.title = grounded.get("title")
+                    img_meta.subtitle = grounded.get("subtitle")
                     img_meta.explicit_caption = grounded["explicit_caption"]
-                    img_meta.caption_text = grounded["caption"]
+                    img_meta.caption_text = grounded["caption_text"]
                     img_meta.caption = grounded["caption"]
                     img_meta.entity_name = grounded["entity_name"]
                     img_meta.designation = grounded["designation"]
@@ -686,7 +688,7 @@ class MultimodalExtractor:
                     img_meta.importance_score = grounded["importance_score"]
                     img_meta.retrievable = grounded["retrievable"]
                     img_meta.association_method = grounded["association_method"]
-                    img_meta.association_confidence = grounded["confidence"]
+                    img_meta.association_confidence = grounded["association_confidence"]
                     img_meta.confidence = grounded["confidence"]
 
                     # VLM enrichment for meaningful visual assets (never skipped prematurely)
@@ -730,29 +732,33 @@ class MultimodalExtractor:
                     bbox_data = img_meta.bbox.model_dump() if hasattr(img_meta.bbox, "model_dump") else (img_meta.bbox.dict() if img_meta.bbox else None)
                     img_json_data = {
                         "image_id": img_meta.image_id,
+                        "image_path": f"05_images/{seq_name}.png",
+                        "image_url": f"/outputs/{doc_id}/05_images/{seq_name}.png",
                         "page": img_meta.page_number,
-                        "caption": img_meta.caption,
-                        "caption_text": img_meta.caption_text,
+                        "bounding_box": bbox_data,
+                        "image_type": img_meta.image_type,
+                        "title": img_meta.title or f"Visual on Page {img_meta.page_number}",
+                        "subtitle": img_meta.subtitle,
                         "explicit_caption": img_meta.explicit_caption,
+                        "caption_text": img_meta.caption_text,
                         "entity_name": img_meta.entity_name,
                         "designation": img_meta.designation,
                         "section_heading": img_meta.section_heading,
                         "text_before": img_meta.text_before,
                         "text_after": img_meta.text_after,
-                        "layout_context": img_meta.layout_context,
+                        "semantic_description": img_meta.semantic_description,
+                        "keywords": img_meta.keywords or grounded.get("keywords", []),
                         "importance_score": img_meta.importance_score,
                         "retrievable": img_meta.retrievable,
                         "association_method": img_meta.association_method,
-                        "confidence": img_meta.confidence,
                         "association_confidence": img_meta.association_confidence,
+                        # Backward-compatible fields
+                        "caption": img_meta.caption,
+                        "confidence": img_meta.confidence,
+                        "layout_context": img_meta.layout_context,
                         "ocr_text": img_meta.ocr_text,
-                        "bounding_box": bbox_data,
-                        "image_path": f"05_images/{seq_name}.png",
-                        "image_type": img_meta.image_type,
-                        "objects": img_meta.objects,
-                        "keywords": img_meta.keywords,
-                        "semantic_description": img_meta.semantic_description,
-                        "detected_entities": img_meta.detected_entities
+                        "objects": img_meta.objects or grounded.get("objects", []),
+                        "detected_entities": img_meta.detected_entities or grounded.get("detected_entities", [])
                     }
                     with open(image_json_path, "w", encoding="utf-8") as f:
                         json.dump(img_json_data, f, indent=2, ensure_ascii=False)

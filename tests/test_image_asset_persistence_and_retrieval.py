@@ -49,7 +49,7 @@ def test_physical_image_assets_strict_1_to_1_mapping():
         
         # 2. JSON metadata must reference this exact path
         with open(json_file, "r", encoding="utf-8") as f:
-            meta = json.load(jf) if 'jf' in locals() else json.load(f)
+            meta = json.load(f)
             
         img_path = meta.get("image_path")
         assert img_path is not None, f"image_path missing in {json_file}"

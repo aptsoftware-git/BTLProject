@@ -516,7 +516,8 @@ export default function Assistant({ propDoc, onSelectPage }) {
                             if (!img) return false;
                             const url = (img.image_url || img.image_path || "").trim().replace(/\\/g, "/");
                             const page = img.page_number || "";
-                            const key = `${url}_p${page}`;
+                            const imgId = img.image_id || "";
+                            const key = imgId ? `${imgId}_${url}` : `${url}_p${page}`;
                             if (!url || seen.has(key)) return false;
                             seen.add(key);
                             return true;
@@ -534,7 +535,7 @@ export default function Assistant({ propDoc, onSelectPage }) {
                               <div style={styles.imageEvidenceGrid}>
                                 {uniqueImages.map((img, imgIdx) => (
                                   <ImageEvidenceCard 
-                                    key={imgIdx} 
+                                    key={img.image_id || img.image_url || `${img.image_path}_${imgIdx}`} 
                                     img={img} 
                                     onSelectPage={onSelectPage} 
                                   />

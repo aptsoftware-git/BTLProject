@@ -509,93 +509,57 @@ class Retriever:
         Dedicated visual search with verified person-to-portrait matching, logo search,
         and strict visual gating (suppressing images for non-visual text queries).
         """
+        from src.rag.image_processor import ImageRetrievalValidator, PortraitSpatialValidator
         import re
-        q_lower = query.lower()
-        
-        visual_triggers = [
-            "image", "images", "figure", "figures", "diagram", "diagrams", "chart", "charts",
-            "photo", "photos", "photograph", "photographs", "picture", "pictures", "portrait",
-            "portraits", "visual", "visuals", "graph", "graphs", "plot", "plots", "illustration",
-            "illustrations", "headshot", "headshots", "look like", "show me", "along with photos",
-            "along with their photos", "with photos", "with photo", "logo", "company logo", "brand logo",
-            "show logo", "show the logo", "director's photo", "directors photo"
-        ]
-        has_visual_intent = any(re.search(rf"\b{re.escape(vt)}\b", q_lower) for vt in visual_triggers) or (intent in ("visual", "person_portrait_visual"))
 
-        # GATING: If query is purely textual with no visual intent, return NO image chunks
-        if not has_visual_intent:
+        # Step 1: Detect query target and check for visual intent
+        target_info = ImageRetrievalValidator.detect_query_target(query)
+        if not target_info.get("is_visual", False) or target_info.get("target_type") == "pure_text":
             return []
 
+        # Reject ambiguous surname-only queries (e.g. "photo of Todi")
+        if target_info.get("target_type") == "ambiguous_surname":
+            logger.info(f"Visual search rejected for ambiguous surname-only query: '{query}'")
+            return []
+
+        q_lower = query.lower()
         matched = []
+        target_type = target_info.get("target_type")
 
         # 1. Logo query handler ("show the logo", "company logo")
-        is_logo_query = any(t in q_lower for t in ["logo", "company logo", "brand logo", "emblem", "insignia", "show logo", "show the logo"])
-        if is_logo_query:
+        if target_type == "logo":
             for c in chunks:
                 if c.metadata.chunk_type == "image":
                     meta = c.metadata
-                    i_type = (getattr(meta, "image_type", None) or "").lower()
-                    cap = (getattr(meta, "caption", None) or "").lower()
-                    vlm = (getattr(meta, "semantic_description", None) or "").lower()
-                    kws = [str(k).lower() for k in (getattr(meta, "keywords", []) or [])]
-                    # Matches logo grid or logo keyword or cover image, never page 49 portrait
-                    if meta.page_number != 49 and ("logo" in i_type or "logo" in cap or "logo" in vlm or any("logo" in k for k in kws) or meta.page_number in (1, 3, 4, 5)):
+                    meta_dict = meta.model_dump() if hasattr(meta, "model_dump") else (meta.dict() if hasattr(meta, "dict") else meta.__dict__)
+                    if ImageRetrievalValidator.validate_image_candidate(meta_dict, query, intent=intent, doc_id=meta.document_id):
                         matched.append(c)
             if matched:
                 return self._deduplicate_chunks(matched)
-        
+
         # 2. Check for Board Collection visual query ("Board of Directors along with photos")
-        is_board_collection = any(t in q_lower for t in ["board of directors", "all directors", "directors and their photos", "directors along with photos", "board members along with", "board along with"])
-        
-        if is_board_collection:
-            # Return all verified board portraits on Page 49
+        if target_type == "board_collection":
             for c in chunks:
                 if c.metadata.chunk_type == "image" and c.metadata.page_number == 49:
-                    matched.append(c)
-            return self._deduplicate_chunks(matched)
-
-        # 3. Check for Single Individual Portrait Query
-        queried_person = None
-        director_names = [
-            "sunil kumar mittra", "sunil mittra", "ravi todi", "rhea todi", "avik mukherjee",
-            "aviik mukherjee", "subrata paul", "arundhuti dhar", "sandipan chakravortty",
-            "ketan mangaldas shanghavi", "ketan shanghavi", "sourav daspatnaik", "sourab kumar jha", "utkarsh tiwari"
-        ]
-        for d_name in director_names:
-            if d_name in q_lower:
-                queried_person = d_name
-                break
-
-        if queried_person:
-            # Return ONLY the verified portrait image matching this specific person
-            for c in chunks:
-                if c.metadata.chunk_type == "image":
                     meta = c.metadata
-                    i_type = (getattr(meta, "image_type", None) or "").lower()
-                    if "logo" in i_type or "decorative" in i_type:
-                        continue
-                    
-                    # Strict portrait gating: require verified Portrait Photo or Page 49 director portrait
-                    if meta.page_number != 49 and "portrait" not in i_type:
-                        continue
-
-                    p_name = getattr(meta, "person_name", None) or ""
-                    cap = (getattr(meta, "caption", None) or "").lower()
-                    ents = getattr(meta, "detected_entities", []) or []
-                    kws = getattr(meta, "keywords", []) or []
-                    vlm = (getattr(meta, "semantic_description", None) or "").lower()
-                    
-                    is_person_match = (
-                        (p_name and Retriever.fuzzy_match_entity(queried_person, p_name)) or
-                        Retriever.fuzzy_match_entity(queried_person, cap) or
-                        any(Retriever.fuzzy_match_entity(queried_person, str(e)) for e in ents) or
-                        any(Retriever.fuzzy_match_entity(queried_person, str(k)) for k in kws)
-                    )
-                    if is_person_match:
+                    meta_dict = meta.model_dump() if hasattr(meta, "model_dump") else (meta.dict() if hasattr(meta, "dict") else meta.__dict__)
+                    if ImageRetrievalValidator.validate_image_candidate(meta_dict, query, intent=intent, doc_id=meta.document_id):
                         matched.append(c)
             return self._deduplicate_chunks(matched)
 
-        # 4. General Diagram / Chart / Figure Query
+        # 3. Check for Single Individual Portrait Query
+        if target_type == "portrait":
+            target_director = target_info.get("target_director")
+            if target_director:
+                for c in chunks:
+                    if c.metadata.chunk_type == "image":
+                        meta = c.metadata
+                        meta_dict = meta.model_dump() if hasattr(meta, "model_dump") else (meta.dict() if hasattr(meta, "dict") else meta.__dict__)
+                        if ImageRetrievalValidator.validate_image_candidate(meta_dict, query, intent=intent, doc_id=meta.document_id):
+                            matched.append(c)
+                return self._deduplicate_chunks(matched)
+
+        # 4. Captioned Figure / Diagram / Chart Query
         fig_match = re.search(r'(?i)\b(?:figure|fig\.?|chart|diagram|image|photo|illustration)\s*#?\s*(\d+)\b', query)
         fig_target_num = fig_match.group(1) if fig_match else None
 
@@ -604,15 +568,17 @@ class Retriever:
                 continue
 
             meta = c.metadata
-            # Retrieval gating: only return retrievable images (skip decorative, separators, low-value graphics)
-            if hasattr(meta, "retrievable") and meta.retrievable is False:
-                continue
-            if getattr(meta, "importance_score", None) == "LOW":
-                continue
-            if (getattr(meta, "image_type", None) or "").lower() == "decorative":
+            meta_dict = meta.model_dump() if hasattr(meta, "model_dump") else (meta.dict() if hasattr(meta, "dict") else meta.__dict__)
+            if not ImageRetrievalValidator.validate_image_candidate(meta_dict, query, intent=intent, doc_id=meta.document_id):
                 continue
 
-            caption = (getattr(meta, "caption", None) or meta.heading or "").lower()
+            title = (getattr(meta, "title", None) or "").lower()
+            subtitle = (getattr(meta, "subtitle", None) or "").lower()
+            caption = (getattr(meta, "caption", None) or getattr(meta, "caption_text", None) or meta.heading or "").lower()
+            explicit_cap = (getattr(meta, "explicit_caption", None) or "").lower()
+            entity_name = (getattr(meta, "entity_name", None) or "").lower()
+            designation = (getattr(meta, "designation", None) or "").lower()
+            section_heading = (getattr(meta, "section_heading", None) or meta.section or "").lower()
             ocr = (getattr(meta, "ocr_text", None) or "").lower()
             vlm = (getattr(meta, "semantic_description", None) or "").lower()
             objs = [str(o).lower() for o in (getattr(meta, "objects", []) or [])]
@@ -620,15 +586,30 @@ class Retriever:
             kws = [str(k).lower() for k in (getattr(meta, "keywords", []) or [])]
 
             if fig_target_num:
-                if fig_target_num in caption or (meta.image_id and fig_target_num in meta.image_id):
+                if (fig_target_num in caption or 
+                    fig_target_num in explicit_cap or 
+                    fig_target_num in title or 
+                    (meta.image_id and fig_target_num in meta.image_id)):
                     matched.append(c)
                     continue
 
+            visual_triggers = ImageRetrievalValidator.VISUAL_TRIGGERS
             q_words = [w for w in re.findall(r'\w+', q_lower) if len(w) > 2 and w not in visual_triggers]
             if q_words:
                 match_count = 0
                 for w in q_words:
-                    if w in caption or w in ocr or w in vlm or any(w in o for o in objs) or any(w in e for e in ents) or any(w in k for k in kws):
+                    if (w in title or 
+                        w in subtitle or 
+                        w in explicit_cap or 
+                        w in caption or 
+                        w in entity_name or 
+                        w in designation or 
+                        w in section_heading or 
+                        w in ocr or 
+                        w in vlm or 
+                        any(w in o for o in objs) or 
+                        any(w in e for e in ents) or 
+                        any(w in k for k in kws)):
                         match_count += 1
                 if match_count > 0:
                     matched.append(c)
@@ -842,12 +823,13 @@ class Retriever:
                 if sc.metadata.chunk_type == "image":
                     if queried_director:
                         # MUST match this specific person's name or variants (not general role titles)
-                        p_name = (getattr(sc.metadata, "person_name", None) or "").lower()
-                        cap = (getattr(sc.metadata, "caption", None) or "").lower()
+                        p_name = (getattr(sc.metadata, "entity_name", None) or getattr(sc.metadata, "person_name", None) or getattr(sc.metadata, "title", None) or "").lower()
+                        cap = (getattr(sc.metadata, "caption", None) or getattr(sc.metadata, "caption_text", None) or "").lower()
                         ents = [str(e).lower() for e in (getattr(sc.metadata, "detected_entities", []) or [])]
+                        kws = [str(k).lower() for k in (getattr(sc.metadata, "keywords", []) or [])]
                         
                         person_matches = any(
-                            v in p_name or v in cap or any(v in ent for ent in ents)
+                            v in p_name or v in cap or any(v in ent for ent in ents) or any(v in kw for kw in kws)
                             for v in queried_director["variants"]
                         )
                         if person_matches and (sc.metadata.page_number == 49 or "portrait" in (sc.metadata.image_type or "").lower()):
@@ -1233,6 +1215,123 @@ class Retriever:
                         keywords=self._parse_list_meta(meta_data.get("keywords"))
                     )
                     chunks.append(DocumentChunk(content=c.get("content"), metadata=meta))
+
+                # Also inject all image metadata JSONs from 05_images if not already represented
+                existing_img_ids = {c.metadata.image_id for c in chunks if c.metadata.image_id}
+                existing_img_paths = {c.metadata.image_path for c in chunks if c.metadata.image_path}
+                images_dir = output_dir / "05_images"
+                if images_dir.exists():
+                    for jf in sorted(list(images_dir.glob("image_*.json"))):
+                        stem = jf.stem
+                        rel_path = f"05_images/{stem}.png"
+                        try:
+                            with open(jf, "r", encoding="utf-8") as f:
+                                im_data = json.load(f)
+                            im_id = im_data.get("image_id") or stem
+                            if im_id not in existing_img_ids and rel_path not in existing_img_paths:
+                                bboxes = []
+                                b_raw = im_data.get("bounding_box")
+                                if b_raw:
+                                    if isinstance(b_raw, dict):
+                                        bboxes.append(BoundingBox(**b_raw))
+                                    elif isinstance(b_raw, BoundingBox):
+                                        bboxes.append(b_raw)
+                                
+                                title = im_data.get("title") or im_data.get("caption") or f"Visual on Page {im_data.get('page', 1)}"
+                                subtitle = im_data.get("subtitle")
+                                explicit_caption = im_data.get("explicit_caption")
+                                caption_text = im_data.get("caption_text") or im_data.get("caption")
+                                entity_name = im_data.get("entity_name")
+                                designation = im_data.get("designation")
+                                sec_heading = im_data.get("section_heading")
+                                vlm_desc = im_data.get("semantic_description") or ""
+                                ocr_text = im_data.get("ocr_text") or ""
+                                text_before = im_data.get("text_before")
+                                text_after = im_data.get("text_after")
+                                image_type = im_data.get("image_type") or "Photo"
+                                importance_score = im_data.get("importance_score", "MEDIUM") or "MEDIUM"
+                                retrievable = im_data.get("retrievable", True)
+                                association_method = im_data.get("association_method", "none") or "none"
+                                association_confidence = float(im_data.get("association_confidence", im_data.get("confidence", 1.0)) or 1.0)
+                                confidence = float(im_data.get("confidence", 1.0) or 1.0)
+                                
+                                # Construct searchable content text
+                                content_parts = [
+                                    f"Document Section: {sec_heading or 'Visual Assets'}",
+                                    "Content:",
+                                    f"Image ID: {im_id}",
+                                    f"Image Type: {image_type}",
+                                    f"Page: {im_data.get('page', 1)}",
+                                    f"Image Title: {title}"
+                                ]
+                                if subtitle:
+                                    content_parts.append(f"Image Subtitle: {subtitle}")
+                                if explicit_caption:
+                                    content_parts.append(f"Explicit Document Caption: {explicit_caption}")
+                                if caption_text and caption_text != title:
+                                    content_parts.append(f"Image Caption: {caption_text}")
+                                if entity_name:
+                                    role_part = f" ({designation})" if designation else ""
+                                    content_parts.append(f"Associated Person/Entity: {entity_name}{role_part}")
+                                if sec_heading:
+                                    content_parts.append(f"Section Heading: {sec_heading}")
+                                if vlm_desc:
+                                    content_parts.append(f"Image Semantic Description: {vlm_desc}")
+                                if ocr_text:
+                                    content_parts.append(f"Image OCR Text: {ocr_text}")
+                                if text_before:
+                                    content_parts.append(f"Preceding Text Context: {text_before[:150]}")
+                                if text_after:
+                                    content_parts.append(f"Succeeding Text Context: {text_after[:150]}")
+                                
+                                keywords = im_data.get("keywords") or []
+                                if keywords:
+                                    content_parts.append(f"Keywords: {', '.join(keywords)}")
+
+                                img_meta = ChunkMetadata(
+                                    chunk_id=f"{document_id}_img_{stem}",
+                                    document_id=document_id,
+                                    page_number=int(im_data.get("page", 1)),
+                                    chunk_type="image",
+                                    heading=title,
+                                    section=sec_heading or "Visual Assets",
+                                    section_heading=sec_heading,
+                                    hierarchy_path=[],
+                                    source_element_ids=[im_id],
+                                    word_count=len("\n".join(content_parts).split()),
+                                    token_estimate=len("\n".join(content_parts).split()) * 2,
+                                    bounding_boxes=bboxes,
+                                    image_id=im_id,
+                                    image_path=rel_path,
+                                    image_url=f"/outputs/{document_id}/{rel_path}",
+                                    image_type=image_type,
+                                    title=title,
+                                    subtitle=subtitle,
+                                    explicit_caption=explicit_caption,
+                                    caption_text=caption_text,
+                                    entity_name=entity_name,
+                                    designation=designation,
+                                    text_before=text_before,
+                                    text_after=text_after,
+                                    layout_context=im_data.get("layout_context"),
+                                    importance_score=importance_score,
+                                    retrievable=retrievable,
+                                    association_method=association_method,
+                                    association_confidence=association_confidence,
+                                    confidence=confidence,
+                                    caption=caption_text or title,
+                                    ocr_text=ocr_text,
+                                    semantic_description=vlm_desc,
+                                    objects=im_data.get("objects", []),
+                                    detected_entities=im_data.get("detected_entities", []),
+                                    keywords=keywords
+                                )
+                                chunks.append(DocumentChunk(content="\n".join(content_parts), metadata=img_meta))
+                                existing_img_ids.add(im_id)
+                                existing_img_paths.add(rel_path)
+                        except Exception as e:
+                            logger.warning(f"Failed to load image metadata {jf.name}: {e}")
+
                 return chunks
             except Exception as e:
                 logger.warning(f"Failed to read chunks file ({e}). Falling back to ChromaDB.")

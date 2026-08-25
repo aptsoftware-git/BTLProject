@@ -1,8 +1,8 @@
 {
   "image_id": "#/pictures/41",
+  "image_path": "05_images/image_042.png",
+  "image_url": "/outputs/b11b45777208668d865c183853eabe223022d698021fa462428750ff943828ee/05_images/image_042.png",
   "page": 10,
-  "caption": null,
-  "ocr_text": null,
   "bounding_box": {
     "l": 212.9207000732422,
     "t": 755.9633331298828,
@@ -10,28 +10,36 @@
     "b": 527.1776733398438,
     "coord_origin": "BOTTOMLEFT"
   },
-  "image_path": "05_images/image_042.png",
-  "image_type": "Photo",
-  "objects": [
-    "Cranes",
-    "and construction workers.",
-    "construction materials",
-    "partially completed structures",
-    "trucks"
-  ],
-  "keywords": [
-    "AHP projects",
-    "Adani-Raigarh CHP",
-    "Construction",
-    "Cranes",
-    "Development",
-    "Industrial",
-    "Infrastructure",
-    "Materials",
-    "Workers."
-  ],
+  "image_type": "Diagram",
+  "title": "Reality: BTL EPC was awarded the coal handling plant and ash handling plant contracts",
+  "subtitle": "Activity: The scope included complete EPC execution of coal handling and ash handling plants systems, including structur",
+  "explicit_caption": null,
+  "caption_text": "Figure on Page 10 (Reality: BTL EPC was awarded the coal handling plant and ash handling plant contracts)",
+  "entity_name": null,
+  "designation": null,
+  "section_heading": null,
+  "text_before": "Our business: Coal Chemical Division",
+  "text_after": "Activity: The scope included complete EPC execution of coal handling and ash handling plants systems, including structural, civil, mechanical and electrical. BTL EPC achieved full structural and civil design-engineering for both projects within the first five months. This rapid design progress set the tone for streamlined project execution.",
   "semantic_description": "The image is a collage of construction scenes, likely depicting industrial or infrastructure development projects. It shows large cranes, construction materials, and partially completed structures, suggesting ongoing work on significant projects.",
-  "detected_entities": [
-    "Adani-Raigarh CHP and AHP projects (mentioned in the OCR text)."
-  ]
+  "keywords": [
+    "diagram",
+    "metrics",
+    "financial",
+    "data",
+    "report"
+  ],
+  "importance_score": "HIGH",
+  "retrievable": true,
+  "association_method": "spatially_nearest_text",
+  "association_confidence": 0.85,
+  "caption": "Figure on Page 10 (Reality: BTL EPC was awarded the coal handling plant and ash handling plant contracts)",
+  "confidence": 0.85,
+  "layout_context": "spatially_anchored_figure",
+  "ocr_text": null,
+  "objects": [
+    "diagram",
+    "chart",
+    "graphic"
+  ],
+  "detected_entities": []
 }

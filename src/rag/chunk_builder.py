@@ -1,5 +1,6 @@
 import logging
 import re
+from pathlib import Path
 from typing import List, Dict, Optional, Any
 from src.rag.document_schema import StructuredDocument, DocumentElement, BoundingBox
 from src.rag.chunk_schema import DocumentChunk, ChunkMetadata
@@ -337,6 +338,30 @@ class ChunkBuilder:
         # Finalize any leftover elements in accumulators
         finalize_all_except(None)
         
+        # Process any images in doc.images that were not encountered in doc.elements
+        processed_image_ids = {c.metadata.image_id for c in chunks if c.metadata.image_id}
+        if doc.images:
+            for img_id, img_meta in doc.images.items():
+                if img_id not in processed_image_ids:
+                    p_num = getattr(img_meta, "page_number", None) or (img_meta.get("page") if isinstance(img_meta, dict) else 1) or 1
+                    b_box = getattr(img_meta, "bbox", None) or (img_meta.get("bounding_box") if isinstance(img_meta, dict) else None)
+                    virtual_el = DocumentElement(
+                        id=img_id,
+                        type="image",
+                        text=getattr(img_meta, "caption", "") or getattr(img_meta, "title", "") or "Image",
+                        metadata=ElementMetadata(
+                            page_number=p_num,
+                            bbox=b_box,
+                            image_id=img_id
+                        )
+                    )
+                    img_chunk = self._create_semantic_image_chunk(
+                        virtual_el, img_meta, document_id, active_headings, active_heading_ids, len(chunks)
+                    )
+                    if img_chunk:
+                        chunks.append(img_chunk)
+                        processed_image_ids.add(img_id)
+
         return chunks
 
     def _create_semantic_table_chunk(
@@ -447,6 +472,8 @@ class ChunkBuilder:
         ocr_text = element.metadata.ocr_text or ""
         vlm_desc = ""
         image_type = "Image"
+        title = None
+        subtitle = None
         objects = []
         keywords = []
         detected_entities = []
@@ -461,10 +488,13 @@ class ChunkBuilder:
         retrievable = True
         association_method = "none"
         confidence = 1.0
+        association_confidence = 1.0
         
         if image_meta:
             if isinstance(image_meta, dict):
-                caption_text = image_meta.get("caption") or caption_text
+                title = image_meta.get("title")
+                subtitle = image_meta.get("subtitle")
+                caption_text = image_meta.get("caption_text") or image_meta.get("caption") or caption_text
                 ocr_text = image_meta.get("ocr_text") or ocr_text
                 vlm_desc = image_meta.get("semantic_description") or ""
                 image_type = image_meta.get("image_type") or "Image"
@@ -481,9 +511,12 @@ class ChunkBuilder:
                 importance_score = image_meta.get("importance_score") or "MEDIUM"
                 retrievable = image_meta.get("retrievable", True)
                 association_method = image_meta.get("association_method") or "none"
-                confidence = float(image_meta.get("confidence", 1.0))
+                association_confidence = float(image_meta.get("association_confidence", image_meta.get("confidence", 1.0)) or 1.0)
+                confidence = float(image_meta.get("confidence", 1.0) or 1.0)
             else:
-                caption_text = getattr(image_meta, "caption", None) or caption_text
+                title = getattr(image_meta, "title", None)
+                subtitle = getattr(image_meta, "subtitle", None)
+                caption_text = getattr(image_meta, "caption_text", None) or getattr(image_meta, "caption", None) or caption_text
                 ocr_text = getattr(image_meta, "ocr_text", None) or ocr_text
                 vlm_desc = getattr(image_meta, "semantic_description", None) or ""
                 image_type = getattr(image_meta, "image_type", None) or "Image"
@@ -500,6 +533,7 @@ class ChunkBuilder:
                 importance_score = getattr(image_meta, "importance_score", "MEDIUM") or "MEDIUM"
                 retrievable = getattr(image_meta, "retrievable", True)
                 association_method = getattr(image_meta, "association_method", "none") or "none"
+                association_confidence = float(getattr(image_meta, "association_confidence", getattr(image_meta, "confidence", 1.0)) or 1.0)
                 confidence = float(getattr(image_meta, "confidence", 1.0) or 1.0)
 
         if not img_path and element.metadata and hasattr(element.metadata, "image_path"):
@@ -518,9 +552,20 @@ class ChunkBuilder:
 
         img_url = f"/outputs/{doc_id}/05_images/{img_filename}"
 
+        if not title:
+            if explicit_caption:
+                title = explicit_caption
+            elif entity_name:
+                title = entity_name
+            elif caption_text:
+                title = caption_text
+            else:
+                clean_name = element.id.replace("#/", "").replace("/", " ").replace("_", " ").title()
+                title = f"Figure on Page {page_number} ({heading or clean_name})"
+
         if not caption_text.strip():
-            clean_name = element.id.replace("#/", "").replace("/", " ").replace("_", " ").title()
-            caption_text = f"Figure on Page {page_number} ({heading or clean_name})"
+            caption_text = title
+
         if not vlm_desc.strip():
             vlm_desc = f"Visual graphic / {image_type.lower()} on Page {page_number} under section '{section}'."
 
@@ -529,13 +574,19 @@ class ChunkBuilder:
             f"Image ID: {element.id}",
             f"Image Type: {image_type}",
             f"Page: {page_number}",
-            f"Image Caption: {caption_text}",
+            f"Image Title: {title}",
         ]
+        if subtitle:
+            image_parts.append(f"Image Subtitle: {subtitle}")
         if explicit_caption:
             image_parts.append(f"Explicit Document Caption: {explicit_caption}")
+        if caption_text and caption_text != title:
+            image_parts.append(f"Image Caption: {caption_text}")
         if entity_name:
             role_part = f" ({designation})" if designation else ""
             image_parts.append(f"Associated Person/Entity: {entity_name}{role_part}")
+        if sec_heading:
+            image_parts.append(f"Section Heading: {sec_heading}")
         if layout_context:
             image_parts.append(f"Layout Context: {layout_context}")
         if association_method and association_method != "none":
@@ -604,7 +655,10 @@ class ChunkBuilder:
             image_path=img_path,
             image_url=img_url,
             image_type=image_type,
+            title=title,
+            subtitle=subtitle,
             explicit_caption=explicit_caption,
+            caption_text=caption_text,
             entity_name=entity_name,
             designation=designation,
             text_before=text_before,
@@ -613,6 +667,7 @@ class ChunkBuilder:
             importance_score=importance_score,
             retrievable=retrievable,
             association_method=association_method,
+            association_confidence=association_confidence,
             confidence=confidence,
             caption=caption_text,
             ocr_text=ocr_text,
