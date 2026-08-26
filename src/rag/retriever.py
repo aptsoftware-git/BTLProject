@@ -497,10 +497,30 @@ class Retriever:
                     boost += 0.50
                     if getattr(meta, "importance_score", None) == "HIGH":
                         boost += 0.30
-                    if getattr(meta, "association_method", None) in ("explicit_caption", "same_card_layout"):
+                    if getattr(meta, "association_method", None) in ("explicit_caption", "same_card_layout", "ocr_grounded_identity"):
                         boost += 0.35
                     if intent == "person_portrait_visual" and page == 49:
                         boost += 0.40
+
+                    # Generic (non-hardcoded) entity match: this image's own
+                    # grounded entity_name -- populated for ANY person via
+                    # explicit caption / same-card layout / OCR, not just a
+                    # fixed roster -- is compared directly against the query.
+                    # Supports exact single-person, multi-person (each image
+                    # scored independently per its own entity_name), and
+                    # generic semantic-description-based queries alike.
+                    candidate_entity = (getattr(meta, "entity_name", None) or person_name or "").strip().lower()
+                    if candidate_entity:
+                        if candidate_entity in q or Retriever.fuzzy_match_entity(candidate_entity, q):
+                            boost += 0.80
+                        else:
+                            name_tokens = [
+                                t for t in re.findall(r"[a-z]+", candidate_entity)
+                                if len(t) > 2 and t not in ("mr", "mrs", "ms", "dr", "shri", "smt", "er")
+                            ]
+                            matched_tokens = sum(1 for t in name_tokens if t in q_words)
+                            if name_tokens and matched_tokens >= max(1, len(name_tokens) - 1):
+                                boost += 0.65
                 else:
                     # For purely text questions, penalize image chunks so text evidence is preferred
                     boost -= 0.30
@@ -522,8 +542,18 @@ class Retriever:
         from src.rag.image_processor import ImageRetrievalValidator, PortraitSpatialValidator
         import re
 
+        # Document's own grounded entity registry (from every image chunk's
+        # entity_name, populated generically -- not a hardcoded roster) so
+        # query-target detection can tell a real person-name query apart
+        # from a generic/semantic visual query (e.g. "the substation
+        # construction site image") without guessing.
+        doc_known_entities = list({
+            c.metadata.entity_name for c in chunks
+            if c.metadata.chunk_type == "image" and getattr(c.metadata, "entity_name", None)
+        })
+
         # Step 1: Detect query target and check for visual intent
-        target_info = ImageRetrievalValidator.detect_query_target(query)
+        target_info = ImageRetrievalValidator.detect_query_target(query, known_entities=doc_known_entities)
         if not target_info.get("is_visual", False) or target_info.get("target_type") == "pure_text":
             return []
 
@@ -542,7 +572,7 @@ class Retriever:
                 if c.metadata.chunk_type == "image":
                     meta = c.metadata
                     meta_dict = meta.model_dump() if hasattr(meta, "model_dump") else (meta.dict() if hasattr(meta, "dict") else meta.__dict__)
-                    if ImageRetrievalValidator.validate_image_candidate(meta_dict, query, intent=intent, doc_id=meta.document_id):
+                    if ImageRetrievalValidator.validate_image_candidate(meta_dict, query, intent=intent, doc_id=meta.document_id, known_entities=doc_known_entities):
                         matched.append(c)
             if matched:
                 return self._deduplicate_chunks(matched)
@@ -553,7 +583,7 @@ class Retriever:
                 if c.metadata.chunk_type == "image":
                     meta = c.metadata
                     meta_dict = meta.model_dump() if hasattr(meta, "model_dump") else (meta.dict() if hasattr(meta, "dict") else meta.__dict__)
-                    if ImageRetrievalValidator.validate_image_candidate(meta_dict, query, intent=intent, doc_id=meta.document_id):
+                    if ImageRetrievalValidator.validate_image_candidate(meta_dict, query, intent=intent, doc_id=meta.document_id, known_entities=doc_known_entities):
                         matched.append(c)
             if matched:
                 return self._deduplicate_chunks(matched)
@@ -596,7 +626,7 @@ class Retriever:
 
             meta = c.metadata
             meta_dict = meta.model_dump() if hasattr(meta, "model_dump") else (meta.dict() if hasattr(meta, "dict") else meta.__dict__)
-            if not ImageRetrievalValidator.validate_image_candidate(meta_dict, query, intent=intent, doc_id=meta.document_id):
+            if not ImageRetrievalValidator.validate_image_candidate(meta_dict, query, intent=intent, doc_id=meta.document_id, known_entities=doc_known_entities):
                 continue
 
             title = (getattr(meta, "title", None) or "").lower()
@@ -863,13 +893,17 @@ class Retriever:
             
         # Retrieval Gating: Filter image chunks using ImageRetrievalValidator
         from src.rag.image_processor import ImageRetrievalValidator
+        doc_known_entities_gate = list({
+            c.metadata.entity_name for c in search_chunks
+            if c.metadata.chunk_type == "image" and getattr(c.metadata, "entity_name", None)
+        })
         gated_scored = []
         for sc in scored_chunks:
             if sc.metadata.chunk_type == "image":
                 meta = sc.metadata
                 meta_dict = meta.model_dump() if hasattr(meta, "model_dump") else (meta.dict() if hasattr(meta, "dict") else meta.__dict__)
                 if is_visual_query:
-                    if not ImageRetrievalValidator.validate_image_candidate(meta_dict, query, intent=intent, doc_id=meta.document_id):
+                    if not ImageRetrievalValidator.validate_image_candidate(meta_dict, query, intent=intent, doc_id=meta.document_id, known_entities=doc_known_entities_gate):
                         continue
                 else:
                     # Pure text query: filter out non-retrievable or decorative images

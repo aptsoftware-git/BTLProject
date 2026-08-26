@@ -56,7 +56,7 @@ def test_all_16_metadata_fields_stored_in_json():
         assert data["importance_score"] in ("HIGH", "MEDIUM", "LOW")
         assert isinstance(data["retrievable"], bool)
         assert data["association_method"] in (
-            "explicit_caption", "same_card_layout", "spatially_nearest_text",
+            "explicit_caption", "same_card_layout", "ocr_grounded_identity", "spatially_nearest_text",
             "section_spatial_context", "surrounding_text", "vlm_semantic_description", "none"
         )
         assert 0.0 <= data["confidence"] <= 1.0
@@ -206,3 +206,102 @@ def test_end_to_end_portrait_and_logo_visual_retrieval():
     for img in logo_imgs:
         assert img.metadata.page_number != 49, "Logo must not return Page 49 director portraits"
         assert "portrait" not in (img.metadata.image_type or "").lower()
+
+
+# ---------------------------------------------------------------------------
+# Generic (non-hardcoded) portrait identity extraction
+# ---------------------------------------------------------------------------
+from src.rag.image_processor import extract_generic_person_identity
+
+
+def test_extract_generic_person_identity_from_titled_name_and_designation():
+    assert extract_generic_person_identity("Mr. Sunil Kumar Mittra, Managing Director") == (
+        "Mr. Sunil Kumar Mittra", "Managing Director"
+    )
+    assert extract_generic_person_identity("Ms. Anjali Roy - Chief Financial Officer") == (
+        "Ms. Anjali Roy", "Chief Financial Officer"
+    )
+
+
+def test_extract_generic_person_identity_name_only_no_designation():
+    assert extract_generic_person_identity("Shri Ramesh Gupta") == ("Shri Ramesh Gupta", None)
+
+
+def test_extract_generic_person_identity_returns_none_for_non_person_text():
+    assert extract_generic_person_identity("EBITDA growth chart FY24") is None
+    assert extract_generic_person_identity("Figure 4.2: Revenue Trend 2020-2024") is None
+    assert extract_generic_person_identity("") is None
+    assert extract_generic_person_identity(None) is None
+
+
+def test_ground_image_grounds_any_captioned_person_not_just_known_directors():
+    """
+    A person who is NOT in PortraitSpatialValidator.KNOWN_DIRECTORS must still
+    get entity_name/designation grounded, as long as the document's own
+    explicit caption names them.
+    """
+    grounded = HierarchicalLayoutGrounder.ground_image(
+        image_id="img_new_hire_portrait",
+        page_number=88,
+        bbox={"l": 60, "r": 200, "t": 700, "b": 560},
+        doc_elements_on_page=[],
+        doc_title="BTL EPC Annual Report",
+        active_section="Leadership Team",
+        explicit_caption="Ms. Priya Sen, Vice President",
+    )
+
+    assert grounded["entity_name"] == "Ms. Priya Sen"
+    assert grounded["designation"] == "Vice President"
+    assert grounded["image_type"] == "Portrait Photo"
+    assert grounded["association_method"] == "explicit_caption"
+    assert grounded["importance_score"] == "HIGH"
+    assert grounded["retrievable"] is True
+
+
+def test_ground_image_grounds_person_from_image_own_ocr_text():
+    """
+    With no explicit caption and no card-layout match, a titled name that the
+    OCR engine actually read off the image itself is still grounded as a
+    portrait (association_method="ocr_grounded_identity") -- generalizing
+    beyond the fixed KNOWN_DIRECTORS roster.
+    """
+    grounded = HierarchicalLayoutGrounder.ground_image(
+        image_id="img_ocr_named_portrait",
+        page_number=91,
+        bbox={"l": 60, "r": 200, "t": 700, "b": 560},
+        doc_elements_on_page=[],
+        doc_title="BTL EPC Annual Report",
+        active_section="Leadership Team",
+        explicit_caption=None,
+        ocr_text="Dr. Alok Banerjee\nChief Technology Officer",
+    )
+
+    assert grounded["entity_name"] == "Dr. Alok Banerjee"
+    assert grounded["designation"] == "Chief Technology Officer"
+    assert grounded["image_type"] == "Portrait Photo"
+    assert grounded["association_method"] == "ocr_grounded_identity"
+    assert grounded["importance_score"] == "HIGH"
+    assert grounded["retrievable"] is True
+
+
+def test_ground_image_does_not_fabricate_identity_from_unrelated_nearby_text():
+    """
+    Nearby PAGE text mentioning a titled name (not the image's own caption or
+    OCR) must never be used to fabricate entity_name -- this is the same
+    negative guard as test_negative_guard_against_generic_keyword_fabrication,
+    re-verified against the new generic extractor's entry points.
+    """
+    grounded = HierarchicalLayoutGrounder.ground_image(
+        image_id="img_unrelated_nearby_name",
+        page_number=37,
+        bbox={"l": 40, "r": 550, "t": 250, "b": 100},  # wide banner geometry
+        doc_elements_on_page=[
+            {"text": "Ms. Priya Sen was present at the site opening ceremony.", "type": "paragraph", "bbox": {"l": 40, "r": 500, "t": 80, "b": 50}}
+        ],
+        doc_title="BTL EPC Annual Report",
+        active_section="Corporate Overview",
+        explicit_caption=None,
+    )
+
+    assert grounded["entity_name"] is None
+    assert grounded["designation"] is None

@@ -237,9 +237,18 @@ class ChatService:
         """
         from src.rag.image_processor import ImageRetrievalValidator
 
+        # This document's own grounded entity registry (from every retrieved
+        # image reference's entity_name, populated generically -- not a
+        # hardcoded roster) so query-target detection can tell a real
+        # person-name query apart from a generic/semantic visual query.
+        doc_known_entities = list({
+            img.get("entity_name") for img in image_references
+            if isinstance(img, dict) and img.get("entity_name")
+        })
+
         # 1. Fallback refusal check: never attach images to unsupported queries or empty refs
         ans_lower = answer.lower().strip()
-        target_info = ImageRetrievalValidator.detect_query_target(question)
+        target_info = ImageRetrievalValidator.detect_query_target(question, known_entities=doc_known_entities)
         if not image_references:
             return []
         if not target_info.get("is_visual", False) and "could not find this information in the uploaded document" in ans_lower:
@@ -271,7 +280,7 @@ class ChatService:
 
             # Run validation suite
             doc_id_val = document_id or img.get("document_id") or (img.get("image_url", "").split("/")[2] if img.get("image_url", "").startswith("/outputs/") else None)
-            if not ImageRetrievalValidator.validate_image_candidate(img, question, doc_id=doc_id_val):
+            if not ImageRetrievalValidator.validate_image_candidate(img, question, doc_id=doc_id_val, known_entities=doc_known_entities):
                 continue
 
             seen_keys.add(dedup_key)

@@ -1,4 +1,5 @@
 import logging
+import re
 from pathlib import Path
 from typing import Any, Optional, Dict, List, Tuple
 from src.rag.document_schema import ImageMetadata
@@ -6,6 +7,68 @@ from src.rag.utils import convert_bbox
 from src.rag.caption_processor import CaptionProcessor
 
 logger = logging.getLogger("pipeline")
+
+# Generic corporate designations recognised regardless of who holds them --
+# NOT tied to any specific named person, unlike PortraitSpatialValidator's
+# KNOWN_DIRECTORS list. Used to ground a person's name+designation for ANY
+# portrait directly from real document text (explicit caption or nearby
+# OCR), so portrait metadata isn't limited to a hardcoded roster.
+_KNOWN_DESIGNATIONS = [
+    "Managing Director", "Executive Director", "Independent Director",
+    "Whole-time Director", "Whole time Director", "Non-Executive Director",
+    "Additional Director", "Nominee Director", "Alternate Director",
+    "Vice Chairman", "Vice Chairperson", "Chairman", "Chairperson",
+    "Chief Executive Officer", "CEO", "Chief Financial Officer", "CFO",
+    "Chief Operating Officer", "COO", "Chief Technology Officer", "CTO",
+    "Company Secretary", "President", "Vice President", "General Manager",
+    "Founder", "Co-Founder", "Promoter", "Director",
+]
+_DESIGNATION_PATTERN = re.compile(
+    r"\b(" + "|".join(re.escape(d) for d in sorted(_KNOWN_DESIGNATIONS, key=len, reverse=True)) + r")\b",
+    re.IGNORECASE,
+)
+# First word of every designation phrase -- excluded from name-token capture
+# so e.g. "Dr. Alok Banerjee Chief Technology Officer" stops the name at
+# "Banerjee" instead of swallowing "Chief Technology" into the person's name.
+_DESIGNATION_LEAD_WORDS = {d.split()[0].lower() for d in _KNOWN_DESIGNATIONS}
+_NAME_TOKEN = rf"(?!(?i:{'|'.join(re.escape(w) for w in _DESIGNATION_LEAD_WORDS)})\b)[A-Z][a-zA-Z.'\-]+"
+_TITLE_PREFIX = r"(?:Mr|Mrs|Ms|Dr|Shri|Smt|Er)\.?\s+"
+# "Mr. Sunil Kumar Mittra" / "Shri Ravi Todi" / "Dr. A. K. Sharma"
+_NAMED_PERSON_PATTERN = re.compile(
+    rf"\b(?:{_TITLE_PREFIX})({_NAME_TOKEN}(?:\s+{_NAME_TOKEN}){{0,3}})"
+)
+
+
+def extract_generic_person_identity(text: Optional[str]) -> Optional[Tuple[str, Optional[str]]]:
+    """
+    Generic (non-hardcoded) extraction of a person's name + designation from
+    real document text (an explicit Docling caption, or OCR text lifted from
+    near an image). Only fires on a titled name (Mr./Ms./Dr./Shri/Smt./Er.)
+    so it never mistakes an arbitrary capitalized phrase for a person, and
+    only reports a designation when one of a fixed set of real corporate
+    titles is present nearby -- it never invents one.
+
+    Returns (name, designation_or_None) or None if no confident person
+    reference is found.
+    """
+    if not text or not text.strip():
+        return None
+    clean = re.sub(r"\s+", " ", text.strip())
+
+    name_match = _NAMED_PERSON_PATTERN.search(clean)
+    if not name_match:
+        return None
+    name = f"{clean[max(0, name_match.start()):name_match.end()]}".strip()
+    # Re-include the title prefix as matched (group 0 covers prefix+name).
+    name = re.sub(r"\s+", " ", name)
+
+    designation = None
+    tail = clean[name_match.end():name_match.end() + 60]
+    desig_match = _DESIGNATION_PATTERN.search(tail) or _DESIGNATION_PATTERN.search(clean)
+    if desig_match:
+        designation = desig_match.group(1)
+
+    return name, designation
 
 class PortraitSpatialValidator:
     """
@@ -285,6 +348,17 @@ class HierarchicalLayoutGrounder:
             association_confidence = 0.98
             layout_context = "explicit_captioned_figure"
 
+            # A captioned figure whose caption names a real person (any
+            # person, not just a fixed roster) is grounded as a portrait
+            # directly from that document text.
+            identity = extract_generic_person_identity(final_explicit_caption)
+            if identity:
+                entity_name, designation = identity
+                title = entity_name
+                subtitle = designation or subtitle
+                image_type = "Portrait Photo"
+                final_caption = f"Portrait of {entity_name} ({designation})" if designation else f"Portrait of {entity_name}"
+
         # Check Priority 2: Structured Same-Card / Layout Text (Portraits & Card Containers)
         if not final_explicit_caption:
             spatial_card_match = PortraitSpatialValidator.match_person_to_portrait_spatial(bbox, doc_elements_on_page)
@@ -297,6 +371,23 @@ class HierarchicalLayoutGrounder:
                 layout_context = f"portrait_card_{spatial_card_match.get('layout_alignment', 'horizontal')}"
                 association_method = "same_card_layout"
                 association_confidence = 0.92
+                final_caption = f"Portrait of {entity_name} ({designation})" if designation else f"Portrait of {entity_name}"
+
+        # Check Priority 2b: Generic OCR-Grounded Identity (ANY person, not a
+        # fixed roster) -- fires only when no explicit caption or spatially
+        # matched card identified a person, and only on a titled name
+        # (Mr./Ms./Dr./Shri/Smt./Er.) actually present in the image's own
+        # OCR text, so it never invents a name.
+        if not final_explicit_caption and not entity_name and ocr_text:
+            ocr_identity = extract_generic_person_identity(ocr_text)
+            if ocr_identity:
+                entity_name, designation = ocr_identity
+                title = entity_name
+                subtitle = designation
+                image_type = "Portrait Photo"
+                layout_context = "ocr_grounded_portrait"
+                association_method = "ocr_grounded_identity"
+                association_confidence = 0.80
                 final_caption = f"Portrait of {entity_name} ({designation})" if designation else f"Portrait of {entity_name}"
 
         # Check Priority 3 & 4: Section Context and Spatially Nearest Text for Uncaptioned Visuals
@@ -381,8 +472,11 @@ class HierarchicalLayoutGrounder:
             association_confidence = 0.55
             final_caption = f"Visual on Page {page_number}"
 
-        # Guard: Negative guard against unassociated entity assignment
-        if association_method not in ("same_card_layout", "explicit_caption"):
+        # Guard: Negative guard against unassociated entity assignment.
+        # ocr_grounded_identity is included because it -- like same_card_layout
+        # and explicit_caption -- only ever gets set from a titled name found
+        # directly in real document text (never a model-inferred guess).
+        if association_method not in ("same_card_layout", "explicit_caption", "ocr_grounded_identity"):
             entity_name = None
             designation = None
 
@@ -447,14 +541,25 @@ class HierarchicalLayoutGrounder:
             importance_score = "HIGH"
             retrievable = True
         elif is_genuinely_low_value or image_type == "Decorative":
+            # The ONLY case that suppresses retrieval: a tiny icon or an
+            # extreme-aspect-ratio divider line with no logo/caption signal
+            # at all -- i.e. genuinely not a meaningful visual asset. Every
+            # other image (regardless of size, aspect ratio, or whether it
+            # has a caption) stays retrievable=True; missing captions or
+            # modest dimensions are never, by themselves, grounds to drop a
+            # meaningful image from search.
             importance_score = "LOW"
             retrievable = False
         elif area_ratio >= 0.05 or (w >= 80 and h >= 60):
             importance_score = "MEDIUM"
             retrievable = True
         else:
-            importance_score = "LOW"
-            retrievable = False
+            # Smaller/uncaptioned photos (project/site photos, inline
+            # figures, small diagrams) are still meaningful visual content
+            # -- they are ranked lower for relevance, not excluded from
+            # retrieval.
+            importance_score = "MEDIUM"
+            retrievable = True
 
         # If decorative/low-value separator, ensure entity is clean
         if is_genuinely_low_value or image_type == "Decorative":
@@ -615,8 +720,11 @@ class ImageRetrievalValidator:
             "with photos", "with photo", "give the photo of", "give photo of", "give image of",
             "give the image of", "please show", "please give", "who is", "who are"
         ]
+        used_explicit_person_phrase = False
         for sp in sorted(strip_phrases, key=len, reverse=True):
-            clean_q = clean_q.replace(sp, " ")
+            if sp in clean_q:
+                used_explicit_person_phrase = True
+                clean_q = clean_q.replace(sp, " ")
 
         # Split on conjunctions and punctuation for multi-person queries
         parts = re.split(r'\b(?:and|&|\+|with)\b|,', clean_q)
@@ -628,12 +736,45 @@ class ImageRetrievalValidator:
                 "the", "a", "an", "of", "for", "in", "at", "to", "on", "from", "by",
                 "director", "directors", "board", "member", "members", "person", "people",
                 "chairman", "managing", "independent", "whole", "time", "photo", "image",
-                "picture", "portrait", "document", "company"
+                "picture", "portrait", "document", "company", "show", "give", "me", "can",
+                "you", "please"
             ) and len(w) > 1]
             if tokens:
                 cand = " ".join(tokens)
                 if len(cand) >= 3 and cand not in extracted:
                     extracted.append(cand)
+
+        # Plausibility gate on the heuristic-extracted candidates: leftover
+        # query text after phrase-stripping is only trusted as a PERSON name
+        # if it actually corresponds to a real name grounded somewhere in
+        # this document's own image registry (`all_known` -- built above
+        # from `known_entities` plus KNOWN_DIRECTORS variants). Without this,
+        # any non-person visual query whose phrasing doesn't match a known
+        # strip-phrase (e.g. "show the substation construction site image at
+        # Deoghar") gets misread as a person's name and wrongly routed
+        # through strict portrait matching instead of general/semantic
+        # visual search. If no registry is available at all, the heuristic
+        # is trusted as-is (nothing to check against).
+        #
+        # Exception: if the query used an EXPLICIT person-oriented phrase
+        # ("photo of X", "who is X", ...), this is unambiguously a person
+        # search -- an unrecognised name here must still resolve to a
+        # "portrait of someone not in this document" target (zero results),
+        # NOT silently fall through to a generic visual search that would
+        # incorrectly return unrelated images for e.g. "photo of Elon Musk".
+        if all_known and not used_explicit_person_phrase:
+            plausible_extracted = []
+            for cand in extracted:
+                cand_tokens = set(cand.split())
+                for ent in all_known:
+                    ent_norm = cls.normalize_name(ent)
+                    ent_tokens = set(ent_norm.split())
+                    if not ent_tokens:
+                        continue
+                    if cand_tokens & ent_tokens:
+                        plausible_extracted.append(cand)
+                        break
+            extracted = plausible_extracted
 
         # Merge extracted with matched_from_entities
         final_names = []
@@ -859,14 +1000,20 @@ class ImageRetrievalValidator:
         image_meta: Dict[str, Any],
         query: str,
         intent: Optional[str] = None,
-        doc_id: Optional[str] = None
+        doc_id: Optional[str] = None,
+        known_entities: Optional[List[str]] = None
     ) -> bool:
         """
         Executes the complete validation suite on an image candidate:
         query target -> metadata match -> page/layout consistency -> physical file existence -> correct image type.
+
+        `known_entities` should be the current document's OWN registry of
+        grounded entity_name values (gathered from its image chunks) so
+        query-target classification can tell a real person-name query apart
+        from a generic/semantic visual query without hardcoding names.
         """
         # Step 1: Query Target Check
-        target_info = cls.detect_query_target(query)
+        target_info = cls.detect_query_target(query, known_entities=known_entities)
         if not target_info.get("is_visual", False) or target_info.get("target_type") == "pure_text":
             return False
 

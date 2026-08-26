@@ -13,6 +13,7 @@ from fastapi.testclient import TestClient
 
 from backend.app import app
 from src.finding_mapper import build_findings, save_findings
+from src.final_validation_layer import FinalValidationLayer, build_count_reconciliation, save_final_findings
 from src.pdf_bbox_resolver import resolve_bboxes
 from src.sentence_mapper import sentence_id_str
 
@@ -136,3 +137,46 @@ def test_findings_data_flow_parity(sample_findings_data, monkeypatch):
 
     assert len(pdf_grounded_in_ui) == 6
     assert len(sentence_grounded_in_ui) == 9
+
+
+def test_final_findings_artifact_is_canonical_source_for_api(sample_findings_data, monkeypatch):
+    """
+    End-to-end: finding_mapper output -> FinalValidationLayer -> canonical
+    10_final/final_findings.json -> /findings API. Once final_findings.json
+    exists, the API must serve it (not mapped_findings.json), and every
+    candidate that went into the validation layer must be accounted for
+    across accepted + rejected + merged (count reconciliation).
+    """
+    job_id = sample_findings_data["job_id"]
+    job_dir = sample_findings_data["job_dir"]
+    final_dir = job_dir / "10_final"
+    resolved_findings = sample_findings_data["resolved_findings"]
+
+    save_findings([], final_dir / "auto_rejected_findings.json")
+
+    layer = FinalValidationLayer()
+    accepted, decision_log = layer.run(resolved_findings, [])
+    save_final_findings(accepted, decision_log, final_dir)
+
+    reconciliation = build_count_reconciliation(job_dir)
+    assert reconciliation["is_reconciled"] is True, reconciliation["checks"]
+
+    n_accepted = sum(1 for d in decision_log if d["decision"] == "accepted")
+    n_rejected = sum(1 for d in decision_log if d["decision"] == "rejected")
+    n_merged = sum(1 for d in decision_log if d["decision"] == "merged")
+    assert n_accepted + n_rejected + n_merged == len(resolved_findings)
+    assert len(accepted) == n_accepted
+
+    import backend.routes as routes
+    monkeypatch.setattr(routes, "get_job", lambda jid: {"job_id": jid, "status": "completed"} if jid == job_id else None)
+    monkeypatch.setattr(routes, "get_job_dir", lambda jid: job_dir)
+
+    client = TestClient(app)
+    response = client.get(f"/api/documents/{job_id}/findings")
+    assert response.status_code == 200
+    api_findings = response.json()["findings"]
+
+    # API must reflect the canonical (post-final-validation) artifact, not
+    # the pre-final-validation mapped_findings.json count.
+    assert len(api_findings) == len(accepted)
+    assert {f["finding_id"] for f in api_findings} == {f["finding_id"] for f in accepted}

@@ -394,6 +394,10 @@ export function fetchFindings(jobId) {
   return request(`/documents/${jobId}/findings`);
 }
 
+export function fetchDocumentImages(jobId) {
+  return request(`/documents/${jobId}/images`);
+}
+
 export function updateFindingStatus(jobId, findingId, statusValue) {
   return request(`/documents/${jobId}/findings/${findingId}`, {
     method: "PATCH",

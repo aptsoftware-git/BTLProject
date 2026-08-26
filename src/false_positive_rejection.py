@@ -507,4 +507,9 @@ class FalsePositiveRejectionLayer:
         if (orig_l, sug_l) in {("a", "an"), ("an", "a"), ("the", "a"), ("a", "the")}:
             return True
 
-        return True
+        # No recognised structural grammar-rule pattern matched -- this is
+        # not a confirmed genuine correction (previously this fell through
+        # to `return True` unconditionally, which silently disabled the
+        # low-confidence suppression branch in Hard Check 6 for every
+        # grammar/tense candidate).
+        return False

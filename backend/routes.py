@@ -3,6 +3,7 @@ from __future__ import annotations
 from typing import Any, Dict, List
 import json
 import logging
+import re
 from pathlib import Path
 from fastapi import APIRouter, File, HTTPException, UploadFile, status
 from fastapi.responses import FileResponse
@@ -1252,7 +1253,17 @@ async def get_sentence_lookup(job_id: str):
 
 
 def _findings_with_live_status(job_dir: Path) -> list:
-    findings = _load_json_or(job_dir / "10_final" / "mapped_findings.json", [])
+    # final_findings.json (produced by src.final_validation_layer) is the
+    # single canonical findings artifact -- it has already been through the
+    # generic final validation gate on top of finding_mapper's own gate, so
+    # it is the only source the API/UI should ever read from. Fall back to
+    # mapped_findings.json only for job directories produced before the
+    # final validation layer existed.
+    final_findings_path = job_dir / "10_final" / "final_findings.json"
+    if final_findings_path.exists():
+        findings = _load_json_or(final_findings_path, [])
+    else:
+        findings = _load_json_or(job_dir / "10_final" / "mapped_findings.json", [])
     decisions = _load_json_or(job_dir / "10_final" / "decisions.json", {})
     out = []
     for f in findings:
@@ -1260,6 +1271,69 @@ def _findings_with_live_status(job_dir: Path) -> list:
         f["status"] = decisions.get(f["finding_id"], f.get("status", "pending"))
         out.append(f)
     return out
+
+
+_IMAGE_FILE_RE = re.compile(r"^image_(\d{3,})$")
+
+_IMAGE_GALLERY_FIELDS = (
+    "image_id", "image_path", "image_url", "page", "image_type",
+    "semantic_description", "entity_name", "designation", "caption",
+    "keywords", "retrievable",
+)
+
+
+def _load_gallery_images(job_dir: Path) -> list:
+    """
+    Scans 05_images/ for strict image_XXX.png <-> image_XXX.json pairs only
+    -- any file that doesn't have both a matching .png and .json (a raw/temp
+    asset left over from extraction, or an orphaned JSON/PNG) is skipped.
+    This never depends on chat retrieval's top_k caps or the `retrievable`
+    scoring gate -- it is a direct, unfiltered listing of every valid final
+    image asset actually persisted for the document.
+    """
+    images_dir = job_dir / "05_images"
+    if not images_dir.exists():
+        return []
+
+    out = []
+    for json_path in sorted(images_dir.glob("image_*.json")):
+        stem = json_path.stem
+        if not _IMAGE_FILE_RE.match(stem):
+            continue
+        png_path = images_dir / f"{stem}.png"
+        if not png_path.exists() or png_path.stat().st_size == 0:
+            continue
+
+        data = _load_json_or(json_path, None)
+        if not isinstance(data, dict):
+            continue
+
+        entry = {field: data.get(field) for field in _IMAGE_GALLERY_FIELDS}
+        entry["seq_name"] = stem
+        if not entry.get("image_url"):
+            entry["image_url"] = f"/outputs/{job_dir.name}/05_images/{stem}.png"
+        if entry.get("retrievable") is None:
+            entry["retrievable"] = True
+        out.append(entry)
+
+    return out
+
+
+@router.get(
+    "/documents/{job_id}/images",
+    summary="All valid extracted image assets from 05_images (strict PNG<->JSON pairs), unfiltered by chat top_k",
+)
+async def get_document_images(job_id: str):
+    job = get_job(job_id)
+    if not job:
+        raise HTTPException(status_code=404, detail=f"Job '{job_id}' not found.")
+    job_dir = get_job_dir(job_id)
+    images = _load_gallery_images(job_dir)
+    return {
+        "job_id": job_id,
+        "total_images": len(images),
+        "images": images,
+    }
 
 
 @router.get(

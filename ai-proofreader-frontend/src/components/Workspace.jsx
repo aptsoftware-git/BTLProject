@@ -6,6 +6,7 @@ import ContextAnalysis from "./ContextAnalysis";
 import Reports from "./Reports";
 import ComparativeAnalysisView from "./ComparativeAnalysisView";
 import PDFReviewWorkspace from "./PDFReviewWorkspace";
+import ImageGallery from "./ImageGallery";
 
 
 const buildDecidedText = (rawText, issues, decisions) => {
@@ -2039,6 +2040,10 @@ export default function Workspace() {
                 ) : activeTab === "analysis" || activeTab === "context" ? (
                   <div style={{ background: "var(--bg-card)", border: "1px solid var(--border)", borderRadius: 12, padding: 20, minHeight: 500 }}>
                     <ContextAnalysis id={id} onShowInDocument={handleShowInDocument} />
+                  </div>
+                ) : activeTab === "images" || activeTab === "gallery" ? (
+                  <div style={{ background: "var(--bg-card)", border: "1px solid var(--border)", borderRadius: 12, padding: 20, minHeight: 500 }}>
+                    <ImageGallery docId={id} />
                   </div>
                 ) : activeTab === "comparative" || activeTab === "comparative-analysis" || activeTab === "benchmarking" ? (
                   <div style={{ background: "var(--bg-card)", border: "1px solid var(--border)", borderRadius: 12, padding: 20, minHeight: 500 }}>

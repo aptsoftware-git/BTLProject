@@ -653,6 +653,7 @@ class StageOrchestrator:
         logger.info("START Stage 4 (Grammar & Writing Quality Review) for job %s", self.job_id)
         report_file = self.job_dir / "10_final" / "report.json"
         mapped_findings_file = self.job_dir / "10_final" / "mapped_findings.json"
+        final_findings_file = self.job_dir / "10_final" / "final_findings.json"
         filtered_spell_file = self.job_dir / "06_spell" / "filtered_spell_candidates.json"
         spell_file = self.job_dir / "06_spell" / "spell_candidates.json"
         sentences_file = self.job_dir / "04_sentences" / "sentences.json"
@@ -677,7 +678,13 @@ class StageOrchestrator:
 
         # Cache check — only if force_regenerate is False AND both report.json AND mapped_findings.json are newer
         # than every upstream input count as "already done".
-        if not force_regenerate and not _artifact_is_stale(report_file, active_spell_file, sentences_file) and not _artifact_is_stale(mapped_findings_file, active_spell_file, sentences_file):
+        if (
+            not force_regenerate
+            and not _artifact_is_stale(report_file, active_spell_file, sentences_file)
+            and not _artifact_is_stale(mapped_findings_file, active_spell_file, sentences_file)
+            and final_findings_file.exists()
+            and not _artifact_is_stale(final_findings_file, active_spell_file, sentences_file)
+        ):
             logger.info("[CACHE HIT] Stage 4 (Grammar) already completed for job %s", self.job_id)
             self.update_stage_state(stage_id, "Completed", duration=0.0, output_location="10_final/report.json")
             job = self.get_job()
@@ -736,6 +743,9 @@ class StageOrchestrator:
                 self.job_dir / "10_final" / "report.json",
                 self.job_dir / "10_final" / "mapped_findings.json",
                 self.job_dir / "10_final" / "auto_rejected_findings.json",
+                self.job_dir / "10_final" / "final_findings.json",
+                self.job_dir / "10_final" / "final_validation_log.json",
+                self.job_dir / "10_final" / "count_reconciliation.json",
                 self.job_dir / "10_final" / "annotated_original.html",
                 self.job_dir / "10_final" / "corrected_document.html",
                 self.job_dir / "10_final" / "summary.csv",
@@ -956,6 +966,38 @@ class StageOrchestrator:
                 self.job_id, len(findings), len(auto_rejected)
             )
 
+            # Final Validation Layer: the last, independent gate before a
+            # finding reaches the UI. Passing finding_mapper's gate above is
+            # NOT automatic acceptance -- every finding (and every
+            # already-auto-rejected one, for a complete audit trail) is
+            # re-evaluated here against sentence/context evidence, PDF/source
+            # evidence, broken sentence boundaries, OCR/whitespace artefacts,
+            # protected entities, duplicate/overlap detection, British vs
+            # American consistency, and confidence/evidence quality.
+            from src.final_validation_layer import (
+                FinalValidationLayer, save_final_findings, build_count_reconciliation,
+            )
+            final_validator = FinalValidationLayer(
+                protected_terms=protected_terms_raw, spelling_standard=spelling_standard,
+            )
+            final_accepted, final_decision_log = final_validator.run(findings, auto_rejected)
+            save_final_findings(final_accepted, final_decision_log, final_dir)
+
+            reconciliation = build_count_reconciliation(self.job_dir)
+            if not reconciliation.get("is_reconciled", True):
+                logger.warning(
+                    "Count reconciliation mismatch for job %s: %s",
+                    self.job_id, [c for c in reconciliation.get("checks", []) if not c.get("passed")]
+                )
+            logger.info(
+                "Final validation layer for job %s: %d accepted, %d rejected, %d merged (of %d candidates seen)",
+                self.job_id,
+                len(final_accepted),
+                sum(1 for d in final_decision_log if d["decision"] == "rejected"),
+                sum(1 for d in final_decision_log if d["decision"] == "merged"),
+                len(final_decision_log),
+            )
+
             end_time = datetime.now()
             duration = round((end_time - start_time).total_seconds(), 2)
 
@@ -972,7 +1014,7 @@ class StageOrchestrator:
                 job["grammar_ready"] = True
                 job["proofreading_ready"] = True
                 job["proofreading_status"] = "completed"
-                job["result"] = {"total_issues": len(high_conf), "accepted": len(accepted)}
+                job["result"] = {"total_issues": len(final_accepted), "accepted": len(accepted)}
                 self.save_job()
 
             logger.info("Stage 4 (Grammar) completed in %.2fs for job %s", duration, self.job_id)
