@@ -244,10 +244,25 @@ class MultimodalExtractor:
         file_name: str,
         file_type: str
     ) -> StructuredDocument:
-        """Lightweight fallback parser using PyMuPDF to extract text from a batch range."""
+        """
+        Lightweight fallback parser using PyMuPDF to extract text -- AND
+        images -- from a batch range when Docling conversion fails for
+        those pages.
+
+        Docling failing on a batch must never mean the pictures on those
+        pages are silently lost: block_type == 1 ("image/vector graphic")
+        blocks are captured here as ImageMetadata entries (bbox + page
+        number only, image_path left unset) so the main extraction loop's
+        existing "crop directly from source PDF" fallback
+        (ImageProcessor.crop_image_from_pdf, triggered whenever a picture's
+        PNG doesn't already exist on disk) picks them up, grounds them, and
+        persists them through the exact same 05_images pipeline as every
+        Docling-detected picture.
+        """
         import fitz
         elements = []
-        
+        images: Dict[str, ImageMetadata] = {}
+
         with fitz.open(file_path) as doc:
             for page_idx in range(start_page, end_page):
                 if page_idx >= doc.page_count:
@@ -255,20 +270,49 @@ class MultimodalExtractor:
                 page = doc[page_idx]
                 page_num = page_idx + 1
 
-                # Extract layout blocks (x0, y0, x1, y1, text, block_no, block_type)
-                # block_type == 0 is text, block_type == 1 is image/vector graphic
+                # Enumerate every embedded raster image on this page via
+                # PyMuPDF's image-XObject inspection (page.get_image_info),
+                # NOT page.get_text("blocks")'s block_type == 1 classifier --
+                # verified against real documents that MuPDF's text-blocks
+                # layout engine frequently does not surface embedded
+                # pictures as block_type 1 at all (e.g. portrait photos laid
+                # out in a card/grid), which would silently lose every
+                # picture on any page Docling fails to convert.
+                try:
+                    image_infos = page.get_image_info(xrefs=True) or []
+                except Exception as img_info_err:
+                    logger.warning(f"Failed to enumerate images on page {page_num}: {img_info_err}")
+                    image_infos = []
+
+                for img_idx, info in enumerate(image_infos):
+                    bbox = info.get("bbox")
+                    if not bbox or len(bbox) != 4:
+                        continue
+                    x0, y0, x1, y1 = bbox
+                    if x1 <= x0 or y1 <= y0:
+                        continue
+                    img_ref_id = f"#/pictures/fallback_{page_idx}_{img_idx}"
+                    images[img_ref_id] = ImageMetadata(
+                        image_id=img_ref_id,
+                        page_number=page_num,
+                        bbox=BoundingBox(l=x0, t=y0, r=x1, b=y1, coord_origin="TOPLEFT"),
+                    )
+
+                # Extract text layout blocks (x0, y0, x1, y1, text, block_no,
+                # block_type); block_type == 1 ("image/vector graphic") is
+                # skipped here since real pictures are already captured
+                # above via get_image_info.
                 blocks = page.get_text("blocks") or []
-                
+
                 b_idx = 0
                 for b in blocks:
                     if len(b) < 7:
                         continue
                     x0, y0, x1, y1, b_text, b_no, b_type = b[:7]
-                    
-                    # Ignore image blocks, graphics, and cover artwork
+
                     if b_type == 1:
                         continue
-                    
+
                     p_text = (b_text or "").strip()
                     if not p_text or len(p_text) < 2:
                         continue
@@ -276,7 +320,7 @@ class MultimodalExtractor:
                     # Filter cover page decorative headers / image titles on Page 1 if short
                     if page_num == 1 and len(p_text) < 15 and not p_text.endswith("."):
                         continue
-                    
+
                     ref_id = f"#/texts/fallback_{page_idx}_{b_idx}"
                     b_idx += 1
 
@@ -301,7 +345,7 @@ class MultimodalExtractor:
                         metadata=meta,
                         hierarchy_path=[]
                     ))
-                    
+
         return StructuredDocument(
             title=file_name,
             file_name=file_name,
@@ -309,7 +353,7 @@ class MultimodalExtractor:
             page_count=end_page - start_page,
             elements=elements,
             tables={},
-            images={}
+            images=images
         )
 
     def extract(

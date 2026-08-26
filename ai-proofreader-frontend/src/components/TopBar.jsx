@@ -136,7 +136,6 @@ export default function TopBar({ userInitial = "S" }) {
   const isAnalysisActive = (activeTab === "analysis" || activeTab === "context") && isDocWorkspace;
   const isComparativeActive = (activeTab === "comparative" || activeTab === "comparative-analysis" || activeTab === "benchmarking") && isDocWorkspace;
   const isReportsActive = (activeTab === "reports") && isDocWorkspace;
-  const isImagesActive = (activeTab === "images" || activeTab === "gallery") && isDocWorkspace;
 
   let assessmentText = "Processing";
   let badgeColor = "var(--amber)";
@@ -462,18 +461,6 @@ export default function TopBar({ userInitial = "S" }) {
             >
               <span>Comparative Analysis</span>
               {!isComparativeReady && isProcessing && <span style={styles.statusChip}>Benchmarking</span>}
-            </button>
-
-            {/* 5. Image Gallery */}
-            <button
-              onClick={() => handleNavTab("images")}
-              style={{
-                ...styles.navTab,
-                ...(isImagesActive ? styles.navTabActive : {})
-              }}
-            >
-              <span>Images</span>
-              {!isAssistantReady && isProcessing && <span style={styles.statusChip}>Indexing</span>}
             </button>
 
             {/* 6. Reports */}

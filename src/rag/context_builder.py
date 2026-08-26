@@ -93,6 +93,7 @@ class ContextBuilder:
 
                     image_refs.append({
                         "image_id": img_id,
+                        "chunk_id": meta.chunk_id,
                         "page_number": meta.page_number,
                         "title": getattr(meta, "title", None) or getattr(meta, "caption", None) or meta.heading or f"Figure on Page {meta.page_number}",
                         "subtitle": getattr(meta, "subtitle", None),

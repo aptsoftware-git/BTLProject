@@ -249,22 +249,34 @@ class ChatService:
         # 1. Fallback refusal check: never attach images to unsupported queries or empty refs
         ans_lower = answer.lower().strip()
         target_info = ImageRetrievalValidator.detect_query_target(question, known_entities=doc_known_entities)
+        is_visual = target_info.get("is_visual", False)
         if not image_references:
             return []
-        if not target_info.get("is_visual", False) and "could not find this information in the uploaded document" in ans_lower:
+        if not is_visual and "could not find this information in the uploaded document" in ans_lower:
             return []
 
-        # 2. Query target detection & pure text guard
-        if not target_info.get("is_visual", False) or target_info.get("target_type") == "pure_text":
-            logger.info("Suppressing image references for text-only question without visual intent.")
-            return []
-
-        # Reject ambiguous surname-only queries (e.g. "photo of Todi")
+        # Reject ambiguous surname-only queries (e.g. "photo of Todi") outright,
+        # regardless of whether any candidate was also selected into context.
         if target_info.get("target_type") == "ambiguous_surname":
             logger.info(f"Chat service rejecting image references for ambiguous surname query: '{question}'")
             return []
 
-        # 3. Deduplicate and validate image references using ImageRetrievalValidator
+        used_chunk_id_set = set(used_chunk_ids or [])
+
+        # 2. Deduplicate and validate image references.
+        #
+        # A query with no visual trigger word/intent at all (a genuinely
+        # indirect, content-only question) no longer blanket-suppresses
+        # every image reference. Instead: an image is still allowed through
+        # if its own chunk was actually selected into the LLM's context by
+        # ContextBuilder.build_context's relevance ranking (chunk_id in
+        # used_chunk_ids) -- that selection is itself evidence the image's
+        # semantic_description genuinely matched the query's content, even
+        # though the raw query text never said "photo"/"image"/etc. Such
+        # candidates skip the target-routing validation (entity/logo/board
+        # matching doesn't apply to a query that never named a target) and
+        # instead only need the same physical-file + not-decorative-LOW
+        # safety checks every image must pass.
         deduped = []
         seen_keys = set()
 
@@ -278,9 +290,18 @@ class ChatService:
             if dedup_key in seen_keys:
                 continue
 
-            # Run validation suite
             doc_id_val = document_id or img.get("document_id") or (img.get("image_url", "").split("/")[2] if img.get("image_url", "").startswith("/outputs/") else None)
-            if not ImageRetrievalValidator.validate_image_candidate(img, question, doc_id=doc_id_val, known_entities=doc_known_entities):
+
+            if is_visual:
+                if not ImageRetrievalValidator.validate_image_candidate(img, question, doc_id=doc_id_val, known_entities=doc_known_entities):
+                    continue
+            elif img.get("chunk_id") in used_chunk_id_set:
+                if not ImageRetrievalValidator.validate_physical_file(image_path=img.get("image_path"), image_url=img.get("image_url"), doc_id=doc_id_val):
+                    continue
+                img_type = (img.get("image_type") or "").lower()
+                if "decorative" in img_type and img.get("importance_score") == "LOW":
+                    continue
+            else:
                 continue
 
             seen_keys.add(dedup_key)

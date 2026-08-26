@@ -155,19 +155,12 @@ export default function IssueCardList({
                     Page {f.page_number}
                   </span>
                 </div>
-                {isGrounded ? (
+                {isGrounded && (
                   <span
                     title="Located at exact bounding box on original PDF page"
                     style={{ fontSize: "10px", fontWeight: 800, color: "#166534", background: "#dcfce7", border: "1px solid #86efac", padding: "1px 7px", borderRadius: "999px" }}
                   >
                     PDF Grounded
-                  </span>
-                ) : (
-                  <span
-                    title="Located at sentence level on page"
-                    style={{ fontSize: "10px", fontWeight: 700, color: "#1e40af", background: "#dbeafe", border: "1px solid #93c5fd", padding: "1px 7px", borderRadius: "999px" }}
-                  >
-                    Sentence Grounded
                   </span>
                 )}
               </div>

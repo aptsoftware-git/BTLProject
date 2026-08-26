@@ -769,7 +769,8 @@ class Retriever:
         fused_results = self._boost_candidates(clean_query, fused_results, intent=intent)
         
         # For visual queries with verified image candidates, ensure they are preserved in candidate_list
-        is_visual_query = (intent in ("visual", "person_portrait_visual") or "photo" in query.lower() or "logo" in query.lower() or "image of" in query.lower())
+        # (is_visual_query computed once above, at the top of retrieve(), and reused everywhere in
+        # this method -- previously recomputed here and below with narrower, drifting keyword sets)
         if is_visual_query and image_candidates:
             cand_dict = {c.metadata.chunk_id: c for c, _, _ in fused_results}
             for ic in image_candidates:

@@ -18,6 +18,7 @@ depending on a fixed name list.
 import json
 import shutil
 from pathlib import Path
+from unittest.mock import MagicMock
 
 import pytest
 
@@ -26,6 +27,7 @@ from src.rag.config import RagConfig
 from src.rag.chunk_schema import DocumentChunk, ChunkMetadata
 from src.rag.index_manager import IndexManager
 from src.rag.retriever import Retriever
+from src.rag.chat_service import ChatService
 from backend.app import app
 import backend.routes as routes
 from fastapi.testclient import TestClient
@@ -259,3 +261,128 @@ def test_canonical_image_id_connects_retriever_to_gallery_api(indexed_gallery):
     gallery_ids = {img["image_id"] for img in gallery["images"]}
     assert "image_201" in gallery_ids
     assert retrieved_ids & gallery_ids, "retriever and gallery API must resolve to the same canonical image_id"
+
+
+# ---------------------------------------------------------------------------
+# Indirect / semantic-only queries (no visual trigger word at all) must
+# still surface an image, as long as ContextBuilder's own relevance ranking
+# already selected that image's chunk into the LLM's context.
+# ---------------------------------------------------------------------------
+
+def _make_chat_service():
+    # retriever/ollama are never touched by _filter_and_deduplicate_image_references
+    return ChatService(retriever=MagicMock(), ollama_client=MagicMock())
+
+
+def _fake_image_ref(chunk_id, image_type="Photo", importance_score="MEDIUM", entity_name=None):
+    return {
+        "image_id": f"id_{chunk_id}",
+        "chunk_id": chunk_id,
+        "page_number": 60,
+        "image_type": image_type,
+        "importance_score": importance_score,
+        "retrievable": True,
+        "entity_name": entity_name,
+        "designation": None,
+        "caption": "Aerial view of the substation construction site.",
+        "semantic_description": "Aerial view of the substation construction site at Deoghar.",
+        "keywords": ["substation", "construction", "site"],
+        "image_url": "/outputs/test_indirect_doc/05_images/image_301.png",
+        "image_path": "05_images/image_301.png",
+        "document_id": "test_indirect_doc",
+    }
+
+
+def test_indirect_keyword_free_query_returns_image_when_chunk_was_used_in_context():
+    service = _make_chat_service()
+    img = _fake_image_ref("c_site_1")
+    result = service._filter_and_deduplicate_image_references(
+        question="Tell me about the substation construction progress at Deoghar",  # no "photo"/"image"/"picture"/etc.
+        answer="The substation construction at Deoghar is progressing well.",
+        image_references=[img],
+        used_chunk_ids=["c_site_1"],  # ContextBuilder actually selected this chunk into the LLM's context
+        page_references=[60],
+        document_id="test_indirect_doc",
+    )
+    assert len(result) == 1
+    assert result[0]["chunk_id"] == "c_site_1"
+
+
+def test_indirect_keyword_free_query_suppresses_image_not_used_in_context():
+    """The image exists in image_references (e.g. retrieved as a weak/incidental
+    candidate) but was NOT selected into the LLM's actual context -- must not
+    be shown, since a purely indirect query gives no other relevance signal."""
+    service = _make_chat_service()
+    img = _fake_image_ref("c_site_2")
+    result = service._filter_and_deduplicate_image_references(
+        question="Tell me about the substation construction progress at Deoghar",
+        answer="The substation construction at Deoghar is progressing well.",
+        image_references=[img],
+        used_chunk_ids=[],  # not actually used in context
+        page_references=[60],
+        document_id="test_indirect_doc",
+    )
+    assert result == []
+
+
+def test_indirect_query_still_rejects_decorative_low_even_if_used_in_context():
+    service = _make_chat_service()
+    img = _fake_image_ref("c_deco", image_type="Decorative", importance_score="LOW")
+    result = service._filter_and_deduplicate_image_references(
+        question="Tell me about the substation construction progress",
+        answer="The substation construction is progressing well.",
+        image_references=[img],
+        used_chunk_ids=["c_deco"],
+        page_references=[60],
+        document_id="test_indirect_doc",
+    )
+    assert result == []
+
+
+def test_direct_visual_query_still_works_unchanged():
+    """Direct name queries are unaffected by the used_chunk_ids relaxation --
+    they still go through full entity/target validation."""
+    service = _make_chat_service()
+    img = _fake_image_ref("c_kavita", image_type="Portrait Photo", entity_name="Ms. Kavita Nair")
+    img["caption"] = "Portrait of Ms. Kavita Nair"
+    img["semantic_description"] = "Portrait photograph of Ms. Kavita Nair, Regional Manager."
+    result = service._filter_and_deduplicate_image_references(
+        question="Show me the photo of Kavita Nair",
+        answer="Here is the requested photo.",
+        image_references=[img],
+        used_chunk_ids=[],  # not used in context -- irrelevant for a direct visual query
+        page_references=[60],
+        document_id="test_indirect_doc",
+    )
+    assert len(result) == 1
+    assert result[0]["chunk_id"] == "c_kavita"
+
+
+def test_ambiguous_surname_query_still_rejected_even_if_chunk_used_in_context():
+    service = _make_chat_service()
+    img = _fake_image_ref("c_todi", image_type="Portrait Photo", entity_name="Mr. Ravi Todi")
+    result = service._filter_and_deduplicate_image_references(
+        question="Show me the photo of Todi",  # surname only -- ambiguous
+        answer="Here is a photo.",
+        image_references=[img],
+        used_chunk_ids=["c_todi"],
+        page_references=[60],
+        document_id="test_indirect_doc",
+    )
+    assert result == []
+
+
+def test_keyword_free_query_with_no_relevant_image_returns_nothing():
+    """Sanity: this relaxation must not turn into 'always attach some image' --
+    with no used_chunk_ids overlap at all, nothing is returned."""
+    service = _make_chat_service()
+    img = _fake_image_ref("c_unrelated")
+    result = service._filter_and_deduplicate_image_references(
+        question="What was the audited profit after tax for FY24?",
+        answer="The audited profit after tax for FY24 was 60 crore.",
+        image_references=[img],
+        used_chunk_ids=["some_other_text_chunk_id"],
+        page_references=[45],
+        document_id="test_indirect_doc",
+    )
+    assert result == []
