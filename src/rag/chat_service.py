@@ -153,19 +153,20 @@ class ChatService:
             answer=answer,
             image_references=image_references,
             used_chunk_ids=used_chunk_ids,
-            page_references=page_references
+            page_references=page_references,
+            document_id=document_id
         )
 
         # 7. Post-generation Formatting & Embedding Enforcement:
         # If user asked for visual/table assets and verified items exist, make sure the answer embeds them cleanly
         ans_clean = answer.strip()
         q_lower = question.lower()
-        if final_image_references and any(vt in q_lower for vt in ["photo", "portrait", "logo", "diagram", "chart", "show me", "along with photos", "image of", "give the logo"]):
+        if final_image_references and any(vt in q_lower for vt in ["photo", "portrait", "logo", "diagram", "chart", "show me", "along with photos", "image of", "give the logo", "picture of"]):
             if "could not find this information in the uploaded document" in ans_clean.lower():
                 ans_clean = "Here is the requested visual information from the uploaded document:"
             for img in final_image_references:
                 url = img.get("image_url")
-                caption = img.get("caption") or "Figure"
+                caption = img.get("caption") or img.get("title") or "Figure"
                 page = img.get("page_number")
                 embed_md = f"![{caption}]({url})"
                 if url and embed_md not in ans_clean and f"({url})" not in ans_clean:
@@ -226,7 +227,8 @@ class ChatService:
         answer: str,
         image_references: List[Dict[str, Any]],
         used_chunk_ids: List[str],
-        page_references: List[int]
+        page_references: List[int],
+        document_id: Optional[str] = None
     ) -> List[Dict[str, Any]]:
         """
         Deduplicates and conditionally filters image references to only include
@@ -267,8 +269,8 @@ class ChatService:
             if dedup_key in seen_keys:
                 continue
 
-            # Run 5-stage validation suite
-            doc_id_val = img.get("document_id") or (img.get("image_url", "").split("/")[2] if img.get("image_url", "").startswith("/outputs/") else None)
+            # Run validation suite
+            doc_id_val = document_id or img.get("document_id") or (img.get("image_url", "").split("/")[2] if img.get("image_url", "").startswith("/outputs/") else None)
             if not ImageRetrievalValidator.validate_image_candidate(img, question, doc_id=doc_id_val):
                 continue
 

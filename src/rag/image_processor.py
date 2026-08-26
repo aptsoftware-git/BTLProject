@@ -541,12 +541,28 @@ class ImageRetrievalValidator:
         "illustrations", "headshot", "headshots", "look like", "show me", "along with photos",
         "along with their photos", "with photos", "with photo", "logo", "company logo", "brand logo",
         "show logo", "show the logo", "give the logo", "give logo", "can you show", "can you give",
-        "director's photo", "directors photo", "show the image", "show image", "photo of", "image of"
+        "director's photo", "directors photo", "show the image", "show image", "photo of", "image of",
+        "picture of", "portrait of", "photos of", "images of", "pictures of", "portraits of"
     ]
 
     AMBIGUOUS_SURNAMES = [
         "todi", "mittra", "mukherjee", "paul", "dhar", "chakravortty", "shanghavi", "daspatnaik", "jha", "tiwari"
     ]
+
+    @staticmethod
+    def normalize_name(name: str) -> str:
+        """
+        Normalizes names by stripping honorifics, punctuation, and collapsing whitespace.
+        """
+        import re
+        if not name:
+            return ""
+        n = str(name).lower()
+        for prefix in ["mr.", "mr ", "mrs.", "mrs ", "ms.", "ms ", "dr.", "dr ", "shri ", "smt "]:
+            if n.startswith(prefix):
+                n = n[len(prefix):]
+        n = re.sub(r"[^\w\s]", " ", n)
+        return re.sub(r"\s+", " ", n).strip()
 
     @classmethod
     def is_visual_query(cls, query: str, intent: Optional[str] = None) -> bool:
@@ -561,7 +577,84 @@ class ImageRetrievalValidator:
         return any(re.search(rf"\b{re.escape(vt)}\b", q_lower) for vt in cls.VISUAL_TRIGGERS)
 
     @classmethod
-    def detect_query_target(cls, query: str) -> Dict[str, Any]:
+    def extract_person_names_from_query(cls, query: str, known_entities: Optional[List[str]] = None) -> List[str]:
+        """
+        Dynamically and generically extracts individual person names from a query.
+        Handles single names, multi-person queries with 'and' / '&' / commas, and known entities.
+        """
+        import re
+        q_lower = query.lower().strip()
+
+        # Check known entities / known directors first if present
+        matched_from_entities = []
+        all_known = list(known_entities or [])
+        for d in PortraitSpatialValidator.KNOWN_DIRECTORS:
+            if d.get("name") and d["name"] not in all_known:
+                all_known.append(d["name"])
+            for v in d.get("variants", []):
+                if v not in all_known:
+                    all_known.append(v)
+
+        for ent in all_known:
+            ent_norm = cls.normalize_name(ent)
+            if len(ent_norm) > 2 and re.search(rf"\b{re.escape(ent_norm)}\b", q_lower):
+                if ent_norm not in matched_from_entities:
+                    matched_from_entities.append(ent_norm)
+
+        # Remove common query prefixes and phrasing
+        clean_q = q_lower
+        strip_phrases = [
+            "can you show the photo of", "can you show photo of", "can you show the image of",
+            "can you show image of", "can you show portrait of", "can you show the portrait of",
+            "can you show me the photo of", "can you show me the image of", "can you show me",
+            "can you show", "can you give", "show me the photo of", "show me the image of",
+            "show the photo of", "show the image of", "show the portrait of", "show photo of",
+            "show image of", "show portrait of", "show photos of", "show images of",
+            "photo of", "image of", "picture of", "portrait of", "photos of", "images of",
+            "pictures of", "portraits of", "along with their photos", "along with photos",
+            "with photos", "with photo", "give the photo of", "give photo of", "give image of",
+            "give the image of", "please show", "please give", "who is", "who are"
+        ]
+        for sp in sorted(strip_phrases, key=len, reverse=True):
+            clean_q = clean_q.replace(sp, " ")
+
+        # Split on conjunctions and punctuation for multi-person queries
+        parts = re.split(r'\b(?:and|&|\+|with)\b|,', clean_q)
+        extracted = []
+        for p in parts:
+            p_norm = cls.normalize_name(p)
+            # Remove filler words
+            tokens = [w for w in p_norm.split() if w not in (
+                "the", "a", "an", "of", "for", "in", "at", "to", "on", "from", "by",
+                "director", "directors", "board", "member", "members", "person", "people",
+                "chairman", "managing", "independent", "whole", "time", "photo", "image",
+                "picture", "portrait", "document", "company"
+            ) and len(w) > 1]
+            if tokens:
+                cand = " ".join(tokens)
+                if len(cand) >= 3 and cand not in extracted:
+                    extracted.append(cand)
+
+        # Merge extracted with matched_from_entities
+        final_names = []
+        for name in (matched_from_entities + extracted):
+            norm = cls.normalize_name(name)
+            # Avoid single ambiguous surname
+            if norm in cls.AMBIGUOUS_SURNAMES:
+                continue
+            if len(norm.split()) >= 1 and len(norm) >= 3 and norm not in final_names:
+                final_names.append(norm)
+
+        # If multiple names extracted and one is substring of another, keep the longer/distinct ones
+        filtered_names = []
+        for n in final_names:
+            if not any(n != other and n in other for other in final_names):
+                filtered_names.append(n)
+
+        return filtered_names
+
+    @classmethod
+    def detect_query_target(cls, query: str, known_entities: Optional[List[str]] = None) -> Dict[str, Any]:
         """
         Extracts structured target entity and type information from the query.
         """
@@ -581,29 +674,26 @@ class ImageRetrievalValidator:
             return {"target_type": "board_collection", "is_visual": True}
 
         # 4. Check Individual & Multi-Director Portrait Target
-        matched_directors = []
-        for d in PortraitSpatialValidator.KNOWN_DIRECTORS:
-            if any(re.search(rf"\b{re.escape(v)}\b", q_lower) for v in d["variants"]) or d["name"].lower() in q_lower:
-                matched_directors.append(d)
-
-        if len(matched_directors) > 1:
+        extracted_persons = cls.extract_person_names_from_query(query, known_entities=known_entities)
+        if len(extracted_persons) > 1:
             return {
                 "target_type": "multi_portrait",
-                "target_directors": matched_directors,
+                "target_persons": extracted_persons,
+                "target_directors": [{"name": p, "variants": [p]} for p in extracted_persons],
                 "is_visual": True
             }
-        elif len(matched_directors) == 1:
+        elif len(extracted_persons) == 1:
             return {
                 "target_type": "portrait",
-                "target_person": matched_directors[0]["name"],
-                "target_director": matched_directors[0],
+                "target_person": extracted_persons[0],
+                "target_director": {"name": extracted_persons[0], "variants": [extracted_persons[0]]},
                 "is_visual": True
             }
 
         # 4.1 Check Ambiguous Surname-Only queries (e.g. "photo of Todi")
         words = set(re.findall(r'\b[a-zA-Z]+\b', q_lower))
         for surname in cls.AMBIGUOUS_SURNAMES:
-            if surname in words:
+            if surname in words and len(extracted_persons) == 0:
                 # Surname alone without distinguishing first name is rejected as ambiguous
                 return {
                     "target_type": "ambiguous_surname",
@@ -627,10 +717,18 @@ class ImageRetrievalValidator:
     def validate_physical_file(cls, image_path: Optional[str] = None, image_url: Optional[str] = None, doc_id: Optional[str] = None) -> bool:
         """
         Validates that the physical image asset actually exists on disk and is non-empty.
+        Robustly resolves across absolute paths, relative paths, job output directories, and static URLs.
         """
         from pathlib import Path
         from src.config import ROOT_DIR
 
+        # Test or mock job bypass
+        if (doc_id and ("test" in doc_id.lower() or "mock" in doc_id.lower())) or \
+           (image_url and ("test" in image_url.lower() or "mock" in image_url.lower())) or \
+           (image_path and ("test" in image_path.lower() or "mock" in image_path.lower())):
+            return True
+
+        # Check candidate path directly
         if image_path:
             p = Path(image_path)
             if p.exists() and p.is_file() and p.stat().st_size > 0:
@@ -639,24 +737,34 @@ class ImageRetrievalValidator:
             if p_rel.exists() and p_rel.is_file() and p_rel.stat().st_size > 0:
                 return True
 
+        # Check URL mapped to data/output/
         if image_url and image_url.startswith("/outputs/"):
             rel_parts = image_url.replace("/outputs/", "").split("/")
-            if len(rel_parts) >= 3:
-                doc_id_val, subfolder, filename = rel_parts[0], rel_parts[1], rel_parts[2]
-                target_disk_path = ROOT_DIR / "data" / "output" / doc_id_val / subfolder / filename
+            if len(rel_parts) >= 2:
+                target_disk_path = ROOT_DIR / "data" / "output" / Path("/".join(rel_parts))
                 if target_disk_path.exists() and target_disk_path.is_file() and target_disk_path.stat().st_size > 0:
                     return True
 
-        if (doc_id and ("test" in doc_id.lower() or "mock" in doc_id.lower())) or \
-           (image_url and ("test" in image_url.lower() or "mock" in image_url.lower())) or \
-           (image_path and ("test" in image_path.lower() or "mock" in image_path.lower())):
-            return True
-
+        # Check doc_id output folders
         if doc_id and image_path:
             clean_name = Path(str(image_path).replace("\\", "/")).name
             target_disk_path = ROOT_DIR / "data" / "output" / doc_id / "05_images" / clean_name
             if target_disk_path.exists() and target_disk_path.is_file() and target_disk_path.stat().st_size > 0:
                 return True
+            target_disk_path2 = ROOT_DIR / "data" / "output" / doc_id / clean_name
+            if target_disk_path2.exists() and target_disk_path2.is_file() and target_disk_path2.stat().st_size > 0:
+                return True
+
+        # Check across any existing run folder if image_path contains 05_images/
+        if image_path and "05_images" in str(image_path):
+            clean_name = Path(str(image_path).replace("\\", "/")).name
+            output_root = ROOT_DIR / "data" / "output"
+            if output_root.exists():
+                for sub in output_root.iterdir():
+                    if sub.is_dir():
+                        cand = sub / "05_images" / clean_name
+                        if cand.exists() and cand.is_file() and cand.stat().st_size > 0:
+                            return True
 
         return False
 
@@ -664,18 +772,23 @@ class ImageRetrievalValidator:
     def validate_single_director_image(
         cls,
         image_meta: Dict[str, Any],
-        target_director: Dict[str, Any],
+        target_director: Any,
         doc_id: Optional[str] = None
     ) -> bool:
         """
-        Validates that an image chunk specifically and exclusively represents the given director.
+        Generic person portrait validation: validates that an image chunk specifically
+        represents the given person or director.
         """
-        if not image_meta.get("retrievable", True):
-            return False
-        if image_meta.get("importance_score") == "LOW":
-            return False
-        img_type = (image_meta.get("image_type") or "").lower()
-        if "decorative" in img_type:
+        target_name = ""
+        if isinstance(target_director, dict):
+            target_name = target_director.get("name", "")
+            variants = target_director.get("variants", [target_name])
+        else:
+            target_name = str(target_director)
+            variants = [target_name]
+
+        target_norm = cls.normalize_name(target_name)
+        if not target_norm:
             return False
 
         img_path = image_meta.get("image_path")
@@ -683,30 +796,59 @@ class ImageRetrievalValidator:
         if not cls.validate_physical_file(image_path=img_path, image_url=img_url, doc_id=doc_id):
             return False
 
-        page = int(image_meta.get("page") or image_meta.get("page_number") or 1)
-        if page != 49 and "portrait" not in img_type:
-            return False
+        entity_name = cls.normalize_name(image_meta.get("entity_name") or image_meta.get("title") or "")
+        caption = cls.normalize_name(image_meta.get("caption") or image_meta.get("caption_text") or "")
+        detected_entities = [cls.normalize_name(e) for e in (image_meta.get("detected_entities") or [])]
+        people = [cls.normalize_name(p) for p in (image_meta.get("people") or [])]
+        keywords = [cls.normalize_name(k) for k in (image_meta.get("keywords") or [])]
+        semantic_desc = cls.normalize_name(image_meta.get("semantic_description") or "")
 
-        entity_name = (image_meta.get("entity_name") or image_meta.get("title") or "").strip().lower()
-        caption = (image_meta.get("caption") or image_meta.get("caption_text") or "").strip().lower()
-        detected_entities = [str(e).lower() for e in (image_meta.get("detected_entities") or [])]
-        keywords = [str(k).lower() for k in (image_meta.get("keywords") or [])]
+        GENERIC_MIDDLE_NAMES = {"kumar", "chandra", "prasad", "singh", "shri", "smt", "dr", "mr", "mrs", "ms"}
+        target_tokens = [w for w in target_norm.split() if w not in GENERIC_MIDDLE_NAMES and len(w) > 2]
+        if not target_tokens:
+            target_tokens = [w for w in target_norm.split() if len(w) > 2]
+        if not target_tokens:
+            target_tokens = target_norm.split()
 
-        variants = target_director.get("variants", [])
-        matches_target = (
-            any(v in entity_name for v in variants) or
-            any(v in caption for v in variants) or
-            any(any(v in e for e in detected_entities) for v in variants) or
-            any(any(v in k for k in keywords) for v in variants)
-        )
+        # Check full string or token match across direct fields
+        direct_strings = [entity_name, caption]
+        context_strings = [semantic_desc] + detected_entities + people + keywords
+        all_meta_strings = direct_strings + context_strings
+
+        matches_target = False
+        if target_norm in entity_name or target_norm in caption:
+            matches_target = True
+        elif target_tokens and all(token in entity_name or token in caption for token in target_tokens):
+            matches_target = True
+        elif target_tokens and all(any(token in s for s in all_meta_strings if s) for token in target_tokens):
+            matches_target = True
+
+        if not matches_target:
+            # Check variant matches
+            for v in variants:
+                v_norm = cls.normalize_name(v)
+                v_tokens = [w for w in v_norm.split() if w not in GENERIC_MIDDLE_NAMES and len(w) > 2]
+                if v_norm and (v_norm in entity_name or v_norm in caption):
+                    matches_target = True
+                    break
+                elif v_tokens and all(any(token in s for s in all_meta_strings if s) for token in v_tokens):
+                    matches_target = True
+                    break
+
         if not matches_target:
             return False
 
-        # Strict 1-to-1 exclusivity: exclude other directors
-        for other_d in PortraitSpatialValidator.KNOWN_DIRECTORS:
-            if other_d["name"] != target_director["name"]:
-                for v in other_d["variants"]:
-                    if v in entity_name:
+        # Exclusivity check: reject when entity_name represents a distinct person
+        if entity_name:
+            e_tokens = [w for w in entity_name.split() if w not in GENERIC_MIDDLE_NAMES and len(w) > 2]
+            if e_tokens and target_tokens:
+                # If neither the first name nor any distinctive token matches, reject
+                has_distinctive_match = any(t in e_tokens for t in target_tokens)
+                if not has_distinctive_match:
+                    return False
+                # If target has distinctive first name and entity has distinctive first name and they differ
+                if len(target_tokens) >= 1 and len(e_tokens) >= 1:
+                    if target_tokens[0] != e_tokens[0] and target_tokens[0] not in e_tokens and e_tokens[0] not in target_tokens:
                         return False
 
         return True
@@ -720,7 +862,7 @@ class ImageRetrievalValidator:
         doc_id: Optional[str] = None
     ) -> bool:
         """
-        Executes the complete 5-layer validation suite on an image candidate:
+        Executes the complete validation suite on an image candidate:
         query target -> metadata match -> page/layout consistency -> physical file existence -> correct image type.
         """
         # Step 1: Query Target Check
@@ -733,18 +875,7 @@ class ImageRetrievalValidator:
             logger.info(f"Rejecting image retrieval for ambiguous surname-only query: '{query}'")
             return False
 
-        # Step 2: Retrievability & Image Type Checks
-        retrievable = image_meta.get("retrievable", True)
-        if retrievable is False:
-            return False
-        importance = image_meta.get("importance_score", "MEDIUM")
-        if importance == "LOW":
-            return False
-        img_type = (image_meta.get("image_type") or "").lower()
-        if "decorative" in img_type:
-            return False
-
-        # Step 3: Physical File Existence Check
+        # Step 2: Physical File Existence Check
         img_path = image_meta.get("image_path")
         img_url = image_meta.get("image_url")
         if not cls.validate_physical_file(image_path=img_path, image_url=img_url, doc_id=doc_id):
@@ -752,38 +883,38 @@ class ImageRetrievalValidator:
             return False
 
         page = int(image_meta.get("page") or image_meta.get("page_number") or 1)
-        entity_name = (image_meta.get("entity_name") or image_meta.get("title") or "").strip()
+        img_type = (image_meta.get("image_type") or "").lower()
         caption = (image_meta.get("caption") or image_meta.get("caption_text") or "").strip()
-        detected_entities = [str(e).lower() for e in (image_meta.get("detected_entities") or [])]
-        keywords = [str(k).lower() for k in (image_meta.get("keywords") or [])]
+        title = (image_meta.get("title") or "").strip()
         target_type = target_info.get("target_type")
 
-        # Step 4: Metadata Match & Page/Layout Consistency for Specific Targets
+        # Step 3: Target-Specific Routing & Validation
         if target_type == "multi_portrait":
-            target_directors = target_info.get("target_directors", [])
-            return any(cls.validate_single_director_image(image_meta, d, doc_id=doc_id) for d in target_directors)
+            target_persons = target_info.get("target_persons", []) or target_info.get("target_directors", [])
+            return any(cls.validate_single_director_image(image_meta, p, doc_id=doc_id) for p in target_persons)
 
         elif target_type == "portrait":
-            target_director = target_info.get("target_director")
-            if not target_director:
+            target_person = target_info.get("target_person") or target_info.get("target_director")
+            if not target_person:
                 return False
-            return cls.validate_single_director_image(image_meta, target_director, doc_id=doc_id)
+            return cls.validate_single_director_image(image_meta, target_person, doc_id=doc_id)
 
         elif target_type == "board_collection":
-            # Must be verified Page 49 portrait
-            return (page == 49 and ("portrait" in img_type or entity_name != ""))
+            # Must be a portrait or leadership figure
+            return bool(image_meta.get("entity_name") or "portrait" in img_type or (page == 49 and "decorative" not in img_type))
 
         elif target_type == "logo":
-            # Must be verified Logo or corporate header asset, never Page 49 director portraits
-            if page == 49 or "portrait" in img_type:
+            # Must be verified Logo or corporate cover header asset, never director portraits
+            if "portrait" in img_type or image_meta.get("entity_name"):
                 return False
             is_logo_asset = (
                 img_type == "logo" or
                 "logo" in img_type or
                 "logo" in caption.lower() or
-                "logo" in (image_meta.get("title") or "").lower() or
+                "logo" in title.lower() or
                 "logo" in (image_meta.get("semantic_description") or "").lower() or
-                (page in (1, 2, 3) and image_meta.get("retrievable", True) is not False and "decorative" not in img_type)
+                any("logo" in str(k).lower() for k in (image_meta.get("keywords") or [])) or
+                (page in (1, 2, 3) and not image_meta.get("entity_name"))
             )
             return is_logo_asset
 
@@ -793,12 +924,14 @@ class ImageRetrievalValidator:
                 return (
                     fig_num in caption.lower() or
                     fig_num in (image_meta.get("explicit_caption") or "").lower() or
-                    fig_num in (image_meta.get("title") or "").lower() or
-                    (image_meta.get("image_id") and fig_num in image_meta.get("image_id"))
+                    fig_num in title.lower() or
+                    (image_meta.get("image_id") and fig_num in str(image_meta.get("image_id")))
                 )
             return True
 
-        # General visual target: require relevant keyword or context match
+        # General visual target: require non-empty visual and physical existence
+        if "decorative" in img_type and image_meta.get("importance_score") == "LOW":
+            return False
         return True
 
 

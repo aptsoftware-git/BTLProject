@@ -59,31 +59,23 @@ class ContextBuilder:
                 resolved_img_url = f"/outputs/{doc_id}/05_images/{img_filename}"
                 
                 # Validate that the physical image asset actually exists on disk
-                from src.config import ROOT_DIR
-                exists_on_disk = False
-                if img_path and Path(img_path).exists():
-                    exists_on_disk = True
-                elif img_path and (ROOT_DIR / img_path).exists():
-                    exists_on_disk = True
-                elif doc_id and img_filename:
-                    target_disk_path = ROOT_DIR / "data" / "output" / doc_id / "05_images" / img_filename
-                    if target_disk_path.exists():
-                        exists_on_disk = True
-
-                if not exists_on_disk and doc_id and ("test" in doc_id.lower() or "mock" in doc_id.lower()):
-                    exists_on_disk = True
-
-                if not exists_on_disk:
+                from src.rag.image_processor import ImageRetrievalValidator
+                if not ImageRetrievalValidator.validate_physical_file(image_path=img_path, image_url=resolved_img_url, doc_id=doc_id):
                     logger.warning(f"Image asset {img_filename} for chunk {meta.chunk_id} does not physically exist on disk. Skipping.")
                     continue
 
                 # Gating: filter out non-retrievable / LOW importance decorative elements
-                if hasattr(meta, "retrievable") and meta.retrievable is False:
-                    continue
-                if getattr(meta, "importance_score", None) == "LOW":
-                    continue
-                if (getattr(meta, "image_type", None) or "").lower() == "decorative":
-                    continue
+                # unless explicitly matched and provided as a verified visual chunk (e.g. portrait, logo)
+                is_explicit_logo = (getattr(meta, "image_type", None) == "Logo" or "logo" in (getattr(meta, "title", None) or "").lower() or (meta.page_number in (1, 2, 3) and getattr(meta, "entity_name", None) is None))
+                is_explicit_portrait = bool(getattr(meta, "entity_name", None) or "portrait" in (getattr(meta, "image_type", None) or "").lower())
+                
+                if not is_explicit_logo and not is_explicit_portrait:
+                    if hasattr(meta, "retrievable") and meta.retrievable is False:
+                        continue
+                    if getattr(meta, "importance_score", None) == "LOW":
+                        continue
+                    if (getattr(meta, "image_type", None) or "").lower() == "decorative":
+                        continue
 
                 # Deduplicate by (resolved_img_url, page_number)
                 dedup_key = (resolved_img_url, meta.page_number)

@@ -558,8 +558,9 @@ class MultimodalExtractor:
                 try:
                     docling_doc, raw_text, page_count = self._run_docling_conversion(converter, temp_pdf_path, output_dir)
                     if docling_doc is not None:
+                        raw_images_dir = output_dir / "_raw_images" if output_dir else None
                         builder = DocumentBuilder(
-                            output_images_dir=output_dir / "05_images" if output_dir else None,
+                            output_images_dir=raw_images_dir,
                             pdf_path=file_path
                         )
                         batch_structured_doc = builder.build(docling_doc, file_name, file_type)
@@ -871,6 +872,24 @@ class MultimodalExtractor:
         # Finalize knowledge objects outputs (JSON, HTML, Markdown)
         if output_dir:
             agent._finalize_outputs(doc_id, output_dir, master_structured_doc)
+
+            # Enforce canonical 05_images persistence: remove any stray staging or non-canonical files
+            raw_stage = output_dir / "_raw_images"
+            if raw_stage.exists():
+                try:
+                    shutil.rmtree(raw_stage, ignore_errors=True)
+                except Exception as clean_err:
+                    logger.warning(f"Failed to cleanup _raw_images: {clean_err}")
+
+            images_dir = output_dir / "05_images"
+            if images_dir.exists():
+                for f in images_dir.iterdir():
+                    if f.is_file() and not f.name.startswith("image_"):
+                        try:
+                            f.unlink()
+                            logger.info(f"Removed non-canonical file from 05_images: {f.name}")
+                        except Exception as e:
+                            logger.warning(f"Could not remove non-canonical file {f.name}: {e}")
 
         # Ingestion Completed
         self._update_job_status(doc_id, "Ingestion Completed", 100.0, total_pages, total_pages, batch_size, total_batches, total_batches, "0s")

@@ -550,39 +550,41 @@ class Retriever:
         # 2. Check for Board Collection visual query ("Board of Directors along with photos")
         if target_type == "board_collection":
             for c in chunks:
-                if c.metadata.chunk_type == "image" and c.metadata.page_number == 49:
+                if c.metadata.chunk_type == "image":
                     meta = c.metadata
                     meta_dict = meta.model_dump() if hasattr(meta, "model_dump") else (meta.dict() if hasattr(meta, "dict") else meta.__dict__)
                     if ImageRetrievalValidator.validate_image_candidate(meta_dict, query, intent=intent, doc_id=meta.document_id):
                         matched.append(c)
-            return self._deduplicate_chunks(matched)
+            if matched:
+                return self._deduplicate_chunks(matched)
 
         # 3. Check for Individual or Multi-Director Portrait Query
         if target_type == "multi_portrait":
-            target_directors = target_info.get("target_directors", [])
-            for d in target_directors:
-                d_matched = []
+            target_persons = target_info.get("target_persons", []) or target_info.get("target_directors", [])
+            for p in target_persons:
+                p_matched = []
                 for c in chunks:
                     if c.metadata.chunk_type == "image":
                         meta = c.metadata
                         meta_dict = meta.model_dump() if hasattr(meta, "model_dump") else (meta.dict() if hasattr(meta, "dict") else meta.__dict__)
-                        if ImageRetrievalValidator.validate_single_director_image(meta_dict, d, doc_id=meta.document_id):
-                            d_matched.append(c)
-                if d_matched:
-                    matched.extend(d_matched)
+                        if ImageRetrievalValidator.validate_single_director_image(meta_dict, p, doc_id=meta.document_id):
+                            p_matched.append(c)
+                if p_matched:
+                    matched.extend(p_matched)
             if matched:
                 return self._deduplicate_chunks(matched)
 
         elif target_type == "portrait":
-            target_director = target_info.get("target_director")
-            if target_director:
+            target_person = target_info.get("target_person") or target_info.get("target_director")
+            if target_person:
                 for c in chunks:
                     if c.metadata.chunk_type == "image":
                         meta = c.metadata
                         meta_dict = meta.model_dump() if hasattr(meta, "model_dump") else (meta.dict() if hasattr(meta, "dict") else meta.__dict__)
-                        if ImageRetrievalValidator.validate_single_director_image(meta_dict, target_director, doc_id=meta.document_id):
+                        if ImageRetrievalValidator.validate_single_director_image(meta_dict, target_person, doc_id=meta.document_id):
                             matched.append(c)
-                return self._deduplicate_chunks(matched)
+                if matched:
+                    return self._deduplicate_chunks(matched)
 
         # 4. Captioned Figure / Diagram / Chart Query
         fig_match = re.search(r'(?i)\b(?:figure|fig\.?|chart|diagram|image|photo|illustration)\s*#?\s*(\d+)\b', query)
@@ -818,15 +820,15 @@ class Retriever:
                 if "u29100wb1992plc054541" in c_text or "cin:" in c_text:
                     score = max(score, 0.98)
                     
-            if intent == "person_portrait_visual":
-                if meta.chunk_type == "image":
-                    if meta.page_number == 49 and (
-                        (p_name and any(Retriever.fuzzy_match_entity(alias, p_name) or alias in p_name or p_name in alias for alias in aliases)) or
-                        any(alias in c_text for alias in aliases)
-                    ):
-                        score = 0.99
-                    else:
-                        score = 0.05
+            if (intent in ("person_portrait_visual", "visual") or is_visual_query) and meta.chunk_type == "image":
+                if image_candidates and chunk.metadata.chunk_id in {ic.metadata.chunk_id for ic in image_candidates}:
+                    score = max(score, 0.99)
+                elif p_name and any(Retriever.fuzzy_match_entity(alias, p_name) or alias in p_name or p_name in alias for alias in aliases):
+                    score = max(score, 0.99)
+                elif "logo" in query.lower() and (getattr(meta, "image_type", None) == "Logo" or "logo" in (getattr(meta, "title", "") or "").lower() or meta.page_number in (1, 2, 3)):
+                    score = max(score, 0.99)
+                else:
+                    score = max(score, 0.50)
 
             if p_name and any(Retriever.fuzzy_match_entity(alias, p_name) or alias in p_name or p_name in alias for alias in aliases):
                 score = max(score, 0.95)
@@ -859,52 +861,26 @@ class Retriever:
                 reranker_score=rerank_score_map.get(cid, 0.01)
             ))
             
-        # Retrieval Gating: Filter out non-retrievable, LOW importance, and Decorative image chunks
+        # Retrieval Gating: Filter image chunks using ImageRetrievalValidator
+        from src.rag.image_processor import ImageRetrievalValidator
         gated_scored = []
         for sc in scored_chunks:
             if sc.metadata.chunk_type == "image":
                 meta = sc.metadata
-                if hasattr(meta, "retrievable") and meta.retrievable is False:
-                    continue
-                if getattr(meta, "importance_score", None) == "LOW":
-                    continue
-                if (getattr(meta, "image_type", None) or "").lower() == "decorative":
-                    continue
+                meta_dict = meta.model_dump() if hasattr(meta, "model_dump") else (meta.dict() if hasattr(meta, "dict") else meta.__dict__)
+                if is_visual_query:
+                    if not ImageRetrievalValidator.validate_image_candidate(meta_dict, query, intent=intent, doc_id=meta.document_id):
+                        continue
+                else:
+                    # Pure text query: filter out non-retrievable or decorative images
+                    if hasattr(meta, "retrievable") and meta.retrievable is False:
+                        continue
+                    if getattr(meta, "importance_score", None) == "LOW":
+                        continue
+                    if (getattr(meta, "image_type", None) or "").lower() == "decorative":
+                        continue
             gated_scored.append(sc)
         scored_chunks = gated_scored
-
-        # When querying for a specific person's portrait, ensure image chunks match that person
-        if intent == "person_portrait_visual":
-            from src.rag.image_processor import PortraitSpatialValidator
-            queried_director = None
-            for d in PortraitSpatialValidator.KNOWN_DIRECTORS:
-                if any(v in clean_query.lower() for v in d["variants"]) or d["name"].lower() in clean_query.lower():
-                    queried_director = d
-                    break
-
-            filtered_scored = []
-            for sc in scored_chunks:
-                if sc.metadata.chunk_type == "image":
-                    if queried_director:
-                        # MUST match this specific person's name or variants (not general role titles)
-                        p_name = (getattr(sc.metadata, "entity_name", None) or getattr(sc.metadata, "person_name", None) or getattr(sc.metadata, "title", None) or "").lower()
-                        cap = (getattr(sc.metadata, "caption", None) or getattr(sc.metadata, "caption_text", None) or "").lower()
-                        ents = [str(e).lower() for e in (getattr(sc.metadata, "detected_entities", []) or [])]
-                        kws = [str(k).lower() for k in (getattr(sc.metadata, "keywords", []) or [])]
-                        
-                        person_matches = any(
-                            v in p_name or v in cap or any(v in ent for ent in ents) or any(v in kw for kw in kws)
-                            for v in queried_director["variants"]
-                        )
-                        if person_matches and (sc.metadata.page_number == 49 or "portrait" in (sc.metadata.image_type or "").lower()):
-                            filtered_scored.append(sc)
-                    else:
-                        # Board collection query (all directors)
-                        if sc.metadata.page_number == 49 or "portrait" in (sc.metadata.image_type or "").lower():
-                            filtered_scored.append(sc)
-                else:
-                    filtered_scored.append(sc)
-            scored_chunks = filtered_scored
             
         # Debug Logging
         retrieval_time = time.time() - start_time
@@ -1239,6 +1215,20 @@ class Retriever:
                             elif isinstance(bbox_data, BoundingBox):
                                 bboxes.append(bbox_data)
 
+                    raw_img_p = str(meta_data.get("image_path") or "").replace("\\", "/")
+                    norm_img_p = None
+                    if "05_images/image_" in raw_img_p:
+                        norm_img_p = f"05_images/{raw_img_p.split('05_images/')[-1]}"
+                    elif raw_img_p.startswith("05_images/image_"):
+                        norm_img_p = raw_img_p
+
+                    raw_img_u = str(meta_data.get("image_url") or "").replace("\\", "/")
+                    norm_img_u = None
+                    if "/05_images/image_" in raw_img_u:
+                        norm_img_u = raw_img_u
+                    elif norm_img_p:
+                        norm_img_u = f"/outputs/{document_id}/{norm_img_p}"
+
                     meta = ChunkMetadata(
                         chunk_id=meta_data.get("chunk_id"),
                         document_id=meta_data.get("document_id"),
@@ -1252,9 +1242,11 @@ class Retriever:
                         token_estimate=meta_data.get("token_estimate", 0),
                         bounding_boxes=bboxes,
                         image_id=meta_data.get("image_id"),
-                        image_path=meta_data.get("image_path"),
-                        image_url=meta_data.get("image_url"),
+                        image_path=norm_img_p,
+                        image_url=norm_img_u,
                         image_type=meta_data.get("image_type"),
+                        title=meta_data.get("title"),
+                        subtitle=meta_data.get("subtitle"),
                         explicit_caption=meta_data.get("explicit_caption"),
                         caption_text=meta_data.get("caption_text") or meta_data.get("caption"),
                         entity_name=meta_data.get("entity_name"),
