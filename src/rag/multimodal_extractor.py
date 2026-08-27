@@ -1048,9 +1048,12 @@ class MultimodalExtractor:
 
         # Post-Processing: Finalize Knowledge objects and chunks
         self._update_job_status(doc_id, "Updating Vector Database", 82.0, total_pages, total_pages, batch_size, total_batches, total_batches, "0s")
+        # Make dedup stats available to _finalize_outputs' image artifact
+        # cleanup/validation pass before it runs, so its funnel log is accurate.
+        agent.stats["image_dedup"] = dedup_registry.summary()
         if output_dir:
             agent._finalize_outputs(doc_id, output_dir, master_structured_doc)
-            
+
             # Save structured_document.json copy at root of output_dir for compatibility
             try:
                 legacy_doc_path = output_dir / "structured_document.json"

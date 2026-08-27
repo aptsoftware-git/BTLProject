@@ -249,3 +249,31 @@ class VectorStore:
             documents=documents
         )
         logger.info(f"Successfully indexed {len(ids)} chunks in ChromaDB.")
+
+    def delete_chunks(self, document_id: str, chunk_ids: List[str]) -> int:
+        """
+        Removes specific chunk records (e.g. orphaned image chunks left behind
+        by deduplication) from the document's collection by chunk_id.
+        Returns the number of ids actually requested for deletion (0 if the
+        collection does not exist or the id list is empty).
+        """
+        if not chunk_ids:
+            return 0
+
+        collection_name = self._get_collection_name(document_id)
+        if collection_name in self._collections:
+            collection = self._collections[collection_name]
+        else:
+            try:
+                collection = self.client.get_collection(name=collection_name)
+                self._collections[collection_name] = collection
+            except Exception:
+                return 0
+
+        try:
+            collection.delete(ids=chunk_ids)
+            logger.info(f"Deleted {len(chunk_ids)} orphaned chunk record(s) from ChromaDB collection: {collection_name}")
+            return len(chunk_ids)
+        except Exception as e:
+            logger.warning(f"Failed to delete chunk records from ChromaDB collection {collection_name}: {e}")
+            return 0

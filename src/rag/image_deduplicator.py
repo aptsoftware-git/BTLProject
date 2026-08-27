@@ -1,7 +1,8 @@
 import hashlib
+import json
 import logging
 from pathlib import Path
-from typing import Dict, List, Optional, Tuple
+from typing import Any, Dict, List, Optional, Tuple
 
 from PIL import Image
 
@@ -185,3 +186,183 @@ def merge_duplicate_page_into_canonical(
             json.dump(data, f, indent=2, ensure_ascii=False)
     except Exception as e:
         logger.warning(f"Failed to update canonical image metadata {canonical_json_path}: {e}")
+
+
+def _load_chunks_file(path: Path) -> Optional[Dict[str, Any]]:
+    if not path.exists():
+        return None
+    try:
+        with open(path, "r", encoding="utf-8") as f:
+            return json.load(f)
+    except Exception as e:
+        logger.warning(f"Failed to read chunks file {path}: {e}")
+        return None
+
+
+def _write_chunks_file(path: Path, data: Dict[str, Any]) -> None:
+    try:
+        with open(path, "w", encoding="utf-8") as f:
+            json.dump(data, f, indent=2, ensure_ascii=False)
+    except Exception as e:
+        logger.warning(f"Failed to write chunks file {path}: {e}")
+
+
+def validate_and_cleanup_image_artifacts(
+    output_dir: Path,
+    document_id: str,
+    dedup_stats: Optional[Dict[str, int]] = None,
+    vector_store: Optional[Any] = None,
+) -> Dict[str, int]:
+    """
+    Reconciles the four artifacts that must stay 1-to-1 for every retained
+    image: the PNG on disk, its JSON metadata sidecar (05_images/*.json), the
+    image chunk(s) referencing it (document_chunks.json / 06_chunks copy),
+    and its vector DB record. Anything left behind by a removed duplicate --
+    an orphaned JSON with no PNG, a PNG with no valid JSON, a chunk pointing
+    at an image that no longer exists, or a stale vector record for a chunk
+    that was dropped -- is deleted so no orphaned records remain.
+
+    Returns a stats dict and logs the full pipeline funnel:
+    extracted -> duplicates removed -> retained images -> valid JSON -> indexed records.
+    """
+    stats: Dict[str, int] = {
+        "orphaned_json_removed": 0,
+        "orphaned_images_removed": 0,
+        "orphaned_chunks_removed": 0,
+        "orphaned_vector_records_removed": 0,
+        "retained_images": 0,
+        "valid_json": 0,
+        "indexed_image_records": 0,
+    }
+
+    images_dir = Path(output_dir) / "05_images"
+    if not images_dir.exists():
+        logger.info("No 05_images directory found; skipping image artifact validation.")
+        return stats
+
+    png_stems = {f.stem for f in images_dir.glob("image_*.png") if f.stat().st_size > 0}
+    json_files = {f.stem: f for f in images_dir.glob("image_*.json")}
+
+    # 1. JSON without a matching retained PNG (or unreadable/invalid JSON) is orphaned.
+    valid_json_stems: Dict[str, Optional[str]] = {}
+    for stem, jf in json_files.items():
+        if stem not in png_stems:
+            try:
+                jf.unlink()
+                stats["orphaned_json_removed"] += 1
+                logger.info(f"Removed orphaned image JSON with no matching PNG: {jf.name}")
+            except Exception as e:
+                logger.warning(f"Failed to remove orphaned image JSON {jf.name}: {e}")
+            continue
+        data = _load_chunks_file(jf)
+        if not isinstance(data, dict) or not data.get("image_id"):
+            try:
+                jf.unlink()
+                stats["orphaned_json_removed"] += 1
+                logger.info(f"Removed invalid/unreadable image JSON: {jf.name}")
+            except Exception as e:
+                logger.warning(f"Failed to remove invalid image JSON {jf.name}: {e}")
+            continue
+        valid_json_stems[stem] = data.get("image_id")
+
+    # 2. PNG with no valid JSON sidecar is orphaned (can't be validated/grounded).
+    for stem in list(png_stems):
+        if stem not in valid_json_stems:
+            png_path = images_dir / f"{stem}.png"
+            try:
+                png_path.unlink()
+                stats["orphaned_images_removed"] += 1
+                logger.info(f"Removed orphaned image PNG with no valid JSON metadata: {png_path.name}")
+            except Exception as e:
+                logger.warning(f"Failed to remove orphaned image PNG {png_path.name}: {e}")
+
+    retained_image_stems = set(valid_json_stems.keys())
+    accepted_image_ids = set(retained_image_stems)
+    for stem, image_id in valid_json_stems.items():
+        if image_id:
+            accepted_image_ids.add(image_id)
+
+    stats["retained_images"] = len(retained_image_stems)
+    stats["valid_json"] = len(retained_image_stems)
+
+    # 3. Reconcile image chunks referencing removed images.
+    chunk_paths = [
+        Path(output_dir) / "document_chunks.json",
+        Path(output_dir) / "06_chunks" / "document_chunks.json",
+    ]
+    orphaned_chunk_ids: List[str] = []
+    for chunks_path in chunk_paths:
+        data = _load_chunks_file(chunks_path)
+        if not data or not isinstance(data.get("chunks"), list):
+            continue
+
+        kept_chunks = []
+        local_orphans: List[str] = []
+        for chunk in data["chunks"]:
+            meta = chunk.get("metadata", {}) or {}
+            img_id = meta.get("image_id")
+            if not img_id and meta.get("chunk_type") != "image":
+                kept_chunks.append(chunk)
+                continue
+
+            img_path = meta.get("image_path") or ""
+            path_stem = Path(str(img_path).replace("\\", "/")).stem
+            is_valid = (
+                (img_id and (img_id in accepted_image_ids or img_id in retained_image_stems))
+                or (path_stem and path_stem in retained_image_stems)
+            )
+            if is_valid:
+                kept_chunks.append(chunk)
+            else:
+                local_orphans.append(meta.get("chunk_id") or "")
+                logger.info(
+                    f"Removing orphaned image chunk {meta.get('chunk_id')} "
+                    f"(image_id={img_id}) -- referenced image no longer exists."
+                )
+
+        if local_orphans:
+            data["chunks"] = kept_chunks
+            _write_chunks_file(chunks_path, data)
+            orphaned_chunk_ids.extend(c for c in local_orphans if c)
+
+    orphaned_chunk_ids = sorted(set(orphaned_chunk_ids))
+    stats["orphaned_chunks_removed"] = len(orphaned_chunk_ids)
+
+    # 4. Remove the matching stale vector DB records.
+    if orphaned_chunk_ids and vector_store is not None:
+        try:
+            stats["orphaned_vector_records_removed"] = vector_store.delete_chunks(
+                document_id, orphaned_chunk_ids
+            )
+        except Exception as e:
+            logger.warning(f"Failed to delete orphaned vector records for {document_id}: {e}")
+
+    # 5. Count how many image chunk records remain (post-cleanup), for the funnel log.
+    for chunks_path in chunk_paths:
+        data = _load_chunks_file(chunks_path)
+        if data and isinstance(data.get("chunks"), list):
+            stats["indexed_image_records"] = sum(
+                1 for chunk in data["chunks"]
+                if (chunk.get("metadata") or {}).get("image_id")
+            )
+            break
+
+    extracted = (dedup_stats or {}).get("total_extracted", stats["retained_images"])
+    duplicates_removed = (dedup_stats or {}).get("duplicates_removed", 0)
+
+    logger.info(
+        "Image metadata cleanup summary | extracted: %d -> duplicates removed: %d -> "
+        "retained images: %d -> valid JSON: %d -> orphaned JSON removed: %d -> "
+        "orphaned images removed: %d -> orphaned chunks removed: %d -> "
+        "orphaned vector records removed: %d",
+        extracted,
+        duplicates_removed,
+        stats["retained_images"],
+        stats["valid_json"],
+        stats["orphaned_json_removed"],
+        stats["orphaned_images_removed"],
+        stats["orphaned_chunks_removed"],
+        stats["orphaned_vector_records_removed"],
+    )
+
+    return stats

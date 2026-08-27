@@ -88,24 +88,28 @@ def extract_untitled_name_near_designation(text: Optional[str]) -> Optional[Tupl
     literal reading of real document content, not a model guess). Unlike
     extract_generic_person_identity, this does not require Mr./Ms./Dr. --
     but it only ever fires when a real corporate designation from
-    _KNOWN_DESIGNATIONS is found immediately next to the name AND the input
-    is short (a caption/label, not a prose sentence), so it can't mistake an
-    arbitrary capitalized phrase (a section heading, a place name) for a
-    person -- the designation match is the anchor of trust, same principle as
-    extract_generic_person_identity's honorific requirement.
+    _KNOWN_DESIGNATIONS is found immediately next to the name, so it can't
+    mistake an arbitrary capitalized phrase (a section heading, a place name)
+    for a person -- the designation match is the anchor of trust, same
+    principle as extract_generic_person_identity's honorific requirement.
+
+    The name search is windowed tightly around the designation match (not
+    the whole input), so a name+designation label immediately followed by a
+    longer bio/description paragraph (common under a portrait on a
+    leadership/director page) still resolves correctly -- only the
+    proximity to the designation is trusted, not the overall text length.
     """
     if not text or not text.strip():
         return None
     clean = re.sub(r"\s+", " ", text.strip())
-    if len(clean) > 100:
-        return None
 
     desig_match = _DESIGNATION_PATTERN.search(clean)
     if not desig_match:
         return None
 
-    before = clean[:desig_match.start()]
-    after = clean[desig_match.end():]
+    _WINDOW = 60
+    before = clean[max(0, desig_match.start() - _WINDOW):desig_match.start()]
+    after = clean[desig_match.end():desig_match.end() + _WINDOW]
 
     name_match = None
     for candidate_text, from_end in ((before, True), (after, False)):

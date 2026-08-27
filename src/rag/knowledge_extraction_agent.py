@@ -1028,10 +1028,24 @@ class KnowledgeExtractionAgent:
         (output_dir / "06_chunks").mkdir(parents=True, exist_ok=True)
         with open(output_dir / "06_chunks" / "document_chunks.json", "w", encoding="utf-8") as f:
             json.dump({
-                "document_id": doc_id, 
+                "document_id": doc_id,
                 "file_name": f"{structured_doc.file_name}.{structured_doc.file_type}",
                 "chunks": compat_chunks
             }, f, indent=2, ensure_ascii=False)
+
+        # Reconcile image <-> JSON <-> chunk <-> vector DB record consistency
+        # now that chunks/vector indexing are final: drop any JSON/PNG/chunk/
+        # vector record left orphaned by duplicate-image removal.
+        try:
+            from src.rag.image_deduplicator import validate_and_cleanup_image_artifacts
+            validate_and_cleanup_image_artifacts(
+                output_dir=output_dir,
+                document_id=doc_id,
+                dedup_stats=self.stats.get("image_dedup"),
+                vector_store=self.vector_store,
+            )
+        except Exception as e:
+            logger.warning(f"Image artifact validation/cleanup failed for {doc_id}: {e}")
 
         # Write Markdown representation
         md_path = output_dir / "03_knowledge_objects" / "knowledge_objects.md"
