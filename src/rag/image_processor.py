@@ -9,10 +9,10 @@ from src.rag.caption_processor import CaptionProcessor
 logger = logging.getLogger("pipeline")
 
 # Generic corporate designations recognised regardless of who holds them --
-# NOT tied to any specific named person, unlike PortraitSpatialValidator's
-# KNOWN_DIRECTORS list. Used to ground a person's name+designation for ANY
-# portrait directly from real document text (explicit caption or nearby
-# OCR), so portrait metadata isn't limited to a hardcoded roster.
+# NOT tied to any specific named person. Used to ground a person's
+# name+designation for ANY portrait directly from real document text
+# (explicit caption or nearby OCR), so portrait metadata isn't limited to a
+# hardcoded roster.
 _KNOWN_DESIGNATIONS = [
     "Managing Director", "Executive Director", "Independent Director",
     "Whole-time Director", "Whole time Director", "Non-Executive Director",
@@ -70,23 +70,100 @@ def extract_generic_person_identity(text: Optional[str]) -> Optional[Tuple[str, 
 
     return name, designation
 
+
+# A bare 2-4 word Title-Case run, no honorific required -- deliberately looser
+# than _NAMED_PERSON_PATTERN, so it is only ever used gated on a real
+# _KNOWN_DESIGNATIONS match immediately adjacent (see
+# extract_untitled_name_near_designation below), which is what keeps it from
+# matching an arbitrary capitalized phrase.
+_BARE_NAME_TOKEN = rf"(?!(?i:{'|'.join(re.escape(w) for w in _DESIGNATION_LEAD_WORDS)})\b)[A-Z][a-zA-Z.'\-]+"
+_BARE_NAME_PATTERN = re.compile(rf"\b({_BARE_NAME_TOKEN}(?:\s+{_BARE_NAME_TOKEN}){{1,3}})\b")
+
+
+def extract_untitled_name_near_designation(text: Optional[str]) -> Optional[Tuple[str, Optional[str]]]:
+    """
+    Catches a person's name printed directly under/beside their photo with no
+    honorific -- the common "Name" / "Role" caption pattern under a portrait
+    (e.g. printed_text transcribed by a VLM from the pixels themselves, a
+    literal reading of real document content, not a model guess). Unlike
+    extract_generic_person_identity, this does not require Mr./Ms./Dr. --
+    but it only ever fires when a real corporate designation from
+    _KNOWN_DESIGNATIONS is found immediately next to the name AND the input
+    is short (a caption/label, not a prose sentence), so it can't mistake an
+    arbitrary capitalized phrase (a section heading, a place name) for a
+    person -- the designation match is the anchor of trust, same principle as
+    extract_generic_person_identity's honorific requirement.
+    """
+    if not text or not text.strip():
+        return None
+    clean = re.sub(r"\s+", " ", text.strip())
+    if len(clean) > 100:
+        return None
+
+    desig_match = _DESIGNATION_PATTERN.search(clean)
+    if not desig_match:
+        return None
+
+    before = clean[:desig_match.start()]
+    after = clean[desig_match.end():]
+
+    name_match = None
+    for candidate_text, from_end in ((before, True), (after, False)):
+        m = None
+        for m in _BARE_NAME_PATTERN.finditer(candidate_text):
+            pass  # take the last match before the designation, or first match after it
+        if from_end:
+            name_match = m
+        else:
+            name_match = _BARE_NAME_PATTERN.search(candidate_text)
+        if name_match:
+            break
+
+    if not name_match:
+        return None
+
+    name = re.sub(r"\s+", " ", name_match.group(1)).strip()
+    return name, desig_match.group(1)
+
+
+# Generic legal-entity suffixes -- these are ordinary English/corporate-law
+# vocabulary (not any specific company's name), used purely to recognise
+# WHERE a real organization name sits inside real nearby text.
+_ORG_SUFFIX_PATTERN = re.compile(
+    r"\b([A-Z][A-Za-z0-9&.,'\-\s]{1,60}?\s+"
+    r"(?:Limited|Ltd\.?|LLC|LLP|Inc\.?|Incorporated|Corporation|Corp\.?|"
+    r"Pvt\.?\s*Ltd\.?|Private\s+Limited|PLC|Co\.?|Company|Group|Enterprises))\b"
+)
+
+
+def extract_generic_organization_name(text_candidates: List[Optional[str]]) -> Optional[str]:
+    """
+    Generic (non-hardcoded) extraction of an organization/company name from
+    real document text, by matching a real legal-entity suffix (Limited,
+    Ltd, LLC, Pvt Ltd, Corporation, ...) actually present in the text --
+    never a fixed company name. Returns the first match found across the
+    given candidate texts, in order.
+    """
+    for text in text_candidates:
+        if not text or not text.strip():
+            continue
+        m = _ORG_SUFFIX_PATTERN.search(text)
+        if m:
+            return re.sub(r"\s+", " ", m.group(1)).strip()
+    return None
+
+
 class PortraitSpatialValidator:
     """
     Validates portrait geometry and pairs images with people using strict 1-to-1 spatial layout analysis.
     Rejects collages, logos, decorative banners, industrial scenes, and unrelated photos.
-    """
 
-    KNOWN_DIRECTORS = [
-        {"name": "Mr. Sunil Kumar Mittra", "role": "Chairman", "variants": ["sunil kumar mittra", "sunil mittra", "sunil"]},
-        {"name": "Mr. Ravi Todi", "role": "Managing Director", "variants": ["ravi todi", "ravi"]},
-        {"name": "Ms. Rhea Todi", "role": "Whole time Director", "variants": ["rhea todi", "rhea"]},
-        {"name": "Mr. Aviik Mukherjee", "role": "Whole time Director", "variants": ["aviik mukherjee", "avik mukherjee", "aviik", "avik"]},
-        {"name": "Mr. Subrata Paul", "role": "Independent Director", "variants": ["subrata paul", "subrata"]},
-        {"name": "Ms. Arundhuti Dhar", "role": "Independent Director", "variants": ["arundhuti dhar", "arundhuti"]},
-        {"name": "Mr. Sandipan Chakravortty", "role": "Additional Director", "variants": ["sandipan chakravortty", "sandipan"]},
-        {"name": "Mr. Ketan Mangaldas Shanghavi", "role": "Independent Director", "variants": ["ketan mangaldas shanghavi", "ketan shanghavi", "ketan"]},
-        {"name": "Mr. Sourav Daspatnaik", "role": "Independent Director", "variants": ["sourav daspatnaik", "sourav"]}
-    ]
+    Fully generic: a person's identity is derived directly from real nearby
+    document text -- a titled name (extract_generic_person_identity) or an
+    untitled name printed beside a real corporate designation
+    (extract_untitled_name_near_designation) -- never from a fixed roster of
+    names, so this works identically for any document's own directors/staff.
+    """
 
     @staticmethod
     def validate_portrait_geometry(
@@ -135,10 +212,13 @@ class PortraitSpatialValidator:
     def match_person_to_portrait_spatial(
         image_bbox: Any,
         text_elements_on_page: List[Dict[str, Any]],
-        known_directors: Optional[List[Dict[str, Any]]] = None
     ) -> Optional[Dict[str, Any]]:
         """
-        Finds a 1-to-1 spatial match between an image and nearby name/designation on the same page.
+        Finds a 1-to-1 spatial match between an image and a nearby name/designation
+        on the same page. The candidate name is extracted directly from each
+        nearby text block's own content (generic, real-text-only extraction) --
+        never looked up against a fixed roster -- so this works for any person
+        actually named beside the image in the document.
         """
         # First check geometry
         is_geom, reason = PortraitSpatialValidator.validate_portrait_geometry(image_bbox)
@@ -156,7 +236,6 @@ class PortraitSpatialValidator:
         icx = (il + ir) / 2.0
         icy = (it + ib) / 2.0
 
-        directors = known_directors or PortraitSpatialValidator.KNOWN_DIRECTORS
         best_match = None
         best_dist = 999999.0
 
@@ -177,16 +256,13 @@ class PortraitSpatialValidator:
             tcx = (tl + tr) / 2.0
             tcy = (tt + tb) / 2.0
 
-            # Match against director list
-            matched_dir = None
-            t_lower = t_text.lower()
-            for d in directors:
-                if any(v in t_lower for v in d["variants"]):
-                    matched_dir = d
-                    break
-
-            if not matched_dir:
+            # Extract identity directly from this nearby text block's own
+            # content -- a titled name, or an untitled name beside a real
+            # corporate designation. No fixed roster involved.
+            identity = extract_generic_person_identity(t_text) or extract_untitled_name_near_designation(t_text)
+            if not identity:
                 continue
+            name, designation = identity
 
             # Check horizontal adjacency: text box is to the right of image
             dx = tl - ir
@@ -203,12 +279,11 @@ class PortraitSpatialValidator:
                 if dist < best_dist:
                     best_dist = dist
                     best_match = {
-                        "director": matched_dir,
-                        "person_name": matched_dir["name"],
-                        "designation": matched_dir["role"],
+                        "person_name": name,
+                        "designation": designation,
                         "layout_alignment": "horizontal",
                         "distance_pt": dist,
-                        "caption_text": f"Portrait of {matched_dir['name']} ({matched_dir['role']})",
+                        "caption_text": f"Portrait of {name} ({designation})" if designation else f"Portrait of {name}",
                         "matched_text": t_text
                     }
 
@@ -218,12 +293,11 @@ class PortraitSpatialValidator:
                 if dist < best_dist:
                     best_dist = dist
                     best_match = {
-                        "director": matched_dir,
-                        "person_name": matched_dir["name"],
-                        "designation": matched_dir["role"],
+                        "person_name": name,
+                        "designation": designation,
                         "layout_alignment": "vertical",
                         "distance_pt": dist,
-                        "caption_text": f"Portrait of {matched_dir['name']} ({matched_dir['role']})",
+                        "caption_text": f"Portrait of {name} ({designation})" if designation else f"Portrait of {name}",
                         "matched_text": t_text
                     }
 
@@ -373,12 +447,52 @@ class HierarchicalLayoutGrounder:
                 association_confidence = 0.92
                 final_caption = f"Portrait of {entity_name} ({designation})" if designation else f"Portrait of {entity_name}"
 
-        # Check Priority 2b: Generic OCR-Grounded Identity (ANY person, not a
-        # fixed roster) -- fires only when no explicit caption or spatially
-        # matched card identified a person, and only on a titled name
-        # (Mr./Ms./Dr./Shri/Smt./Er.) actually present in the image's own
-        # OCR text, so it never invents a name.
-        if not final_explicit_caption and not entity_name and ocr_text:
+        # Check Priority 2b: Signature Association -- generic detection via a
+        # fixed set of ordinary English signature-block phrases (never any
+        # person/organization name), then reuses the same real-text-only name
+        # extraction as portraits so the signature is attributed to whoever
+        # is actually named beside/under it in the document, not a guess.
+        # Runs BEFORE the general OCR-grounded portrait check below, since a
+        # signature block's OCR text also contains a titled name and would
+        # otherwise always be misread as a portrait.
+        _SIGNATURE_INDICATORS = (
+            "signature", "signed by", "authorised signatory", "authorized signatory",
+            "for and on behalf of", "sd/-", "digitally signed"
+        )
+        is_signature_block = False
+        if not final_explicit_caption and not entity_name:
+            signature_context = " ".join(
+                filter(None, [ocr_text, explicit_caption, text_before, text_after])
+            ).lower()
+            if any(ind in signature_context for ind in _SIGNATURE_INDICATORS):
+                is_signature_block = True
+                sig_identity = None
+                for candidate_text in (ocr_text, text_before, text_after):
+                    sig_identity = (
+                        extract_generic_person_identity(candidate_text)
+                        or extract_untitled_name_near_designation(candidate_text)
+                    )
+                    if sig_identity:
+                        break
+                image_type = "Signature"
+                layout_context = "signature_block"
+                if sig_identity:
+                    entity_name, designation = sig_identity
+                    title = entity_name
+                    subtitle = designation or "Signature"
+                    association_method = "signature_text_grounded"
+                    association_confidence = 0.85
+                    final_caption = (
+                        f"Signature of {entity_name} ({designation})" if designation
+                        else f"Signature of {entity_name}"
+                    )
+
+        # Check Priority 2c: Generic OCR-Grounded Identity (ANY person, not a
+        # fixed roster) -- fires only when no explicit caption, spatially
+        # matched card, or signature-block indicator identified a person,
+        # and only on a titled name (Mr./Ms./Dr./Shri/Smt./Er.) actually
+        # present in the image's own OCR text, so it never invents a name.
+        if not final_explicit_caption and not entity_name and not is_signature_block and ocr_text:
             ocr_identity = extract_generic_person_identity(ocr_text)
             if ocr_identity:
                 entity_name, designation = ocr_identity
@@ -473,10 +587,11 @@ class HierarchicalLayoutGrounder:
             final_caption = f"Visual on Page {page_number}"
 
         # Guard: Negative guard against unassociated entity assignment.
-        # ocr_grounded_identity is included because it -- like same_card_layout
-        # and explicit_caption -- only ever gets set from a titled name found
-        # directly in real document text (never a model-inferred guess).
-        if association_method not in ("same_card_layout", "explicit_caption", "ocr_grounded_identity"):
+        # ocr_grounded_identity and signature_text_grounded are included
+        # because they -- like same_card_layout and explicit_caption -- only
+        # ever get set from a titled name found directly in real document
+        # text (never a model-inferred guess).
+        if association_method not in ("same_card_layout", "explicit_caption", "ocr_grounded_identity", "signature_text_grounded"):
             entity_name = None
             designation = None
 
@@ -491,10 +606,18 @@ class HierarchicalLayoutGrounder:
             ))
         )
         if is_logo:
+            # Organization name is derived generically: a real legal-entity
+            # name found in nearby text/caption/description, else the
+            # document's own title -- never a hardcoded company name.
+            org_name = (
+                extract_generic_organization_name([explicit_caption, final_caption, vlm_description, active_section])
+                or (doc_title.strip() if doc_title else None)
+                or "the associated organization"
+            )
             image_type = "Logo"
-            title = f"Company Logo - {doc_title or 'BTL EPC Limited'}"
+            title = f"Company Logo - {org_name}"
             subtitle = "Official Brand Identity"
-            final_caption = f"Company Logo of {doc_title or 'BTL EPC Limited'}"
+            final_caption = f"Company Logo of {org_name}"
             final_explicit_caption = final_caption if not final_explicit_caption else final_explicit_caption
             association_method = "explicit_caption" if final_explicit_caption else "layout_brand_identity"
             association_confidence = 0.96
@@ -511,10 +634,12 @@ class HierarchicalLayoutGrounder:
         # Determine Image Type if still generic
         if image_type in ("Photo", "Image", "Diagram", "PictureItem", "Figure"):
             combined_desc = f"{final_caption or ''} {title or ''} {subtitle or ''} {active_section or ''} {vlm_description or ''}".lower()
-            if entity_name or association_method == "same_card_layout" or "portrait" in combined_desc or ("director" in combined_desc and page_number == 49):
+            if entity_name or association_method == "same_card_layout" or "portrait" in combined_desc or "director" in combined_desc:
                 image_type = "Portrait Photo"
             elif is_logo or "logo" in combined_desc:
                 image_type = "Logo"
+            elif "signature" in combined_desc or "signatory" in combined_desc:
+                image_type = "Signature"
             elif is_genuinely_low_value:
                 image_type = "Decorative"
             elif any(k in combined_desc for k in ("chart", "graph", "growth", "performance", "bar graph", "pie chart", "trend")):
@@ -579,8 +704,13 @@ class HierarchicalLayoutGrounder:
                 keywords.append(designation)
             objects = ["portrait", "person", "headshot", "photograph"]
         elif image_type == "Logo" or is_logo:
-            detected_entities = [doc_title or "BTL EPC Limited", "BTL EPC"]
-            keywords = ["logo", "company logo", "brand", "emblem", "insignia", "BTL", "EPC", "BTL EPC", "BTL EPC Limited", doc_title or "BTL EPC Limited"]
+            logo_org = org_name if is_logo else (
+                extract_generic_organization_name([explicit_caption, final_caption, vlm_description, active_section])
+                or (doc_title.strip() if doc_title else None)
+                or "the associated organization"
+            )
+            detected_entities = [logo_org]
+            keywords = ["logo", "company logo", "brand", "emblem", "insignia", logo_org]
             objects = ["logo", "emblem", "brand mark"]
         elif image_type in ("Chart", "Graph", "Chart/Graph", "Diagram", "Table"):
             keywords = [image_type.lower(), "metrics", "financial", "data", active_section or "report"]
@@ -650,9 +780,23 @@ class ImageRetrievalValidator:
         "picture of", "portrait of", "photos of", "images of", "pictures of", "portraits of"
     ]
 
-    AMBIGUOUS_SURNAMES = [
-        "todi", "mittra", "mukherjee", "paul", "dhar", "chakravortty", "shanghavi", "daspatnaik", "jha", "tiwari"
-    ]
+    @classmethod
+    def _ambiguous_token_owner_count(cls, token: str, known_entities: List[str]) -> int:
+        """
+        Counts how many DISTINCT entities in the document's own known-entity
+        registry share `token` as one of their name parts. Purely derived
+        from the document's own grounded entities -- no fixed surname list --
+        so "photo of Todi" is correctly flagged ambiguous only when the
+        document itself actually contains 2+ people whose name includes
+        "todi", and is a normal (non-ambiguous) single-person lookup for any
+        other document.
+        """
+        owners = set()
+        for ent in known_entities or []:
+            ent_norm = cls.normalize_name(ent)
+            if token in ent_norm.split():
+                owners.add(ent_norm)
+        return len(owners)
 
     @staticmethod
     def normalize_name(name: str) -> str:
@@ -690,15 +834,11 @@ class ImageRetrievalValidator:
         import re
         q_lower = query.lower().strip()
 
-        # Check known entities / known directors first if present
+        # Check known entities from the document's own grounded entity
+        # registry (passed in by the caller, e.g. every image chunk's
+        # entity_name) -- never a fixed roster.
         matched_from_entities = []
         all_known = list(known_entities or [])
-        for d in PortraitSpatialValidator.KNOWN_DIRECTORS:
-            if d.get("name") and d["name"] not in all_known:
-                all_known.append(d["name"])
-            for v in d.get("variants", []):
-                if v not in all_known:
-                    all_known.append(v)
 
         for ent in all_known:
             ent_norm = cls.normalize_name(ent)
@@ -747,14 +887,22 @@ class ImageRetrievalValidator:
         # Plausibility gate on the heuristic-extracted candidates: leftover
         # query text after phrase-stripping is only trusted as a PERSON name
         # if it actually corresponds to a real name grounded somewhere in
-        # this document's own image registry (`all_known` -- built above
-        # from `known_entities` plus KNOWN_DIRECTORS variants). Without this,
-        # any non-person visual query whose phrasing doesn't match a known
+        # this document's own image registry (`all_known` -- the caller-
+        # supplied `known_entities`, e.g. every image chunk's own
+        # entity_name; never a fixed roster). Without this, any non-person
+        # visual query whose phrasing doesn't match a known
         # strip-phrase (e.g. "show the substation construction site image at
         # Deoghar") gets misread as a person's name and wrongly routed
         # through strict portrait matching instead of general/semantic
-        # visual search. If no registry is available at all, the heuristic
-        # is trusted as-is (nothing to check against).
+        # visual search.
+        #
+        # When no registry is available at all, fall back to a
+        # capitalization-based plausibility signal from the query's OWN
+        # original casing (a generic, language-level signal, not tied to any
+        # roster): a real proper name is typically capitalized mid-sentence,
+        # unlike ordinary descriptive/functional words -- e.g. "What does
+        # the architecture diagram show?" has no capitalized word after the
+        # sentence-initial "What", so nothing here is trusted as a name.
         #
         # Exception: if the query used an EXPLICIT person-oriented phrase
         # ("photo of X", "who is X", ...), this is unambiguously a person
@@ -762,26 +910,36 @@ class ImageRetrievalValidator:
         # "portrait of someone not in this document" target (zero results),
         # NOT silently fall through to a generic visual search that would
         # incorrectly return unrelated images for e.g. "photo of Elon Musk".
-        if all_known and not used_explicit_person_phrase:
-            plausible_extracted = []
-            for cand in extracted:
-                cand_tokens = set(cand.split())
-                for ent in all_known:
-                    ent_norm = cls.normalize_name(ent)
-                    ent_tokens = set(ent_norm.split())
-                    if not ent_tokens:
-                        continue
-                    if cand_tokens & ent_tokens:
-                        plausible_extracted.append(cand)
-                        break
-            extracted = plausible_extracted
+        if not used_explicit_person_phrase:
+            if all_known:
+                plausible_extracted = []
+                for cand in extracted:
+                    cand_tokens = set(cand.split())
+                    for ent in all_known:
+                        ent_norm = cls.normalize_name(ent)
+                        ent_tokens = set(ent_norm.split())
+                        if not ent_tokens:
+                            continue
+                        if cand_tokens & ent_tokens:
+                            plausible_extracted.append(cand)
+                            break
+                extracted = plausible_extracted
+            else:
+                query_words = re.findall(r"\b[A-Za-z]+\b", query)
+                capitalized_tokens = {
+                    w.lower() for i, w in enumerate(query_words)
+                    if i > 0 and w[0].isupper()
+                }
+                extracted = [cand for cand in extracted if set(cand.split()) & capitalized_tokens]
 
         # Merge extracted with matched_from_entities
         final_names = []
         for name in (matched_from_entities + extracted):
             norm = cls.normalize_name(name)
-            # Avoid single ambiguous surname
-            if norm in cls.AMBIGUOUS_SURNAMES:
+            # Avoid a single-token name that's ambiguous WITHIN this
+            # document's own registry (shared by 2+ distinct known people) --
+            # derived from the document itself, never a fixed surname list.
+            if len(norm.split()) == 1 and cls._ambiguous_token_owner_count(norm, all_known) >= 2:
                 continue
             if len(norm.split()) >= 1 and len(norm) >= 3 and norm not in final_names:
                 final_names.append(norm)
@@ -831,16 +989,19 @@ class ImageRetrievalValidator:
                 "is_visual": True
             }
 
-        # 4.1 Check Ambiguous Surname-Only queries (e.g. "photo of Todi")
-        words = set(re.findall(r'\b[a-zA-Z]+\b', q_lower))
-        for surname in cls.AMBIGUOUS_SURNAMES:
-            if surname in words and len(extracted_persons) == 0:
-                # Surname alone without distinguishing first name is rejected as ambiguous
-                return {
-                    "target_type": "ambiguous_surname",
-                    "surname": surname,
-                    "is_visual": True
-                }
+        # 4.1 Check Ambiguous Surname-Only queries (e.g. "photo of Todi"),
+        # purely from the document's own known-entity registry: a bare word
+        # in the query that's a shared name-part of 2+ distinct known
+        # entities, with no extracted candidate resolving it, is ambiguous.
+        if known_entities and len(extracted_persons) == 0:
+            words = set(re.findall(r'\b[a-zA-Z]+\b', q_lower))
+            for w in words:
+                if len(w) > 2 and cls._ambiguous_token_owner_count(w, known_entities) >= 2:
+                    return {
+                        "target_type": "ambiguous_surname",
+                        "surname": w,
+                        "is_visual": True
+                    }
 
         # 5. Check Captioned Figure Number Target
         fig_match = re.search(r'(?i)\b(?:figure|fig\.?|chart|diagram|image|photo|illustration)\s*#?\s*(\d+)\b', query)
@@ -862,12 +1023,6 @@ class ImageRetrievalValidator:
         """
         from pathlib import Path
         from src.config import ROOT_DIR
-
-        # Test or mock job bypass
-        if (doc_id and ("test" in doc_id.lower() or "mock" in doc_id.lower())) or \
-           (image_url and ("test" in image_url.lower() or "mock" in image_url.lower())) or \
-           (image_path and ("test" in image_path.lower() or "mock" in image_path.lower())):
-            return True
 
         # Check candidate path directly
         if image_path:
@@ -937,6 +1092,19 @@ class ImageRetrievalValidator:
         if not cls.validate_physical_file(image_path=img_path, image_url=img_url, doc_id=doc_id):
             return False
 
+        # A decorative / non-retrievable / LOW-importance asset can never be
+        # someone's portrait, regardless of whether the target's name text
+        # happens to appear in its keywords/OCR/semantic description (e.g. a
+        # decorative graphic sitting near a paragraph that merely mentions
+        # the person). This prevents unrelated images from being returned
+        # for a person-portrait query just because of incidental text overlap.
+        if (
+            str(image_meta.get("image_type") or "").lower() == "decorative"
+            or image_meta.get("importance_score") == "LOW"
+            or image_meta.get("retrievable") is False
+        ):
+            return False
+
         entity_name = cls.normalize_name(image_meta.get("entity_name") or image_meta.get("title") or "")
         caption = cls.normalize_name(image_meta.get("caption") or image_meta.get("caption_text") or "")
         detected_entities = [cls.normalize_name(e) for e in (image_meta.get("detected_entities") or [])]
@@ -956,12 +1124,20 @@ class ImageRetrievalValidator:
         context_strings = [semantic_desc] + detected_entities + people + keywords
         all_meta_strings = direct_strings + context_strings
 
+        # The weak context-only match (keywords/OCR/semantic description
+        # mentioning the name, with no entity_name/caption backing it) is
+        # only trusted when this image is itself plausibly a person image --
+        # otherwise a chart/diagram/logo whose description merely quotes or
+        # references the person would incorrectly validate as their portrait.
+        img_type_lower = str(image_meta.get("image_type") or "").lower()
+        is_plausible_person_image = bool(entity_name) or "portrait" in img_type_lower or img_type_lower in ("photo", "image")
+
         matches_target = False
         if target_norm in entity_name or target_norm in caption:
             matches_target = True
         elif target_tokens and all(token in entity_name or token in caption for token in target_tokens):
             matches_target = True
-        elif target_tokens and all(any(token in s for s in all_meta_strings if s) for token in target_tokens):
+        elif is_plausible_person_image and target_tokens and all(any(token in s for s in all_meta_strings if s) for token in target_tokens):
             matches_target = True
 
         if not matches_target:
@@ -972,7 +1148,7 @@ class ImageRetrievalValidator:
                 if v_norm and (v_norm in entity_name or v_norm in caption):
                     matches_target = True
                     break
-                elif v_tokens and all(any(token in s for s in all_meta_strings if s) for token in v_tokens):
+                elif is_plausible_person_image and v_tokens and all(any(token in s for s in all_meta_strings if s) for token in v_tokens):
                     matches_target = True
                     break
 
@@ -1047,11 +1223,12 @@ class ImageRetrievalValidator:
             return cls.validate_single_director_image(image_meta, target_person, doc_id=doc_id)
 
         elif target_type == "board_collection":
-            # Must be a portrait or leadership figure
-            return bool(image_meta.get("entity_name") or "portrait" in img_type or (page == 49 and "decorative" not in img_type))
+            # Must be a portrait or leadership figure -- purely content-based
+            # (entity/type signal), no fixed page number.
+            return bool(image_meta.get("entity_name") or "portrait" in img_type)
 
         elif target_type == "logo":
-            # Must be verified Logo or corporate cover header asset, never director portraits
+            # Must be verified Logo or corporate brand asset, never director portraits
             if "portrait" in img_type or image_meta.get("entity_name"):
                 return False
             is_logo_asset = (
@@ -1060,8 +1237,7 @@ class ImageRetrievalValidator:
                 "logo" in caption.lower() or
                 "logo" in title.lower() or
                 "logo" in (image_meta.get("semantic_description") or "").lower() or
-                any("logo" in str(k).lower() for k in (image_meta.get("keywords") or [])) or
-                (page in (1, 2, 3) and not image_meta.get("entity_name"))
+                any("logo" in str(k).lower() for k in (image_meta.get("keywords") or []))
             )
             return is_logo_asset
 

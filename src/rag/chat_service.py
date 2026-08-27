@@ -1,3 +1,4 @@
+import re
 import time
 import logging
 from typing import List, Dict, Any, Optional
@@ -143,6 +144,14 @@ class ChatService:
         generation_time = time.time() - generation_start
         logger.info(f"Answer generated successfully using model '{selected_model}' in {generation_time:.2f}s.")
 
+        # Sanitize any markdown image syntax the LLM itself may have
+        # emitted (e.g. if a chunk's content text happened to look
+        # URL-shaped) -- the answer string must NEVER carry an image URL of
+        # any origin. Images reach the caller exclusively through the
+        # separately-verified `image_references` field below; this keeps
+        # that contract true regardless of what the model actually said.
+        answer = re.sub(r"!\[([^\]]*)\]\([^)]+\)", lambda m: m.group(1), answer)
+
         # 5. Save Interaction to Conversation Memory
         self.memory.add_message(document_id, "user", question)
         self.memory.add_message(document_id, "assistant", answer)
@@ -157,20 +166,21 @@ class ChatService:
             document_id=document_id
         )
 
-        # 7. Post-generation Formatting & Embedding Enforcement:
-        # If user asked for visual/table assets and verified items exist, make sure the answer embeds them cleanly
+        # 7. Post-generation Formatting: acknowledge visual results in plain
+        # text only -- the actual image URLs are NEVER embedded into the
+        # answer string. Images reach the caller exclusively through the
+        # structured, independently-verified `image_references` field, so
+        # the frontend has no LLM-influenced markup to parse for image
+        # sources -- only the backend's own verified reference list.
         ans_clean = answer.strip()
         q_lower = question.lower()
         if final_image_references and any(vt in q_lower for vt in ["photo", "portrait", "logo", "diagram", "chart", "show me", "along with photos", "image of", "give the logo", "picture of"]):
             if "could not find this information in the uploaded document" in ans_clean.lower():
                 ans_clean = "Here is the requested visual information from the uploaded document:"
-            for img in final_image_references:
-                url = img.get("image_url")
-                caption = img.get("caption") or img.get("title") or "Figure"
-                page = img.get("page_number")
-                embed_md = f"![{caption}]({url})"
-                if url and embed_md not in ans_clean and f"({url})" not in ans_clean:
-                    ans_clean += f"\n\n{embed_md}\n*(Source: Page {page})*"
+            if not any((img.get("caption") or img.get("title") or "") in ans_clean for img in final_image_references):
+                pages = sorted({img.get("page_number") for img in final_image_references if img.get("page_number")})
+                page_note = f" (see Page{'s' if len(pages) != 1 else ''} {', '.join(str(p) for p in pages)})" if pages else ""
+                ans_clean += f"\n\nRelevant visual evidence is shown below{page_note}."
 
         # Strict fallback clearing: If answer states info not found and no verified visual references exist, clear citations
         if "could not find this information in the uploaded document" in ans_clean.lower() and not final_image_references:

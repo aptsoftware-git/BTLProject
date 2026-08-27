@@ -47,11 +47,12 @@ class MultimodalExtractor:
         
         current_section = None
         desc_parts = []
+        printed_text_parts = []
         for line in lines:
             line_strip = line.strip()
             if not line_strip:
                 continue
-            
+
             # Simple keyword checks to parse VLM response
             if any(term in line_strip.lower() for term in ["image type", "type of image", "image_type"]):
                 current_section = "type"
@@ -73,6 +74,11 @@ class MultimodalExtractor:
                 parts = line_strip.split(":")
                 if len(parts) > 1 and parts[1].strip():
                     entities.extend([e.strip().strip("-* ") for e in parts[1].split(",")])
+            elif any(term in line_strip.lower() for term in ["printed text", "text printed", "printed/overlaid"]):
+                current_section = "printed_text"
+                parts = line_strip.split(":")
+                if len(parts) > 1 and parts[1].strip():
+                    printed_text_parts.append(parts[1].strip())
             elif "keywords" in line_strip.lower():
                 current_section = "keywords"
                 parts = line_strip.split(":")
@@ -85,23 +91,31 @@ class MultimodalExtractor:
                     objects.append(line_strip.strip("-* "))
                 elif current_section == "entities":
                     entities.append(line_strip.strip("-* "))
+                elif current_section == "printed_text":
+                    printed_text_parts.append(line_strip.strip("-* "))
                 elif current_section == "keywords":
                     keywords.extend([k.strip().strip("-* ") for k in line_strip.split(",")])
-                    
+
         if desc_parts:
             description = "\n".join(desc_parts)
-            
+
         # Deduplicate list fields
         objects = sorted(list(set([o for o in objects if len(o) > 1])))
         entities = sorted(list(set([e for e in entities if len(e) > 1])))
         keywords = sorted(list(set([k for k in keywords if len(k) > 1])))
-        
+
+        printed_text = " ".join(printed_text_parts).strip()
+        NONE_MARKERS = ("none", "n/a", "na", "-", "blank", "no text", "not visible", "not applicable")
+        if printed_text.lower().strip(".") in NONE_MARKERS:
+            printed_text = ""
+
         return {
             "image_type": img_type or "Diagram",
             "semantic_description": description.strip(),
             "objects": objects,
             "entities": entities,
-            "keywords": keywords
+            "keywords": keywords,
+            "printed_text": printed_text
         }
 
     def _update_job_status(
@@ -504,6 +518,20 @@ class MultimodalExtractor:
         if cumulative_stats:
             agent.stats.update(cumulative_stats)
 
+        # Content-based image deduplication registry, persisted across the
+        # whole streaming extraction so a logo/header/footer repeated in a
+        # later batch is still caught against canonicals from earlier batches.
+        from src.rag.image_deduplicator import ImageDeduplicationRegistry
+        dedup_registry = ImageDeduplicationRegistry()
+        if output_dir and start_page > 0:
+            # Resuming from a checkpoint: prime the registry with images already
+            # written by earlier (pre-crash) batches so duplicates spanning the
+            # restart boundary are still caught.
+            existing_images_dir = output_dir / "05_images"
+            if existing_images_dir.exists():
+                for existing_png in sorted(existing_images_dir.glob("image_*.png")):
+                    dedup_registry.check_and_register(existing_png, existing_png.stem)
+
         # Initialize Docling Converter once
         converter = None
         try:
@@ -704,6 +732,44 @@ class MultimodalExtractor:
                         logger.warning(f"Physical image file could not be created for {seq_name} (Page {img_meta.page_number}). Skipping metadata save to enforce 1:1 mapping.")
                         continue
 
+                    # Content-based duplicate detection (exact + near-duplicate
+                    # perceptual hash), BEFORE any grounding, VLM captioning,
+                    # JSON metadata write, or chunking/indexing happens for
+                    # this image. Repeated logos, headers, footers, decorative
+                    # assets, and any other pixel-identical/near-identical
+                    # repeat are collapsed onto their earlier canonical copy;
+                    # genuinely different images are never touched.
+                    canonical_seq = dedup_registry.check_and_register(new_png_path, seq_name)
+                    if canonical_seq is not None:
+                        from src.rag.image_deduplicator import merge_duplicate_page_into_canonical
+                        canonical_json_path = output_dir / "05_images" / f"{canonical_seq}.json"
+                        merge_duplicate_page_into_canonical(
+                            canonical_json_path=canonical_json_path,
+                            duplicate_page_number=img_meta.page_number,
+                            duplicate_image_id=img_meta.image_id,
+                        )
+                        try:
+                            new_png_path.unlink()
+                        except Exception:
+                            pass
+                        # Remove from every structure chunk_builder / master doc
+                        # will read, so the duplicate is invisible to chunking
+                        # and indexing (not merely undescribed).
+                        master_structured_doc.images.pop(f"b{batch_index}_{img_id}", None)
+                        batch_structured_doc.images.pop(img_id, None)
+                        batch_structured_doc.elements = [
+                            el for el in batch_structured_doc.elements
+                            if not (
+                                el.type == "image"
+                                and (el.id.endswith(img_id) or (el.metadata.image_id or "").endswith(img_id))
+                            )
+                        ]
+                        logger.info(
+                            f"Duplicate image detected: {seq_name} (Page {img_meta.page_number}) "
+                            f"merged into canonical {canonical_seq}; excluded from chunking/indexing."
+                        )
+                        continue
+
                     # Step 3: Hierarchical Caption Detection & Layout Association
                     page_elements = [
                         el for el in batch_structured_doc.elements 
@@ -763,11 +829,14 @@ class MultimodalExtractor:
                                 f"Caption: {img_meta.caption or ''}\n"
                                 f"OCR text: {img_meta.ocr_text or ''}\n"
                                 "Please provide a structured response in natural language describing:\n"
-                                "1. Image Type (e.g. Graph, Chart, Map, Photo, Diagram, Flowchart, Logo, Screenshot)\n"
+                                "1. Image Type (e.g. Graph, Chart, Map, Photo, Diagram, Flowchart, Logo, Screenshot, Portrait Photo)\n"
                                 "2. Semantic Description (a detailed explanation of the overall meaning)\n"
                                 "3. Detected Objects (list of main objects/elements)\n"
                                 "4. Detected Entities (people, names, or organizations if any)\n"
                                 "5. Keywords (a list of comma-separated keywords)\n"
+                                "6. Printed Text (transcribe verbatim any name, caption, designation, or other text\n"
+                                "   actually printed/overlaid on the image itself, e.g. a name label under a portrait;\n"
+                                "   leave blank if none is visible)\n"
                                 "\nAnswer clearly and directly."
                             )
                             vlm_text = ollama_client.generate_vision(
@@ -776,17 +845,81 @@ class MultimodalExtractor:
                                 image_bytes_b64=img_b64
                             )
                             parsed = self._parse_vlm_output(vlm_text)
-                            if not img_meta.image_type or img_meta.image_type in ("Photo", "Diagram", "Image"):
+                            # A grounded image_type is only trusted here when it came from a
+                            # real document signal (an explicit caption, a same-card name/photo
+                            # layout, or OCR-read identity). Anything else -- including Docling's
+                            # own built-in picture classifier, which can mislabel a full-page
+                            # portrait as e.g. "Chart/Graph" with no caption to cross-check against --
+                            # is a low-confidence guess the VLM's actual look at the pixels may correct.
+                            if img_meta.association_method not in ("same_card_layout", "explicit_caption", "ocr_grounded_identity"):
                                 img_meta.image_type = parsed.get("image_type", img_meta.image_type)
                             img_meta.semantic_description = parsed.get("semantic_description", "")
                             img_meta.objects = parsed.get("objects", [])
                             img_meta.detected_entities = parsed.get("entities", [])
                             img_meta.keywords = parsed.get("keywords", [])
+                            if not img_meta.ocr_text and parsed.get("printed_text"):
+                                img_meta.ocr_text = parsed["printed_text"]
                         except Exception as vlm_err:
                             logger.warning(f"VLM analysis failed for {seq_name}: {vlm_err}")
 
                     if not img_meta.semantic_description:
                         img_meta.semantic_description = grounded.get("semantic_description") or f"Document visual graphic on Page {img_meta.page_number}."
+
+                    # Late signature-grounded identity promotion: checked
+                    # BEFORE the generic OCR-grounded portrait promotion
+                    # below, since a signature block's OCR text also
+                    # contains a titled name and would otherwise always be
+                    # misread as a portrait. Uses only generic English
+                    # signature phrases, never any person/organization name.
+                    is_late_signature_block = False
+                    if not img_meta.entity_name and img_meta.ocr_text:
+                        _SIG_INDICATORS = (
+                            "signature", "signed by", "authorised signatory",
+                            "authorized signatory", "for and on behalf of", "sd/-"
+                        )
+                        if any(ind in img_meta.ocr_text.lower() for ind in _SIG_INDICATORS):
+                            is_late_signature_block = True
+                            from src.rag.image_processor import extract_generic_person_identity, extract_untitled_name_near_designation
+                            sig_identity = extract_generic_person_identity(img_meta.ocr_text) or extract_untitled_name_near_designation(img_meta.ocr_text)
+                            if sig_identity:
+                                entity_name, designation = sig_identity
+                                img_meta.entity_name = entity_name
+                                img_meta.designation = designation
+                                img_meta.title = entity_name
+                                img_meta.subtitle = designation or "Signature"
+                                img_meta.image_type = "Signature"
+                                img_meta.layout_context = "signature_block"
+                                img_meta.association_method = "signature_text_grounded"
+                                img_meta.association_confidence = 0.85
+                                img_meta.confidence = 0.85
+                                img_meta.caption_text = f"Signature of {entity_name} ({designation})" if designation else f"Signature of {entity_name}"
+                                img_meta.caption = img_meta.caption_text
+                                img_meta.explicit_caption = img_meta.caption_text
+
+                    # Late OCR-grounded identity promotion: the layout grounder runs before
+                    # the VLM call above and can only see caption/OCR text known at that time.
+                    # If the VLM's transcription of text printed on the image itself (or any
+                    # OCR text otherwise present) reveals a name/designation that grounding
+                    # missed, apply the same real-text-only identity rule here so images whose
+                    # only identifying signal is baked into the pixels (no separate caption
+                    # text-block for Docling to parse) still get correctly associated.
+                    if not img_meta.entity_name and not is_late_signature_block and img_meta.ocr_text:
+                        from src.rag.image_processor import extract_generic_person_identity, extract_untitled_name_near_designation
+                        ocr_identity = extract_generic_person_identity(img_meta.ocr_text) or extract_untitled_name_near_designation(img_meta.ocr_text)
+                        if ocr_identity:
+                            entity_name, designation = ocr_identity
+                            img_meta.entity_name = entity_name
+                            img_meta.designation = designation
+                            img_meta.title = entity_name
+                            img_meta.subtitle = designation
+                            img_meta.image_type = "Portrait Photo"
+                            img_meta.layout_context = "ocr_grounded_portrait"
+                            img_meta.association_method = "ocr_grounded_identity"
+                            img_meta.association_confidence = 0.80
+                            img_meta.confidence = 0.80
+                            img_meta.caption_text = f"Portrait of {entity_name} ({designation})" if designation else f"Portrait of {entity_name}"
+                            img_meta.caption = img_meta.caption_text
+                            img_meta.explicit_caption = img_meta.caption_text
 
                     # Post-VLM Retrievability & Score Re-evaluation
                     is_logo_semantic = (
@@ -795,19 +928,28 @@ class MultimodalExtractor:
                         any("logo" in str(k).lower() for k in (img_meta.keywords or []))
                     )
                     if is_logo_semantic:
+                        from src.rag.image_processor import extract_generic_organization_name
+                        org_name = (
+                            extract_generic_organization_name([
+                                img_meta.explicit_caption, img_meta.semantic_description,
+                                img_meta.ocr_text, batch_structured_doc.title
+                            ])
+                            or (batch_structured_doc.title.strip() if batch_structured_doc.title else None)
+                            or "the associated organization"
+                        )
                         img_meta.image_type = "Logo"
                         img_meta.importance_score = "HIGH"
                         img_meta.retrievable = True
-                        img_meta.title = f"Company Logo - {batch_structured_doc.title or 'BTL EPC Limited'}"
+                        img_meta.title = f"Company Logo - {org_name}"
                         img_meta.subtitle = "Official Brand Identity"
-                        img_meta.caption_text = f"Company Logo of {batch_structured_doc.title or 'BTL EPC Limited'}"
+                        img_meta.caption_text = f"Company Logo of {org_name}"
                         img_meta.caption = img_meta.caption_text
-                        img_meta.keywords = list(set((img_meta.keywords or []) + ["logo", "company logo", "brand", "emblem", "insignia", "BTL", "EPC", "BTL EPC", "BTL EPC Limited"]))
-                        img_meta.detected_entities = list(set((img_meta.detected_entities or []) + ["BTL EPC Limited", "BTL EPC"]))
+                        img_meta.keywords = list(set((img_meta.keywords or []) + ["logo", "company logo", "brand", "emblem", "insignia", org_name]))
+                        img_meta.detected_entities = list(set((img_meta.detected_entities or []) + [org_name]))
                     elif img_meta.image_type in ("Portrait", "Portrait Photo") or img_meta.entity_name:
                         img_meta.importance_score = "HIGH"
                         img_meta.retrievable = True
-                    elif img_meta.image_type in ("Chart", "Graph", "Chart/Graph", "Diagram", "Table", "Map"):
+                    elif img_meta.image_type in ("Chart", "Graph", "Chart/Graph", "Diagram", "Table", "Map", "Signature"):
                         img_meta.importance_score = "HIGH"
                         img_meta.retrievable = True
 
@@ -936,6 +1078,18 @@ class MultimodalExtractor:
                         except Exception as e:
                             logger.warning(f"Could not remove non-canonical file {f.name}: {e}")
 
+        # Image deduplication summary: total extracted -> duplicates removed -> unique retained -> images indexed
+        dedup_stats = dedup_registry.summary()
+        images_indexed = agent.stats.get("by_type", {}).get("image", 0)
+        logger.info(
+            "Image pipeline summary | total extracted: %d -> duplicates removed: %d -> "
+            "unique retained: %d -> images indexed: %d",
+            dedup_stats["total_extracted"],
+            dedup_stats["duplicates_removed"],
+            dedup_stats["unique_retained"],
+            images_indexed,
+        )
+
         # Ingestion Completed
         self._update_job_status(doc_id, "Ingestion Completed", 100.0, total_pages, total_pages, batch_size, total_batches, total_batches, "0s")
 
@@ -961,6 +1115,11 @@ class MultimodalExtractor:
                 f"- **VLM Vision Descriptions**: {vlm_count}\n"
                 f"- **Processing Strategy**: {analysis['complexity']} (Safe Streaming Mode)\n"
                 f"- **Total Processing Time**: {processing_time:.2f} seconds\n\n"
+                f"## Image Deduplication\n"
+                f"- **Total Images Extracted**: {dedup_stats['total_extracted']}\n"
+                f"- **Duplicate Images Removed**: {dedup_stats['duplicates_removed']}\n"
+                f"- **Unique Images Retained**: {dedup_stats['unique_retained']}\n"
+                f"- **Images Indexed**: {images_indexed}\n\n"
                 f"## Collections\n"
                 f"- **ChromaDB**: `doc_{doc_id}`\n"
             )

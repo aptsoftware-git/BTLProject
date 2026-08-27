@@ -186,6 +186,42 @@ class VectorStore:
                 if val:
                     flat_metadata[img_list] = json.dumps(val)
 
+            # Document-grounded image metadata (entity association, layout
+            # grounding, and retrieval gating) -- required so a chunk loaded
+            # straight from ChromaDB (bypassing document_chunks.json) still
+            # carries the same portrait/signature/logo association and
+            # retrievability signals as the primary load path.
+            if getattr(meta, "title", None):
+                flat_metadata["title"] = str(meta.title)
+            if getattr(meta, "subtitle", None):
+                flat_metadata["subtitle"] = str(meta.subtitle)
+            if getattr(meta, "explicit_caption", None):
+                flat_metadata["explicit_caption"] = str(meta.explicit_caption)
+            if getattr(meta, "caption_text", None):
+                flat_metadata["caption_text"] = str(meta.caption_text)
+            if getattr(meta, "entity_name", None):
+                flat_metadata["entity_name"] = str(meta.entity_name)
+            if getattr(meta, "designation", None):
+                flat_metadata["designation"] = str(meta.designation)
+            if getattr(meta, "section_heading", None):
+                flat_metadata["section_heading"] = str(meta.section_heading)
+            if getattr(meta, "text_before", None):
+                flat_metadata["text_before"] = str(meta.text_before)
+            if getattr(meta, "text_after", None):
+                flat_metadata["text_after"] = str(meta.text_after)
+            if getattr(meta, "layout_context", None):
+                flat_metadata["layout_context"] = str(meta.layout_context)
+            if getattr(meta, "importance_score", None):
+                flat_metadata["importance_score"] = str(meta.importance_score)
+            if getattr(meta, "retrievable", None) is not None:
+                flat_metadata["retrievable"] = bool(meta.retrievable)
+            if getattr(meta, "association_method", None):
+                flat_metadata["association_method"] = str(meta.association_method)
+            if getattr(meta, "association_confidence", None) is not None:
+                flat_metadata["association_confidence"] = float(meta.association_confidence)
+            if getattr(meta, "confidence", None) is not None:
+                flat_metadata["confidence"] = float(meta.confidence)
+
             if meta.bounding_boxes:
                 bboxes_data = []
                 for b in meta.bounding_boxes:

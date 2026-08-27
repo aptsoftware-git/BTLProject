@@ -66,12 +66,6 @@ class QueryProcessor:
     intent routing, and query embedding generation.
     """
 
-    KNOWN_DIRECTORS: List[str] = [
-        "sunil kumar mittra", "sunil mittra", "ravi todi", "rhea todi", "avik mukherjee",
-        "aviik mukherjee", "subrata paul", "arundhuti dhar", "sandipan chakravortty",
-        "ketan mangaldas shanghavi", "ketan shanghavi", "sourav daspatnaik", "sourab kumar jha", "utkarsh tiwari"
-    ]
-
     def __init__(self, embedder: Optional[Embedder] = None) -> None:
         self.embedder = embedder
 
@@ -100,10 +94,14 @@ class QueryProcessor:
 
         return processed
 
-    def classify_query(self, query: str) -> QueryClassification:
+    def classify_query(self, query: str, known_entities: Optional[List[str]] = None) -> QueryClassification:
         """
         Classifies user query into text, factual/entity, summary, table, image/visual, or mixed.
         Detects specific entity targets, visual asset types, and table display flags.
+
+        `known_entities` is the document's own grounded entity registry
+        (e.g. names found in its image/text chunks), used to detect person
+        mentions generically -- never a fixed roster of names.
         """
         q_raw = query.strip()
         q = q_raw.lower()
@@ -192,12 +190,15 @@ class QueryProcessor:
         ]
         is_leadership = has_phrase(leadership_triggers)
 
-        # Detect all specific persons mentioned (including multi-person queries)
+        # Detect all specific persons mentioned (including multi-person queries),
+        # purely from the document's own known-entity registry -- never a
+        # fixed roster of names.
         detected_persons = []
-        for d_name in self.KNOWN_DIRECTORS:
-            if re.search(rf"\b{re.escape(d_name)}\b", q):
-                if d_name not in detected_persons:
-                    detected_persons.append(d_name)
+        for ent in (known_entities or []):
+            ent_norm = re.sub(r"\s+", " ", ent.strip().lower())
+            if len(ent_norm) > 2 and re.search(rf"\b{re.escape(ent_norm)}\b", q):
+                if ent_norm not in detected_persons:
+                    detected_persons.append(ent_norm)
 
         detected_person = detected_persons[0] if detected_persons else None
 
@@ -205,14 +206,14 @@ class QueryProcessor:
         target_entities = []
         for dp in detected_persons:
             target_entities.append(dp.title())
-        if is_cin or "u29100wb1992plc054541" in q:
+        if is_cin:
             target_entities.append("CIN")
         if is_office:
             target_entities.append("Office Address")
         if is_auditor:
             target_entities.append("Statutory Auditors")
-        if is_company_id or "btl" in q:
-            target_entities.append("BTL EPC LIMITED")
+        if is_company_id:
+            target_entities.append("Company Name")
 
         # Determine Visual Target Type
         target_visual_type = None

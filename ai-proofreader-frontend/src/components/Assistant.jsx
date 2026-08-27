@@ -59,19 +59,13 @@ const parseMarkdown = (text) => {
   html = html.replace(/^##\s+(.+)$/gm, '<h2 style="font-size:15px; font-weight:700; margin:18px 0 8px; text-align:left; color:var(--text-primary);">$1</h2>');
   html = html.replace(/^#\s+(.+)$/gm, '<h1 style="font-size:17px; font-weight:800; margin:22px 0 10px; text-align:left; color:var(--text-primary);">$1</h1>');
   
-  // Handle Markdown Images: ![alt](url)
-  html = html.replace(/!\[([^\]]*)\]\(([^)]+)\)/g, (match, alt, src) => {
-    let cleanSrc = src.trim();
-    if (!cleanSrc.startsWith("http") && !cleanSrc.startsWith("/")) {
-      cleanSrc = "/" + cleanSrc;
-    }
-    return `<div style="margin: 14px 0; text-align: center;">
-      <a href="${cleanSrc}" target="_blank" rel="noopener noreferrer" style="display:inline-block; max-width:100%;">
-        <img src="${cleanSrc}" alt="${alt || 'Document Figure'}" style="max-width:100%; max-height:420px; border-radius:8px; border:1px solid var(--border); box-shadow: 0 4px 12px rgba(0,0,0,0.08); object-fit: contain; background: #ffffff;" />
-      </a>
-      ${alt ? `<div style="font-size: 11.5px; color: var(--text-muted); margin-top: 6px; font-style: italic; font-weight: 500;">📷 ${alt}</div>` : ''}
-    </div>`;
-  });
+  // Markdown image syntax (![alt](url)) in the assistant's own free-text
+  // answer is NEVER rendered as a live <img> here -- images are only ever
+  // displayed from the backend's verified `imageReferences` gallery
+  // (see ImageEvidenceCard below), so the frontend never sources an image
+  // element from arbitrary/LLM-influenced text. Any such markup is
+  // collapsed to its caption text only.
+  html = html.replace(/!\[([^\]]*)\]\([^)]+\)/g, (match, alt) => (alt ? alt : ""));
 
   html = html.replace(/\n\n/g, '<br/><br/>');
   return html;

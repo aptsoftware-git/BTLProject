@@ -269,6 +269,26 @@ def test_canonical_image_id_connects_retriever_to_gallery_api(indexed_gallery):
 # already selected that image's chunk into the LLM's context.
 # ---------------------------------------------------------------------------
 
+_MINIMAL_PNG_BYTES = (
+    b"\x89PNG\r\n\x1a\n\x00\x00\x00\rIHDR\x00\x00\x00\x01\x00\x00\x00\x01"
+    b"\x08\x02\x00\x00\x00\x90wS\xde\x00\x00\x00\x0cIDATx\x9cc\xf8\xcf\xc0"
+    b"\x00\x00\x03\x01\x01\x00\x18\xdd\x8d\xb0\x00\x00\x00\x00IEND\xaeB`\x82"
+)
+
+
+@pytest.fixture(autouse=True)
+def _indirect_query_fake_image_file():
+    # validate_physical_file requires a real backing file on disk (no
+    # test/mock substring bypass) -- create the one _fake_image_ref() below
+    # claims, so these tests exercise real, non-bypassed validation.
+    real_path = ROOT_DIR / "data" / "output" / "test_indirect_doc" / "05_images" / "image_301.png"
+    real_path.parent.mkdir(parents=True, exist_ok=True)
+    real_path.write_bytes(_MINIMAL_PNG_BYTES)
+    yield
+    if real_path.exists():
+        real_path.unlink()
+
+
 def _make_chat_service():
     # retriever/ollama are never touched by _filter_and_deduplicate_image_references
     return ChatService(retriever=MagicMock(), ollama_client=MagicMock())
@@ -359,17 +379,40 @@ def test_direct_visual_query_still_works_unchanged():
 
 
 def test_ambiguous_surname_query_still_rejected_even_if_chunk_used_in_context():
+    # Ambiguity is derived purely from THIS document's own registered
+    # entities (never a fixed surname list) -- so the fixture must itself
+    # contain two distinct people sharing the surname for "Todi" to be
+    # genuinely ambiguous here.
     service = _make_chat_service()
-    img = _fake_image_ref("c_todi", image_type="Portrait Photo", entity_name="Mr. Ravi Todi")
+    img_a = _fake_image_ref("c_todi_a", image_type="Portrait Photo", entity_name="Mr. Ravi Todi")
+    img_b = _fake_image_ref("c_todi_b", image_type="Portrait Photo", entity_name="Ms. Rhea Todi")
     result = service._filter_and_deduplicate_image_references(
         question="Show me the photo of Todi",  # surname only -- ambiguous
         answer="Here is a photo.",
-        image_references=[img],
-        used_chunk_ids=["c_todi"],
+        image_references=[img_a, img_b],
+        used_chunk_ids=["c_todi_a", "c_todi_b"],
         page_references=[60],
         document_id="test_indirect_doc",
     )
     assert result == []
+
+
+def test_bare_surname_query_not_ambiguous_when_document_has_only_one_match():
+    """A bare surname that resolves to exactly ONE person in this document's
+    own registry is a normal, unambiguous portrait lookup -- ambiguity must
+    never be assumed from the surname text alone."""
+    service = _make_chat_service()
+    img = _fake_image_ref("c_todi_solo", image_type="Portrait Photo", entity_name="Mr. Ravi Todi")
+    result = service._filter_and_deduplicate_image_references(
+        question="Show me the photo of Todi",
+        answer="Here is a photo.",
+        image_references=[img],
+        used_chunk_ids=["c_todi_solo"],
+        page_references=[60],
+        document_id="test_indirect_doc",
+    )
+    assert len(result) == 1
+    assert result[0]["chunk_id"] == "c_todi_solo"
 
 
 def test_keyword_free_query_with_no_relevant_image_returns_nothing():

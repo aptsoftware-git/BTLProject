@@ -342,6 +342,18 @@ def test_chat_service_empty_retrieval_unsupported_question():
 
 
 def test_chat_service_multimodal_image_retrieval_and_citation():
+    # validate_physical_file requires a real backing file on disk (no
+    # test/mock substring bypass) -- create a minimal real PNG at the path
+    # this synthetic chunk claims, so the test exercises real validation.
+    from src.config import ROOT_DIR
+    real_image_path = ROOT_DIR / "data" / "output" / "doc_test" / "05_images" / "image_001.png"
+    real_image_path.parent.mkdir(parents=True, exist_ok=True)
+    real_image_path.write_bytes(
+        b"\x89PNG\r\n\x1a\n\x00\x00\x00\rIHDR\x00\x00\x00\x01\x00\x00\x00\x01"
+        b"\x08\x02\x00\x00\x00\x90wS\xde\x00\x00\x00\x0cIDATx\x9cc\xf8\xcf\xc0"
+        b"\x00\x00\x03\x01\x01\x00\x18\xdd\x8d\xb0\x00\x00\x00\x00IEND\xaeB`\x82"
+    )
+
     # Setup mock image chunk
     img_meta = ChunkMetadata(
         chunk_id="doc_test_chunk_0005",

@@ -66,7 +66,7 @@ class ContextBuilder:
 
                 # Gating: filter out non-retrievable / LOW importance decorative elements
                 # unless explicitly matched and provided as a verified visual chunk (e.g. portrait, logo)
-                is_explicit_logo = (getattr(meta, "image_type", None) == "Logo" or "logo" in (getattr(meta, "title", None) or "").lower() or (meta.page_number in (1, 2, 3) and getattr(meta, "entity_name", None) is None))
+                is_explicit_logo = (getattr(meta, "image_type", None) == "Logo" or "logo" in (getattr(meta, "title", None) or "").lower())
                 is_explicit_portrait = bool(getattr(meta, "entity_name", None) or "portrait" in (getattr(meta, "image_type", None) or "").lower())
                 
                 if not is_explicit_logo and not is_explicit_portrait:

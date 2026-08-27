@@ -1,5 +1,6 @@
 import json
 import logging
+import re
 from pathlib import Path
 from typing import List, Dict, Any, Optional, Tuple, Set
 
@@ -71,7 +72,7 @@ class Retriever:
             "show portrait", "show picture", "director's photo", "directors photo", "photo of", "photos of",
             "picture of", "pictures of", "image of", "images of"
         ]
-        if has_any(person_visual_triggers) or (("photo" in q or "picture" in q or "image" in q) and any(d in q for d in ["director", "board", "sunil", "ravi", "avik", "aviik", "rhea", "subrata", "arundhuti", "sandipan", "ketan", "sourav", "sourab", "utkarsh", "person", "people", "man", "woman"])):
+        if has_any(person_visual_triggers) or (("photo" in q or "picture" in q or "image" in q) and any(d in q for d in ["director", "board", "person", "people", "man", "woman"])):
             return "person_portrait_visual"
 
         # 2. General Visual / Diagram / Chart Intent
@@ -115,10 +116,7 @@ class Retriever:
         # 5. Entity / Person Lookup & Statutory Auditors (Biographies, Roles, Auditors)
         person_lookup_terms = [
             "who is", "who are", "who was", "name of the", "names of", "person", "people",
-            "founder", "promoter", "ravi todi", "avik mukherjee", "aviik mukherjee", "sunil mittra",
-            "sunil kumar mittra", "rhea todi", "subrata paul", "arundhuti dhar", "sandipan chakravortty",
-            "ketan shanghavi", "sourav daspatnaik", "sourab kumar jha", "utkarsh tiwari",
-            "statutory auditor", "statutory auditors", "auditors", "audit firm"
+            "founder", "promoter", "statutory auditor", "statutory auditors", "auditors", "audit firm"
         ]
         if has_any(person_lookup_terms):
             return "entity_person_lookup"
@@ -238,27 +236,23 @@ class Retriever:
 
     def expand_query(self, query: str) -> str:
         """
-        Expands query terms with corporate, leadership, financial, and domain-specific aliases.
+        Expands query terms with generic corporate-role/domain synonyms (title
+        abbreviations, visual-content vocabulary). Never expands to any
+        specific company name, person name, address, or ID -- those come
+        from the document's own entity registry via `_get_expanded_aliases`,
+        not a fixed dictionary.
         """
         import re
         expanded = query
         synonyms = {
-            r"\b(company name|name of company|name of the company)\b": "company name BTL EPC LTD BTL EPC LIMITED BTL EPC engineering",
-            r"\b(managing director|md)\b": "managing director MD Ravi Todi promoter and managing director executive director",
-            r"\b(whole-time director|whole time director|wtd)\b": "whole-time director whole time director WTD Rhea Todi Aviik Mukherjee Avik Mukherjee executive director",
-            r"\b(independent director|independent directors)\b": "independent director non-executive independent director Sunil Kumar Mittra Subrata Paul Arundhuti Dhar Sourav Daspatnaik Ketan Shanghavi",
-            r"\b(board of directors|board members|the board|directors)\b": "board of directors directors board members corporate governance composition of board executive committee Page 49",
-            r"\b(chairman|chairperson)\b": "board chairman chairperson executive chairman Sunil Kumar Mittra Independent Director",
-            r"\b(chief financial officer|cfo)\b": "chief financial officer CFO Sourab Kumar Jha head of finance finance director",
-            r"\b(company secretary|cs)\b": "company secretary CS Utkarsh Tiwari compliance officer",
-            r"\b(statutory auditor|statutory auditors|auditors)\b": "statutory auditors JKVS & Co Chartered Accountants 5A Nandalal Jew Road Kolkata independent auditor",
-            r"\b(registered office)\b": "registered office 2 Jessore Road Dumdum Kolkata 700028 West Bengal",
-            r"\b(corporate office)\b": "corporate office Shrachi Tower 7th Floor 686 Anandapur EM Bypass Kolkata 700107",
-            r"\b(cin|corporate identification number)\b": "CIN U29100WB1992PLC054541 corporate identification number CIN: Page 66 Page 69 Page 216",
-            r"\b(business divisions|divisions|businesses)\b": "business divisions Engineering Division Agri-mech Division Bulk Material Handling Ash Handling Water Management",
-            r"\b(manufacturing facilities|manufacturing plant|plants)\b": "manufacturing facilities 2 Jessore Road 9 Jessore Road 17 Jessore Road Durgapur Kharagpur West Bengal",
-            r"\b(revenue|turnover|sales)\b": "revenue from operations total income turnover sales gross revenue financial performance",
-            r"\b(profit|pat|pbt)\b": "profit after tax PAT profit before tax PBT net profit net income operating profit",
+            r"\b(md)\b": "managing director MD",
+            r"\b(wtd)\b": "whole-time director WTD",
+            r"\b(cfo)\b": "chief financial officer CFO",
+            r"\b(cs)\b": "company secretary CS",
+            r"\b(cin)\b": "corporate identification number CIN",
+            r"\b(kmp)\b": "key managerial personnel KMP",
+            r"\b(pat)\b": "profit after tax PAT",
+            r"\b(pbt)\b": "profit before tax PBT",
             r"\b(diagram|flowchart|architecture)\b": "diagram flowchart architecture visual figure illustration schematic workflow system diagram",
             r"\b(chart|graph|plot)\b": "chart graph plot visual trend curve data graphic figure",
             r"\b(figure|image|photo|illustration|picture|portrait)\b": "figure image photo portrait illustration visual picture diagram graphic"
@@ -268,52 +262,53 @@ class Retriever:
                 expanded += " " + replacement
         return expanded
 
-    def _get_expanded_aliases(self, query: str) -> List[str]:
+    def _get_expanded_aliases(self, query: str, known_entities: Optional[List[str]] = None) -> List[str]:
         """
-        Extracts specific alias keywords and phrases for exact matching and candidate boosting.
+        Extracts generic role/section keyword aliases for exact matching and
+        candidate boosting -- plus, when the caller supplies the document's
+        own known-entity registry (e.g. names grounded from its own image
+        chunks), any entity whose name overlaps the query is expanded into
+        its own name-part variants (full name, first name, last name).
+        Nothing here is specific to any one company/person/address/ID.
         """
         import re
         q = query.lower()
         aliases = []
-        
-        if re.search(r"\b(company name|name of company|name of the company)\b", q):
-            aliases.extend(["btl epc ltd", "btl epc limited", "btl epc", "company name"])
-        if re.search(r"\b(managing director|md)\b", q):
-            aliases.extend(["managing director", "md", "ravi todi", "mr. ravi todi"])
-        if re.search(r"\b(whole-time director|whole time director|wtd)\b", q):
-            aliases.extend(["whole-time director", "whole time director", "wtd", "rhea todi", "avik mukherjee", "aviik mukherjee"])
-        if re.search(r"\b(independent director|independent directors)\b", q):
-            aliases.extend(["independent director", "sunil kumar mittra", "subrata paul", "arundhuti dhar", "sourav daspatnaik", "ketan mangaldas shanghavi"])
-        if re.search(r"\b(chairman|chairperson)\b", q):
-            aliases.extend(["chairman", "mr. sunil kumar mittra", "sunil kumar mittra", "independent director"])
-        if re.search(r"\b(board of directors|directors|board)\b", q):
-            aliases.extend(["board of directors", "directors", "board members", "composition of board", "page 49"])
-        if re.search(r"\b(registered office)\b", q):
-            aliases.extend(["registered office", "2, jessore road, dumdum kolkata-700028", "jessore road"])
-        if re.search(r"\b(corporate office)\b", q):
-            aliases.extend(["corporate office", "shrachi tower", "686, anandapur", "e. m bypass"])
-        if re.search(r"\b(cin|corporate identification number)\b", q):
-            aliases.extend(["cin:", "cin", "u29100wb1992plc054541", "corporate identification number"])
-        if re.search(r"\b(auditor|statutory auditor|auditors)\b", q):
-            aliases.extend(["statutory auditors", "jkvs & co.", "jkvs", "5a, nandalal jew road"])
-        if re.search(r"\b(cfo|chief financial officer)\b", q):
-            aliases.extend(["chief financial officer", "cfo", "sourab kumar jha"])
-        if re.search(r"\b(cs|company secretary)\b", q):
-            aliases.extend(["company secretary", "utkarsh tiwari", "cs"])
-        if re.search(r"\b(business division|divisions)\b", q):
-            aliases.extend(["business division", "engineering division", "agri-mech division", "bulk material handling"])
-        if re.search(r"\b(manufacturing facilities|manufacturing plant)\b", q):
-            aliases.extend(["manufacturing facilities", "jessore road", "durgapur", "kharagpur"])
-        if re.search(r"\b(revenue|turnover|sales)\b", q):
-            aliases.extend(["revenue from operations", "total income", "turnover", "sales"])
-        if re.search(r"\b(profit|pat|pbt)\b", q):
-            aliases.extend(["profit after tax", "pat", "profit before tax", "pbt", "net profit"])
 
-        from src.rag.image_processor import PortraitSpatialValidator
-        for d in PortraitSpatialValidator.KNOWN_DIRECTORS:
-            if any(v in q for v in d["variants"]) or d["name"].lower() in q:
-                aliases.extend([d["name"].lower()] + [v.lower() for v in d["variants"]])
-            
+        role_terms = {
+            r"\b(company name|name of company|name of the company)\b": ["company name"],
+            r"\b(managing director|md)\b": ["managing director", "md"],
+            r"\b(whole-time director|whole time director|wtd)\b": ["whole-time director", "whole time director", "wtd"],
+            r"\b(independent director|independent directors)\b": ["independent director"],
+            r"\b(chairman|chairperson)\b": ["chairman", "chairperson"],
+            r"\b(board of directors|directors|board)\b": ["board of directors", "directors", "board members", "composition of board"],
+            r"\b(registered office)\b": ["registered office"],
+            r"\b(corporate office)\b": ["corporate office"],
+            r"\b(cin|corporate identification number)\b": ["cin", "corporate identification number"],
+            r"\b(auditor|statutory auditor|auditors)\b": ["statutory auditors", "auditor"],
+            r"\b(cfo|chief financial officer)\b": ["chief financial officer", "cfo"],
+            r"\b(cs|company secretary)\b": ["company secretary", "cs"],
+            r"\b(business division|divisions)\b": ["business division"],
+            r"\b(manufacturing facilities|manufacturing plant)\b": ["manufacturing facilities"],
+            r"\b(revenue|turnover|sales)\b": ["revenue from operations", "total income", "turnover", "sales"],
+            r"\b(profit|pat|pbt)\b": ["profit after tax", "pat", "profit before tax", "pbt", "net profit"],
+        }
+        for pattern, keywords in role_terms.items():
+            if re.search(pattern, q):
+                aliases.extend(keywords)
+
+        # Document-derived entity variants: only entities actually present in
+        # THIS document's own registry, expanded into name-part variants
+        # generically (never a fixed roster).
+        for ent in (known_entities or []):
+            ent_norm = Retriever.normalize_entity_text(ent)
+            if not ent_norm:
+                continue
+            tokens = ent_norm.split()
+            if ent_norm in q or any(len(t) > 2 and t in q for t in tokens):
+                aliases.append(ent_norm)
+                aliases.extend(t for t in tokens if len(t) > 2)
+
         return aliases
 
     def _search_exact_phrases(self, chunks: List[DocumentChunk], query: str) -> List[DocumentChunk]:
@@ -392,30 +387,44 @@ class Retriever:
         matched.sort(key=lambda x: x[1], reverse=True)
         return [c for c, _ in matched]
 
+    # India's Companies Act CIN format is a fixed, publicly standardized
+    # pattern (not any one company's specific value): 1 letter + 5 digits +
+    # 2 letters + 4 digits + 3 letters + 6 digits.
+    _CIN_PATTERN = re.compile(r"\b[A-Z]\d{5}[A-Z]{2}\d{4}[A-Z]{3}\d{6}\b")
+
     def _boost_candidates(
-        self, 
-        clean_query: str, 
+        self,
+        clean_query: str,
         fused_results: List[Tuple[DocumentChunk, float, float]],
         intent: Optional[str] = None
     ) -> List[Tuple[DocumentChunk, float, float]]:
         """
         Authority-aware candidate boosting: prioritizes exact factual statements, official directory tables,
-        board of directors profiles, registered office, and entity matches.
+        board of directors profiles, registered office, and entity matches. Purely content-based -- no
+        hardcoded page numbers, company names, or person rosters; boosts are derived from the query's own
+        role/keyword terms and from entities the document itself has grounded (chunk.metadata.people /
+        entity_name).
         """
         import re
         q = clean_query.lower()
         boosted = []
         is_visual_query = (intent in ("visual", "person_portrait_visual"))
-        
-        aliases = self._get_expanded_aliases(q)
-        q_words = [w for w in re.findall(r'\b[a-zA-Z0-9_\-\.]{3,}\b', q) if w not in ("what", "when", "where", "which", "who", "the", "and", "for", "with", "from", "about", "this", "that", "document")]
 
-        # Specific known directors for individual lookup boost
-        director_names = [
-            "sunil kumar mittra", "sunil mittra", "ravi todi", "rhea todi", "avik mukherjee",
-            "aviik mukherjee", "subrata paul", "arundhuti dhar", "sandipan chakravortty",
-            "ketan mangaldas shanghavi", "ketan shanghavi", "sourav daspatnaik"
-        ]
+        # Document's own known people/entities (from every chunk's grounded
+        # `people` / `entity_name` fields), used for generic entity-lookup
+        # boosting -- never a fixed roster.
+        doc_known_people = set()
+        for chunk, _, _ in fused_results:
+            for p in (getattr(chunk.metadata, "people", None) or []):
+                if p:
+                    doc_known_people.add(Retriever.normalize_entity_text(p))
+            en = getattr(chunk.metadata, "entity_name", None)
+            if en:
+                doc_known_people.add(Retriever.normalize_entity_text(en))
+        doc_known_people.discard("")
+
+        aliases = self._get_expanded_aliases(q, known_entities=list(doc_known_people))
+        q_words = [w for w in re.findall(r'\b[a-zA-Z0-9_\-\.]{3,}\b', q) if w not in ("what", "when", "where", "which", "who", "the", "and", "for", "with", "from", "about", "this", "that", "document")]
 
         for chunk, rrf, sem in fused_results:
             boost = 0.0
@@ -424,24 +433,20 @@ class Retriever:
             content_lower = (chunk.content or "").lower()
             heading_lower = (meta.heading or "").lower()
             section_lower = (meta.section or "").lower()
-            person_name = (getattr(meta, "person_name", None) or "").lower()
-            
-            # 1. Primary Company Identification (Pages 1, 2, 4, 89)
-            if intent == "primary_company_identification":
-                if page in (1, 2, 4):
-                    boost += 0.60
-                elif page == 89 and "1. corporate and general information" in section_lower:
-                    boost += 0.55
-                elif "btl epc" in content_lower:
-                    boost += 0.35
+            person_name = (getattr(meta, "entity_name", None) or "").lower()
 
-            # 2. Corporate Office / Registered Office / Directory (Page 50 & 89)
+            # 1. Primary Company Identification -- generic structural signal:
+            # this content is generically an early-document / corporate-info
+            # section, not a specific page number.
+            if intent == "primary_company_identification":
+                if any(k in heading_lower or k in section_lower for k in ("corporate information", "general information", "about the company", "company overview", "company name")):
+                    boost += 0.55
+                elif page <= 3:
+                    boost += 0.25
+
+            # 2. Corporate Office / Registered Office / Directory -- generic keyword match only
             if intent == "corporate_office_factual" or any(k in q for k in ["registered office", "corporate office", "cin", "auditor", "secretary", "cfo", "division", "facility"]):
-                if page == 50:
-                    boost += 0.65
-                elif page == 89 and "registered office" in content_lower:
-                    boost += 0.50
-                if any(alias in heading_lower or alias in content_lower for alias in ["registered office", "corporate office", "statutory auditors", "jkvs", "business division"]):
+                if any(alias in heading_lower or alias in content_lower for alias in ["registered office", "corporate office", "statutory auditors", "business division"]):
                     boost += 0.45
 
             # 2.2 Statutory Auditor & Auditor's Report Boosting
@@ -454,29 +459,34 @@ class Retriever:
                 if meta.chunk_type == "table" or meta.table_id:
                     boost += 0.70
 
-            # 2.5 CIN Direct Search (Pages 66, 69, 216)
+            # 2.5 CIN Direct Search -- generic CIN-format regex, not any one document's specific value
             if any(k in q for k in ["cin", "corporate identification number"]):
-                if "u29100wb1992plc054541" in content_lower or "cin:" in content_lower:
+                if Retriever._CIN_PATTERN.search(chunk.content or "") or "cin:" in content_lower:
                     boost += 0.85
-                elif page in (66, 69, 216):
-                    boost += 0.60
 
-            # 3. Leadership & Board / Person Lookup (Pages 49, 50, 33, 35, 37, 38)
+            # 3. Leadership & Board / Person Lookup -- generic entity-derived boost, no page numbers
             if intent in ("leadership_board", "person_portrait_visual", "entity_person_lookup"):
-                if page == 49:
-                    boost += 0.60
-                elif page == 50:
-                    boost += 0.40
-                elif page in (33, 35, 37, 38):
-                    boost += 0.45
-                    
-                # Specific person match
-                for d_name in director_names:
-                    if d_name in q:
+                for d_name in doc_known_people:
+                    if len(d_name) > 2 and d_name in q:
                         if d_name in person_name or Retriever.fuzzy_match_entity(d_name, person_name):
                             boost += 0.80
                         if d_name in heading_lower or d_name in content_lower:
                             boost += 0.50
+
+                # Generic directory/listing signal: a query about the board
+                # or leadership as a GROUP (no specific name mentioned) has
+                # no single entity to match against. Instead, boost chunks
+                # that themselves mention multiple of the document's own
+                # known people together -- a content-based signal that this
+                # chunk is a director/leadership listing or directory
+                # section, without any hardcoded page number.
+                if intent in ("leadership_board", "entity_person_lookup"):
+                    co_mentioned = sum(
+                        1 for d_name in doc_known_people
+                        if len(d_name) > 2 and (d_name in content_lower or d_name in heading_lower)
+                    )
+                    if co_mentioned >= 2:
+                        boost += min(0.75, 0.20 * co_mentioned)
 
             # 4. Exact Phrase & Entity-Role Match
             for alias in aliases:
@@ -497,9 +507,7 @@ class Retriever:
                     boost += 0.50
                     if getattr(meta, "importance_score", None) == "HIGH":
                         boost += 0.30
-                    if getattr(meta, "association_method", None) in ("explicit_caption", "same_card_layout", "ocr_grounded_identity"):
-                        boost += 0.35
-                    if intent == "person_portrait_visual" and page == 49:
+                    if getattr(meta, "association_method", None) in ("explicit_caption", "same_card_layout", "ocr_grounded_identity", "signature_text_grounded"):
                         boost += 0.40
 
                     # Generic (non-hardcoded) entity match: this image's own
@@ -711,7 +719,22 @@ class Retriever:
         
         # 4. Build Entity Index
         entity_index = self._build_entity_index(search_chunks)
-        
+
+        # Document's own known people/entities (from every chunk's grounded
+        # `people` / `entity_name` fields), reused for generic alias
+        # expansion and ambiguity detection throughout this method -- never
+        # a fixed roster.
+        doc_known_people = set()
+        for c in search_chunks:
+            for p in (getattr(c.metadata, "people", None) or []):
+                if p:
+                    doc_known_people.add(Retriever.normalize_entity_text(p))
+            en = getattr(c.metadata, "entity_name", None)
+            if en:
+                doc_known_people.add(Retriever.normalize_entity_text(en))
+        doc_known_people.discard("")
+        doc_known_people = list(doc_known_people)
+
         # 5. Multi-Stage Candidates Collection
         candidates_dict = {}
         def add_candidates(chunks_list):
@@ -807,7 +830,7 @@ class Retriever:
         
         # 8. Two-Pass Retrieval Fallback
         max_rerank_score = max([score for _, score in reranked]) if reranked else 0.0
-        aliases = self._get_expanded_aliases(query)
+        aliases = self._get_expanded_aliases(query, known_entities=doc_known_people)
         has_targeted_terms = bool(aliases or "board" in query.lower() or "director" in query.lower() or "auditor" in query.lower() or "office" in query.lower())
         
         if max_rerank_score < 0.20 and has_targeted_terms:
@@ -839,24 +862,21 @@ class Retriever:
             c_head = (meta.heading or "").lower()
             p_name = (getattr(meta, "entity_name", None) or getattr(meta, "title", None) or getattr(meta, "person_name", None) or "").lower()
             
-            # If chunk is on authoritative pages with exact matches, give a score floor
-            if meta.page_number in (49, 50, 89):
-                if any(alias in c_text or alias in c_head for alias in aliases):
-                    score = max(score, 0.95)
-                elif intent in ("primary_company_identification", "corporate_office_factual", "leadership_board"):
-                    score = max(score, 0.90)
+            # Authoritative exact-match score floor -- content-based only, no fixed page numbers
+            if any(alias in c_text or alias in c_head for alias in aliases):
+                score = max(score, 0.95)
 
-            # CIN exact matching floor
+            # CIN exact matching floor -- generic CIN-format regex, not any one document's specific value
             if intent == "cin_lookup" or any(k in query.lower() for k in ["cin", "corporate identification number"]):
-                if "u29100wb1992plc054541" in c_text or "cin:" in c_text:
+                if Retriever._CIN_PATTERN.search(chunk.content or "") or "cin:" in c_text:
                     score = max(score, 0.98)
-                    
+
             if (intent in ("person_portrait_visual", "visual") or is_visual_query) and meta.chunk_type == "image":
                 if image_candidates and chunk.metadata.chunk_id in {ic.metadata.chunk_id for ic in image_candidates}:
                     score = max(score, 0.99)
                 elif p_name and any(Retriever.fuzzy_match_entity(alias, p_name) or alias in p_name or p_name in alias for alias in aliases):
                     score = max(score, 0.99)
-                elif "logo" in query.lower() and (getattr(meta, "image_type", None) == "Logo" or "logo" in (getattr(meta, "title", "") or "").lower() or meta.page_number in (1, 2, 3)):
+                elif "logo" in query.lower() and (getattr(meta, "image_type", None) == "Logo" or "logo" in (getattr(meta, "title", "") or "").lower()):
                     score = max(score, 0.99)
                 else:
                     score = max(score, 0.50)
@@ -1322,6 +1342,12 @@ class Retriever:
                     for jf in sorted(list(images_dir.glob("image_*.json"))):
                         stem = jf.stem
                         rel_path = f"05_images/{stem}.png"
+                        png_path = images_dir / f"{stem}.png"
+                        if not png_path.exists() or png_path.stat().st_size == 0:
+                            # Orphaned metadata JSON with no backing image file --
+                            # never surface a chunk with no valid file mapping.
+                            logger.warning(f"Skipping image metadata {jf.name}: no backing PNG at {png_path}")
+                            continue
                         try:
                             with open(jf, "r", encoding="utf-8") as f:
                                 im_data = json.load(f)
