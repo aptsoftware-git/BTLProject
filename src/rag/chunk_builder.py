@@ -2,7 +2,7 @@ import logging
 import re
 from pathlib import Path
 from typing import List, Dict, Optional, Any
-from src.rag.document_schema import StructuredDocument, DocumentElement, BoundingBox
+from src.rag.document_schema import StructuredDocument, DocumentElement, ElementMetadata, BoundingBox
 from src.rag.chunk_schema import DocumentChunk, ChunkMetadata
 from src.rag.chunk_utils import estimate_tokens, count_words, format_section_path
 
@@ -340,6 +340,7 @@ class ChunkBuilder:
         
         # Process any images in doc.images that were not encountered in doc.elements
         processed_image_ids = {c.metadata.image_id for c in chunks if c.metadata.image_id}
+        processed_image_paths = {c.metadata.image_path for c in chunks if c.metadata.image_path}
         if doc.images:
             for img_id, img_meta in doc.images.items():
                 if img_id not in processed_image_ids:
@@ -361,6 +362,53 @@ class ChunkBuilder:
                     if img_chunk:
                         chunks.append(img_chunk)
                         processed_image_ids.add(img_id)
+                        if img_chunk.metadata.image_path:
+                            processed_image_paths.add(img_chunk.metadata.image_path)
+
+        # Process any image metadata JSONs in 05_images not yet represented
+        if document_id:
+            try:
+                import json
+                from src.config import ROOT_DIR
+                images_dir = ROOT_DIR / "data" / "output" / document_id / "05_images"
+                if images_dir.exists():
+                    for jf in sorted(list(images_dir.glob("image_*.json"))):
+                        stem = jf.stem
+                        rel_path = f"05_images/{stem}.png"
+                        try:
+                            with open(jf, "r", encoding="utf-8") as f:
+                                jdata = json.load(f)
+                            im_id = jdata.get("image_id") or stem
+                            if im_id not in processed_image_ids and rel_path not in processed_image_paths:
+                                p_num = int(jdata.get("page", 1))
+                                b_box = None
+                                if jdata.get("bounding_box"):
+                                    b_raw = jdata["bounding_box"]
+                                    if isinstance(b_raw, dict):
+                                        b_box = BoundingBox(**b_raw)
+                                    elif isinstance(b_raw, BoundingBox):
+                                        b_box = b_raw
+                                virtual_el = DocumentElement(
+                                    id=im_id,
+                                    type="image",
+                                    text=jdata.get("caption_text") or jdata.get("title") or "Image",
+                                    metadata=ElementMetadata(
+                                        page_number=p_num,
+                                        bbox=b_box,
+                                        image_id=im_id
+                                    )
+                                )
+                                img_chunk = self._create_semantic_image_chunk(
+                                    virtual_el, jdata, document_id, active_headings, active_heading_ids, len(chunks)
+                                )
+                                if img_chunk:
+                                    chunks.append(img_chunk)
+                                    processed_image_ids.add(im_id)
+                                    processed_image_paths.add(rel_path)
+                        except Exception as j_err:
+                            logger.warning(f"Failed to chunk image JSON {jf.name}: {j_err}")
+            except Exception as dir_err:
+                logger.debug(f"05_images scan skipped: {dir_err}")
 
         return chunks
 
@@ -478,6 +526,7 @@ class ChunkBuilder:
         keywords = []
         detected_entities = []
         img_path = None
+        img_url = None
         explicit_caption = None
         entity_name = None
         designation = None
@@ -539,6 +588,63 @@ class ChunkBuilder:
         if not img_path and element.metadata and hasattr(element.metadata, "image_path"):
             img_path = element.metadata.image_path
 
+        # Check if corresponding 05_images JSON exists on disk to enrich metadata if missing
+        if doc_id:
+            try:
+                import json
+                from src.config import ROOT_DIR
+                images_dir = ROOT_DIR / "data" / "output" / doc_id / "05_images"
+                if images_dir.exists():
+                    target_json = None
+                    if img_path:
+                        stem = Path(str(img_path).replace("\\", "/")).stem
+                        cand = images_dir / f"{stem}.json"
+                        if cand.exists():
+                            target_json = cand
+                    if not target_json and element.id:
+                        clean_stem = element.id.replace("#/", "").replace("/", "_")
+                        cand = images_dir / f"{clean_stem}.json"
+                        if cand.exists():
+                            target_json = cand
+                    if not target_json:
+                        for jf in images_dir.glob("image_*.json"):
+                            try:
+                                with open(jf, "r", encoding="utf-8") as f:
+                                    jd = json.load(f)
+                                if jd.get("image_id") == element.id:
+                                    target_json = jf
+                                    break
+                            except Exception:
+                                pass
+                    if target_json and target_json.exists():
+                        with open(target_json, "r", encoding="utf-8") as f:
+                            jd = json.load(f)
+                        title = title or jd.get("title")
+                        subtitle = subtitle or jd.get("subtitle")
+                        explicit_caption = explicit_caption or jd.get("explicit_caption")
+                        caption_text = caption_text or jd.get("caption_text") or jd.get("caption")
+                        entity_name = entity_name or jd.get("entity_name")
+                        designation = designation or jd.get("designation")
+                        sec_heading = sec_heading or jd.get("section_heading")
+                        text_before = text_before or jd.get("text_before")
+                        text_after = text_after or jd.get("text_after")
+                        layout_context = layout_context or jd.get("layout_context")
+                        importance_score = jd.get("importance_score") or importance_score
+                        retrievable = jd.get("retrievable", retrievable)
+                        vlm_desc = vlm_desc or jd.get("semantic_description") or ""
+                        ocr_text = ocr_text or jd.get("ocr_text") or ""
+                        image_type = jd.get("image_type") or image_type
+                        img_path = img_path or jd.get("image_path")
+                        img_url = img_url or jd.get("image_url")
+                        if jd.get("keywords"):
+                            keywords = list(set((keywords or []) + jd.get("keywords", [])))
+                        if jd.get("objects"):
+                            objects = list(set((objects or []) + jd.get("objects", [])))
+                        if jd.get("detected_entities"):
+                            detected_entities = list(set((detected_entities or []) + jd.get("detected_entities", [])))
+            except Exception as j_err:
+                logger.debug(f"Disk JSON metadata lookup skipped for image {element.id}: {j_err}")
+
         # Resolve clean filename for static browser URL
         img_filename = ""
         if img_path:
@@ -550,7 +656,8 @@ class ChunkBuilder:
             clean_id = element.id.replace("#/", "").replace("/", "_")
             img_filename = f"{clean_id}.png"
 
-        img_url = f"/outputs/{doc_id}/05_images/{img_filename}"
+        if not img_url:
+            img_url = f"/outputs/{doc_id}/05_images/{img_filename}"
 
         if not title:
             if explicit_caption:

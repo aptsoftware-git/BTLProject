@@ -196,3 +196,44 @@ def test_chunking_end_to_end_on_pdf():
         shutil.rmtree(temp_output_dir)
     except Exception:
         pass
+
+
+def test_chunk_builder_unreferenced_images():
+    """Verify ChunkBuilder correctly creates chunks for images in doc.images that were not in doc.elements."""
+    from src.rag.document_schema import DocumentElement, ElementMetadata, ImageMetadata, BoundingBox
+    
+    doc = StructuredDocument(
+        title="Test Document With Standalone Images",
+        file_name="test_doc_images",
+        file_type="pdf",
+        page_count=1,
+        elements=[
+            DocumentElement(
+                id="#/texts/0", type="paragraph", text="Introduction text before unreferenced image.",
+                metadata=ElementMetadata(page_number=1, parent_id="body"),
+                hierarchy_path=[]
+            )
+        ],
+        tables={},
+        images={
+            "#/pictures/99": ImageMetadata(
+                image_id="#/pictures/99",
+                page_number=1,
+                bbox=BoundingBox(l=10.0, t=10.0, r=100.0, b=100.0),
+                caption="Unreferenced Chart Caption",
+                ocr_text="Q1 Revenue Data"
+            )
+        }
+    )
+
+    builder = ChunkBuilder(target_tokens_max=100)
+    chunks = builder.build_chunks(doc, "test_doc_images_id")
+
+    assert len(chunks) == 2
+    image_chunks = [c for c in chunks if c.metadata.chunk_type == "image"]
+    assert len(image_chunks) == 1
+    assert image_chunks[0].metadata.image_id == "#/pictures/99"
+    assert "Unreferenced Chart Caption" in image_chunks[0].content
+    assert "Q1 Revenue Data" in image_chunks[0].content
+    assert image_chunks[0].metadata.page_number == 1
+

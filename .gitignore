@@ -71,6 +71,7 @@ htmlcov/
 
 # Uncomment only if you don't want local vector DBs
 data/chromadb/
+data/chromadb_corrupted_backup_*/
 
 
 # Crash dumps & temp files

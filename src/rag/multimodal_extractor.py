@@ -602,9 +602,11 @@ class MultimodalExtractor:
                 try:
                     docling_doc, raw_text, page_count = self._run_docling_conversion(converter, temp_pdf_path, output_dir)
                     if docling_doc is not None:
-                        raw_images_dir = output_dir / "_raw_images" if output_dir else None
+                        images_dir = output_dir / "05_images" if output_dir else None
+                        if images_dir:
+                            images_dir.mkdir(parents=True, exist_ok=True)
                         builder = DocumentBuilder(
-                            output_images_dir=raw_images_dir,
+                            output_images_dir=images_dir,
                             pdf_path=file_path
                         )
                         batch_structured_doc = builder.build(docling_doc, file_name, file_type)
@@ -671,12 +673,18 @@ class MultimodalExtractor:
                     new_png_path = output_dir / "05_images" / f"{seq_name}.png"
                     
                     if orig_path and orig_path.exists():
-                        try:
-                            shutil.move(str(orig_path), str(new_png_path))
+                        if orig_path.resolve() != new_png_path.resolve():
+                            try:
+                                if new_png_path.exists():
+                                    new_png_path.unlink()
+                                shutil.move(str(orig_path), str(new_png_path))
+                                img_meta.image_path = str(new_png_path)
+                                master_structured_doc.images[f"b{batch_index}_{img_id}"].image_path = str(new_png_path)
+                            except Exception as move_err:
+                                logger.error(f"Failed to sequentialize image {seq_name}: {move_err}")
+                        else:
                             img_meta.image_path = str(new_png_path)
                             master_structured_doc.images[f"b{batch_index}_{img_id}"].image_path = str(new_png_path)
-                        except Exception as move_err:
-                            logger.error(f"Failed to sequentialize image {seq_name}: {move_err}")
 
                     # Fallback extraction: If new_png_path still does not exist or is empty, crop directly from source PDF
                     if (not new_png_path.exists() or new_png_path.stat().st_size == 0) and file_path and img_meta.bbox:
@@ -918,13 +926,6 @@ class MultimodalExtractor:
             agent._finalize_outputs(doc_id, output_dir, master_structured_doc)
 
             # Enforce canonical 05_images persistence: remove any stray staging or non-canonical files
-            raw_stage = output_dir / "_raw_images"
-            if raw_stage.exists():
-                try:
-                    shutil.rmtree(raw_stage, ignore_errors=True)
-                except Exception as clean_err:
-                    logger.warning(f"Failed to cleanup _raw_images: {clean_err}")
-
             images_dir = output_dir / "05_images"
             if images_dir.exists():
                 for f in images_dir.iterdir():
