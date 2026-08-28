@@ -96,7 +96,7 @@ ai-proofreader-frontend/dist/
 data/input/
 data/output/
 
-data/cache/ 
+data/cache/
 
 md_files/
 debug_metadata_direct.py
