@@ -75,7 +75,7 @@ class ImageMetadata(BaseModel):
     layout_context: Optional[str] = Field(None, description="Layout spatial context (e.g. portrait_card_horizontal, full_page_visual, section_figure)")
     importance_score: str = Field("MEDIUM", description="Image importance level: HIGH, MEDIUM, LOW")
     retrievable: bool = Field(True, description="Whether image is meaningful and retrievable (False for decorative/separators)")
-    association_method: str = Field("none", description="Method used for context association: explicit_caption, same_card_layout, spatial_document_context, spatially_nearest_text, section_spatial_context, surrounding_text, vlm_semantic_description, none")
+    association_method: str = Field("none", description="Method used for context association: explicit_caption, same_card_layout, spatial_document_context, unresolved_portrait, spatially_nearest_text, section_spatial_context, surrounding_text, vlm_semantic_description, none")
     association_confidence: Optional[float] = Field(1.0, description="Confidence score of context association (0.0 to 1.0)")
     objects: List[str] = Field(default_factory=list, description="List of detected objects in the image")
     keywords: List[str] = Field(default_factory=list, description="Keywords summarizing the image content")

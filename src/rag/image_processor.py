@@ -324,40 +324,90 @@ def _get_bbox_coords(box: Any) -> Tuple[float, float, float, float]:
     )
 
 
+_BIO_NARRATIVE_CUES = re.compile(
+    r"\b(?:has|holds|graduated|joined|leads|leading|responsible|overseeing|oversees|manages|"
+    r"specializ\w*|years of experience|experience in|expertise in|career|serves as|serving as|"
+    r"previously|prior to|instrumental in|qualified|qualification|alumnus|alumna)\b",
+    re.IGNORECASE,
+)
+
+
+def _looks_like_biography_text(text: str) -> bool:
+    """
+    Generic (content-based, never name-specific) signal that a block of text
+    reads like narrative biography/profile prose rather than a heading,
+    section title, or unrelated short caption -- length plus common
+    biography-narrative vocabulary. Deliberately weak on its own: never
+    sufficient by itself to assign identity (a generic company-history
+    paragraph can also "sound biographical"), only used to raise confidence
+    once a real name has already been found in the same region.
+    """
+    words = text.split()
+    if len(words) < 10:
+        return False
+    return bool(_BIO_NARRATIVE_CUES.search(text))
+
+
 class SpatialDocumentContextGrounder:
     """
-    Generalized spatial association: pairs a portrait's bounding box with the
-    nearest structured text block on the SAME page using pure geometry --
-    horizontal/vertical distance, vertical overlap ratio, column adjacency,
-    and reading order -- then extracts name -> designation -> biography from
-    that block's own real text (never OCR/pixel text, never a fixed roster).
+    Portrait-specific profile association: pairs a portrait's bounding box
+    with the correct nearby PERSON-PROFILE region on the same page -- never
+    just "whatever text happens to be closest" (a heading like "Strategic
+    Overview" or an unrelated narrative paragraph must never be treated as
+    portrait identity context, no matter how spatially close it is).
 
-    Unlike PortraitSpatialValidator (which only matches within a narrow
-    "portrait card" geometry envelope, and only scans blocks that already
-    fall inside its tight dx/dy windows), this method scores every text
-    block on the page so a profile block sitting beside the portrait at the
-    same vertical band -- but outside that narrow envelope, and not caught
-    by the simple text_before/text_after vertical-only scan either -- is
-    never missed and silently pushed to a lower-confidence fallback.
+    Pipeline:
+      1. Detect all text blocks around the portrait on the page (geometry:
+         horizontal/vertical distance, vertical overlap ratio, column
+         adjacency, reading order).
+      2. Group adjacent candidate blocks into logical profile/content
+         regions (a name line + a designation line + a biography paragraph
+         stacked/aligned together read as one region, the way a real
+         profile card is laid out) using layout + reading-order adjacency.
+      3. Score every region on actual identity evidence -- a real person
+         name, a real designation/title, biography-narrative language, and
+         its spatial adjacency to the portrait -- never on distance alone.
+      4. Only a region that clears the evidence bar (a name must be found;
+         designation/biography evidence and adjacency only add confidence)
+         is accepted. If nothing in the normal search radius clears the
+         bar, the search is widened (larger distance cap, and the full
+         same-column span regardless of distance) before giving up.
+      5. If no region ever clears the bar, the portrait is left explicitly
+         UNRESOLVED -- entity_name/designation/nearby_text/confidence are
+         never populated from a heading or unrelated narrative just because
+         it was nearby.
     """
 
-    # Maximum spatial distance (PDF points) beyond which a text block is not
-    # considered spatially adjacent to the portrait at all.
+    # Maximum spatial distance (PDF points) for the normal search pass.
     MAX_ASSOCIATION_DISTANCE = 260.0
+    # Widened distance cap used only on the extended ("search beyond the
+    # immediate nearest block") pass, when the normal pass found no region
+    # with real identity evidence.
+    EXTENDED_ASSOCIATION_DISTANCE = MAX_ASSOCIATION_DISTANCE * 3.0
+    # Blocks that share the portrait's own column are searched the full
+    # page height on the extended pass (a directory column can place the
+    # matching name/designation well below the immediate nearest line).
+    MAX_REGION_GAP = 42.0  # PDF points -- max gap between two blocks to merge them into one region
 
     @staticmethod
     def _candidate_blocks(
         image_bbox_coords: Tuple[float, float, float, float],
         doc_elements_on_page: List[Dict[str, Any]],
+        extended: bool = False,
     ) -> List[Dict[str, Any]]:
         il, ir, it, ib = image_bbox_coords
         i_height = max(1e-6, it - ib)
         i_width = max(1e-6, ir - il)
         candidates: List[Dict[str, Any]] = []
+        distance_cap = (
+            SpatialDocumentContextGrounder.EXTENDED_ASSOCIATION_DISTANCE
+            if extended else SpatialDocumentContextGrounder.MAX_ASSOCIATION_DISTANCE
+        )
 
         for order_idx, el in enumerate(doc_elements_on_page):
             t_str = (el.get("text") or "").strip()
-            if not t_str or el.get("type") in ("image", "PictureItem", "ImageItem"):
+            el_type = (el.get("type") or "").lower()
+            if not t_str or el_type in ("image", "pictureitem", "imageitem"):
                 continue
             t_box = el.get("metadata", {}).get("bbox") or el.get("bbox") or {}
             tl, tr, tt, tb = _get_bbox_coords(t_box)
@@ -383,16 +433,24 @@ class SpatialDocumentContextGrounder:
             same_column = h_overlap > 0 or gap_x <= (i_width * 1.5)
 
             distance = (gap_x ** 2 + gap_y ** 2) ** 0.5
-            if distance > SpatialDocumentContextGrounder.MAX_ASSOCIATION_DISTANCE:
+            # A same-column block is exempt from the distance cap on the
+            # extended pass only -- a directory-style profile column can
+            # place the matching name/designation well below the nearest
+            # unrelated line, and column membership (not raw distance) is
+            # the real evidence of belonging to the same portrait.
+            if distance > distance_cap and not (extended and same_column):
                 continue
 
             # Composite score (lower = better): raw distance, discounted for
             # strong vertical overlap and same-column layout. Reading order
-            # is kept only as a final tiebreaker.
+            # is kept only as a final tiebreaker. This score is used only to
+            # order candidates for grouping/display -- it is NEVER, by
+            # itself, treated as proof of identity association.
             score = distance - (overlap_ratio * 80.0) - (25.0 if same_column else 0.0)
 
             candidates.append({
                 "text": t_str,
+                "type": el_type,
                 "bbox": {"l": tl, "r": tr, "t": tt, "b": tb},
                 "gap_x": round(gap_x, 2),
                 "gap_y": round(gap_y, 2),
@@ -407,6 +465,100 @@ class SpatialDocumentContextGrounder:
         return candidates
 
     @staticmethod
+    def _group_into_regions(candidates: List[Dict[str, Any]]) -> List[Dict[str, Any]]:
+        """
+        Groups candidate blocks into logical profile/content regions using
+        reading order + layout adjacency (a name line immediately followed
+        by a designation line and a biography paragraph, stacked in the
+        same column with small gaps, is one region -- not three unrelated
+        text hits). A block far from its reading-order neighbor, or in a
+        different column, starts a new region.
+        """
+        if not candidates:
+            return []
+
+        ordered = sorted(candidates, key=lambda c: c["reading_order_index"])
+        regions: List[List[Dict[str, Any]]] = [[ordered[0]]]
+
+        for prev, cur in zip(ordered, ordered[1:]):
+            same_region = False
+            if cur["reading_order_index"] - prev["reading_order_index"] <= 2:
+                p_box, c_box = prev["bbox"], cur["bbox"]
+                vertical_gap = max(0.0, p_box["b"] - c_box["t"], c_box["b"] - p_box["t"])
+                h_overlap = max(0.0, min(p_box["r"], c_box["r"]) - max(p_box["l"], c_box["l"]))
+                same_col = h_overlap > 0 or abs(p_box["l"] - c_box["l"]) < 30.0
+                if vertical_gap <= SpatialDocumentContextGrounder.MAX_REGION_GAP and same_col:
+                    same_region = True
+            if same_region:
+                regions[-1].append(cur)
+            else:
+                regions.append([cur])
+
+        region_summaries = []
+        for members in regions:
+            members_sorted = sorted(members, key=lambda m: m["reading_order_index"])
+            text = "\n".join(m["text"] for m in members_sorted)
+            ls = [m["bbox"]["l"] for m in members_sorted]
+            rs = [m["bbox"]["r"] for m in members_sorted]
+            ts = [m["bbox"]["t"] for m in members_sorted]
+            bs = [m["bbox"]["b"] for m in members_sorted]
+            region_summaries.append({
+                "text": text,
+                "bbox": {"l": min(ls), "r": max(rs), "t": max(ts), "b": min(bs)},
+                "member_count": len(members_sorted),
+                "min_distance": min(m["distance"] for m in members_sorted),
+                "max_vertical_overlap_ratio": max(m["vertical_overlap_ratio"] for m in members_sorted),
+                "any_same_column": any(m["same_column"] for m in members_sorted),
+                "reading_order_index": members_sorted[0]["reading_order_index"],
+            })
+        return region_summaries
+
+    @staticmethod
+    def _evaluate_region(region: Dict[str, Any]) -> Dict[str, Any]:
+        """
+        Scores a region on real identity evidence only. A heading, section
+        title, or generic/unrelated narrative paragraph carries no name and
+        no designation, so it scores zero name/designation evidence and is
+        rejected regardless of how spatially close it is.
+        """
+        text = region["text"]
+        identity = extract_generic_person_identity(text) or extract_untitled_name_near_designation(text)
+        name_evidence = identity[0] if identity else None
+        designation_from_name = identity[1] if identity else None
+        desig_match = _DESIGNATION_PATTERN.search(text)
+        designation_evidence = designation_from_name or (desig_match.group(1) if desig_match else None)
+        biography_evidence = _looks_like_biography_text(text)
+
+        distance_ratio = max(
+            0.0,
+            (SpatialDocumentContextGrounder.EXTENDED_ASSOCIATION_DISTANCE - region["min_distance"])
+            / SpatialDocumentContextGrounder.EXTENDED_ASSOCIATION_DISTANCE,
+        )
+        adjacency_score = (
+            distance_ratio * 15.0
+            + min(region["max_vertical_overlap_ratio"], 1.0) * 10.0
+            + (5.0 if region["any_same_column"] else 0.0)
+        )
+
+        score = 0.0
+        if name_evidence:
+            score += 50.0
+        if designation_evidence:
+            score += 25.0
+        if biography_evidence:
+            score += 10.0
+        score += adjacency_score
+
+        return {
+            **region,
+            "name_evidence": name_evidence,
+            "designation_evidence": designation_evidence,
+            "biography_evidence": biography_evidence,
+            "adjacency_score": round(adjacency_score, 2),
+            "evidence_score": round(score, 2),
+        }
+
+    @staticmethod
     def ground(
         image_id: str,
         bbox: Any,
@@ -415,73 +567,110 @@ class SpatialDocumentContextGrounder:
     ) -> Dict[str, Any]:
         """
         Returns, on success: {entity_name, designation, nearby_text,
-        confidence, selected_block, debug}.
+        confidence, selected_region, debug}.
         On failure: {entity_name: None, reason: "<exact reason>", debug}.
-        Every call logs the full candidate list and the outcome so a
-        spatial-association failure is always traceable, never silent.
+        Every call logs: portrait bbox -> candidate regions -> name evidence
+        -> designation evidence -> biography evidence -> selected region ->
+        confidence, OR the exact rejection reason -- never a silent guess.
         """
         il, ir, it, ib = _get_bbox_coords(bbox) if bbox else (0.0, 0.0, 0.0, 0.0)
         if il == 0 and ir == 0 and it == 0 and ib == 0:
             logger.debug(f"[spatial_document_context] {image_id}: no usable portrait bbox -- skipping.")
             return {"entity_name": None, "reason": "missing_portrait_bbox", "debug": {}}
 
-        candidates = SpatialDocumentContextGrounder._candidate_blocks((il, ir, it, ib), doc_elements_on_page)
-        debug_candidates = [
-            {**{k: v for k, v in c.items() if k != "text"}, "text_preview": c["text"][:80]}
-            for c in candidates[:8]
+        coords = (il, ir, it, ib)
+
+        def _resolve(extended: bool) -> Tuple[Optional[Dict[str, Any]], List[Dict[str, Any]]]:
+            candidates = SpatialDocumentContextGrounder._candidate_blocks(coords, doc_elements_on_page, extended=extended)
+            regions = SpatialDocumentContextGrounder._group_into_regions(candidates)
+            evaluated = [SpatialDocumentContextGrounder._evaluate_region(r) for r in regions]
+            evaluated.sort(key=lambda r: r["evidence_score"], reverse=True)
+            qualifying = [r for r in evaluated if r["name_evidence"]]
+            best = qualifying[0] if qualifying else None
+            return best, evaluated
+
+        best_region, evaluated_regions = _resolve(extended=False)
+        search_mode = "normal"
+        if best_region is None:
+            logger.info(
+                f"[spatial_document_context] image={image_id}: no region with name evidence in normal "
+                f"search radius ({SpatialDocumentContextGrounder.MAX_ASSOCIATION_DISTANCE:.0f}pt) -- "
+                f"widening search (extended distance + full same-column span)."
+            )
+            best_region, evaluated_regions = _resolve(extended=True)
+            search_mode = "extended"
+
+        debug_regions = [
+            {
+                "text_preview": r["text"][:100],
+                "bbox": r["bbox"],
+                "name_evidence": r["name_evidence"],
+                "designation_evidence": r["designation_evidence"],
+                "biography_evidence": r["biography_evidence"],
+                "min_distance": r["min_distance"],
+                "evidence_score": r["evidence_score"],
+            }
+            for r in evaluated_regions[:8]
         ]
         logger.debug(
             f"[spatial_document_context] image={image_id} portrait_bbox=(l={il:.1f}, r={ir:.1f}, "
-            f"t={it:.1f}, b={ib:.1f}) candidate_blocks={debug_candidates}"
+            f"t={it:.1f}, b={ib:.1f}) search_mode={search_mode} candidate_regions={debug_regions}"
         )
 
-        if not candidates:
+        if not evaluated_regions:
             logger.info(
                 f"[spatial_document_context] image={image_id}: association FAILED -- no text block "
-                f"found within {SpatialDocumentContextGrounder.MAX_ASSOCIATION_DISTANCE:.0f}pt of the "
-                f"portrait bbox on page {page_number}."
+                f"found near the portrait bbox on page {page_number}, even after widening the search."
             )
-            return {"entity_name": None, "reason": "no_candidate_text_block_within_range", "debug": {"candidates": debug_candidates}}
+            return {"entity_name": None, "reason": "no_candidate_regions_found", "debug": {"regions": debug_regions}}
 
-        for candidate in candidates[:5]:
-            identity = (
-                extract_generic_person_identity(candidate["text"])
-                or extract_untitled_name_near_designation(candidate["text"])
+        if best_region is None:
+            top = evaluated_regions[0]
+            logger.info(
+                f"[spatial_document_context] image={image_id}: association FAILED (rejected) -- "
+                f"{len(evaluated_regions)} candidate region(s) found (search_mode={search_mode}), but none "
+                f"contain a recognizable person name (closest/highest-scoring region: "
+                f"'{top['text'][:80]}', designation_evidence={top['designation_evidence']}, "
+                f"biography_evidence={top['biography_evidence']}). Rejected as heading/section-title/"
+                f"unrelated narrative -- distance alone is not proof of association."
             )
-            if identity:
-                name, designation = identity
-                proximity_bonus = max(
-                    0.0,
-                    (SpatialDocumentContextGrounder.MAX_ASSOCIATION_DISTANCE - candidate["distance"])
-                    / SpatialDocumentContextGrounder.MAX_ASSOCIATION_DISTANCE,
-                ) * 0.15
-                overlap_bonus = min(candidate["vertical_overlap_ratio"], 1.0) * 0.10
-                confidence = round(min(0.90, 0.65 + proximity_bonus + overlap_bonus), 2)
+            return {
+                "entity_name": None,
+                "reason": "no_person_name_evidence_in_any_region",
+                "debug": {"regions": debug_regions},
+            }
 
-                logger.info(
-                    f"[spatial_document_context] image={image_id} -> selected profile block "
-                    f"text='{candidate['text'][:60]}' bbox={candidate['bbox']} "
-                    f"distance={candidate['distance']} vertical_overlap_ratio={candidate['vertical_overlap_ratio']} "
-                    f"-> entity_name='{name}' designation='{designation}' confidence={confidence}"
-                )
-                return {
-                    "entity_name": name,
-                    "designation": designation,
-                    "nearby_text": candidate["text"],
-                    "confidence": confidence,
-                    "selected_block": candidate,
-                    "debug": {"candidates": debug_candidates},
-                }
+        name, designation = best_region["name_evidence"], best_region["designation_evidence"]
+        # Confidence is earned strictly from the evidence actually found in
+        # the selected region -- never a flat constant regardless of
+        # content. A name alone (no designation, no biography language, weak
+        # adjacency) sits at the low end; name + designation + biography
+        # narrative + strong adjacency sits at the high end.
+        confidence = 0.55
+        if designation:
+            confidence += 0.15
+        if best_region["biography_evidence"]:
+            confidence += 0.10
+        confidence += min(best_region["adjacency_score"] / 30.0, 1.0) * 0.10
+        if search_mode == "extended":
+            # Slightly more conservative when the match required widening
+            # the search radius beyond the immediate vicinity.
+            confidence -= 0.05
+        confidence = round(max(0.50, min(0.90, confidence)), 2)
 
         logger.info(
-            f"[spatial_document_context] image={image_id}: association FAILED -- "
-            f"{len(candidates)} nearby text block(s) found on page {page_number}, but none contain a "
-            f"recognizable name/designation pattern (nearest text: '{candidates[0]['text'][:80]}')."
+            f"[spatial_document_context] image={image_id} search_mode={search_mode} -> selected profile "
+            f"region text='{best_region['text'][:80]}' bbox={best_region['bbox']} "
+            f"name_evidence='{name}' designation_evidence='{designation}' "
+            f"biography_evidence={best_region['biography_evidence']} confidence={confidence}"
         )
         return {
-            "entity_name": None,
-            "reason": "no_name_pattern_in_nearby_blocks",
-            "debug": {"candidates": debug_candidates},
+            "entity_name": name,
+            "designation": designation,
+            "nearby_text": best_region["text"],
+            "confidence": confidence,
+            "selected_region": best_region,
+            "debug": {"regions": debug_regions},
         }
 
 
@@ -687,16 +876,25 @@ class HierarchicalLayoutGrounder:
                 association_confidence = 0.80
                 final_caption = f"Portrait of {entity_name} ({designation})" if designation else f"Portrait of {entity_name}"
 
-        # Check Priority 2d: Generalized Spatial Document Context. Pairs the
-        # portrait bbox with the nearest structured text block ANYWHERE on
-        # the page (not just inside a matching "card" envelope, and not just
-        # above/below via the text_before/text_after vertical-only scan) via
-        # spatial distance, vertical overlap, column adjacency and reading
-        # order. This is what catches a profile block sitting beside a
-        # portrait that priorities 1/2/2b/2c did not already resolve, so it
-        # is never silently pushed down to surrounding_text/VLM fallback.
+        # Geometry check (computed once, reused below): does this bbox fit a
+        # single individual portrait photograph? Portrait-shaped images take
+        # a dedicated identity-evidence-gated path (2d) and must NEVER fall
+        # through to the generic distance-only section/nearest-text tiers
+        # (3 & 4) below -- that is what previously let an unrelated heading
+        # or narrative paragraph become a portrait's "identity" just because
+        # it was spatially closest.
+        is_portrait_shape, _geom_reason = PortraitSpatialValidator.validate_portrait_geometry(bbox)
+
+        # Check Priority 2d: Portrait-Specific Profile Region Association.
+        # Detects every text block around the portrait, groups them into
+        # logical profile regions (layout + reading order + column
+        # adjacency), and only accepts a region that contains real person-
+        # name evidence (designation/biography language and adjacency only
+        # raise confidence, never substitute for a name). This is what
+        # catches a genuine profile block beside a portrait that priorities
+        # 1/2/2b/2c did not already resolve -- without ever accepting a
+        # heading or unrelated narrative just because it was nearby.
         if not final_explicit_caption and not entity_name and not is_signature_block:
-            is_portrait_shape, _geom_reason = PortraitSpatialValidator.validate_portrait_geometry(bbox)
             if is_portrait_shape:
                 spatial_ctx = SpatialDocumentContextGrounder.ground(
                     image_id=image_id,
@@ -721,8 +919,12 @@ class HierarchicalLayoutGrounder:
                     f"geometry ({_geom_reason})."
                 )
 
-        # Check Priority 3 & 4: Section Context and Spatially Nearest Text for Uncaptioned Visuals
-        if not final_explicit_caption and not entity_name:
+        # Check Priority 3 & 4: Section Context and Spatially Nearest Text
+        # for Uncaptioned Visuals -- NEVER for a portrait-shaped image. A
+        # portrait with no verified identity must stay unresolved rather
+        # than adopt a nearby heading/section title/unrelated paragraph as
+        # if it were the person's identity (handled explicitly below).
+        if not final_explicit_caption and not entity_name and not is_portrait_shape:
             sec_candidate = (active_section or "").strip()
             # If large/full-width visual or active section is prominent
             if sec_candidate and (area_ratio >= 0.25 or w >= 400 or not doc_elements_on_page):
@@ -780,14 +982,39 @@ class HierarchicalLayoutGrounder:
                     layout_context = "section_figure"
                     final_caption = f"Figure on Page {page_number} ({title})"
 
-        # Check Priority 4b: Surrounding Text
-        if association_method == "none" and (text_before or text_after):
+        # Check Priority 4b: Surrounding Text -- NEVER for a portrait-shaped
+        # image, for the same reason as Priority 3 & 4: unverified nearby
+        # prose (whatever precedes/follows on the page) is not evidence of
+        # who is in the photo.
+        if association_method == "none" and not is_portrait_shape and (text_before or text_after):
             title = text_before[:80].strip() if text_before else text_after[:80].strip()
             subtitle = text_after[:120].strip() if (text_before and text_after) else None
             layout_context = "embedded_visual"
             association_method = "surrounding_text"
             association_confidence = 0.68
             final_caption = f"Figure on Page {page_number}"
+
+        # Check Priority 4c: Unresolved Portrait. A portrait-shaped image
+        # that reaches this point has explicitly failed every identity-
+        # evidence check (explicit caption, same-card layout, signature,
+        # OCR-grounded identity, and the profile-region search above,
+        # including its widened/extended pass). It is left honestly
+        # unresolved -- no entity_name/designation/nearby_text, no borrowed
+        # heading or unrelated narrative as a fake title, and a confidence
+        # that reflects genuine uncertainty -- rather than silently
+        # contaminating retrieval with unrelated text content.
+        if association_method == "none" and is_portrait_shape:
+            title = f"Unidentified Portrait on Page {page_number}"
+            subtitle = None
+            layout_context = "unresolved_portrait"
+            association_method = "unresolved_portrait"
+            association_confidence = 0.30
+            final_caption = f"Unidentified portrait on Page {page_number}"
+            logger.info(
+                f"[spatial_document_context] image={image_id}: portrait left UNRESOLVED -- "
+                f"no verified person-profile evidence found; not attaching any nearby heading, "
+                f"section title, or unrelated narrative as identity context."
+            )
 
         # Check Priority 5: VLM Fallback
         if association_method == "none":
@@ -944,7 +1171,18 @@ class HierarchicalLayoutGrounder:
                 keywords.append(title)
             objects = ["image", "figure", "visual graphic"]
 
-        nearby_text = spatial_nearby_text or text_before or text_after
+        # nearby_text carries identity-bearing profile text only. For an
+        # unresolved portrait specifically, text_before/text_after must NOT
+        # be substituted in as if they were that person's profile text --
+        # that is exactly the "unrelated heading/narrative treated as
+        # identity context" contamination this pipeline must avoid. Non-
+        # portrait visuals (charts, diagrams, generic figures) still use
+        # text_before/text_after here as ordinary surrounding context, which
+        # was always their intended, non-identity meaning.
+        if association_method == "unresolved_portrait":
+            nearby_text = None
+        else:
+            nearby_text = spatial_nearby_text or text_before or text_after
 
         if entity_name and not vlm_description:
             bio_snippet = (nearby_text or "")[:200]
