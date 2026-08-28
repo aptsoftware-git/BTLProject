@@ -12,6 +12,7 @@ roster.
 """
 from src.rag.image_processor import (
     HierarchicalLayoutGrounder,
+    PortraitSpatialValidator,
     SpatialDocumentContextGrounder,
 )
 
@@ -202,3 +203,78 @@ class TestGroundImageEndToEnd:
         assert stats["portraits_linked"] == 0
         assert "entity_id" not in chunks[0]["metadata"]
         assert "entity_id" not in chunks[1]["metadata"]
+
+
+class TestSameCardLayoutBiographyAttachment:
+    """
+    Reproduces the reported bug: a director-grid page where the portrait
+    resolves via same_card_layout (name+designation matched to the card),
+    but nearby_text used to fall back to the generic single-nearest
+    text_before/text_after -- which picked up an unrelated heading fragment
+    ("Board of...") and, in a multi-person grid, literally the NEXT
+    director's own name. nearby_text must instead carry that person's own
+    biography/qualifications paragraph, or stay empty -- never someone
+    else's name or an unrelated heading.
+    """
+
+    MITTRA_BBOX = {"l": 40.5, "t": 638.1, "r": 134.1, "b": 538.4}  # ~93.6 x 99.7, valid portrait geometry
+    BIO_TEXT = (
+        "Mr. Mittra possesses a distinguished academic background and extensive "
+        "industry experience exceeding 41 years. He holds a Bachelor of Engineering "
+        "(Mechanical) from the Indian Institute of Technology (IIT) - Banaras Hindu "
+        "University, followed by an MBA from Calcutta University."
+    )
+
+    def _elements(self):
+        return [
+            # Unrelated section heading, well ABOVE the matched name/designation
+            # line -- must never be treated as this person's biography.
+            _text_el("Board of Directors", l=40, r=300, t=680, b=660),
+            # Matched name/designation line for the Mittra card.
+            _text_el("Mr. Sunil Kumar Mittra, Chairman", l=140, r=300, t=635, b=615),
+            # This person's own biography paragraph, directly beneath the
+            # matched line, referring to him by surname only.
+            _text_el(self.BIO_TEXT, l=140, r=310, t=605, b=500),
+            # The NEXT director's own card (different column) -- must never
+            # be absorbed as if it were Mittra's biography.
+            _text_el("Mr. Ravi Todi, Managing Director", l=350, r=500, t=635, b=615),
+        ]
+
+    def test_biography_search_finds_the_right_paragraph(self):
+        match = PortraitSpatialValidator.match_person_to_portrait_spatial(self.MITTRA_BBOX, self._elements())
+        assert match is not None
+        assert "Mittra" in match["person_name"]
+        assert match["designation"] == "Chairman"
+        assert match["biography_text"] == self.BIO_TEXT
+
+    def test_ground_image_nearby_text_is_the_real_biography_not_heading_or_other_person(self):
+        grounded = HierarchicalLayoutGrounder.ground_image(
+            image_id="img_056",
+            page_number=22,
+            bbox=self.MITTRA_BBOX,
+            doc_elements_on_page=self._elements(),
+            active_section="Board of Directors",
+        )
+        assert grounded["association_method"] == "same_card_layout"
+        assert "Mittra" in grounded["entity_name"]
+        assert grounded["nearby_text"] == self.BIO_TEXT
+        assert "board of" not in grounded["nearby_text"].lower()
+        assert "ravi todi" not in grounded["nearby_text"].lower()
+
+    def test_no_biography_paragraph_present_leaves_nearby_text_empty_not_wrong_text(self):
+        """Without a real biography block on the card, nearby_text must stay
+        None -- never fall back to an unrelated heading or the next card's name."""
+        elements = [
+            _text_el("Board of Directors", l=40, r=300, t=680, b=660),
+            _text_el("Mr. Sunil Kumar Mittra, Chairman", l=140, r=300, t=635, b=615),
+            _text_el("Mr. Ravi Todi, Managing Director", l=350, r=500, t=635, b=615),
+        ]
+        grounded = HierarchicalLayoutGrounder.ground_image(
+            image_id="img_056b",
+            page_number=22,
+            bbox=self.MITTRA_BBOX,
+            doc_elements_on_page=elements,
+            active_section="Board of Directors",
+        )
+        assert grounded["association_method"] == "same_card_layout"
+        assert grounded["nearby_text"] is None

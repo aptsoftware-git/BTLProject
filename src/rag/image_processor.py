@@ -288,7 +288,8 @@ class PortraitSpatialValidator:
                         "layout_alignment": "horizontal",
                         "distance_pt": dist,
                         "caption_text": f"Portrait of {name} ({designation})" if designation else f"Portrait of {name}",
-                        "matched_text": t_text
+                        "matched_text": t_text,
+                        "matched_bbox": (tl, tr, tt, tb),
                     }
 
             # Vertical match (single column stacked portrait layout)
@@ -302,10 +303,84 @@ class PortraitSpatialValidator:
                         "layout_alignment": "vertical",
                         "distance_pt": dist,
                         "caption_text": f"Portrait of {name} ({designation})" if designation else f"Portrait of {name}",
-                        "matched_text": t_text
+                        "matched_text": t_text,
+                        "matched_bbox": (tl, tr, tt, tb),
                     }
 
+        if best_match:
+            best_match["biography_text"] = PortraitSpatialValidator._find_biography_text_for_card(
+                matched_bbox=best_match["matched_bbox"],
+                matched_name=best_match["person_name"],
+                text_elements_on_page=text_elements_on_page,
+            )
+
         return best_match
+
+    @staticmethod
+    def _find_biography_text_for_card(
+        matched_bbox: Tuple[float, float, float, float],
+        matched_name: str,
+        text_elements_on_page: List[Dict[str, Any]],
+        max_gap: float = 70.0,
+    ) -> Optional[str]:
+        """
+        Once a person's name/designation line has been matched to a
+        portrait's own card, this looks for the biography/qualifications
+        paragraph that actually belongs to THAT card -- the text block
+        stacked immediately below the matched name/designation line, in the
+        same column, close enough to be part of the same card. Explicitly
+        rejects a candidate that itself names a DIFFERENT person (the
+        adjacent card's own name/title line in a multi-person directory
+        grid), so one person's card never absorbs a neighboring person's
+        name as if it were their biography.
+        """
+        mtl, mtr, mtt, mtb = matched_bbox
+
+        # Token-overlap comparison (not substring containment): a biography
+        # paragraph often refers to the person by surname only ("Mr. Mittra"
+        # for "Mr. Sunil Kumar Mittra"), which is NOT a contiguous substring
+        # match but clearly the same person -- while "Ravi Todi" sharing no
+        # token at all with "Sunil Kumar Mittra" is clearly a different one.
+        _STOP_NAME_WORDS = {"mr", "mrs", "ms", "dr", "shri", "smt", "er"}
+
+        def _name_tokens(s: Optional[str]) -> set:
+            cleaned = re.sub(r"[^a-z\s]", " ", (s or "").lower())
+            return {w for w in cleaned.split() if len(w) > 2 and w not in _STOP_NAME_WORDS}
+
+        matched_tokens = _name_tokens(matched_name)
+        best_bio = None
+        best_gap = max_gap + 1.0
+
+        for txt_el in text_elements_on_page:
+            t_text = (txt_el.get("text") or "").strip()
+            if not t_text or t_text == matched_name or len(t_text) < 15:
+                continue
+            tbox = txt_el.get("metadata", {}).get("bbox") or txt_el.get("bbox") or {}
+            tl, tr, tt, tb = _get_bbox_coords(tbox)
+            if tl == 0 and tr == 0 and tt == 0 and tb == 0:
+                continue
+
+            gap = mtb - tt  # positive: this block starts below the matched line
+            h_overlap = max(0.0, min(mtr, tr) - max(mtl, tl))
+            same_column = h_overlap > 0 or abs(mtl - tl) < 40.0
+            if not (0.0 <= gap <= max_gap and same_column):
+                continue
+
+            # Reject a block that itself names a DIFFERENT person (shares no
+            # name token at all with the matched person) -- an adjacent
+            # card's own name/designation line, not this card's bio. A
+            # surname-only mention of the SAME person is allowed through.
+            other_identity = extract_generic_person_identity(t_text) or extract_untitled_name_near_designation(t_text)
+            if other_identity:
+                other_tokens = _name_tokens(other_identity[0])
+                if other_tokens and matched_tokens and not (other_tokens & matched_tokens):
+                    continue
+
+            if gap < best_gap:
+                best_gap = gap
+                best_bio = t_text
+
+        return best_bio
 
 
 def _get_bbox_coords(box: Any) -> Tuple[float, float, float, float]:
@@ -811,6 +886,13 @@ class HierarchicalLayoutGrounder:
             if spatial_card_match:
                 entity_name = spatial_card_match["person_name"]
                 designation = spatial_card_match["designation"]
+                # The person's actual biography/qualifications paragraph on
+                # THIS card, if one was found directly beneath the matched
+                # name/designation line -- never the generic single-nearest
+                # text_before/text_after block, which can just as easily be
+                # an unrelated heading fragment or (in a multi-person
+                # directory grid) the very next person's own name.
+                spatial_nearby_text = spatial_card_match.get("biography_text")
                 title = entity_name
                 subtitle = designation
                 image_type = "Portrait Photo"
@@ -1171,16 +1253,26 @@ class HierarchicalLayoutGrounder:
                 keywords.append(title)
             objects = ["image", "figure", "visual graphic"]
 
-        # nearby_text carries identity-bearing profile text only. For an
-        # unresolved portrait specifically, text_before/text_after must NOT
-        # be substituted in as if they were that person's profile text --
-        # that is exactly the "unrelated heading/narrative treated as
-        # identity context" contamination this pipeline must avoid. Non-
-        # portrait visuals (charts, diagrams, generic figures) still use
+        # nearby_text carries identity-bearing profile text only, and only
+        # when it was actually found as evidence for THIS person (the
+        # region-grouped match from spatial_document_context, or the
+        # biography paragraph found directly beneath the matched card line
+        # for same_card_layout). It must NEVER fall back to the generic
+        # single-nearest text_before/text_after for an identity-resolved or
+        # unresolved portrait -- that single-nearest block can just as
+        # easily be an unrelated heading fragment or (in a multi-person
+        # directory grid) literally the next person's own name, which is
+        # exactly the "unrelated heading/narrative treated as identity
+        # context" contamination this pipeline must avoid. Non-portrait
+        # visuals (charts, diagrams, generic figures) still use
         # text_before/text_after here as ordinary surrounding context, which
         # was always their intended, non-identity meaning.
-        if association_method == "unresolved_portrait":
-            nearby_text = None
+        _IDENTITY_ASSOCIATION_METHODS = (
+            "same_card_layout", "explicit_caption", "ocr_grounded_identity",
+            "signature_text_grounded", "spatial_document_context", "unresolved_portrait",
+        )
+        if association_method in _IDENTITY_ASSOCIATION_METHODS:
+            nearby_text = spatial_nearby_text
         else:
             nearby_text = spatial_nearby_text or text_before or text_after
 
