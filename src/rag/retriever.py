@@ -113,6 +113,21 @@ class Retriever:
         if any(k in q for k in ["cin", "corporate identification number", "company identification number"]):
             return "cin_lookup"
 
+        # 4.7 Person Biography / Qualification / Experience Intent -- must
+        # resolve to the person's actual linked text chunks (biography,
+        # qualifications, education, experience), never rely on the
+        # portrait's own short metadata alone.
+        person_bio_terms = [
+            "qualification", "qualifications", "educational background", "educational qualification",
+            "educated", "alma mater", "biography", "bio of", "profile of",
+            "professional experience", "work experience", "experience of", "career of",
+            "years of experience", "credentials", "expertise of", "achievements of",
+            "about him", "about her", "his experience", "her experience", "their experience",
+            "experience", "biography of",
+        ]
+        if has_any(person_bio_terms):
+            return "person_biography"
+
         # 5. Entity / Person Lookup & Statutory Auditors (Biographies, Roles, Auditors)
         person_lookup_terms = [
             "who is", "who are", "who was", "name of the", "names of", "person", "people",
@@ -182,6 +197,7 @@ class Retriever:
             "cin_lookup": (35, 20, 5),
             "direct_factual": (25, 15, 6),
             "entity_person_lookup": (35, 20, 8),
+            "person_biography": (40, 25, 10),
             "person_portrait_visual": (45, 30, 12),
             "leadership_board": (45, 30, 10),
             "financial": (45, 30, 10),
@@ -423,6 +439,27 @@ class Retriever:
                 doc_known_people.add(Retriever.normalize_entity_text(en))
         doc_known_people.discard("")
 
+        # Person/entity-first resolution: if the query names one of the
+        # document's own grounded people (any person, never a fixed
+        # roster), resolve their stable document-scoped entity_id --
+        # entity_linker computed and stamped the same key onto that
+        # person's portrait chunk and every text chunk that discusses them
+        # at indexing time -- so it can be used below to route
+        # bio/qualification/experience/portrait questions to their own
+        # linked chunks specifically, not just generic keyword overlap.
+        from src.rag.entity_linker import generate_entity_key
+        resolved_entity_key = None
+        doc_id_for_entity = None
+        for chunk, _, _ in fused_results:
+            if getattr(chunk.metadata, "document_id", None):
+                doc_id_for_entity = chunk.metadata.document_id
+                break
+        if doc_id_for_entity:
+            for person in sorted(doc_known_people, key=len, reverse=True):
+                if person and len(person) > 2 and person in q:
+                    resolved_entity_key = generate_entity_key(doc_id_for_entity, person)
+                    break
+
         aliases = self._get_expanded_aliases(q, known_entities=list(doc_known_people))
         q_words = [w for w in re.findall(r'\b[a-zA-Z0-9_\-\.]{3,}\b', q) if w not in ("what", "when", "where", "which", "who", "the", "and", "for", "with", "from", "about", "this", "that", "document")]
 
@@ -465,7 +502,7 @@ class Retriever:
                     boost += 0.85
 
             # 3. Leadership & Board / Person Lookup -- generic entity-derived boost, no page numbers
-            if intent in ("leadership_board", "person_portrait_visual", "entity_person_lookup"):
+            if intent in ("leadership_board", "person_portrait_visual", "entity_person_lookup", "person_biography"):
                 for d_name in doc_known_people:
                     if len(d_name) > 2 and d_name in q:
                         if d_name in person_name or Retriever.fuzzy_match_entity(d_name, person_name):
@@ -536,7 +573,36 @@ class Retriever:
             # 6. Table Target
             if meta.chunk_type == "table" and (intent == "table_based" or "table" in q):
                 boost += 0.40
-            
+
+            # 7. Person/Entity-First Routing: once a specific person has
+            # been resolved from the query (above), strongly prefer the
+            # chunks entity_linker actually linked to that exact person --
+            # their own biography/qualification/experience text for a
+            # person_biography question, their own portrait for a visual
+            # question -- over generic keyword/vector similarity alone.
+            if resolved_entity_key:
+                chunk_entity_id = getattr(meta, "entity_id", None)
+                chunk_entity_ids = getattr(meta, "entity_ids", None) or []
+                is_entity_match = chunk_entity_id == resolved_entity_key or resolved_entity_key in chunk_entity_ids
+
+                if is_entity_match:
+                    if intent == "person_biography" and meta.chunk_type != "image":
+                        boost += 3.00
+                    elif is_visual_query and meta.chunk_type == "image":
+                        boost += 3.00
+                    elif meta.chunk_type != "image":
+                        boost += 1.20
+                else:
+                    if intent == "person_biography" and meta.chunk_type == "image":
+                        # A pure biography/qualification question should not
+                        # surface the portrait (this person's own or anyone
+                        # else's) as if it answered the question.
+                        boost -= 1.00
+                    elif is_visual_query and meta.chunk_type == "image" and chunk_entity_id:
+                        # A different, specifically-named person's portrait
+                        # when this person's photo was asked for.
+                        boost -= 1.00
+
             boosted.append((chunk, rrf + boost, sem))
             
         boosted.sort(key=lambda x: x[1], reverse=True)
@@ -742,6 +808,50 @@ class Retriever:
                 if c and c.metadata and c.metadata.chunk_id:
                     candidates_dict[c.metadata.chunk_id] = c
         
+        # Stage A0: Person/Entity-First Resolution. If the query names one of
+        # the document's own grounded people, resolve their stable
+        # entity_id (the same key entity_linker stamped onto that person's
+        # portrait chunk and every text chunk that discusses them at
+        # indexing time) and GUARANTEE the correct linked chunks are in the
+        # candidate pool for a person-oriented intent -- not left to chance
+        # keyword/vector ranking. A qualifications/education/experience/
+        # biography question is guaranteed their real text chunks (not just
+        # the portrait's own short metadata); a portrait/photo question is
+        # guaranteed their own portrait, not an unrelated image.
+        from src.rag.entity_linker import generate_entity_key
+        q_lower = clean_query.lower()
+        resolved_entity_key = None
+        for person in sorted(doc_known_people, key=len, reverse=True):
+            if person and len(person) > 2 and person in q_lower:
+                resolved_entity_key = generate_entity_key(document_id, person)
+                break
+
+        person_oriented_intent = intent in (
+            "person_biography", "entity_person_lookup", "leadership_board", "person_portrait_visual"
+        )
+        if resolved_entity_key and person_oriented_intent:
+            linked = []
+            for c in search_chunks:
+                meta = c.metadata
+                c_entity_id = getattr(meta, "entity_id", None)
+                c_entity_ids = getattr(meta, "entity_ids", None) or []
+                if c_entity_id != resolved_entity_key and resolved_entity_key not in c_entity_ids:
+                    continue
+                if intent == "person_biography":
+                    if meta.chunk_type != "image":
+                        linked.append(c)
+                elif is_visual_query:
+                    if meta.chunk_type == "image":
+                        linked.append(c)
+                else:
+                    linked.append(c)
+            if linked:
+                logger.info(
+                    f"[entity_resolution] query resolved to entity_id={resolved_entity_key} "
+                    f"-> guaranteeing {len(linked)} linked chunk(s) for intent={intent}."
+                )
+            add_candidates(linked)
+
         # Stage A: Metadata & Heading-Aware Search
         meta_candidates = self._search_metadata(search_chunks, query)
         add_candidates(meta_candidates)
@@ -1306,6 +1416,9 @@ class Retriever:
                         caption_text=meta_data.get("caption_text") or meta_data.get("caption"),
                         entity_name=meta_data.get("entity_name"),
                         designation=meta_data.get("designation"),
+                        entity_id=meta_data.get("entity_id"),
+                        entity_ids=self._parse_list_meta(meta_data.get("entity_ids")),
+                        linked_text_chunk_ids=self._parse_list_meta(meta_data.get("linked_text_chunk_ids")),
                         text_before=meta_data.get("text_before"),
                         text_after=meta_data.get("text_after"),
                         nearby_text=meta_data.get("nearby_text"),
@@ -1439,6 +1552,8 @@ class Retriever:
                                     caption_text=caption_text,
                                     entity_name=entity_name,
                                     designation=designation,
+                                    entity_id=im_data.get("entity_id"),
+                                    linked_text_chunk_ids=im_data.get("linked_text_chunk_ids") or [],
                                     text_before=text_before,
                                     text_after=text_after,
                                     nearby_text=nearby_text,
@@ -1502,6 +1617,9 @@ class Retriever:
                     caption_text=meta_data.get("caption_text") or meta_data.get("caption") or None,
                     entity_name=meta_data.get("entity_name") or None,
                     designation=meta_data.get("designation") or None,
+                    entity_id=meta_data.get("entity_id") or None,
+                    entity_ids=self._parse_list_meta(meta_data.get("entity_ids")),
+                    linked_text_chunk_ids=self._parse_list_meta(meta_data.get("linked_text_chunk_ids")),
                     text_before=meta_data.get("text_before") or None,
                     text_after=meta_data.get("text_after") or None,
                     nearby_text=meta_data.get("nearby_text") or None,

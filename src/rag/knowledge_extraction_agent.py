@@ -1050,6 +1050,23 @@ class KnowledgeExtractionAgent:
         except Exception as e:
             logger.warning(f"Image artifact validation/cleanup failed for {doc_id}: {e}")
 
+        # Resolve every grounded portrait into a stable, document-scoped
+        # entity_id and link it to the text chunks that actually discuss
+        # that person (biography/qualifications/experience), so a
+        # qualifications-style query retrieves the real text rather than
+        # relying on the portrait's own short metadata. Runs after the
+        # dedup cleanup above so linking never targets a chunk/image that
+        # was just removed as an orphan/duplicate.
+        try:
+            from src.rag.entity_linker import link_person_entities_for_document
+            link_person_entities_for_document(
+                output_dir=output_dir,
+                document_id=doc_id,
+                vector_store=self.vector_store,
+            )
+        except Exception as e:
+            logger.warning(f"Person/entity linking failed for {doc_id}: {e}")
+
         # Write Markdown representation
         md_path = output_dir / "03_knowledge_objects" / "knowledge_objects.md"
         md_parts = [f"# Knowledge Objects for Document {doc_id}\n\n"]

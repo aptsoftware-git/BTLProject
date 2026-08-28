@@ -533,6 +533,8 @@ class ChunkBuilder:
         text_before = None
         text_after = None
         nearby_text = None
+        entity_id = None
+        linked_text_chunk_ids = []
         layout_context = None
         importance_score = "MEDIUM"
         retrievable = True
@@ -632,6 +634,8 @@ class ChunkBuilder:
                         text_before = text_before or jd.get("text_before")
                         text_after = text_after or jd.get("text_after")
                         nearby_text = nearby_text or jd.get("nearby_text")
+                        entity_id = entity_id or jd.get("entity_id")
+                        linked_text_chunk_ids = linked_text_chunk_ids or jd.get("linked_text_chunk_ids") or []
                         layout_context = layout_context or jd.get("layout_context")
                         importance_score = jd.get("importance_score") or importance_score
                         retrievable = jd.get("retrievable", retrievable)
@@ -777,6 +781,8 @@ class ChunkBuilder:
             text_before=text_before,
             text_after=text_after,
             nearby_text=nearby_text,
+            entity_id=entity_id,
+            linked_text_chunk_ids=linked_text_chunk_ids,
             layout_context=layout_context,
             importance_score=importance_score,
             retrievable=retrievable,

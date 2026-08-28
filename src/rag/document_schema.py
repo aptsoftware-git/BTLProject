@@ -66,6 +66,8 @@ class ImageMetadata(BaseModel):
     caption_text: Optional[str] = Field(None, description="Full caption text associated with the image")
     entity_name: Optional[str] = Field(None, description="Name of person or entity associated via layout grounding")
     designation: Optional[str] = Field(None, description="Designation or role of person associated via layout grounding")
+    entity_id: Optional[str] = Field(None, description="Stable document-scoped entity/person key, shared with the text chunks that discuss this same person")
+    linked_text_chunk_ids: List[str] = Field(default_factory=list, description="Chunk IDs of the text chunks (biography/qualifications/experience) that discuss this image's grounded entity")
     section_heading: Optional[str] = Field(None, description="Immediate section heading covering the image")
     text_before: Optional[str] = Field(None, description="Immediate textual context preceding the image")
     text_after: Optional[str] = Field(None, description="Immediate textual context succeeding the image")

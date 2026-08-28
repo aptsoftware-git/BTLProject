@@ -211,6 +211,12 @@ class VectorStore:
                 flat_metadata["text_after"] = str(meta.text_after)
             if getattr(meta, "nearby_text", None):
                 flat_metadata["nearby_text"] = str(meta.nearby_text)
+            if getattr(meta, "entity_id", None):
+                flat_metadata["entity_id"] = str(meta.entity_id)
+            if getattr(meta, "entity_ids", None):
+                flat_metadata["entity_ids"] = json.dumps(meta.entity_ids)
+            if getattr(meta, "linked_text_chunk_ids", None):
+                flat_metadata["linked_text_chunk_ids"] = json.dumps(meta.linked_text_chunk_ids)
             if getattr(meta, "layout_context", None):
                 flat_metadata["layout_context"] = str(meta.layout_context)
             if getattr(meta, "importance_score", None):
@@ -278,4 +284,59 @@ class VectorStore:
             return len(chunk_ids)
         except Exception as e:
             logger.warning(f"Failed to delete chunk records from ChromaDB collection {collection_name}: {e}")
+            return 0
+
+    def update_chunk_metadata(self, document_id: str, updates: Dict[str, Dict[str, Any]]) -> int:
+        """
+        Merges the given per-field updates (e.g. entity_id/linked_text_chunk_ids
+        computed by a post-indexing pass such as entity_linker) into the
+        EXISTING metadata of each already-indexed chunk, by chunk_id. Does not
+        touch embeddings/documents -- metadata-only, so it never requires a
+        re-embed. Returns the number of chunk records actually updated.
+        """
+        if not updates:
+            return 0
+
+        collection_name = self._get_collection_name(document_id)
+        if collection_name in self._collections:
+            collection = self._collections[collection_name]
+        else:
+            try:
+                collection = self.client.get_collection(name=collection_name)
+                self._collections[collection_name] = collection
+            except Exception:
+                return 0
+
+        chunk_ids = list(updates.keys())
+        try:
+            existing = collection.get(ids=chunk_ids)
+        except Exception as e:
+            logger.warning(f"Failed to fetch existing metadata for update in {collection_name}: {e}")
+            return 0
+
+        existing_ids = existing.get("ids", []) or []
+        existing_metadatas = existing.get("metadatas", []) or []
+        if not existing_ids:
+            return 0
+
+        merged_ids = []
+        merged_metadatas = []
+        for chunk_id, meta in zip(existing_ids, existing_metadatas):
+            field_updates = updates.get(chunk_id)
+            if not field_updates:
+                continue
+            merged = dict(meta or {})
+            merged.update(field_updates)
+            merged_ids.append(chunk_id)
+            merged_metadatas.append(merged)
+
+        if not merged_ids:
+            return 0
+
+        try:
+            collection.update(ids=merged_ids, metadatas=merged_metadatas)
+            logger.info(f"Updated metadata for {len(merged_ids)} chunk record(s) in ChromaDB collection: {collection_name}")
+            return len(merged_ids)
+        except Exception as e:
+            logger.warning(f"Failed to update chunk metadata in ChromaDB collection {collection_name}: {e}")
             return 0

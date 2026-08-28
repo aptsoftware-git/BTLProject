@@ -112,6 +112,8 @@ class ContextBuilder:
                         "text_before": getattr(meta, "text_before", None),
                         "text_after": getattr(meta, "text_after", None),
                         "nearby_text": getattr(meta, "nearby_text", None),
+                        "entity_id": getattr(meta, "entity_id", None),
+                        "linked_text_chunk_ids": getattr(meta, "linked_text_chunk_ids", []) or [],
                         "semantic_description": getattr(meta, "semantic_description", None),
                         "keywords": getattr(meta, "keywords", []) or [],
                         "image_url": resolved_img_url,
