@@ -111,6 +111,7 @@ class ContextBuilder:
                         "confidence": float(getattr(meta, "confidence", 1.0) or 1.0),
                         "text_before": getattr(meta, "text_before", None),
                         "text_after": getattr(meta, "text_after", None),
+                        "nearby_text": getattr(meta, "nearby_text", None),
                         "semantic_description": getattr(meta, "semantic_description", None),
                         "keywords": getattr(meta, "keywords", []) or [],
                         "image_url": resolved_img_url,

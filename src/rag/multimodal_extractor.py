@@ -810,6 +810,7 @@ class MultimodalExtractor:
                     img_meta.section_heading = grounded["section_heading"]
                     img_meta.text_before = grounded["text_before"]
                     img_meta.text_after = grounded["text_after"]
+                    img_meta.nearby_text = grounded.get("nearby_text")
                     img_meta.layout_context = grounded["layout_context"]
                     img_meta.image_type = grounded["image_type"]
                     img_meta.importance_score = grounded["importance_score"]
@@ -972,6 +973,7 @@ class MultimodalExtractor:
                         "section_heading": img_meta.section_heading,
                         "text_before": img_meta.text_before,
                         "text_after": img_meta.text_after,
+                        "nearby_text": img_meta.nearby_text,
                         "semantic_description": img_meta.semantic_description,
                         "keywords": img_meta.keywords or grounded.get("keywords", []),
                         "importance_score": img_meta.importance_score,

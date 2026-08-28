@@ -167,10 +167,16 @@ def build_findings(
         sentence_id_resolved = sid is not None or numeric_sentence_id is not None
         sentence_found_in_map = sentence_entry is not None or bool(sentence_text)
         page_number_valid = isinstance(page_number, (int, float)) and int(page_number) > 0
-        original_found_in_sentence = bool(original) and (
-            (bool(sentence_text) and (original.lower() in sentence_text.lower()))
-            or sentence_found_in_map
-            or bool(original)
+        # Real evidence check: the exact `original` token must actually occur
+        # in the source-of-truth sentence text pulled from the document (not
+        # merely "a sentence_text string exists"). Whitespace-normalized,
+        # case-insensitive match only -- never a fallback to "non-empty text
+        # is good enough", which previously made this check a no-op and let
+        # stale/hallucinated candidates (LLM/OCR text that doesn't exist in
+        # the source at all) through to the UI.
+        original_found_in_sentence = bool(original) and bool(sentence_text) and (
+            re.sub(r"\s+", " ", original.strip()).lower()
+            in re.sub(r"\s+", " ", sentence_text.strip()).lower()
         )
         token_offsets_valid = (
             token_start is not None
@@ -181,7 +187,7 @@ def build_findings(
         grounding_verified = (
             page_number_valid
             and (sentence_id_resolved or sentence_found_in_map)
-            and bool(original)
+            and original_found_in_sentence
         )
 
         status = decisions.get(finding_id) or decisions.get(str(idx + 1)) or decisions.get(str(idx)) or "pending"

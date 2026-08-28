@@ -1308,6 +1308,7 @@ class Retriever:
                         designation=meta_data.get("designation"),
                         text_before=meta_data.get("text_before"),
                         text_after=meta_data.get("text_after"),
+                        nearby_text=meta_data.get("nearby_text"),
                         layout_context=meta_data.get("layout_context"),
                         importance_score=meta_data.get("importance_score", "MEDIUM") or "MEDIUM",
                         retrievable=meta_data.get("retrievable", True) if isinstance(meta_data.get("retrievable"), bool) else (str(meta_data.get("retrievable")).lower() != "false"),
@@ -1372,6 +1373,7 @@ class Retriever:
                                 ocr_text = im_data.get("ocr_text") or ""
                                 text_before = im_data.get("text_before")
                                 text_after = im_data.get("text_after")
+                                nearby_text = im_data.get("nearby_text")
                                 image_type = im_data.get("image_type") or "Photo"
                                 importance_score = im_data.get("importance_score", "MEDIUM") or "MEDIUM"
                                 retrievable = im_data.get("retrievable", True)
@@ -1407,7 +1409,9 @@ class Retriever:
                                     content_parts.append(f"Preceding Text Context: {text_before[:150]}")
                                 if text_after:
                                     content_parts.append(f"Succeeding Text Context: {text_after[:150]}")
-                                
+                                if nearby_text and nearby_text not in (text_before, text_after):
+                                    content_parts.append(f"Adjacent Profile Text: {nearby_text[:250]}")
+
                                 keywords = im_data.get("keywords") or []
                                 if keywords:
                                     content_parts.append(f"Keywords: {', '.join(keywords)}")
@@ -1437,6 +1441,7 @@ class Retriever:
                                     designation=designation,
                                     text_before=text_before,
                                     text_after=text_after,
+                                    nearby_text=nearby_text,
                                     layout_context=im_data.get("layout_context"),
                                     importance_score=importance_score,
                                     retrievable=retrievable,
@@ -1499,6 +1504,7 @@ class Retriever:
                     designation=meta_data.get("designation") or None,
                     text_before=meta_data.get("text_before") or None,
                     text_after=meta_data.get("text_after") or None,
+                    nearby_text=meta_data.get("nearby_text") or None,
                     layout_context=meta_data.get("layout_context") or None,
                     importance_score=meta_data.get("importance_score", "MEDIUM") or "MEDIUM",
                     retrievable=str(meta_data.get("retrievable", "True")).lower() != "false",

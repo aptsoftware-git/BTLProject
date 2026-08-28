@@ -532,6 +532,7 @@ class ChunkBuilder:
         designation = None
         text_before = None
         text_after = None
+        nearby_text = None
         layout_context = None
         importance_score = "MEDIUM"
         retrievable = True
@@ -556,6 +557,7 @@ class ChunkBuilder:
                 designation = image_meta.get("designation")
                 text_before = image_meta.get("text_before")
                 text_after = image_meta.get("text_after")
+                nearby_text = image_meta.get("nearby_text")
                 layout_context = image_meta.get("layout_context")
                 importance_score = image_meta.get("importance_score") or "MEDIUM"
                 retrievable = image_meta.get("retrievable", True)
@@ -578,6 +580,7 @@ class ChunkBuilder:
                 designation = getattr(image_meta, "designation", None)
                 text_before = getattr(image_meta, "text_before", None)
                 text_after = getattr(image_meta, "text_after", None)
+                nearby_text = getattr(image_meta, "nearby_text", None)
                 layout_context = getattr(image_meta, "layout_context", None)
                 importance_score = getattr(image_meta, "importance_score", "MEDIUM") or "MEDIUM"
                 retrievable = getattr(image_meta, "retrievable", True)
@@ -628,6 +631,7 @@ class ChunkBuilder:
                         sec_heading = sec_heading or jd.get("section_heading")
                         text_before = text_before or jd.get("text_before")
                         text_after = text_after or jd.get("text_after")
+                        nearby_text = nearby_text or jd.get("nearby_text")
                         layout_context = layout_context or jd.get("layout_context")
                         importance_score = jd.get("importance_score") or importance_score
                         retrievable = jd.get("retrievable", retrievable)
@@ -710,6 +714,8 @@ class ChunkBuilder:
             image_parts.append(f"Preceding Text Context: {text_before[:150]}")
         if text_after:
             image_parts.append(f"Succeeding Text Context: {text_after[:150]}")
+        if nearby_text and nearby_text not in (text_before, text_after):
+            image_parts.append(f"Adjacent Profile Text: {nearby_text[:250]}")
         if objects:
             objs_str = ", ".join(objects) if isinstance(objects, list) else str(objects)
             image_parts.append(f"Detected Visual Objects: {objs_str}")
@@ -770,6 +776,7 @@ class ChunkBuilder:
             designation=designation,
             text_before=text_before,
             text_after=text_after,
+            nearby_text=nearby_text,
             layout_context=layout_context,
             importance_score=importance_score,
             retrievable=retrievable,

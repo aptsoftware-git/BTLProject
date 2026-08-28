@@ -209,6 +209,8 @@ class VectorStore:
                 flat_metadata["text_before"] = str(meta.text_before)
             if getattr(meta, "text_after", None):
                 flat_metadata["text_after"] = str(meta.text_after)
+            if getattr(meta, "nearby_text", None):
+                flat_metadata["nearby_text"] = str(meta.nearby_text)
             if getattr(meta, "layout_context", None):
                 flat_metadata["layout_context"] = str(meta.layout_context)
             if getattr(meta, "importance_score", None):

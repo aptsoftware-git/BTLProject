@@ -2,7 +2,7 @@ import hashlib
 import json
 import logging
 from pathlib import Path
-from typing import Any, Dict, List, Optional, Tuple
+from typing import Any, Dict, List, Optional, Set, Tuple
 
 from PIL import Image
 
@@ -276,6 +276,37 @@ def validate_and_cleanup_image_artifacts(
             except Exception as e:
                 logger.warning(f"Failed to remove orphaned image PNG {png_path.name}: {e}")
 
+    # 2b. Enforce exactly-one-JSON-per-image_id: if multiple retained PNG/JSON
+    # pairs somehow carry the same image_id (should not happen given
+    # multimodal_extractor's in-stream duplicate collapse, but enforced here
+    # as a hard guarantee), keep only the lowest seq_name and remove the rest
+    # so every retained image maps to exactly one JSON/PNG pair.
+    seen_image_ids: Dict[str, str] = {}
+    for stem in sorted(valid_json_stems.keys()):
+        image_id = valid_json_stems[stem]
+        if not image_id:
+            continue
+        if image_id in seen_image_ids:
+            dup_json = images_dir / f"{stem}.json"
+            dup_png = images_dir / f"{stem}.png"
+            try:
+                dup_json.unlink(missing_ok=True)
+                stats["orphaned_json_removed"] += 1
+            except Exception as e:
+                logger.warning(f"Failed to remove duplicate image JSON {dup_json.name}: {e}")
+            try:
+                dup_png.unlink(missing_ok=True)
+                stats["orphaned_images_removed"] += 1
+            except Exception as e:
+                logger.warning(f"Failed to remove duplicate image PNG {dup_png.name}: {e}")
+            logger.info(
+                f"Removed duplicate image pair {stem} (image_id={image_id}) -- "
+                f"already retained as {seen_image_ids[image_id]}; enforcing exactly-one-JSON-per-image."
+            )
+            del valid_json_stems[stem]
+        else:
+            seen_image_ids[image_id] = stem
+
     retained_image_stems = set(valid_json_stems.keys())
     accepted_image_ids = set(retained_image_stems)
     for stem, image_id in valid_json_stems.items():
@@ -298,6 +329,7 @@ def validate_and_cleanup_image_artifacts(
 
         kept_chunks = []
         local_orphans: List[str] = []
+        seen_chunk_image_keys: Set[str] = set()
         for chunk in data["chunks"]:
             meta = chunk.get("metadata", {}) or {}
             img_id = meta.get("image_id")
@@ -311,14 +343,32 @@ def validate_and_cleanup_image_artifacts(
                 (img_id and (img_id in accepted_image_ids or img_id in retained_image_stems))
                 or (path_stem and path_stem in retained_image_stems)
             )
-            if is_valid:
-                kept_chunks.append(chunk)
-            else:
+            if not is_valid:
                 local_orphans.append(meta.get("chunk_id") or "")
                 logger.info(
                     f"Removing orphaned image chunk {meta.get('chunk_id')} "
                     f"(image_id={img_id}) -- referenced image no longer exists."
                 )
+                continue
+
+            # Enforce exactly-one-chunk-per-image: a second chunk pointing at
+            # an image that already has a retained chunk is a duplicate, not
+            # an orphan, but must be removed the same way (and its vector
+            # record dropped below) so retained image count == indexed image
+            # chunk count.
+            dedup_key = img_id or path_stem
+            if dedup_key and dedup_key in seen_chunk_image_keys:
+                local_orphans.append(meta.get("chunk_id") or "")
+                logger.info(
+                    f"Removing duplicate image chunk {meta.get('chunk_id')} "
+                    f"(image_id={img_id}) -- image already has a retained chunk; "
+                    f"enforcing exactly-one-chunk-per-image."
+                )
+                continue
+
+            if dedup_key:
+                seen_chunk_image_keys.add(dedup_key)
+            kept_chunks.append(chunk)
 
         if local_orphans:
             data["chunks"] = kept_chunks
@@ -364,5 +414,13 @@ def validate_and_cleanup_image_artifacts(
         stats["orphaned_chunks_removed"],
         stats["orphaned_vector_records_removed"],
     )
+
+    if stats["retained_images"] != stats["indexed_image_records"]:
+        logger.warning(
+            "Image metadata consistency check FAILED for %s: retained images (%d) != "
+            "indexed image chunk records (%d) -- some retained image lacks a chunk, or "
+            "some chunk still points at an image outside the retained set.",
+            document_id, stats["retained_images"], stats["indexed_image_records"],
+        )
 
     return stats

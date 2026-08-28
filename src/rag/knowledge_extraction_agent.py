@@ -466,6 +466,7 @@ class KnowledgeExtractionAgent:
                     section_heading = grounded["section_heading"]
                     text_before = grounded["text_before"]
                     text_after = grounded["text_after"]
+                    nearby_text = grounded.get("nearby_text")
                     layout_context = grounded["layout_context"]
                     image_type = grounded["image_type"]
                     importance_score = grounded["importance_score"]
@@ -485,6 +486,7 @@ class KnowledgeExtractionAgent:
                     img_meta.section_heading = section_heading
                     img_meta.text_before = text_before
                     img_meta.text_after = text_after
+                    img_meta.nearby_text = nearby_text
                     img_meta.layout_context = layout_context
                     img_meta.image_type = image_type
                     img_meta.importance_score = importance_score
@@ -556,6 +558,7 @@ class KnowledgeExtractionAgent:
                         "section_heading": section_heading,
                         "text_before": text_before,
                         "text_after": text_after,
+                        "nearby_text": nearby_text,
                         "semantic_description": vlm_description,
                         "keywords": keywords,
                         "importance_score": importance_score,

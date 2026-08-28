@@ -215,10 +215,19 @@ class FinalValidationLayer:
             if conf < self.min_apostrophe_confidence:
                 return "rejected", Reason.UNCERTAIN_APOSTROPHE_SUGGESTION
 
+        # Authoritative grounding: either the token was verified against the
+        # real PDF page text (pdf_grounded, see src/pdf_bbox_resolver.py) or
+        # against the source sentence text (grounding_verified, see
+        # src/finding_mapper.py's original_found_in_sentence check). A bare
+        # `source_bbox` is only carried-through Docling element provenance
+        # (never itself checked against the finding's `original` text) and
+        # must never be treated as evidence on its own -- doing so let
+        # stale/hallucinated candidates through as long as *some* bbox
+        # metadata existed, regardless of whether the reported token was
+        # ever actually found anywhere.
         grounding_verified = bool(finding.get("grounding_verified"))
         pdf_grounded = bool(finding.get("pdf_grounded"))
-        source_bbox = finding.get("source_bbox") or finding.get("bbox")
-        if not grounding_verified and not pdf_grounded and not source_bbox:
+        if not grounding_verified and not pdf_grounded:
             return "rejected", Reason.NO_PDF_OR_SOURCE_EVIDENCE
 
         if confidence is not None and confidence < self.min_confidence:

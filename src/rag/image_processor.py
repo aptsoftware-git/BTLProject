@@ -307,6 +307,184 @@ class PortraitSpatialValidator:
 
         return best_match
 
+
+def _get_bbox_coords(box: Any) -> Tuple[float, float, float, float]:
+    if isinstance(box, dict):
+        return (
+            float(box.get("l", 0) or 0),
+            float(box.get("r", 0) or 0),
+            float(box.get("t", 0) or 0),
+            float(box.get("b", 0) or 0),
+        )
+    return (
+        float(getattr(box, "l", 0) or 0),
+        float(getattr(box, "r", 0) or 0),
+        float(getattr(box, "t", 0) or 0),
+        float(getattr(box, "b", 0) or 0),
+    )
+
+
+class SpatialDocumentContextGrounder:
+    """
+    Generalized spatial association: pairs a portrait's bounding box with the
+    nearest structured text block on the SAME page using pure geometry --
+    horizontal/vertical distance, vertical overlap ratio, column adjacency,
+    and reading order -- then extracts name -> designation -> biography from
+    that block's own real text (never OCR/pixel text, never a fixed roster).
+
+    Unlike PortraitSpatialValidator (which only matches within a narrow
+    "portrait card" geometry envelope, and only scans blocks that already
+    fall inside its tight dx/dy windows), this method scores every text
+    block on the page so a profile block sitting beside the portrait at the
+    same vertical band -- but outside that narrow envelope, and not caught
+    by the simple text_before/text_after vertical-only scan either -- is
+    never missed and silently pushed to a lower-confidence fallback.
+    """
+
+    # Maximum spatial distance (PDF points) beyond which a text block is not
+    # considered spatially adjacent to the portrait at all.
+    MAX_ASSOCIATION_DISTANCE = 260.0
+
+    @staticmethod
+    def _candidate_blocks(
+        image_bbox_coords: Tuple[float, float, float, float],
+        doc_elements_on_page: List[Dict[str, Any]],
+    ) -> List[Dict[str, Any]]:
+        il, ir, it, ib = image_bbox_coords
+        i_height = max(1e-6, it - ib)
+        i_width = max(1e-6, ir - il)
+        candidates: List[Dict[str, Any]] = []
+
+        for order_idx, el in enumerate(doc_elements_on_page):
+            t_str = (el.get("text") or "").strip()
+            if not t_str or el.get("type") in ("image", "PictureItem", "ImageItem"):
+                continue
+            t_box = el.get("metadata", {}).get("bbox") or el.get("bbox") or {}
+            tl, tr, tt, tb = _get_bbox_coords(t_box)
+            if tl == 0 and tr == 0 and tt == 0 and tb == 0:
+                continue
+            t_height = max(1e-6, tt - tb)
+
+            # Horizontal / vertical gaps (0 when the boxes overlap on that axis)
+            gap_x = max(0.0, tl - ir, il - tr)
+            gap_y = max(0.0, tb - it, ib - tt)
+
+            # Vertical overlap: how much of the text block's height sits in
+            # the same horizontal "row band" as the portrait -- this is what
+            # identifies a profile block sitting BESIDE the portrait, not
+            # merely above/below it.
+            overlap = max(0.0, min(it, tt) - max(ib, tb))
+            overlap_ratio = overlap / min(i_height, t_height)
+
+            # Column adjacency: horizontal overlap between the image's and
+            # text block's x-ranges (same column), or a horizontal gap no
+            # wider than 1.5x the portrait's own width (adjacent column).
+            h_overlap = max(0.0, min(ir, tr) - max(il, tl))
+            same_column = h_overlap > 0 or gap_x <= (i_width * 1.5)
+
+            distance = (gap_x ** 2 + gap_y ** 2) ** 0.5
+            if distance > SpatialDocumentContextGrounder.MAX_ASSOCIATION_DISTANCE:
+                continue
+
+            # Composite score (lower = better): raw distance, discounted for
+            # strong vertical overlap and same-column layout. Reading order
+            # is kept only as a final tiebreaker.
+            score = distance - (overlap_ratio * 80.0) - (25.0 if same_column else 0.0)
+
+            candidates.append({
+                "text": t_str,
+                "bbox": {"l": tl, "r": tr, "t": tt, "b": tb},
+                "gap_x": round(gap_x, 2),
+                "gap_y": round(gap_y, 2),
+                "vertical_overlap_ratio": round(overlap_ratio, 3),
+                "same_column": same_column,
+                "distance": round(distance, 2),
+                "score": round(score, 2),
+                "reading_order_index": order_idx,
+            })
+
+        candidates.sort(key=lambda c: (c["score"], c["reading_order_index"]))
+        return candidates
+
+    @staticmethod
+    def ground(
+        image_id: str,
+        bbox: Any,
+        doc_elements_on_page: List[Dict[str, Any]],
+        page_number: int = 0,
+    ) -> Dict[str, Any]:
+        """
+        Returns, on success: {entity_name, designation, nearby_text,
+        confidence, selected_block, debug}.
+        On failure: {entity_name: None, reason: "<exact reason>", debug}.
+        Every call logs the full candidate list and the outcome so a
+        spatial-association failure is always traceable, never silent.
+        """
+        il, ir, it, ib = _get_bbox_coords(bbox) if bbox else (0.0, 0.0, 0.0, 0.0)
+        if il == 0 and ir == 0 and it == 0 and ib == 0:
+            logger.debug(f"[spatial_document_context] {image_id}: no usable portrait bbox -- skipping.")
+            return {"entity_name": None, "reason": "missing_portrait_bbox", "debug": {}}
+
+        candidates = SpatialDocumentContextGrounder._candidate_blocks((il, ir, it, ib), doc_elements_on_page)
+        debug_candidates = [
+            {**{k: v for k, v in c.items() if k != "text"}, "text_preview": c["text"][:80]}
+            for c in candidates[:8]
+        ]
+        logger.debug(
+            f"[spatial_document_context] image={image_id} portrait_bbox=(l={il:.1f}, r={ir:.1f}, "
+            f"t={it:.1f}, b={ib:.1f}) candidate_blocks={debug_candidates}"
+        )
+
+        if not candidates:
+            logger.info(
+                f"[spatial_document_context] image={image_id}: association FAILED -- no text block "
+                f"found within {SpatialDocumentContextGrounder.MAX_ASSOCIATION_DISTANCE:.0f}pt of the "
+                f"portrait bbox on page {page_number}."
+            )
+            return {"entity_name": None, "reason": "no_candidate_text_block_within_range", "debug": {"candidates": debug_candidates}}
+
+        for candidate in candidates[:5]:
+            identity = (
+                extract_generic_person_identity(candidate["text"])
+                or extract_untitled_name_near_designation(candidate["text"])
+            )
+            if identity:
+                name, designation = identity
+                proximity_bonus = max(
+                    0.0,
+                    (SpatialDocumentContextGrounder.MAX_ASSOCIATION_DISTANCE - candidate["distance"])
+                    / SpatialDocumentContextGrounder.MAX_ASSOCIATION_DISTANCE,
+                ) * 0.15
+                overlap_bonus = min(candidate["vertical_overlap_ratio"], 1.0) * 0.10
+                confidence = round(min(0.90, 0.65 + proximity_bonus + overlap_bonus), 2)
+
+                logger.info(
+                    f"[spatial_document_context] image={image_id} -> selected profile block "
+                    f"text='{candidate['text'][:60]}' bbox={candidate['bbox']} "
+                    f"distance={candidate['distance']} vertical_overlap_ratio={candidate['vertical_overlap_ratio']} "
+                    f"-> entity_name='{name}' designation='{designation}' confidence={confidence}"
+                )
+                return {
+                    "entity_name": name,
+                    "designation": designation,
+                    "nearby_text": candidate["text"],
+                    "confidence": confidence,
+                    "selected_block": candidate,
+                    "debug": {"candidates": debug_candidates},
+                }
+
+        logger.info(
+            f"[spatial_document_context] image={image_id}: association FAILED -- "
+            f"{len(candidates)} nearby text block(s) found on page {page_number}, but none contain a "
+            f"recognizable name/designation pattern (nearest text: '{candidates[0]['text'][:80]}')."
+        )
+        return {
+            "entity_name": None,
+            "reason": "no_name_pattern_in_nearby_blocks",
+            "debug": {"candidates": debug_candidates},
+        }
+
+
 class HierarchicalLayoutGrounder:
     """
     Implements a hierarchical caption and layout-grounding strategy for extracted document images.
@@ -408,6 +586,7 @@ class HierarchicalLayoutGrounder:
         subtitle = None
         entity_name = None
         designation = None
+        spatial_nearby_text = None
         final_caption = None
         final_explicit_caption = None
         layout_context = "unanchored_visual"
@@ -508,6 +687,40 @@ class HierarchicalLayoutGrounder:
                 association_confidence = 0.80
                 final_caption = f"Portrait of {entity_name} ({designation})" if designation else f"Portrait of {entity_name}"
 
+        # Check Priority 2d: Generalized Spatial Document Context. Pairs the
+        # portrait bbox with the nearest structured text block ANYWHERE on
+        # the page (not just inside a matching "card" envelope, and not just
+        # above/below via the text_before/text_after vertical-only scan) via
+        # spatial distance, vertical overlap, column adjacency and reading
+        # order. This is what catches a profile block sitting beside a
+        # portrait that priorities 1/2/2b/2c did not already resolve, so it
+        # is never silently pushed down to surrounding_text/VLM fallback.
+        if not final_explicit_caption and not entity_name and not is_signature_block:
+            is_portrait_shape, _geom_reason = PortraitSpatialValidator.validate_portrait_geometry(bbox)
+            if is_portrait_shape:
+                spatial_ctx = SpatialDocumentContextGrounder.ground(
+                    image_id=image_id,
+                    bbox=bbox_data,
+                    doc_elements_on_page=doc_elements_on_page,
+                    page_number=page_number,
+                )
+                if spatial_ctx.get("entity_name"):
+                    entity_name = spatial_ctx["entity_name"]
+                    designation = spatial_ctx.get("designation")
+                    spatial_nearby_text = spatial_ctx.get("nearby_text")
+                    title = entity_name
+                    subtitle = designation
+                    image_type = "Portrait Photo"
+                    layout_context = "spatial_document_context"
+                    association_method = "spatial_document_context"
+                    association_confidence = spatial_ctx.get("confidence", 0.70)
+                    final_caption = f"Portrait of {entity_name} ({designation})" if designation else f"Portrait of {entity_name}"
+            else:
+                logger.debug(
+                    f"[spatial_document_context] {image_id}: skipped -- bbox does not match portrait "
+                    f"geometry ({_geom_reason})."
+                )
+
         # Check Priority 3 & 4: Section Context and Spatially Nearest Text for Uncaptioned Visuals
         if not final_explicit_caption and not entity_name:
             sec_candidate = (active_section or "").strip()
@@ -595,7 +808,10 @@ class HierarchicalLayoutGrounder:
         # because they -- like same_card_layout and explicit_caption -- only
         # ever get set from a titled name found directly in real document
         # text (never a model-inferred guess).
-        if association_method not in ("same_card_layout", "explicit_caption", "ocr_grounded_identity", "signature_text_grounded"):
+        if association_method not in (
+            "same_card_layout", "explicit_caption", "ocr_grounded_identity",
+            "signature_text_grounded", "spatial_document_context",
+        ):
             entity_name = None
             designation = None
 
@@ -728,7 +944,17 @@ class HierarchicalLayoutGrounder:
                 keywords.append(title)
             objects = ["image", "figure", "visual graphic"]
 
-        semantic_description = vlm_description or f"{image_type} on Page {page_number} under section '{active_section or 'Document Content'}'."
+        nearby_text = spatial_nearby_text or text_before or text_after
+
+        if entity_name and not vlm_description:
+            bio_snippet = (nearby_text or "")[:200]
+            semantic_description = (
+                f"Portrait of {entity_name}"
+                + (f", {designation}" if designation else "")
+                + (f". {bio_snippet}" if bio_snippet else f" on Page {page_number}.")
+            )
+        else:
+            semantic_description = vlm_description or f"{image_type} on Page {page_number} under section '{active_section or 'Document Content'}'."
 
         return {
             "image_id": image_id,
@@ -745,6 +971,7 @@ class HierarchicalLayoutGrounder:
             "section_heading": active_section,
             "text_before": text_before,
             "text_after": text_after,
+            "nearby_text": nearby_text,
             "semantic_description": semantic_description,
             "keywords": keywords,
             "importance_score": importance_score,
