@@ -1930,19 +1930,14 @@ export default function Workspace() {
     }
   }
 
+  const isProofreadTab = activeTab === "proofreading" || activeTab === "proofread" || activeTab === "annotated" || activeTab === "corrected";
+
   return (
-    <div style={styles.workspace}>
-      
-
-
-        {/* 3. Master-Detail Enterprise Workspace Split Layout (100% for Proofreading | 73%/27% for Overview and other tabs) */}
-        {(() => {
-          const isProofreadTab = activeTab === "proofreading" || activeTab === "proofread" || activeTab === "annotated" || activeTab === "corrected";
-          console.log("[Workspace Render] activeTab runtime value:", activeTab, "| isProofreadTab:", isProofreadTab);
-
+    <div style={isProofreadTab ? styles.workspaceWide : styles.workspace}>
+      {/* Master-Detail Enterprise Workspace Split Layout (100% for Proofreading | 73%/27% for Overview and other tabs) */}
+      {(() => {
           return (
             <div style={{ display: "flex", gap: 20, alignItems: "flex-start", width: "100%" }}>
-              
               {/* Main Left Workspace View (100% full width & maximum breathing room) */}
               <div style={{ flex: "1 1 100%", width: "100%", minWidth: 0, display: "flex", flexDirection: "column", gap: 16 }}>
                 {activeTab === "overview" ? (
@@ -2276,6 +2271,10 @@ export default function Workspace() {
 
 const styles = {
   workspace: { display: "flex", flexDirection: "column", gap: 16, maxWidth: 1040, margin: "0 auto", padding: "0 4px" },
+  // Proofreading tab only: no centered max-width cap, so the document
+  // viewer + findings panel use the full available page width instead of
+  // leaving large empty margins on wider screens.
+  workspaceWide: { display: "flex", flexDirection: "column", gap: 8, width: "100%", padding: "0 4px", boxSizing: "border-box" },
   topSummaryRow: {
     display: "flex",
     gap: 12,

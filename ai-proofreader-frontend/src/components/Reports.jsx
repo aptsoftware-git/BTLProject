@@ -3,12 +3,41 @@ import { useNavigate } from "react-router-dom";
 import {
   fetchDocuments,
   fetchDocument,
-  fetchFinalReport,
-  fetchClaudeVerificationReport,
-  fetchChunkReasoningReport,
-  fetchClusterReasoningReport,
-  fetchComparativeAnalysis
+  fetchFinalReport
 } from "../api";
+
+// Plain-language labels for the internal ambiguity-analysis taxonomy, so a
+// non-technical reader never sees the underlying category names.
+const CATEGORY_LABELS = {
+  "Cross-reference / contradiction": "Information does not match",
+  "Numerical inconsistency": "Numbers don't match",
+  "Pronoun / entity-reference ambiguity": "Unclear who or what is being referred to",
+  "Terminology inconsistency": "Inconsistent wording",
+  "Date / timeline inconsistency": "Dates don't match",
+  "Unit / measurement inconsistency": "Inconsistent units of measurement",
+  "Internal factual contradiction": "Conflicting information",
+  "Structural / convention inconsistency": "Inconsistent formatting",
+  "Missing / conflicting context": "Missing information or context"
+};
+
+function plainCategory(category) {
+  return CATEGORY_LABELS[category] || category || "Issue";
+}
+
+function priorityInfo(severity) {
+  const s = String(severity || "").toUpperCase();
+  if (s === "CRITICAL" || s === "HIGH") return { label: "High priority", bg: "#fef2f2", color: "#dc2626" };
+  if (s === "MEDIUM") return { label: "Medium priority", bg: "#fffbeb", color: "#b45309" };
+  return { label: "Low priority", bg: "#f0fdf4", color: "#166534" };
+}
+
+function statusColors(label) {
+  const l = String(label || "").toLowerCase();
+  if (l.includes("ready")) return { bg: "#f0fdf4", color: "#166534", border: "#bbf7d0" };
+  if (l.includes("major")) return { bg: "#fef2f2", color: "#dc2626", border: "#fecaca" };
+  if (l.includes("minor")) return { bg: "#eff6ff", color: "#1d4ed8", border: "#bfdbfe" };
+  return { bg: "#fffbeb", color: "#b45309", border: "#fde68a" };
+}
 
 export default function Reports({ activeDocId }) {
   const navigate = useNavigate();
@@ -21,18 +50,8 @@ export default function Reports({ activeDocId }) {
   const [reportsState, setReportsState] = useState({});
   const [exportDropdownOpen, setExportDropdownOpen] = useState(false);
 
-  // Modal / Dedicated View state
-  const [activeModalReportKey, setActiveModalReportKey] = useState(null);
-  const [modalReportData, setModalReportData] = useState(null);
-  const [modalLoading, setModalLoading] = useState(false);
-  const [modalFilter, setModalFilter] = useState("ALL");
-
-  const [searchTerm, setSearchTerm] = useState("");
-  const [selectedCategory, setSelectedCategory] = useState("ALL");
-  const [selectedSeverity, setSelectedSeverity] = useState("ALL");
-  const [verifiedOnly, setVerifiedOnly] = useState(false);
-  const [highPriorityOnly, setHighPriorityOnly] = useState(false);
-  const [showRejectedOnly, setShowRejectedOnly] = useState(false);
+  // Full-list viewer for the Compliance Report (opened via "View all")
+  const [showAllIssues, setShowAllIssues] = useState(false);
 
   useEffect(() => {
     async function loadDocs() {
@@ -57,6 +76,10 @@ export default function Reports({ activeDocId }) {
     loadDocs();
   }, [activeDocId]);
 
+  // Only the two user-facing reports are polled/shown here. Claude
+  // Verification / Chunk Reasoning / Cluster Reasoning are internal
+  // debugging reports -- their backend generation is untouched, this view
+  // simply no longer surfaces them.
   const checkStatusAndReports = useCallback(async () => {
     if (!selectedDocId) return;
 
@@ -65,18 +88,11 @@ export default function Reports({ activeDocId }) {
       if (doc) setActiveDoc(doc);
 
       const isDocProcessing = doc && (
-        doc.context_analysis_status === "running" || 
+        doc.context_analysis_status === "running" ||
         doc.context_analysis_status === "pending"
       );
 
-      const reportKeys = [
-        "final-report",
-        "claude-verification",
-        "chunk-reasoning",
-        "cluster-reasoning",
-        "comparative-analysis"
-      ];
-
+      const reportKeys = ["final-report", "comparative-analysis"];
       const newReportsState = {};
 
       await Promise.all(
@@ -90,79 +106,49 @@ export default function Reports({ activeDocId }) {
 
               if (isGen || (!resJson.data && isDocProcessing)) {
                 newReportsState[key] = {
-                  state: "generating",
-                  isReady: false,
-                  isGenerating: true,
-                  isWaiting: false,
-                  isFailed: false,
-                  timestamp: doc?.current_stage || "Generating report...",
-                  meta: meta,
-                  data: null
+                  state: "generating", isReady: false, isGenerating: true,
+                  isWaiting: false, isFailed: false,
+                  timestamp: "Preparing your report...", meta, data: null
                 };
               } else if (resJson.data) {
                 const rawDate = meta.created_at || meta.timestamp;
                 let formattedTime = "Generated recently";
-
                 if (rawDate) {
                   try {
                     const parsed = new Date(rawDate);
                     if (!isNaN(parsed.getTime())) {
                       formattedTime = parsed.toLocaleString("en-US", {
-                        month: "short",
-                        day: "numeric",
-                        hour: "2-digit",
-                        minute: "2-digit"
+                        month: "short", day: "numeric", hour: "2-digit", minute: "2-digit"
                       });
                     }
                   } catch (e) {
                     formattedTime = rawDate;
                   }
                 }
-
                 newReportsState[key] = {
-                  state: "ready",
-                  isReady: true,
-                  isGenerating: false,
-                  isWaiting: false,
-                  isFailed: false,
-                  timestamp: formattedTime,
-                  meta: meta,
-                  data: resJson.data
+                  state: "ready", isReady: true, isGenerating: false,
+                  isWaiting: false, isFailed: false,
+                  timestamp: formattedTime, meta, data: resJson.data
                 };
               } else {
                 newReportsState[key] = {
-                  state: "waiting",
-                  isReady: false,
-                  isGenerating: false,
-                  isWaiting: true,
-                  isFailed: false,
-                  timestamp: "Pending",
-                  meta: meta,
-                  data: null
+                  state: "waiting", isReady: false, isGenerating: false,
+                  isWaiting: true, isFailed: false,
+                  timestamp: "Not generated yet", meta, data: null
                 };
               }
             } else {
               newReportsState[key] = {
-                state: "waiting",
-                isReady: false,
-                isGenerating: false,
-                isWaiting: true,
-                isFailed: false,
-                timestamp: "Pending",
-                meta: {},
-                data: null
+                state: "waiting", isReady: false, isGenerating: false,
+                isWaiting: true, isFailed: false,
+                timestamp: "Not generated yet", meta: {}, data: null
               };
             }
           } catch (e) {
             newReportsState[key] = {
-              state: "waiting",
-              isReady: false,
-              isGenerating: false,
-              isWaiting: true,
-              isFailed: false,
-              timestamp: "Pending",
-              meta: {},
-              data: null
+              state: "waiting", isReady: false, isGenerating: false,
+              isWaiting: true, isFailed: false,
+              timestamp: "Not generated yet", meta: {}, data: null
             };
           }
         })
@@ -192,35 +178,12 @@ export default function Reports({ activeDocId }) {
     return () => clearInterval(interval);
   }, [selectedDocId, activeDoc?.status, activeDoc?.context_analysis_status, reportsState, checkStatusAndReports]);
 
-  // Open dedicated viewer for each specific report card
   const handleViewReportCard = async (key) => {
     if (key === "comparative-analysis") {
       navigate(`/documents/${selectedDocId}?tab=comparative`);
       return;
     }
-
-    setActiveModalReportKey(key);
-    setModalLoading(true);
-    setModalReportData(null);
-    setModalFilter("ALL");
-
-    try {
-      let result = null;
-      if (key === "final-report") {
-        result = await fetchFinalReport(selectedDocId);
-      } else if (key === "claude-verification") {
-        result = await fetchClaudeVerificationReport(selectedDocId);
-      } else if (key === "chunk-reasoning") {
-        result = await fetchChunkReasoningReport(selectedDocId);
-      } else if (key === "cluster-reasoning") {
-        result = await fetchClusterReasoningReport(selectedDocId);
-      }
-      setModalReportData(result?.data || result);
-    } catch (err) {
-      console.error(`Error loading ${key}:`, err);
-    } finally {
-      setModalLoading(false);
-    }
+    setShowAllIssues(true);
   };
 
   const handleDownloadPdf = (reportKey, title = "Report") => {
@@ -234,28 +197,66 @@ export default function Reports({ activeDocId }) {
 
   const finalRep = reportsState["final-report"] || {};
   const fData = finalRep.data || {};
-
-  const kpis = {
-    total_findings: fData.total_issues || activeDoc?.issues?.length || 0,
-    confirmed_findings: fData.confirmed_issues_count || (fData.findings || []).length,
-    rejected_false_positives: fData.rejected_issues_count || (fData.rejected_findings || []).length,
-    publication_readiness: fData.executive_summary?.readiness || "Conditional Approval",
-    publication_guidance: fData.executive_summary?.guidance || "Review flagged critical clauses prior to release."
-  };
-
   const findingsList = fData.findings || [];
+
+  const sevBreak = fData.executive_summary?.severity_breakdown || {};
+  const highCount = (sevBreak.CRITICAL || 0) + (sevBreak.HIGH || 0);
+  const medCount = sevBreak.MEDIUM || 0;
+  const lowCount = sevBreak.LOW || 0;
+  const totalIssues = findingsList.length;
+
+  const overallStatusLabel = fData.publication_status?.label || "Review Pending";
+  const overallStatusAction = fData.publication_status?.action || "The document review has not finished yet.";
+  const statusStyle = statusColors(overallStatusLabel);
+
+  const docLabel = activeDoc?.filename || documents.find(d => d.id === selectedDocId)?.filename || selectedDocId;
+
+  const reviewSummarySentence = totalIssues === 0
+    ? "No issues were found in this document."
+    : `${totalIssues} issue${totalIssues === 1 ? "" : "s"} ${totalIssues === 1 ? "was" : "were"} identified that may require your attention.`;
+
+  function renderFindingCard(f, idx) {
+    const priority = priorityInfo(f.severity);
+    const whatWasFound = f.highlighted_ambiguity || f.original_chunk || f.claude_explanation || "An issue was found in this section of the document.";
+    const location = f.section_heading && f.section_heading !== "General Section"
+      ? `Page ${f.page_number || 1} — ${f.section_heading}`
+      : `Page ${f.page_number || 1}`;
+    const whyItMatters = f.business_impact || "This may affect how the document is understood or used.";
+    const suggestedAction = f.recommended_resolution || "Review this section and confirm the correct information.";
+
+    return (
+      <div key={f.finding_id || idx} style={styles.findingCard}>
+        <div style={styles.findingCardTop}>
+          <span style={styles.findingTitle}>{plainCategory(f.category)}</span>
+          <span style={{ ...styles.priorityBadge, background: priority.bg, color: priority.color }}>{priority.label}</span>
+        </div>
+        <div style={styles.findingLocation}>📍 {location}</div>
+
+        <div style={styles.findingRow}>
+          <span style={styles.findingLabel}>What was found</span>
+          <p style={styles.findingText}>{whatWasFound}</p>
+        </div>
+        <div style={styles.findingRow}>
+          <span style={styles.findingLabel}>Why it matters</span>
+          <p style={styles.findingText}>{whyItMatters}</p>
+        </div>
+        <div style={styles.actionRow}>
+          <span style={styles.findingLabel}>Suggested action</span>
+          <p style={styles.actionText}>{suggestedAction}</p>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div style={styles.container}>
       {/* Page Header */}
       <div style={styles.header}>
         <div>
-          <h1 style={styles.title}>Executive Audit & Intelligence Reports</h1>
-          <p style={styles.subtitle}>
-            Enterprise Document Reference: <code style={styles.codeRef}>{selectedDocId}</code>
-          </p>
+          <h1 style={styles.title}>Reports</h1>
+          <p style={styles.subtitle}>Document: <strong>{docLabel}</strong></p>
         </div>
-        
+
         <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
           {documents.length > 1 && (
             <select
@@ -273,26 +274,19 @@ export default function Reports({ activeDocId }) {
           )}
 
           <div style={{ position: "relative" }}>
-            <button
-              onClick={() => setExportDropdownOpen(!exportDropdownOpen)}
-              style={{
-                ...styles.exportBtn,
-                opacity: 1,
-                cursor: "pointer"
-              }}
-            >
-              📥 Export Package ▼
+            <button onClick={() => setExportDropdownOpen(!exportDropdownOpen)} style={styles.exportBtn}>
+              📥 Download ▼
             </button>
             {exportDropdownOpen && (
               <div style={styles.dropdownMenu}>
-                <button style={styles.dropdownItem} onClick={() => { setExportDropdownOpen(false); handleDownloadPdf("final-report", "Executive Audit Report"); }}>
-                  📄 Export Executive Report (PDF)
+                <button style={styles.dropdownItem} onClick={() => { setExportDropdownOpen(false); handleDownloadPdf("final-report", "Compliance Report"); }}>
+                  📄 Compliance Report (PDF)
                 </button>
                 <button style={styles.dropdownItem} onClick={() => { setExportDropdownOpen(false); navigate(`/documents/${selectedDocId}?tab=comparative`); }}>
-                  📊 View Executive Comparative Report
+                  📊 Comparative Analysis Report
                 </button>
                 <button style={styles.dropdownItem} onClick={() => { setExportDropdownOpen(false); window.open(`/api/documents/${selectedDocId}/export`, "_blank"); }}>
-                  📦 Export Complete Job Archive (ZIP)
+                  📦 Download All Files (ZIP)
                 </button>
               </div>
             )}
@@ -300,82 +294,46 @@ export default function Reports({ activeDocId }) {
         </div>
       </div>
 
-      {/* Cache Info Banner */}
-      {activeDoc?.cache_info?.cached && (
-        <div style={styles.cacheBanner}>
-          <div style={styles.cacheHeader}>
-            <span style={styles.cacheBadge}>⚡ Cache Status</span>
-            <strong>SHA-256 Hash Matched — Reused Verified Pipeline Artifacts</strong>
-          </div>
-        </div>
-      )}
-
-      {/* 5 Report Cards Grid */}
+      {/* Report Cards */}
       <div style={styles.reportCardsGrid}>
         {[
-          { key: "final-report", title: "Executive Compliance Report", desc: "Opens Executive Compliance Report viewer" },
-          { key: "comparative-analysis", title: "Executive Comparative Analysis Report", desc: "Opens Comparative Analysis View" },
-          { key: "claude-verification", title: "Claude Verification Report", desc: "Opens Claude Verification Report" },
-          { key: "chunk-reasoning", title: "Chunk Reasoning Report", desc: "Opens Chunk Reasoning Report" },
-          { key: "cluster-reasoning", title: "Cluster Reasoning Report", desc: "Opens Cluster Reasoning Report" }
+          { key: "final-report", title: "Executive Compliance Report", desc: "A plain-language summary of issues found in this document." },
+          { key: "comparative-analysis", title: "Executive Comparative Analysis Report", desc: "Compares this document against a reference version." }
         ].map(item => {
           const st = reportsState[item.key] || {};
           const isCompRep = item.key === "comparative-analysis";
           return (
             <div key={item.key} style={styles.reportStatusCard}>
               <div style={styles.reportStatusTitle}>{item.title}</div>
-              <div style={{ fontSize: 11, color: "var(--text-muted)", marginTop: 2 }}>{item.desc}</div>
-              
+              <div style={{ fontSize: 12, color: "var(--text-muted)", marginTop: 4 }}>{item.desc}</div>
+
               {st.isReady ? (
                 <div>
                   <div style={styles.stateBadgeReady}>✓ Ready</div>
                   <div style={styles.reportTimeText}>{st.timestamp}</div>
-                  <div style={{ ...styles.btnRow, flexWrap: "wrap", gap: 6, marginTop: 8 }}>
+                  <div style={{ ...styles.btnRow, flexWrap: "wrap" }}>
                     <button style={styles.viewBtn} onClick={() => handleViewReportCard(item.key)}>View</button>
-                    
                     {isCompRep ? (
                       <>
                         <a href={`/api/download/${selectedDocId}/comparative_report.html`} download style={{ textDecoration: "none" }}>
                           <button style={{ ...styles.dlBtn, background: "var(--brand-light)", color: "var(--brand)" }}>HTML</button>
                         </a>
-                        <a href={`/api/download/${selectedDocId}/comparative_report.json`} download style={{ textDecoration: "none" }}>
-                          <button style={{ ...styles.dlBtn, background: "var(--brand-light)", color: "var(--brand)" }}>JSON</button>
-                        </a>
                         <button style={styles.dlBtn} onClick={() => handleDownloadPdf("comparative-analysis", item.title)}>PDF</button>
                       </>
                     ) : (
-                      <>
-                        <a href={`/api/reports/${selectedDocId}/${item.key}`} target="_blank" rel="noreferrer" style={{ textDecoration: "none" }}>
-                          <button style={{ ...styles.dlBtn, background: "#f8fafc" }}>JSON</button>
-                        </a>
-                        <button style={styles.dlBtn} onClick={() => handleDownloadPdf(item.key, item.title)}>PDF</button>
-                      </>
+                      <button style={styles.dlBtn} onClick={() => handleDownloadPdf(item.key, item.title)}>PDF</button>
                     )}
                   </div>
                 </div>
               ) : st.isGenerating ? (
                 <div>
-                  <div style={styles.stateBadgeGenerating}>⏳ Generating</div>
-                  <div style={{ fontSize: 11, color: "var(--amber)", marginTop: 4 }}>
-                    <strong>Current Status:</strong> Building Report Artifacts<br/>
-                    <strong>Dependencies:</strong> Stage 4 Grammar & Stage 6 Scan<br/>
-                    <strong>Progress:</strong> 85% Complete • <strong>ETA:</strong> ~30s
-                  </div>
-                  <div style={{ ...styles.btnRow, gap: 6, marginTop: 8 }}>
-                    <button style={styles.viewBtn} onClick={() => handleViewReportCard(item.key)}>Preview Partial Report</button>
-                  </div>
+                  <div style={styles.stateBadgeGenerating}>⏳ Preparing your report...</div>
+                  <div style={{ fontSize: 12, color: "#64748b", marginTop: 6 }}>This usually takes a minute. Check back shortly.</div>
                 </div>
               ) : (
                 <div>
-                  <div style={styles.stateBadgeWaiting}>⚡ Ready to Generate</div>
-                  <div style={{ fontSize: 11, color: "var(--text-muted)", marginTop: 4 }}>
-                    <strong>Current Status:</strong> Pipeline Artifacts Available<br/>
-                    <strong>Dependencies:</strong> Stage 1 Content & Stage 4 Proofreading<br/>
-                    <strong>Progress:</strong> Standby • <strong>ETA:</strong> Instant
-                  </div>
-                  <div style={{ ...styles.btnRow, gap: 6, marginTop: 8 }}>
-                    <button style={styles.viewBtn} onClick={() => handleViewReportCard(item.key)}>View / Generate</button>
-                  </div>
+                  <div style={styles.stateBadgeWaiting}>Not available yet</div>
+                  <div style={{ fontSize: 12, color: "#64748b", marginTop: 6 }}>This report will appear once the document review finishes.</div>
                 </div>
               )}
             </div>
@@ -383,210 +341,75 @@ export default function Reports({ activeDocId }) {
         })}
       </div>
 
-      {/* Default Inline View: Executive Compliance Summary */}
+      {/* Document Review Summary */}
       <div style={styles.layout}>
         <div style={styles.sectionBlock}>
-          <div style={styles.sectionHeader}>
-            <span style={styles.sectionNumber}>OVERVIEW</span>
-            <h2 style={styles.sectionTitleText}>Executive Audit Overview</h2>
-          </div>
-          <div style={styles.summaryCard}>
-            <p style={styles.summaryParagraph}>
-              {fData.executive_summary?.summary_text || `Executive Audit Report for document ${selectedDocId}. Evaluated by automated proofreading and Anthropic Claude verification.`}
-            </p>
-            <div style={styles.summaryMetaRow}>
-              <span style={styles.badgeReadiness}>
-                Status: <strong>{kpis.publication_readiness}</strong>
-              </span>
-              <span style={{ fontSize: 12.5, color: "#64748b" }}>
-                {kpis.publication_guidance}
-              </span>
+          <h2 style={styles.sectionTitleText}>Document Review Summary</h2>
+          <p style={styles.reviewSentence}>{reviewSummarySentence}</p>
+
+          <div style={styles.summaryStatsRow}>
+            <div style={styles.statTile}>
+              <span style={{ ...styles.statDot, background: "#dc2626" }} />
+              <div>
+                <div style={styles.statNumber}>{highCount}</div>
+                <div style={styles.statLabel}>High priority</div>
+              </div>
             </div>
+            <div style={styles.statTile}>
+              <span style={{ ...styles.statDot, background: "#b45309" }} />
+              <div>
+                <div style={styles.statNumber}>{medCount}</div>
+                <div style={styles.statLabel}>Medium priority</div>
+              </div>
+            </div>
+            <div style={styles.statTile}>
+              <span style={{ ...styles.statDot, background: "#166534" }} />
+              <div>
+                <div style={styles.statNumber}>{lowCount}</div>
+                <div style={styles.statLabel}>Low priority</div>
+              </div>
+            </div>
+          </div>
+
+          <div style={{ ...styles.statusBanner, background: statusStyle.bg, borderColor: statusStyle.border }}>
+            <span style={{ ...styles.statusBadge, color: statusStyle.color }}>{overallStatusLabel}</span>
+            <span style={{ fontSize: 13, color: "#334155" }}>{overallStatusAction}</span>
           </div>
         </div>
 
-        <div style={styles.sectionBlock}>
-          <div style={styles.sectionHeader}>
-            <span style={styles.sectionNumber}>AUDIT LOG</span>
-            <h2 style={styles.sectionTitleText}>Audited Detections ({findingsList.length})</h2>
-          </div>
-          <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
-            {findingsList.slice(0, 5).map((f, idx) => (
-              <div key={idx} style={{ padding: 12, background: "#f8fafc", border: "1px solid #e2e8f0", borderRadius: 8 }}>
-                <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-                  <span style={{ fontSize: 12, fontWeight: 700, color: "#0f172a" }}>Page {f.page_number || f.page || 1} &bull; {f.category || f.ambiguity_category || "Issue"}</span>
-                  <span style={{ fontSize: 11, fontWeight: 700, padding: "2px 6px", borderRadius: 4, background: f.severity === "Critical" ? "#fef2f2" : "#fef3c7", color: f.severity === "Critical" ? "#dc2626" : "#d97706" }}>
-                    {f.severity || "Medium"}
-                  </span>
-                </div>
-                <p style={{ margin: "6px 0 0", fontSize: 12.5, color: "#334155" }}>{f.original_chunk || f.text || f.recommendation}</p>
-              </div>
-            ))}
-            {findingsList.length > 5 && (
-              <p style={{ fontSize: 12, color: "#64748b", margin: 0, textAlign: "center" }}>Showing 5 of {findingsList.length} findings. Use View on Executive Compliance Report card for full details.</p>
+        {totalIssues > 0 && (
+          <div style={styles.sectionBlock}>
+            <div style={styles.sectionHeaderRow}>
+              <h2 style={styles.sectionTitleText}>Issues Found ({totalIssues})</h2>
+              {totalIssues > 5 && (
+                <button style={styles.viewAllBtn} onClick={() => setShowAllIssues(true)}>View all</button>
+              )}
+            </div>
+            <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
+              {findingsList.slice(0, 5).map((f, idx) => renderFindingCard(f, idx))}
+            </div>
+            {totalIssues > 5 && (
+              <p style={styles.moreText}>Showing 5 of {totalIssues} issues. <button style={styles.inlineLink} onClick={() => setShowAllIssues(true)}>View all issues</button></p>
             )}
           </div>
-        </div>
+        )}
       </div>
 
-      {/* ============================================================ */}
-      {/* DEDICATED REPORT VIEWER MODALS                                */}
-      {/* ============================================================ */}
-      {activeModalReportKey && (
-        <div style={modalStyles.overlay}>
-          <div style={modalStyles.dialog}>
+      {/* Full issues list viewer */}
+      {showAllIssues && (
+        <div style={modalStyles.overlay} onClick={() => setShowAllIssues(false)}>
+          <div style={modalStyles.dialog} onClick={(e) => e.stopPropagation()}>
             <div style={modalStyles.header}>
               <div>
-                <span style={modalStyles.keyBadge}>{activeModalReportKey.toUpperCase()}</span>
-                <h2 style={modalStyles.title}>
-                  {activeModalReportKey === "final-report" && "Executive Compliance Report"}
-                  {activeModalReportKey === "claude-verification" && "Claude Verification Report"}
-                  {activeModalReportKey === "chunk-reasoning" && "Chunk-Level Reasoning Report"}
-                  {activeModalReportKey === "cluster-reasoning" && "Cluster-Level Reasoning Report"}
-                </h2>
-                <p style={modalStyles.subTitle}>Document: <code>{selectedDocId}</code></p>
+                <h2 style={modalStyles.title}>All Issues Found</h2>
+                <p style={modalStyles.subTitle}>{docLabel}</p>
               </div>
-              <button style={modalStyles.closeBtn} onClick={() => setActiveModalReportKey(null)}>✕ Close</button>
+              <button style={modalStyles.closeBtn} onClick={() => setShowAllIssues(false)}>✕ Close</button>
             </div>
-
             <div style={modalStyles.body}>
-              {modalLoading ? (
-                <div style={{ padding: 40, textAlign: "center", color: "#64748b" }}>
-                  <div style={styles.spinner} />
-                  <p style={{ marginTop: 12 }}>Fetching dedicated report data from backend...</p>
-                </div>
-              ) : (
-                <>
-                  {/* VIEWER 1: EXECUTIVE COMPLIANCE REPORT */}
-                  {activeModalReportKey === "final-report" && (
-                    <div style={{ display: "flex", flexDirection: "column", gap: 16 }}>
-                      <div style={styles.summaryCard}>
-                        <h3 style={{ margin: "0 0 8px", fontSize: 14, fontWeight: 700 }}>Executive Narrative</h3>
-                        <p style={styles.summaryParagraph}>{modalReportData?.executive_summary?.summary_text || execSummaryText}</p>
-                      </div>
-
-                      <div>
-                        <h3 style={{ fontSize: 14, fontWeight: 700, margin: "0 0 8px" }}>Audited Detections</h3>
-                        <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
-                          {((modalReportData?.findings || findingsList) || []).map((f, i) => (
-                            <div key={i} style={modalStyles.itemCard}>
-                              <div style={{ display: "flex", justifyBetween: "space-between", alignItems: "center" }}>
-                                <span style={{ fontWeight: 700, fontSize: 12.5 }}>Page {f.page_number || 1} &bull; {f.category || "General"}</span>
-                                <span style={{ fontSize: 11, fontWeight: 700, color: "#166534", background: "#f0fdf4", padding: "2px 8px", borderRadius: 4 }}>
-                                  {f.verification_status || "Verified"}
-                                </span>
-                              </div>
-                              <p style={{ margin: "4px 0", fontSize: 12.5, color: "#334155" }}>{f.original_chunk || f.text}</p>
-                              {f.recommended_resolution && (
-                                <div style={{ fontSize: 12, color: "#166534", background: "#f0fdf4", padding: 6, borderRadius: 4, marginTop: 4 }}>
-                                  <strong>Resolution:</strong> {f.recommended_resolution}
-                                </div>
-                              )}
-                            </div>
-                          ))}
-                        </div>
-                      </div>
-                    </div>
-                  )}
-
-                  {/* VIEWER 2: CLAUDE VERIFICATION REPORT */}
-                  {activeModalReportKey === "claude-verification" && (
-                    <div style={{ display: "flex", flexDirection: "column", gap: 16 }}>
-                      <div style={{ display: "flex", gap: 12 }}>
-                        <button
-                          onClick={() => setModalFilter("ALL")}
-                          style={{ ...modalStyles.filterTab, background: modalFilter === "ALL" ? "#0f172a" : "#f1f5f9", color: modalFilter === "ALL" ? "#fff" : "#475569" }}
-                        >All Detections</button>
-                        <button
-                          onClick={() => setModalFilter("CONFIRMED")}
-                          style={{ ...modalStyles.filterTab, background: modalFilter === "CONFIRMED" ? "#166534" : "#f1f5f9", color: modalFilter === "CONFIRMED" ? "#fff" : "#475569" }}
-                        >Confirmed Detections</button>
-                        <button
-                          onClick={() => setModalFilter("REJECTED")}
-                          style={{ ...modalStyles.filterTab, background: modalFilter === "REJECTED" ? "#dc2626" : "#f1f5f9", color: modalFilter === "REJECTED" ? "#fff" : "#475569" }}
-                        >Rejected False Positives</button>
-                      </div>
-
-                      <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
-                        {((modalReportData?.audited_findings || modalReportData?.findings || [])
-                          .filter(f => {
-                            if (modalFilter === "CONFIRMED") return (f.status || f.verification_status || "").toLowerCase().includes("confirm");
-                            if (modalFilter === "REJECTED") return (f.status || f.verification_status || "").toLowerCase().includes("reject");
-                            return true;
-                          })
-                        ).map((item, i) => (
-                          <div key={i} style={modalStyles.itemCard}>
-                            <div style={{ display: "flex", justifyBetween: "space-between", alignItems: "center", width: "100%" }}>
-                              <span style={{ fontWeight: 700, fontSize: 12.5 }}>Finding #{i + 1}</span>
-                              <span style={{
-                                fontSize: 11, fontWeight: 800, padding: "2px 8px", borderRadius: 4,
-                                background: (item.status || "").toLowerCase().includes("reject") ? "#fef2f2" : "#f0fdf4",
-                                color: (item.status || "").toLowerCase().includes("reject") ? "#dc2626" : "#166534"
-                              }}>
-                                {item.status || item.verification_status || "Confirmed"}
-                              </span>
-                            </div>
-                            <p style={{ margin: "6px 0", fontSize: 12.5, color: "#1e293b" }}>{item.original_chunk || item.text || item.claim_text}</p>
-                            <div style={{ fontSize: 12, color: "#475569", background: "#f8fafc", padding: 8, borderRadius: 6 }}>
-                              <strong>Claude Explanation:</strong> {item.claude_explanation || item.reason || item.why_claude_flagged_it || "Audited and verified by Anthropic Claude model."}
-                            </div>
-                          </div>
-                        ))}
-                      </div>
-                    </div>
-                  )}
-
-                  {/* VIEWER 3: CHUNK REASONING REPORT */}
-                  {activeModalReportKey === "chunk-reasoning" && (
-                    <div style={{ display: "flex", flexDirection: "column", gap: 16 }}>
-                      <div style={{ fontSize: 12.5, color: "#64748b" }}>
-                        Local LLM semantic chunk-level ambiguity detection findings:
-                      </div>
-
-                      <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
-                        {((modalReportData?.chunks || modalReportData?.findings || [])).map((c, i) => (
-                          <div key={i} style={modalStyles.itemCard}>
-                            <div style={{ display: "flex", justifyContent: "space-between", fontSize: 12, fontWeight: 700, color: "#1e40af" }}>
-                              <span>Chunk ID: {c.chunk_id || `chunk_${i+1}`} &bull; Page {c.page_number || 1}</span>
-                              <span>Category: {c.category || c.ambiguity_category || "Ambiguity"}</span>
-                            </div>
-                            <p style={{ margin: "6px 0", fontSize: 12.5, color: "#334155" }}>{c.text || c.original_chunk}</p>
-                            <div style={{ fontSize: 12, color: "#1e40af", background: "#eff6ff", padding: 6, borderRadius: 4 }}>
-                              <strong>Local LLM Reasoning:</strong> {c.reasoning || c.explanation || "Flagged potential ambiguity during chunk processing."}
-                            </div>
-                          </div>
-                        ))}
-                      </div>
-                    </div>
-                  )}
-
-                  {/* VIEWER 4: CLUSTER REASONING REPORT */}
-                  {activeModalReportKey === "cluster-reasoning" && (
-                    <div style={{ display: "flex", flexDirection: "column", gap: 16 }}>
-                      <div style={{ fontSize: 12.5, color: "#64748b" }}>
-                        Consolidated semantic issue clusters and root cause analysis:
-                      </div>
-
-                      <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
-                        {((modalReportData?.clusters || modalReportData?.semantic_clusters || [])).map((cl, i) => (
-                          <div key={i} style={modalStyles.itemCard}>
-                            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-                              <span style={{ fontWeight: 800, fontSize: 13, color: "#0f172a" }}>{cl.cluster_name || cl.title || `Cluster #${i+1}`}</span>
-                              <span style={{ fontSize: 11, fontWeight: 800, padding: "2px 8px", borderRadius: 4, background: "#fef3c7", color: "#d97706" }}>
-                                Severity: {cl.severity || "Medium"}
-                              </span>
-                            </div>
-                            <p style={{ margin: "6px 0", fontSize: 12.5, color: "#334155" }}>{cl.description || cl.summary}</p>
-                            <div style={{ fontSize: 12, color: "#0f172a", background: "#f8fafc", padding: 8, borderRadius: 6, border: "1px solid #e2e8f0" }}>
-                              <strong>Root Cause & Cross-Chunk Tracing:</strong> {cl.root_cause || cl.actionable_resolution || "Cross-referencing verified multiple related instances."}
-                            </div>
-                          </div>
-                        ))}
-                      </div>
-                    </div>
-                  )}
-                </>
-              )}
+              <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
+                {findingsList.map((f, idx) => renderFindingCard(f, idx))}
+              </div>
             </div>
           </div>
         </div>
@@ -599,12 +422,12 @@ const modalStyles = {
   overlay: {
     position: "fixed", top: 0, left: 0, right: 0, bottom: 0,
     background: "rgba(15, 23, 42, 0.75)", backdropFilter: "blur(4px)",
-    display: "flex", alignItems: "center", justifyCenter: "center",
+    display: "flex", alignItems: "center", justifyContent: "center",
     zIndex: 9999, padding: 24
   },
   dialog: {
     background: "#ffffff", border: "1px solid #cbd5e1", borderRadius: 16,
-    maxWidth: 840, width: "100%", maxHeight: "85vh", display: "flex",
+    maxWidth: 780, width: "100%", maxHeight: "85vh", display: "flex",
     flexDirection: "column", boxShadow: "0 20px 25px -5px rgba(0, 0, 0, 0.2)",
     overflow: "hidden"
   },
@@ -613,46 +436,54 @@ const modalStyles = {
     display: "flex", justifyContent: "space-between", alignItems: "flex-start",
     background: "#f8fafc"
   },
-  keyBadge: { fontSize: 10, fontWeight: 900, color: "#1e40af", background: "#eff6ff", padding: "2px 6px", borderRadius: 4, textTransform: "uppercase" },
-  title: { margin: "4px 0 0", fontSize: 18, fontWeight: 800, color: "#0f172a" },
+  title: { margin: 0, fontSize: 18, fontWeight: 800, color: "#0f172a" },
   subTitle: { margin: "2px 0 0", fontSize: 12, color: "#64748b" },
   closeBtn: { background: "#f1f5f9", border: "1px solid #cbd5e1", borderRadius: 6, padding: "6px 12px", fontSize: 12, fontWeight: 700, cursor: "pointer", color: "#0f172a" },
-  body: { padding: 24, overflowY: "auto", flex: 1 },
-  itemCard: { background: "#ffffff", border: "1px solid #cbd5e1", borderRadius: 8, padding: 14, textAlign: "left" },
-  filterTab: { border: "none", borderRadius: 6, padding: "6px 14px", fontSize: 12, fontWeight: 700, cursor: "pointer" }
+  body: { padding: 24, overflowY: "auto", flex: 1 }
 };
 
 const styles = {
-  container: { maxWidth: 1000, margin: "0 auto", padding: "10px 0" },
+  container: { maxWidth: 900, margin: "0 auto", padding: "10px 0" },
   header: { display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 20 },
   title: { margin: 0, fontSize: 22, fontWeight: 800, color: "#0f172a" },
   subtitle: { margin: "4px 0 0", fontSize: 13, color: "#64748b" },
-  codeRef: { background: "#f1f5f9", padding: "2px 6px", borderRadius: 4, fontFamily: "monospace", fontSize: 12 },
   docSelect: { padding: "8px 12px", borderRadius: 8, border: "1px solid #cbd5e1", fontSize: 13 },
   exportBtn: { background: "#0f172a", color: "#fff", border: "none", borderRadius: 8, padding: "8px 16px", fontSize: 13, fontWeight: 700, cursor: "pointer" },
-  dropdownMenu: { position: "absolute", right: 0, top: 42, background: "#fff", border: "1px solid #cbd5e1", borderRadius: 8, boxShadow: "0 10px 15px -3px rgba(0,0,0,0.1)", zIndex: 100, width: 220, overflow: "hidden" },
+  dropdownMenu: { position: "absolute", right: 0, top: 42, background: "#fff", border: "1px solid #cbd5e1", borderRadius: 8, boxShadow: "0 10px 15px -3px rgba(0,0,0,0.1)", zIndex: 100, width: 240, overflow: "hidden" },
   dropdownItem: { width: "100%", padding: "10px 14px", textAlign: "left", background: "none", border: "none", fontSize: 12.5, fontWeight: 600, color: "#0f172a", cursor: "pointer" },
-  cacheBanner: { background: "#f0fdf4", border: "1px solid #bbf7d0", padding: "12px 16px", borderRadius: 8, marginBottom: 20, color: "#166534", fontSize: 13 },
-  cacheHeader: { display: "flex", alignItems: "center", gap: 10 },
-  cacheBadge: { background: "#dcfce7", color: "#15803d", fontSize: 11, fontWeight: 800, padding: "2px 6px", borderRadius: 4 },
-  reportCardsGrid: { display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(180px, 1fr))", gap: 12, marginBottom: 24 },
-  reportStatusCard: { background: "#ffffff", border: "1px solid #cbd5e1", borderRadius: 10, padding: 14, textAlign: "left" },
-  reportStatusTitle: { fontSize: 12.5, fontWeight: 800, color: "#0f172a" },
-  stateBadgeReady: { display: "inline-block", background: "#f0fdf4", color: "#166534", fontSize: 11, fontWeight: 800, padding: "2px 8px", borderRadius: 4, marginTop: 4 },
-  stateBadgeGenerating: { display: "inline-block", background: "#eff6ff", color: "#1d4ed8", fontSize: 11, fontWeight: 800, padding: "2px 8px", borderRadius: 4, marginTop: 4 },
-  stateBadgeWaiting: { display: "inline-block", background: "#f1f5f9", color: "#64748b", fontSize: 11, fontWeight: 800, padding: "2px 8px", borderRadius: 4, marginTop: 4 },
+  reportCardsGrid: { display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(280px, 1fr))", gap: 12, marginBottom: 24 },
+  reportStatusCard: { background: "#ffffff", border: "1px solid #cbd5e1", borderRadius: 10, padding: 16, textAlign: "left" },
+  reportStatusTitle: { fontSize: 14, fontWeight: 800, color: "#0f172a" },
+  stateBadgeReady: { display: "inline-block", background: "#f0fdf4", color: "#166534", fontSize: 11, fontWeight: 800, padding: "2px 8px", borderRadius: 4, marginTop: 8 },
+  stateBadgeGenerating: { display: "inline-block", background: "#eff6ff", color: "#1d4ed8", fontSize: 11, fontWeight: 800, padding: "2px 8px", borderRadius: 4, marginTop: 8 },
+  stateBadgeWaiting: { display: "inline-block", background: "#f1f5f9", color: "#64748b", fontSize: 11, fontWeight: 800, padding: "2px 8px", borderRadius: 4, marginTop: 8 },
   reportTimeText: { fontSize: 11, color: "#64748b", marginTop: 4 },
-  reportSubText: { fontSize: 11, color: "#94a3b8", marginTop: 4 },
   btnRow: { display: "flex", gap: 6, marginTop: 10 },
-  viewBtn: { background: "#0f172a", color: "#fff", border: "none", borderRadius: 4, padding: "4px 10px", fontSize: 11, fontWeight: 700, cursor: "pointer" },
-  dlBtn: { background: "#f1f5f9", color: "#0f172a", border: "1px solid #cbd5e1", borderRadius: 4, padding: "4px 10px", fontSize: 11, fontWeight: 700, cursor: "pointer" },
-  layout: { display: "flex", flexDirection: "column", gap: 24 },
+  viewBtn: { background: "#0f172a", color: "#fff", border: "none", borderRadius: 4, padding: "5px 12px", fontSize: 11.5, fontWeight: 700, cursor: "pointer" },
+  dlBtn: { background: "#f1f5f9", color: "#0f172a", border: "1px solid #cbd5e1", borderRadius: 4, padding: "5px 12px", fontSize: 11.5, fontWeight: 700, cursor: "pointer" },
+  layout: { display: "flex", flexDirection: "column", gap: 20 },
   sectionBlock: { background: "#ffffff", border: "1px solid #e2e8f0", borderRadius: 12, padding: 24 },
-  sectionHeader: { display: "flex", alignItems: "center", gap: 10, marginBottom: 16, borderBottom: "1px solid #f1f5f9", paddingBottom: 10 },
-  sectionNumber: { background: "#eff6ff", color: "#1e40af", fontSize: 11, fontWeight: 800, padding: "3px 8px", borderRadius: 4 },
-  sectionTitleText: { margin: 0, fontSize: 16, fontWeight: 800, color: "#0f172a" },
-  summaryCard: { background: "#f8fafc", borderRadius: 8, padding: 16, border: "1px solid #e2e8f0" },
-  summaryParagraph: { margin: 0, fontSize: 13, lineHeight: 1.5, color: "#334155" },
-  summaryMetaRow: { display: "flex", alignItems: "center", gap: 12, marginTop: 12 },
-  badgeReadiness: { fontSize: 12, color: "#0f172a" }
+  sectionHeaderRow: { display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 12 },
+  sectionTitleText: { margin: "0 0 4px", fontSize: 16, fontWeight: 800, color: "#0f172a" },
+  reviewSentence: { margin: "0 0 18px", fontSize: 14.5, color: "#334155" },
+  summaryStatsRow: { display: "flex", gap: 20, marginBottom: 18, flexWrap: "wrap" },
+  statTile: { display: "flex", alignItems: "center", gap: 10 },
+  statDot: { width: 10, height: 10, borderRadius: "50%", display: "inline-block", flexShrink: 0 },
+  statNumber: { fontSize: 20, fontWeight: 800, color: "#0f172a", lineHeight: 1.1 },
+  statLabel: { fontSize: 12, color: "#64748b" },
+  statusBanner: { display: "flex", alignItems: "center", gap: 12, flexWrap: "wrap", padding: "12px 16px", borderRadius: 8, border: "1px solid" },
+  statusBadge: { fontSize: 13, fontWeight: 800 },
+  viewAllBtn: { background: "none", border: "none", color: "var(--brand, #4f46e5)", fontSize: 12.5, fontWeight: 700, cursor: "pointer" },
+  moreText: { fontSize: 12.5, color: "#64748b", margin: "10px 0 0", textAlign: "center" },
+  inlineLink: { background: "none", border: "none", color: "var(--brand, #4f46e5)", fontWeight: 700, cursor: "pointer", fontSize: 12.5, padding: 0 },
+  findingCard: { background: "#f8fafc", border: "1px solid #e2e8f0", borderRadius: 10, padding: 14 },
+  findingCardTop: { display: "flex", justifyContent: "space-between", alignItems: "center", flexWrap: "wrap", gap: 8 },
+  findingTitle: { fontSize: 14, fontWeight: 800, color: "#0f172a" },
+  priorityBadge: { fontSize: 11, fontWeight: 800, padding: "3px 8px", borderRadius: 4 },
+  findingLocation: { fontSize: 12, color: "#64748b", marginTop: 4, marginBottom: 10 },
+  findingRow: { marginTop: 8 },
+  findingLabel: { fontSize: 11, fontWeight: 800, color: "#64748b", textTransform: "uppercase", letterSpacing: 0.3 },
+  findingText: { margin: "3px 0 0", fontSize: 13, lineHeight: 1.5, color: "#1e293b" },
+  actionRow: { marginTop: 10, paddingTop: 10, borderTop: "1px dashed #cbd5e1" },
+  actionText: { margin: "3px 0 0", fontSize: 13, lineHeight: 1.5, color: "#166534", fontWeight: 600 }
 };

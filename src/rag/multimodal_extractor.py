@@ -282,7 +282,15 @@ class MultimodalExtractor:
                 if page_idx >= doc.page_count:
                     break
                 page = doc[page_idx]
-                page_num = page_idx + 1
+                # Batch-local (1-based within this batch), matching the numbering
+                # Docling itself produces when it parses the per-batch temp PDF --
+                # NOT the absolute page number in the source document. The caller's
+                # "Update batch element IDs and page offsets" pass below adds
+                # batch_start to convert every element/image produced here (or by
+                # the Docling success path) to an absolute page number exactly
+                # once; using an absolute number here would make it get shifted
+                # a second time.
+                page_num = (page_idx - start_page) + 1
 
                 # Enumerate every embedded raster image on this page via
                 # PyMuPDF's image-XObject inspection (page.get_image_info),
@@ -673,6 +681,21 @@ class MultimodalExtractor:
                     el.metadata.table_id = f"b{batch_index}_{el.metadata.table_id}"
                 if el.metadata.image_id:
                     el.metadata.image_id = f"b{batch_index}_{el.metadata.image_id}"
+
+            # Images carry their own page_number (Docling assigns it from the
+            # per-batch temp PDF it parsed, so it is batch-local -- 1..batch_size
+            # -- exactly like the elements above before the offset was applied).
+            # It was never being shifted to the absolute page number here, which
+            # meant every image after the first batch was persisted with the
+            # wrong "page" in its JSON, and its caption/layout grounding lookup
+            # below (which matches against elements' *already-absolute*
+            # page_number) silently found zero surrounding page elements for
+            # every batch past the first -- degrading grounding/retrievability
+            # for the majority of a large document's images without dropping
+            # the PNG itself, and pointing any PDF-crop fallback at the wrong
+            # page of the source document.
+            for img_meta in batch_structured_doc.images.values():
+                img_meta.page_number = img_meta.page_number + batch_start
 
             # Merge into master document layout tree
             master_structured_doc.elements.extend(batch_structured_doc.elements)

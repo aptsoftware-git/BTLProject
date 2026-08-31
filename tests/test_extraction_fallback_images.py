@@ -40,7 +40,16 @@ REAL_PDF = ROOT_DIR / "data" / "output" / "btl_216_page_run" / "01_document" / "
 @pytest.mark.skipif(not REAL_PDF.exists(), reason="real btl_216_page_run source PDF fixture not present")
 def test_fallback_extraction_finds_real_images_on_known_portrait_page():
     """Page 49 (0-indexed 48) is independently known (test_hierarchical_image_grounding.py)
-    to contain the 9 director portraits image_146.json..image_154.json."""
+    to contain the 9 director portraits image_146.json..image_154.json.
+
+    page_number here is batch-local (1-based within [start_page, end_page)),
+    matching Docling's own numbering when it parses a per-batch temp PDF --
+    see test_fallback_extraction_multiple_images_across_pages below, which
+    documents the same contract. multimodal_extractor.extract()'s
+    "Update batch element IDs and page offsets" pass is what adds
+    batch_start on top of this to get the absolute page (49 here); this
+    isolated unit test calls the builder directly, without that pass.
+    """
     extractor = MultimodalExtractor()
     doc = extractor._build_fallback_structured_document_for_batch(
         file_path=REAL_PDF, start_page=48, end_page=49,
@@ -48,7 +57,7 @@ def test_fallback_extraction_finds_real_images_on_known_portrait_page():
     )
     assert len(doc.images) == 9, f"expected 9 portrait images on page 49, found {len(doc.images)}"
     for img_meta in doc.images.values():
-        assert img_meta.page_number == 49
+        assert img_meta.page_number == 1  # batch-local: this batch covers only absolute page 49
         assert img_meta.bbox is not None
         assert img_meta.image_path is None  # left unset for the main loop's crop-from-PDF fallback to fill in
 

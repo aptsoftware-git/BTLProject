@@ -12,6 +12,10 @@ import {
 // Configure worker for react-pdf
 pdfjs.GlobalWorkerOptions.workerSrc = `https://unpkg.com/pdfjs-dist@${pdfjs.version}/build/pdf.worker.min.mjs`;
 
+const MIN_ZOOM = 0.25;
+const MAX_ZOOM = 3.0;
+const PAGE_VIEW_PADDING = 24; // must match the horizontal padding applied to the page-view wrapper below
+
 /**
  * PDFReviewWorkspace Component
  * -----------------------------
@@ -41,6 +45,11 @@ export default function PDFReviewWorkspace({
   const [numPages, setNumPages] = useState(1);
   const [visiblePage, setVisiblePage] = useState(1);
   const [zoomLevel, setZoomLevel] = useState(1.0);
+  // Once the user explicitly zooms in/out, the page-view stops auto-fitting
+  // to the panel width and stops auto-zooming to focus a newly selected
+  // error -- the user's chosen zoom is preserved across error navigation
+  // and panel resizes until they hit "Fit".
+  const [hasManualZoom, setHasManualZoom] = useState(false);
   const [pageDimensions, setPageDimensions] = useState({ width: 612, height: 792 });
   const [isRerunning, setIsRerunning] = useState(false);
   const [isReprocessing, setIsReprocessing] = useState(false);
@@ -149,6 +158,14 @@ export default function PDFReviewWorkspace({
     );
   }
 
+  const calculateFitWidthZoom = () => {
+    if (!scrollContainerRef.current || !pageDimensions.width) return 1.0;
+    const cWidth = scrollContainerRef.current.clientWidth || 800;
+    const available = Math.max(100, cWidth - PAGE_VIEW_PADDING * 2);
+    const fitZoom = available / pageDimensions.width;
+    return Math.max(MIN_ZOOM, Math.min(MAX_ZOOM, fitZoom));
+  };
+
   const calculateOptimalZoom = (unionBbox) => {
     if (!scrollContainerRef.current || !unionBbox) return 1.5;
     const cWidth = scrollContainerRef.current.clientWidth || 800;
@@ -232,21 +249,35 @@ export default function PDFReviewWorkspace({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [activeFocusTarget, zoomLevel, viewMode]);
 
-  // Recalculate center position when PDF container dimensions change
+  // Fit the page to the available panel width by default. Runs once the
+  // first page's real dimensions are known, and again whenever the panel is
+  // resized -- but only until the user takes manual control of zoom.
+  useEffect(() => {
+    if (viewMode !== "pdf" || hasManualZoom) return;
+    setZoomLevel(calculateFitWidthZoom());
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [viewMode, hasManualZoom, pageDimensions.width]);
+
+  // Recalculate center position (and, while un-zoomed by the user, the
+  // fit-to-width scale) when the PDF panel is resized.
   useEffect(() => {
     const container = scrollContainerRef.current;
     if (!container) return;
 
     const observer = new ResizeObserver(() => {
-      if (activeFocusTarget && viewMode === "pdf") {
-        triggerFocus(activeFocusTarget, zoomLevel);
+      if (viewMode !== "pdf") return;
+      if (!hasManualZoom) {
+        setZoomLevel(calculateFitWidthZoom());
+      }
+      if (activeFocusTarget) {
+        triggerFocus(activeFocusTarget, hasManualZoom ? zoomLevel : calculateFitWidthZoom());
       }
     });
 
     observer.observe(container);
     return () => observer.disconnect();
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [activeFocusTarget, viewMode, zoomLevel]);
+  }, [activeFocusTarget, viewMode, zoomLevel, hasManualZoom, pageDimensions.width]);
 
   const handleClosePopover = (e) => {
     if (e && e.stopPropagation) {
@@ -269,7 +300,10 @@ export default function PDFReviewWorkspace({
 
       if (isGrounded && bboxes.length > 0) {
         const unionBbox = computeUnionBbox(bboxes);
-        const targetZoom = calculateOptimalZoom(unionBbox);
+        // Once the user has taken manual control of zoom, respect it --
+        // navigating between errors must never reset their chosen zoom
+        // level, only scroll/center the page at that zoom.
+        const targetZoom = hasManualZoom ? zoomLevel : calculateOptimalZoom(unionBbox);
 
         const focusTarget = {
           findingId,
@@ -284,7 +318,7 @@ export default function PDFReviewWorkspace({
         setActiveFocusTarget(focusTarget);
         setVisiblePage(target.page_number);
 
-        if (Math.abs(zoomLevel - targetZoom) > 0.05) {
+        if (!hasManualZoom && Math.abs(zoomLevel - targetZoom) > 0.05) {
           setZoomLevel(targetZoom);
         }
 
@@ -398,9 +432,47 @@ export default function PDFReviewWorkspace({
     }
   };
 
-  const handleZoomIn = () => setZoomLevel((prev) => Math.min(prev + 0.2, 2.5));
-  const handleZoomOut = () => setZoomLevel((prev) => Math.max(prev - 0.2, 0.5));
-  const handleZoomReset = () => setZoomLevel(1.0);
+  const handleZoomIn = () => {
+    setHasManualZoom(true);
+    setZoomLevel((prev) => Math.min(prev + 0.2, MAX_ZOOM));
+  };
+  const handleZoomOut = () => {
+    setHasManualZoom(true);
+    setZoomLevel((prev) => Math.max(prev - 0.2, MIN_ZOOM));
+  };
+  const handleZoomReset = () => {
+    setHasManualZoom(false);
+    setZoomLevel(calculateFitWidthZoom());
+  };
+
+  // Trackpad pinch-to-zoom (and ctrl+scroll-wheel) support. Browsers report
+  // both a two-finger trackpad pinch and an explicit ctrl+wheel as native
+  // "wheel" events with ctrlKey set to true -- there is no separate pinch
+  // event to listen for. A plain two-finger scroll (no ctrlKey) is left
+  // alone so normal vertical/horizontal panning still works untouched.
+  //
+  // This is wired up as a native, non-passive addEventListener (see effect
+  // below) rather than React's onWheel prop: React attaches wheel handlers
+  // passively by default, so e.preventDefault() inside a synthetic onWheel
+  // does not reliably stop the browser's own pinch-zoom/page-zoom.
+  useEffect(() => {
+    const container = scrollContainerRef.current;
+    if (!container || viewMode !== "pdf") return;
+
+    const onWheel = (e) => {
+      if (!e.ctrlKey) return;
+      e.preventDefault();
+      setHasManualZoom(true);
+      // deltaY is negative for zoom-in (pinch-out / scroll-up), positive for
+      // zoom-out; scale the step down since trackpads report much larger
+      // per-event deltas than a single click of the +/- buttons.
+      const step = -e.deltaY * 0.01;
+      setZoomLevel((prev) => Math.max(MIN_ZOOM, Math.min(MAX_ZOOM, prev + step)));
+    };
+
+    container.addEventListener("wheel", onWheel, { passive: false });
+    return () => container.removeEventListener("wheel", onWheel);
+  }, [viewMode]);
 
   // Track visible page on vertical scroll (Original PDF tab only)
   useEffect(() => {
@@ -468,170 +540,75 @@ export default function PDFReviewWorkspace({
       style={{
         display: "flex",
         width: "100%",
-        height: "calc(100vh - 120px)",
-        minHeight: "650px",
+        height: "calc(100vh - 108px)",
+        minHeight: "600px",
         background: "var(--bg-main, #f1f5f9)",
-        borderRadius: "12px",
+        borderRadius: "10px",
         overflow: "hidden",
         border: "1px solid var(--border, #e2e8f0)",
-        boxShadow: "var(--shadow-card, 0 4px 6px -1px rgba(0, 0, 0, 0.1))"
+        boxShadow: "var(--shadow-card, 0 2px 6px -1px rgba(0, 0, 0, 0.08))"
       }}
     >
       {/* Main pane: document is the primary focus */}
       <div
         style={{
-          flex: viewMode !== "corrected" ? "0 0 78%" : "1 1 100%",
-          width: viewMode !== "corrected" ? "78%" : "100%",
+          flex: viewMode !== "corrected" ? "1 1 80%" : "1 1 100%",
+          minWidth: 0,
           display: "flex",
           flexDirection: "column",
           background: "#cbd5e1",
           position: "relative"
         }}
       >
-        {/* Live Stage Processing Status Header */}
+        {/* Live Stage Processing Status Header -- compact, single line, no per-banner action button (the toolbar below owns the one Rerun/Reprocess pair). */}
         {proofreadingDone ? (
-          <div style={{
-            background: "#f0fdf4",
-            borderBottom: "1px solid #22c55e",
-            padding: "8px 16px",
-            fontSize: "12px",
-            display: "flex",
-            justifyContent: "space-between",
-            alignItems: "center",
-            zIndex: 25
-          }}>
-            <div style={{ display: "flex", alignItems: "center", gap: "12px", flexWrap: "wrap" }}>
-              <span style={{ background: "#16a34a", color: "#ffffff", fontSize: "10px", fontWeight: 800, padding: "2px 6px", borderRadius: "4px" }}>
-                PROOFREADING COMPLETED
-              </span>
-              <span><strong>Status:</strong> Completed</span>
-              <span>•</span>
-              <span><strong>Progress:</strong> 100%</span>
-              {documentData?.total_pages > 0 && (
-                <>
-                  <span>•</span>
-                  <span><strong>Pages:</strong> {documentData.total_pages}/{documentData.total_pages}</span>
-                </>
-              )}
-              {documentData?.total_batches > 0 && (
-                <>
-                  <span>•</span>
-                  <span><strong>Batch:</strong> {documentData.total_batches}/{documentData.total_batches}</span>
-                </>
-              )}
-              <span>•</span>
-              <span><strong>ETA:</strong> 0s</span>
-              {isProcessing && (
-                <span style={{ color: "#64748b", fontStyle: "italic", fontSize: "11px" }}>
-                  (Downstream RAG & reports processing in background)
-                </span>
-              )}
-            </div>
-            <button onClick={handleRerunProofreading} style={{ ...styles.ctrlBtn, background: "#dcfce7", color: "#15803d", border: "1px solid #22c55e" }} disabled={isRerunning}>
-              {isRerunning ? "Rerunning..." : "↻ Rerun Proofreading"}
-            </button>
+          <div style={styles.statusBar}>
+            <span style={{ ...styles.statusPill, background: "#16a34a" }}>PROOFREADING COMPLETED</span>
+            <span>100% complete</span>
+            {documentData?.total_pages > 0 && <span>• {documentData.total_pages} pages</span>}
+            {isProcessing && <span style={{ color: "#64748b", fontStyle: "italic" }}>• Additional analysis still running in background</span>}
           </div>
         ) : isProcessing ? (
-          <div style={{
-            background: "#fffbeb",
-            borderBottom: "1px solid #f59e0b",
-            padding: "8px 16px",
-            fontSize: "12px",
-            display: "flex",
-            justifyContent: "space-between",
-            alignItems: "center",
-            zIndex: 25
-          }}>
-            <div style={{ display: "flex", alignItems: "center", gap: "12px", flexWrap: "wrap" }}>
-              <span style={{ background: "#d97706", color: "#ffffff", fontSize: "10px", fontWeight: 800, padding: "2px 6px", borderRadius: "4px" }}>
-                PROOFREADING SCAN IN PROGRESS
-              </span>
-              <span><strong>Status:</strong> {documentData?.current_stage || "Scanning Text & Grammar Issues"}</span>
-              <span>•</span>
-              <span><strong>Progress:</strong> {documentData?.overall_progress || Math.round(documentData?.progress_percentage || 45)}%</span>
-              {documentData?.total_pages > 0 && (
-                <>
-                  <span>•</span>
-                  <span><strong>Pages:</strong> {documentData?.current_page || 0}/{documentData?.total_pages}</span>
-                </>
-              )}
-              {documentData?.total_batches > 0 && (
-                <>
-                  <span>•</span>
-                  <span><strong>Batch:</strong> {documentData?.current_batch || 0}/{documentData?.total_batches}</span>
-                </>
-              )}
-              <span>•</span>
-              <span><strong>ETA:</strong> {documentData?.estimated_remaining_time || "~1 min"}</span>
-            </div>
-            <button onClick={handleRerunProofreading} style={{ ...styles.ctrlBtn, background: "var(--brand-light)", color: "var(--brand)", border: "1px solid var(--brand)" }} disabled={isRerunning}>
-              {isRerunning ? "Rerunning..." : "↻ Rerun Proofreading"}
-            </button>
+          <div style={{ ...styles.statusBar, background: "#fffbeb", borderBottom: "1px solid #f59e0b" }}>
+            <span style={{ ...styles.statusPill, background: "#d97706" }}>SCAN IN PROGRESS</span>
+            <span>{documentData?.current_stage || "Scanning Text & Grammar Issues"}</span>
+            <span>• {documentData?.overall_progress || Math.round(documentData?.progress_percentage || 45)}%</span>
+            <span>• ETA {documentData?.estimated_remaining_time || "~1 min"}</span>
           </div>
         ) : null}
 
         {isFailed && (
-          <div style={{
-            background: "#fef2f2",
-            borderBottom: "1px solid #dc2626",
-            padding: "8px 16px",
-            fontSize: "12px",
-            display: "flex",
-            justifyContent: "space-between",
-            alignItems: "center",
-            zIndex: 25
-          }}>
-            <div style={{ display: "flex", alignItems: "center", gap: "12px", flexWrap: "wrap" }}>
-              <span style={{ background: "#dc2626", color: "#ffffff", fontSize: "10px", fontWeight: 800, padding: "2px 6px", borderRadius: "4px" }}>
-                PROOFREADING FAILED
+          <div style={{ ...styles.statusBar, background: "#fef2f2", borderBottom: "1px solid #dc2626" }}>
+            <span style={{ ...styles.statusPill, background: "#dc2626" }}>PROOFREADING FAILED</span>
+            <span>{documentData.current_stage || "Unknown stage"}</span>
+            {documentData.error && (
+              <span style={{ color: "#991b1b", maxWidth: "420px", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }} title={documentData.error}>
+                • {String(documentData.error).split("\n")[0]}
               </span>
-              <span><strong>Failed stage:</strong> {documentData.current_stage || "Unknown"}</span>
-              {documentData.error && (
-                <span style={{ color: "#991b1b", maxWidth: "480px", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }} title={documentData.error}>
-                  <strong>Reason:</strong> {String(documentData.error).split("\n")[0]}
-                </span>
-              )}
-            </div>
-            <button onClick={handleRerunProofreading} style={{ ...styles.ctrlBtn, background: "#fee2e2", color: "#991b1b", border: "1px solid #dc2626" }} disabled={isRerunning}>
-              {isRerunning ? "Retrying..." : "↻ Retry"}
-            </button>
+            )}
           </div>
         )}
 
         {isRecoverable && (
-          <div style={{
-            background: "#eff6ff",
-            borderBottom: "1px solid #3b82f6",
-            padding: "8px 16px",
-            fontSize: "12px",
-            display: "flex",
-            justifyContent: "space-between",
-            alignItems: "center",
-            zIndex: 25
-          }}>
-            <div style={{ display: "flex", alignItems: "center", gap: "12px", flexWrap: "wrap" }}>
-              <span style={{ background: "#2563eb", color: "#ffffff", fontSize: "10px", fontWeight: 800, padding: "2px 6px", borderRadius: "4px" }}>
-                RECOVERABLE
-              </span>
-              <span>Proofreading was interrupted and needs to be resumed before findings are up to date.</span>
-            </div>
-            <button onClick={handleRerunProofreading} style={{ ...styles.ctrlBtn, background: "#dbeafe", color: "#1d4ed8", border: "1px solid #3b82f6" }} disabled={isRerunning}>
-              {isRerunning ? "Resuming..." : "↻ Resume / Rerun Proofreading"}
-            </button>
+          <div style={{ ...styles.statusBar, background: "#eff6ff", borderBottom: "1px solid #3b82f6" }}>
+            <span style={{ ...styles.statusPill, background: "#2563eb" }}>RECOVERABLE</span>
+            <span>Interrupted -- resume to bring findings up to date.</span>
           </div>
         )}
 
-        {/* Tab bar */}
+        {/* Tab bar + toolbar (compact, single row) */}
         <div
           style={{
             display: "flex",
             justifyContent: "space-between",
             alignItems: "center",
-            padding: "8px 16px",
+            flexWrap: "wrap",
+            rowGap: 6,
+            padding: "6px 14px",
             background: "var(--bg-card, #ffffff)",
             borderBottom: "1px solid var(--border, #e2e8f0)",
             zIndex: 20,
-            boxShadow: "0 2px 8px rgba(0,0,0,0.05)"
+            boxShadow: "0 1px 4px rgba(0,0,0,0.04)"
           }}
         >
           <div style={{ display: "flex", gap: 4, background: "#f1f5f9", padding: 3, borderRadius: 6 }}>
@@ -684,14 +661,15 @@ export default function PDFReviewWorkspace({
                     {Math.round(zoomLevel * 100)}%
                   </span>
                   <button onClick={handleZoomIn} style={styles.ctrlBtn} title="Zoom In">+</button>
-                  <button onClick={handleZoomReset} style={styles.ctrlBtn}>Reset</button>
+                  <button onClick={handleZoomReset} style={styles.ctrlBtn} title="Fit to panel width">Fit</button>
                 </div>
               </>
             )}
-            {isDone && (viewMode === "pdf" || viewMode === "review") && (
+            {/* Single instance of each action button, always in the toolbar -- no duplicate copies in the status banners above. */}
+            {(viewMode === "pdf" || viewMode === "review") && (isDone || isProcessing || isFailed || isRecoverable) && (
               <>
                 <button onClick={handleRerunProofreading} style={styles.ctrlBtn} disabled={isRerunning} title="Re-run Spell, Grammar and Validation and refresh findings">
-                  {isRerunning ? "Rerunning..." : "↻ Rerun Proofreading"}
+                  {isRerunning ? "Rerunning..." : isFailed ? "↻ Retry" : isRecoverable ? "↻ Resume Proofreading" : "↻ Rerun Proofreading"}
                 </button>
                 <button onClick={handleReprocessDocument} style={styles.ctrlBtn} disabled={isReprocessing} title="Re-run the full extraction (Docling) and rebuild page/sentence mapping from scratch">
                   {isReprocessing ? "Reprocessing..." : "⟳ Reprocess Document"}
@@ -718,16 +696,31 @@ export default function PDFReviewWorkspace({
             ref={scrollContainerRef}
             style={{
               flex: 1,
+              position: "relative",
               overflowY: "auto",
               overflowX: "auto",
-              display: "flex",
-              flexDirection: "column",
-              alignItems: "center",
-              padding: "24px",
-              gap: "24px",
               scrollBehavior: "smooth"
             }}
           >
+            {/* Plain block wrapper, not a flex/align-items:center container --
+                that combination clips the far edge of a scroll region when
+                content overflows the viewport, making it impossible to
+                scroll all the way to one side when zoomed in. margin:auto on
+                a block box centers it when it's narrower than the panel
+                while still allowing full scroll travel once it's wider. */}
+            <div
+              style={{
+                width: "fit-content",
+                minWidth: "100%",
+                display: "flex",
+                flexDirection: "column",
+                alignItems: "center",
+                padding: "24px",
+                boxSizing: "border-box",
+                gap: "24px",
+                margin: "0 auto"
+              }}
+            >
             {!pdfLoadError ? (
               <Document
                 file={pdfUrl}
@@ -886,6 +879,7 @@ export default function PDFReviewWorkspace({
                 </object>
               </div>
             )}
+            </div>
           </div>
         ) : viewMode === "review" ? (
           <SentenceDocumentViewer
@@ -909,7 +903,7 @@ export default function PDFReviewWorkspace({
 
       {/* Findings sidebar */}
       {(viewMode === "pdf" || viewMode === "review") && (
-        <div style={{ flex: "0 0 22%", width: "22%", height: "100%", borderLeft: "1px solid var(--border, #e2e8f0)", background: "#ffffff" }}>
+        <div style={{ flex: "0 0 clamp(260px, 20%, 340px)", height: "100%", borderLeft: "1px solid var(--border, #e2e8f0)", background: "#ffffff", overflow: "hidden" }}>
           <IssueCardList
             findings={findings}
             selectedFindingId={selectedFindingId}
@@ -935,5 +929,24 @@ const styles = {
     fontWeight: 600,
     cursor: "pointer",
     color: "var(--text-primary, #0f172a)"
+  },
+  statusBar: {
+    background: "#f0fdf4",
+    borderBottom: "1px solid #22c55e",
+    padding: "5px 14px",
+    fontSize: "11.5px",
+    display: "flex",
+    alignItems: "center",
+    gap: "8px",
+    flexWrap: "wrap",
+    zIndex: 25
+  },
+  statusPill: {
+    color: "#ffffff",
+    fontSize: "9.5px",
+    fontWeight: 800,
+    padding: "1.5px 6px",
+    borderRadius: "4px",
+    letterSpacing: "0.2px"
   }
 };
