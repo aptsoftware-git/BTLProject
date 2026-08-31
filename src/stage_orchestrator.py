@@ -326,13 +326,43 @@ class StageOrchestrator:
         docling_path = self.job_dir / "02_docling" / "structured_document.json"
         if not docling_path.exists():
             docling_path = self.job_dir / "structured_document.json"
-        if docling_path.exists() and docling_path.stat().st_size > 0:
+
+        # multimodal_extractor.extract() persists structured_document.json
+        # INCREMENTALLY after every page batch (so a crash mid-extraction
+        # can resume from its checkpoint), but only writes
+        # 03_knowledge_objects/knowledge_objects.json once, at the very end,
+        # after every batch has succeeded. Reusing structured_document.json
+        # on the strength of its own existence alone -- as this used to do --
+        # means any transient failure partway through a large document
+        # (a NameError, an Ollama timeout, an OOM, anything) leaves a
+        # partial file on disk that gets silently treated as "the whole
+        # document" on the next attempt: Stage 2 reports success, and the
+        # page/image count is permanently frozen at wherever the crash
+        # happened, with no error ever surfacing. Requiring the
+        # knowledge_objects.json completion marker too means an interrupted
+        # run instead falls through to calling extract() again below, which
+        # resumes from its own ingestion_checkpoint.json and genuinely
+        # finishes the remaining pages rather than quietly serving a partial
+        # result as done.
+        ko_path = self.job_dir / "03_knowledge_objects" / "knowledge_objects.json"
+        if (
+            docling_path.exists() and docling_path.stat().st_size > 0
+            and ko_path.exists() and ko_path.stat().st_size > 0
+        ):
             try:
                 with open(docling_path, "r", encoding="utf-8") as f:
                     logger.info("Reusing existing Docling structured_document.json for job %s", self.job_id)
                     return json.load(f)
             except Exception as e:
                 logger.warning("Could not load existing docling file: %s", e)
+        elif docling_path.exists() and docling_path.stat().st_size > 0:
+            logger.warning(
+                "structured_document.json exists for job %s but knowledge_objects.json does not -- "
+                "extraction previously stopped partway through (e.g. a crash mid-batch). Re-running "
+                "extraction to resume from its checkpoint and complete the remaining pages instead of "
+                "reusing the partial result.",
+                self.job_id,
+            )
 
         try:
             from src.rag.multimodal_extractor import MultimodalExtractor

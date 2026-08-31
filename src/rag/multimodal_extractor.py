@@ -14,6 +14,7 @@ from PIL import Image
 
 from src.rag.document_schema import StructuredDocument, DocumentElement, ElementMetadata, BoundingBox, TableStructure, ImageMetadata
 from src.rag.document_builder import DocumentBuilder
+from src.rag.image_processor import ImageProcessor
 from src.rag.ollama_client import OllamaClient
 
 logger = logging.getLogger("pipeline")
