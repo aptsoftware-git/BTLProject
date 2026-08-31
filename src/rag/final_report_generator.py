@@ -7,6 +7,7 @@ from collections import Counter
 from datetime import datetime
 
 from src.rag.config import RagConfig
+from src.rag.cache_manager import PIPELINE_VERSION
 
 logger = logging.getLogger("pipeline")
 
@@ -290,8 +291,17 @@ class FinalReportGenerator:
 
         claude_json_path = job_dir / "14_claude_verification" / "claude_response.json"
         if not claude_json_path.exists():
-            logger.error(f"claude_response.json not found in {job_dir}/14_claude_verification/")
-            return
+            # This is the last stage before the UI-facing final_report.json.
+            # Returning silently here (as before) meant Stage 6 would still
+            # copy nothing, hit no exception, and get marked "Completed" --
+            # indistinguishable in the UI from a document that genuinely has
+            # zero ambiguities. Raising forces the orchestrator's own
+            # try/except to mark the stage "Failed" instead.
+            raise RuntimeError(
+                f"[AMBIGUITY PIPELINE INCOMPLETE] claude_response.json not found in "
+                f"{job_dir}/14_claude_verification/ (job {doc_id}) -- Claude verification did not "
+                "run or failed. This must not be reported as zero ambiguities."
+            )
 
         with open(claude_json_path, "r", encoding="utf-8") as f:
             claude_data = json.load(f)
@@ -468,6 +478,11 @@ class FinalReportGenerator:
         # Structure clean final JSON schema
         final_report_data = {
             "document_job_id": doc_id,
+            # Stamped so a stale report from an older pipeline version can be
+            # detected and forced to regenerate even for an already-existing
+            # job (stage_orchestrator.run_stage_6_context's cache check reads
+            # this) -- see cache_manager.PIPELINE_VERSION.
+            "pipeline_version": PIPELINE_VERSION,
             "audit_metadata": {
                 "document_name": doc_id,
                 "total_pages": max([f.get("page_number", 1) for f in business_findings] + [1]),

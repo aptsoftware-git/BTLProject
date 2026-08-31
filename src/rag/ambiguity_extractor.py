@@ -174,8 +174,17 @@ class AmbiguityExtractor:
         chunks_master = chunks_data.get("chunks", [])
                 
         if not chunks_master:
-            logger.error("No semantic chunks found to extract claims from.")
-            return
+            # Must propagate as a failure, not a silent empty result: a
+            # missing/empty chunk set here (upstream extraction incomplete
+            # or not yet run) is "analysis could not be completed", never
+            # "zero ambiguities found" -- returning normally here previously
+            # let every downstream stage silently no-op in turn, all the way
+            # to Stage 6 reporting "Completed" with zero findings.
+            raise RuntimeError(
+                "[AMBIGUITY PIPELINE INCOMPLETE] No semantic chunks found to extract claims from "
+                f"(job {doc_id}) -- document_chunks.json/knowledge_objects.json missing or empty. "
+                "This must not be reported as zero ambiguities."
+            )
             
         # Check connection to Ollama server
         ollama_active = False

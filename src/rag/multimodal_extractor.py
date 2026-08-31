@@ -868,6 +868,11 @@ class MultimodalExtractor:
                     global_image_seq += 1
                     seq_name = f"image_{global_image_seq:03d}"
                     new_png_path = output_dir / "05_images" / f"{seq_name}.png"
+                    # "pymupdf_supplement" for images the raw PyMuPDF cross-check
+                    # added because Docling's own picture classifier missed them
+                    # (see _supplement_missing_images_from_pdf); "docling" for
+                    # everything Docling itself detected.
+                    detection_source = "pymupdf_supplement" if "/pictures/supplement_" in img_id else "docling"
                     
                     if orig_path and orig_path.exists():
                         if orig_path.resolve() != new_png_path.resolve():
@@ -970,14 +975,14 @@ class MultimodalExtractor:
                             )
                         ]
                         logger.info(
-                            "Image pipeline | global_id=%s | page=%s | file=%s | status=DUPLICATE | canonical=%s",
-                            seq_name, img_meta.page_number, f"{seq_name}.png", canonical_seq,
+                            "Image pipeline | global_id=%s | page=%s | file=%s | source=%s | status=DUPLICATE | canonical=%s",
+                            seq_name, img_meta.page_number, f"{seq_name}.png", detection_source, canonical_seq,
                         )
                         continue
 
                     logger.info(
-                        "Image pipeline | global_id=%s | page=%s | file=%s | status=UNIQUE | canonical=%s",
-                        seq_name, img_meta.page_number, f"{seq_name}.png", seq_name,
+                        "Image pipeline | global_id=%s | page=%s | file=%s | source=%s | status=UNIQUE | canonical=%s",
+                        seq_name, img_meta.page_number, f"{seq_name}.png", detection_source, seq_name,
                     )
 
                     # Step 3: Hierarchical Caption Detection & Layout Association
@@ -1201,6 +1206,19 @@ class MultimodalExtractor:
                     with open(image_json_path, "w", encoding="utf-8") as f:
                         json.dump(img_json_data, f, indent=2, ensure_ascii=False)
 
+                    # Consolidated per-image status: identity association
+                    # outcome, image_type, and retrievability -- the
+                    # complementary entity_id/linked_text_chunk_ids fields
+                    # (computed later, in a separate document-wide pass) are
+                    # logged by entity_linker's own per-portrait line.
+                    logger.info(
+                        "Image pipeline | global_id=%s | page=%s | image_type=%s | association_method=%s | "
+                        "entity_name=%s | designation=%s | retrievable=%s | importance=%s | status=INDEXED",
+                        seq_name, img_meta.page_number, img_meta.image_type, img_meta.association_method,
+                        img_meta.entity_name or "unresolved", img_meta.designation or "-",
+                        img_meta.retrievable, img_meta.importance_score,
+                    )
+
             # Part 3 & 4: Incremental Knowledge Extraction & Vector DB Updates (Semantic Chunks reasoning unit)
             self._update_job_status(doc_id, "Building Embeddings", percent, batch_start+1, total_pages, batch_size, batch_index, total_batches, est_time_str)
             batch_objects = []
@@ -1304,14 +1322,25 @@ class MultimodalExtractor:
         # that guarantee alongside the real dedup/indexing counts for audit.
         dedup_stats = dedup_registry.summary()
         images_indexed = agent.stats.get("by_type", {}).get("image", 0)
+        portraits_resolved = sum(
+            1 for img in master_structured_doc.images.values()
+            if img.image_type in ("Portrait", "Portrait Photo") and img.entity_name
+        )
+        portraits_unresolved = sum(
+            1 for img in master_structured_doc.images.values()
+            if img.image_type in ("Portrait", "Portrait Photo") and not img.entity_name
+        )
         logger.info(
             "Image pipeline summary | extracted: %d -> overwrites prevented: %d (globally-unique "
             "naming, batch-tagged raw extraction) -> duplicates removed: %d -> unique retained: %d "
-            "-> images indexed: %d (entity/chunk linking logged separately by entity_linker)",
+            "-> portraits resolved: %d -> portraits unresolved: %d -> images indexed: %d "
+            "(entity/chunk linking summary logged separately by entity_linker)",
             dedup_stats["total_extracted"],
             global_image_seq,
             dedup_stats["duplicates_removed"],
             dedup_stats["unique_retained"],
+            portraits_resolved,
+            portraits_unresolved,
             images_indexed,
         )
 

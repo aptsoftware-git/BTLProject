@@ -21,6 +21,16 @@ DEFAULT_MODEL_ROUTER: Dict[str, str] = {
     "rag_chat": os.environ.get("MODEL_RAG_CHAT", "qwen2.5-coder:32b"),
     "context_analysis": os.environ.get("MODEL_CONTEXT_ANALYSIS", "qwen2.5-coder:7b"),
     "comparative_analysis": os.environ.get("MODEL_COMPARATIVE_ANALYSIS", "qwen2.5-coder:7b"),
+    # Used only when the Comparative Analysis Claude agents (company/competitor
+    # summary, executive insights, strategic recommendations) can't reach the
+    # Claude API -- missing/invalid key, out of credits, rate-limited, network
+    # failure -- so the report is still generated from a real LLM synthesis
+    # of the actual document/competitor data instead of falling straight
+    # through to a generic templated summary. Runs against the same Ollama
+    # host as everything else (OLLAMA_HOST, see src/rag/config.py) -- this
+    # variable only picks which model on that host to use. See
+    # src/comparative_analysis/agents/llm_fallback.py.
+    "comparative_analysis_fallback": os.environ.get("ALTERNATIVE_COMPARATIVE_ANALYSIS_MODEL", "qwen2.5-coder:32b"),
     "executive_report": os.environ.get("MODEL_EXECUTIVE_REPORT", os.environ.get("CLAUDE_MODEL", os.environ.get("ANTHROPIC_MODEL", "claude-sonnet-4-6"))),
     "embedding_model": os.environ.get("MODEL_EMBEDDING", "BAAI/bge-small-en-v1.5"),
 }

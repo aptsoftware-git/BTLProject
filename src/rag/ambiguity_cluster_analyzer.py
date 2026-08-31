@@ -200,17 +200,23 @@ class AmbiguityClusterAnalyzer:
         # Load necessary inputs
         clusters_path = job_dir / "09_semantic_clusters" / "semantic_clusters.json"
         if not clusters_path.exists():
-            logger.error(f"semantic_clusters.json not found in {job_dir}/09_semantic_clusters/")
-            return
-            
+            raise RuntimeError(
+                f"[AMBIGUITY PIPELINE INCOMPLETE] semantic_clusters.json not found in "
+                f"{job_dir}/09_semantic_clusters/ (job {doc_id}) -- clustering did not run or "
+                "failed. This must not be reported as zero ambiguities."
+            )
+
         with open(clusters_path, "r", encoding="utf-8") as f:
             clusters = json.load(f)
-            
+
         # Load Phase 2A extractions
         claims_json_path = job_dir / "10_claim_extraction" / "chunk_claims.json"
         if not claims_json_path.exists():
-            logger.error(f"chunk_claims.json not found in {job_dir}/10_claim_extraction/")
-            return
+            raise RuntimeError(
+                f"[AMBIGUITY PIPELINE INCOMPLETE] chunk_claims.json not found in "
+                f"{job_dir}/10_claim_extraction/ (job {doc_id}) -- claim extraction did not run "
+                "or failed. This must not be reported as zero ambiguities."
+            )
             
         with open(claims_json_path, "r", encoding="utf-8") as f:
             chunk_claims_data = json.load(f)

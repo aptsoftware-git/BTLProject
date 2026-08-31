@@ -1143,8 +1143,23 @@ class StageOrchestrator:
         # elsewhere) but is no longer invoked here.
         rep_json = self.job_dir / "15_final_report" / "final_report.json"
 
-        # Cache check
-        if not force_regenerate and rep_html.exists() and rep_json.exists():
+        # Cache check. File existence alone is not enough: final_report.json
+        # is stamped with the pipeline_version it was generated under (see
+        # final_report_generator.py), so a report produced before an
+        # ambiguity-pipeline fix (e.g. the clustering/claim-extraction/
+        # verification silent-failure fix, or a taxonomy/grounding change)
+        # is never silently reused for an already-existing job just because
+        # its files still happen to be on disk.
+        cached_report_is_current = False
+        if rep_json.exists():
+            try:
+                from src.rag.cache_manager import PIPELINE_VERSION
+                with open(rep_json, "r", encoding="utf-8") as f:
+                    cached_report_is_current = json.load(f).get("pipeline_version") == PIPELINE_VERSION
+            except Exception as e:
+                logger.warning("Could not verify final_report.json pipeline_version for job %s: %s", self.job_id, e)
+
+        if not force_regenerate and rep_html.exists() and rep_json.exists() and cached_report_is_current:
             logger.info("[CACHE HIT] Stage 6 (Context Analysis) already completed for job %s", self.job_id)
             self.update_stage_state(stage_id, "Completed", duration=0.0, output_location="09_reports/consistency_report.html")
             job = self.get_job()
@@ -1157,38 +1172,54 @@ class StageOrchestrator:
         start_time = datetime.now()
         self.update_stage_state(stage_id, "Running", start_time=start_time.isoformat())
 
+        # A version-stale cached report must actually force every sub-stage
+        # to regenerate, not just be *detected* as stale above -- each of
+        # AmbiguityPipeline/AmbiguityExtractor/AmbiguityChunkAnalyzer/
+        # AmbiguityClusterAnalyzer/ClaudeInputBuilder/ClaudeVerificationService/
+        # FinalReportGenerator has its own independent file-existence cache
+        # check, none of which know about pipeline_version. Passing the raw
+        # (possibly still False) force_regenerate through in that case would
+        # let every sub-stage silently reuse its own stale artifact and
+        # rewrite the exact same stale final_report.json again.
+        effective_force_regenerate = force_regenerate or (rep_json.exists() and not cached_report_is_current)
+        if effective_force_regenerate and not force_regenerate:
+            logger.warning(
+                "Stage 6 (Context Analysis) cached final_report.json for job %s was produced by an "
+                "older pipeline version -- forcing a full regeneration.", self.job_id
+            )
+
         try:
-            if force_regenerate:
+            if effective_force_regenerate:
                 from backend.services import delete_stage_output_cache
                 delete_stage_output_cache(self.job_id, "stage_6_context")
 
             from src.rag.ambiguity_pipeline import AmbiguityPipeline
             ambiguity_pipeline = AmbiguityPipeline()
-            ambiguity_pipeline.run_clustering(self.job_dir, self.job_id, force_regenerate=force_regenerate)
+            ambiguity_pipeline.run_clustering(self.job_dir, self.job_id, force_regenerate=effective_force_regenerate)
 
             from src.rag.ambiguity_extractor import AmbiguityExtractor
             ambiguity_extractor = AmbiguityExtractor()
-            ambiguity_extractor.run_extraction(self.job_dir, self.job_id, force_regenerate=force_regenerate)
+            ambiguity_extractor.run_extraction(self.job_dir, self.job_id, force_regenerate=effective_force_regenerate)
 
             from src.rag.ambiguity_chunk_analyzer import AmbiguityChunkAnalyzer
             chunk_analyzer = AmbiguityChunkAnalyzer()
-            chunk_analyzer.run_analysis(self.job_dir, self.job_id, force_regenerate=force_regenerate)
+            chunk_analyzer.run_analysis(self.job_dir, self.job_id, force_regenerate=effective_force_regenerate)
 
             from src.rag.ambiguity_cluster_analyzer import AmbiguityClusterAnalyzer
             cluster_analyzer = AmbiguityClusterAnalyzer()
-            cluster_analyzer.run_analysis(self.job_dir, self.job_id, force_regenerate=force_regenerate)
+            cluster_analyzer.run_analysis(self.job_dir, self.job_id, force_regenerate=effective_force_regenerate)
 
             from src.rag.claude_input_builder import ClaudeInputBuilder
             input_builder = ClaudeInputBuilder()
-            input_builder.run_packaging(self.job_dir, self.job_id, force_regenerate=force_regenerate)
+            input_builder.run_packaging(self.job_dir, self.job_id, force_regenerate=effective_force_regenerate)
 
             from src.rag.claude.verification_service import ClaudeVerificationService
             verification_service = ClaudeVerificationService()
-            verification_service.run_verification(self.job_dir, self.job_id, force_regenerate=force_regenerate)
+            verification_service.run_verification(self.job_dir, self.job_id, force_regenerate=effective_force_regenerate)
 
             from src.rag.final_report_generator import FinalReportGenerator
             report_gen = FinalReportGenerator()
-            report_gen.generate_report(self.job_dir, self.job_id, force_regenerate=force_regenerate)
+            report_gen.generate_report(self.job_dir, self.job_id, force_regenerate=effective_force_regenerate)
 
             # Copy the primary (System B) final report into 09_reports/
             # under its existing consistency_report.* names, so any

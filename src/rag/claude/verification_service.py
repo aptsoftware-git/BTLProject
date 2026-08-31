@@ -189,8 +189,11 @@ class ClaudeVerificationService:
         # Load claude_input.json
         input_json_path = job_dir / "13_claude_input" / "claude_input.json"
         if not input_json_path.exists():
-            logger.error(f"claude_input.json not found in {job_dir}/13_claude_input/")
-            return {}
+            raise RuntimeError(
+                f"[AMBIGUITY PIPELINE INCOMPLETE] claude_input.json not found in "
+                f"{job_dir}/13_claude_input/ (job {doc_id}) -- input packaging did not run or "
+                "failed. This must not be reported as zero ambiguities."
+            )
             
         with open(input_json_path, "r", encoding="utf-8") as f:
             input_data = json.load(f)

@@ -27,7 +27,15 @@ MEMORY_CACHE: Dict[str, Dict[str, Any]] = {}
 
 CACHE_BASE_DIR = ROOT_DIR / "data" / "cache"
 
-PIPELINE_VERSION = "2.0.0"
+# Bumped whenever a change to extraction, deduplication, entity-linking,
+# grounding, or retrieval logic could make previously-cached artifacts for
+# an already-processed document stale/incorrect (image identity-collision
+# fix, global image numbering, entity/text-chunk linking, dedup safety net,
+# etc.). is_fully_processed() below rejects a cache hit whose stored
+# pipeline_version doesn't match this constant, so a document reprocessed
+# under an older, buggier pipeline version is never silently served again
+# once fixed -- it must go through the current pipeline at least once.
+PIPELINE_VERSION = "2.1.0"
 PROMPT_VERSION = "1.0.0"
 EMBEDDING_MODEL_VERSION = "all-MiniLM-L6-v2"
 
@@ -128,6 +136,14 @@ class DocumentCacheManager:
         return False
 
     def is_fully_processed(self) -> bool:
+        # A document cached under an older pipeline_version must never be
+        # served as a full cache hit -- its images/chunks/entity-links may
+        # have been produced by logic since fixed (e.g. the image identity-
+        # collision bug, missing entity linking). Stage-completion flags and
+        # on-disk artifacts alone can't tell "correct" apart from "stale but
+        # present", so the version stamp is the authoritative gate here.
+        if self.get_metadata().get("pipeline_version") != PIPELINE_VERSION:
+            return False
         essential_stages = [
             "extraction", "chunks", "embeddings", "proofreading",
             "semantic_clusters", "claim_extraction", "chunk_reasoning",

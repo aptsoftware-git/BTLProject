@@ -133,6 +133,20 @@ class CompanySummaryAgent:
                 validated = self._validate_company_profile(company_profile, all_text)
                 return ProfileValidator.validate_and_clean(validated)
 
+        # Claude unavailable/unparseable -- retry with a local LLM before
+        # falling through to the generic template.
+        from src.comparative_analysis.agents.llm_fallback import call_local_llm_fallback
+        raw_local_response = call_local_llm_fallback(
+            CLAUDE_COMPANY_SUMMARY_SYSTEM_PROMPT, user_prompt, "CompanySummaryAgent"
+        )
+        if raw_local_response:
+            company_profile = self._parse_json_response(raw_local_response, legal_company_name)
+            if company_profile:
+                company_profile.company_name = legal_company_name
+                company_profile.target_company_identity = resolved_identity
+                validated = self._validate_company_profile(company_profile, all_text)
+                return ProfileValidator.validate_and_clean(validated)
+
         fallback = self._extract_fallback_profile(profile, legal_company_name)
         fallback.company_name = legal_company_name
         fallback.target_company_identity = resolved_identity

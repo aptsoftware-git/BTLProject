@@ -117,6 +117,15 @@ class CompetitorSummaryAgent:
             if parsed:
                 return parsed
 
+        # Claude unavailable/unparseable -- retry with a local LLM before
+        # falling through to the generic template.
+        from src.comparative_analysis.agents.llm_fallback import call_local_llm_fallback
+        raw_local_response = call_local_llm_fallback(self.system_prompt, user_prompt, "CompetitorSummaryAgent")
+        if raw_local_response:
+            parsed = self._parse_json_response(raw_local_response, raw_comp, primary_industry)
+            if parsed:
+                return parsed
+
         return self._extract_fallback_competitor(raw_comp, primary_industry)
 
     def _call_claude_api(self, prompt: str, model: str) -> str:

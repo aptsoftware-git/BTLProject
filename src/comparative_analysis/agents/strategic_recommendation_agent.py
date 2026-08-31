@@ -100,6 +100,15 @@ class StrategicRecommendationAgent:
             if recs and len(recs) >= 3:
                 return recs[:5]
 
+        # Claude unavailable/unparseable -- retry with a local LLM before
+        # falling through to the generic template.
+        from src.comparative_analysis.agents.llm_fallback import call_local_llm_fallback
+        raw_local_response = call_local_llm_fallback(self.system_prompt, user_prompt, "StrategicRecommendationAgent")
+        if raw_local_response:
+            recs = self._parse_json_response(raw_local_response)
+            if recs and len(recs) >= 3:
+                return recs[:5]
+
         return self._extract_fallback_recommendations(company_profile, competitor_summary_list)
 
     def _call_claude_api(self, prompt: str, model: str) -> str:

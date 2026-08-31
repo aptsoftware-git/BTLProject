@@ -91,6 +91,17 @@ class ExecutiveInsightsAgent:
             if insights:
                 return insights
 
+        # Claude unavailable (no/invalid key, out of credits, rate-limited,
+        # network failure) or returned an unparseable response -- retry with
+        # a local LLM before falling through to the generic template, so the
+        # report still reflects real synthesis of this document's data.
+        from src.comparative_analysis.agents.llm_fallback import call_local_llm_fallback
+        raw_local_response = call_local_llm_fallback(self.system_prompt, user_prompt, "ExecutiveInsightsAgent")
+        if raw_local_response:
+            insights = self._parse_json_response(raw_local_response)
+            if insights:
+                return insights
+
         return self._extract_fallback_insights(company_profile, market_position)
 
     def _call_claude_api(self, prompt: str, model: str) -> str:
