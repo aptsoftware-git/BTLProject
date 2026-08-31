@@ -1889,16 +1889,29 @@ class ImageProcessor:
 
     @staticmethod
     def process_image(
-        element: Any, 
-        doc: Any, 
+        element: Any,
+        doc: Any,
         output_images_dir: Optional[Path] = None,
-        pdf_path: Optional[Path] = None
+        pdf_path: Optional[Path] = None,
+        filename_prefix: str = ""
     ) -> ImageMetadata:
         """
         Extracts metadata of an image, saves the cropped image if enabled, and maps captions.
+
+        `filename_prefix` (e.g. "b3" for batch 3) makes the raw, pre-rename
+        filename this writes into `output_images_dir` collision-proof across
+        batches. Docling numbers pictures locally within whatever document it
+        just parsed (pictures_0, pictures_1, ...), so every batch's temp-PDF
+        parse restarts from pictures_0 -- without this prefix, batch 2's
+        first picture would be saved to the exact same filename as batch 1's
+        first picture, in the same shared 05_images directory, before the
+        caller's later "sequentialize into a globally unique image_NNN.png
+        name" step even runs. The caller (multimodal_extractor) still owns
+        assigning the final globally-unique name; this only protects the
+        intermediate write from ever silently overwriting a prior batch's file.
         """
         image_id = element.self_ref
-        
+
         # Get page number
         page_number = 1
         bbox = None
@@ -1915,6 +1928,8 @@ class ImageProcessor:
         if output_images_dir:
             output_images_dir.mkdir(parents=True, exist_ok=True)
             safe_id = image_id.replace("#/", "").replace("/", "_")
+            if filename_prefix:
+                safe_id = f"{filename_prefix}_{safe_id}"
             target_path = output_images_dir / f"{safe_id}.png"
 
             # Primary: retrieve the image bytes/object from Docling

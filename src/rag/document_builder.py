@@ -21,12 +21,18 @@ class DocumentBuilder:
     """
 
     def __init__(
-        self, 
+        self,
         output_images_dir: Optional[Path] = None,
-        pdf_path: Optional[Path] = None
+        pdf_path: Optional[Path] = None,
+        batch_tag: Optional[str] = None
     ) -> None:
         self.output_images_dir = output_images_dir
         self.pdf_path = Path(pdf_path) if pdf_path else None
+        # Tags the raw, pre-rename image filenames this batch writes (e.g.
+        # "b3") so they can never collide with another batch's Docling
+        # picture output in the shared 05_images directory -- see
+        # ImageProcessor.process_image's filename_prefix docstring.
+        self.batch_tag = batch_tag
 
     def build(self, docling_doc: Any, file_name: str, file_type: str) -> StructuredDocument:
         """
@@ -112,10 +118,11 @@ class DocumentBuilder:
                 # Process detailed image metadata and save crop if configured
                 try:
                     img_meta = ImageProcessor.process_image(
-                        element, 
-                        docling_doc, 
+                        element,
+                        docling_doc,
                         output_images_dir=self.output_images_dir,
-                        pdf_path=self.pdf_path
+                        pdf_path=self.pdf_path,
+                        filename_prefix=self.batch_tag or ""
                     )
                     images_dict[self_ref] = img_meta
                     if img_meta.caption:

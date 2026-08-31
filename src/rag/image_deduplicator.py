@@ -277,18 +277,40 @@ def validate_and_cleanup_image_artifacts(
                 logger.warning(f"Failed to remove orphaned image PNG {png_path.name}: {e}")
 
     # 2b. Enforce exactly-one-JSON-per-image_id: if multiple retained PNG/JSON
-    # pairs somehow carry the same image_id (should not happen given
-    # multimodal_extractor's in-stream duplicate collapse, but enforced here
-    # as a hard guarantee), keep only the lowest seq_name and remove the rest
-    # so every retained image maps to exactly one JSON/PNG pair.
+    # pairs somehow carry the same image_id (should not happen now that
+    # multimodal_extractor assigns image_id from the run-wide global image
+    # counter -- see its per-image loop -- rather than Docling's per-batch
+    # picture numbering, which used to make every batch's Nth picture share
+    # an image_id with every other batch's Nth picture and get wrongly
+    # collapsed here), enforced as a hard guarantee.
+    #
+    # A shared image_id string alone is no longer trusted as proof of
+    # duplication: before deleting anything, the two PNGs' exact byte
+    # content is compared. Only a genuine byte-for-byte duplicate is
+    # removed; if the content differs, both are kept and a warning is
+    # logged, since deleting the only copy of a unique image (a Board of
+    # Directors portrait mislabeled with a colliding id, say) is strictly
+    # worse than tolerating a redundant id string.
     seen_image_ids: Dict[str, str] = {}
     for stem in sorted(valid_json_stems.keys()):
         image_id = valid_json_stems[stem]
         if not image_id:
             continue
         if image_id in seen_image_ids:
-            dup_json = images_dir / f"{stem}.json"
+            kept_stem = seen_image_ids[image_id]
             dup_png = images_dir / f"{stem}.png"
+            kept_png = images_dir / f"{kept_stem}.png"
+            same_content = (
+                dup_png.exists() and kept_png.exists()
+                and compute_exact_hash(dup_png) == compute_exact_hash(kept_png)
+            )
+            if not same_content:
+                logger.warning(
+                    f"Image {stem} shares image_id={image_id} with {kept_stem} but their "
+                    f"pixel content differs -- keeping both rather than risk deleting a unique image."
+                )
+                continue
+            dup_json = images_dir / f"{stem}.json"
             try:
                 dup_json.unlink(missing_ok=True)
                 stats["orphaned_json_removed"] += 1
@@ -301,7 +323,7 @@ def validate_and_cleanup_image_artifacts(
                 logger.warning(f"Failed to remove duplicate image PNG {dup_png.name}: {e}")
             logger.info(
                 f"Removed duplicate image pair {stem} (image_id={image_id}) -- "
-                f"already retained as {seen_image_ids[image_id]}; enforcing exactly-one-JSON-per-image."
+                f"byte-identical to already-retained {kept_stem}; enforcing exactly-one-JSON-per-image."
             )
             del valid_json_stems[stem]
         else:

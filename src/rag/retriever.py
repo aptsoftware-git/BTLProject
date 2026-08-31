@@ -588,6 +588,16 @@ class Retriever:
                 if is_entity_match:
                     if intent == "person_biography" and meta.chunk_type != "image":
                         boost += 3.00
+                    elif intent == "person_biography" and meta.chunk_type == "image":
+                        # The resolved person's own portrait, surfaced
+                        # alongside (never instead of) their biography/
+                        # qualification text -- a smaller boost than the
+                        # text gets so prose stays primary, but still enough
+                        # to keep it from being crowded out of the results by
+                        # unrelated chunks the way a fully neutral score
+                        # would. See entity_linker's linked_image_ids /
+                        # linked_text_chunk_ids for the underlying link.
+                        boost += 0.80
                     elif is_visual_query and meta.chunk_type == "image":
                         boost += 3.00
                     elif meta.chunk_type != "image":

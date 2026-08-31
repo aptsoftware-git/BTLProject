@@ -531,14 +531,31 @@ class MultimodalExtractor:
         # later batch is still caught against canonicals from earlier batches.
         from src.rag.image_deduplicator import ImageDeduplicationRegistry
         dedup_registry = ImageDeduplicationRegistry()
+
+        # Global, monotonically-increasing image sequence number, shared
+        # across every batch in this extraction run. This -- not Docling's
+        # own per-batch picture numbering, and not arithmetic derived from
+        # dict lengths (which shifts whenever a same-batch duplicate is
+        # popped mid-loop) -- is what final image_NNN filenames and the
+        # persisted "image_id" are assigned from, so every image in the
+        # document gets a filename/id that can never collide with any other
+        # batch's, regardless of dedup outcomes or resume boundaries.
+        global_image_seq = 0
         if output_dir and start_page > 0:
             # Resuming from a checkpoint: prime the registry with images already
             # written by earlier (pre-crash) batches so duplicates spanning the
-            # restart boundary are still caught.
+            # restart boundary are still caught, and continue the global
+            # counter from the highest existing image number instead of
+            # restarting at 0 (which would collide with those existing files).
             existing_images_dir = output_dir / "05_images"
             if existing_images_dir.exists():
                 for existing_png in sorted(existing_images_dir.glob("image_*.png")):
                     dedup_registry.check_and_register(existing_png, existing_png.stem)
+                    try:
+                        existing_num = int(existing_png.stem.split("_")[-1])
+                        global_image_seq = max(global_image_seq, existing_num)
+                    except (ValueError, IndexError):
+                        pass
 
         # Initialize Docling Converter once
         converter = None
@@ -643,7 +660,8 @@ class MultimodalExtractor:
                             images_dir.mkdir(parents=True, exist_ok=True)
                         builder = DocumentBuilder(
                             output_images_dir=images_dir,
-                            pdf_path=file_path
+                            pdf_path=file_path,
+                            batch_tag=f"b{batch_index}"
                         )
                         batch_structured_doc = builder.build(docling_doc, file_name, file_type)
                         docling_success = True
@@ -718,9 +736,16 @@ class MultimodalExtractor:
             if output_dir and batch_structured_doc.images:
                 self._update_job_status(doc_id, "Generating Knowledge Objects", percent, batch_start+1, total_pages, batch_size, batch_index, total_batches, est_time_str)
                 ollama_client = agent.ollama_client
-                for idx, (img_id, img_meta) in enumerate(list(batch_structured_doc.images.items())):
+                for img_id, img_meta in list(batch_structured_doc.images.items()):
                     orig_path = Path(img_meta.image_path) if img_meta.image_path else None
-                    seq_name = f"image_{len(master_structured_doc.images) - len(batch_structured_doc.images) + idx + 1:03d}"
+                    # Assigned from the run-wide global counter, never from
+                    # dict lengths -- those shift under our feet the moment a
+                    # same-batch duplicate is popped later in this same loop,
+                    # which previously could hand two different images the
+                    # same seq_name and have the second silently overwrite
+                    # the first's file.
+                    global_image_seq += 1
+                    seq_name = f"image_{global_image_seq:03d}"
                     new_png_path = output_dir / "05_images" / f"{seq_name}.png"
                     
                     if orig_path and orig_path.exists():
@@ -755,14 +780,48 @@ class MultimodalExtractor:
                         logger.warning(f"Physical image file could not be created for {seq_name} (Page {img_meta.page_number}). Skipping metadata save to enforce 1:1 mapping.")
                         continue
 
+                    # From here on this image's globally-unique seq_name is also
+                    # its canonical identifier: the persisted JSON "image_id"
+                    # field, the filename stem, and the id chunk_builder /
+                    # validate_and_cleanup_image_artifacts key off of are the
+                    # same string. Previously image_id stayed at Docling's raw
+                    # per-batch self_ref (e.g. "#/pictures/0"), which every
+                    # batch reuses -- that made every batch's Nth picture look
+                    # like a duplicate of every other batch's Nth picture to
+                    # the "exactly-one-JSON-per-image_id" cleanup pass and to
+                    # chunk_builder's cross-batch JSON rescan, so genuinely
+                    # distinct images (Board of Directors portraits included)
+                    # were silently deleted or dropped from indexing even
+                    # though their files were never actually duplicates.
+                    img_meta.image_id = seq_name
+
                     # Content-based duplicate detection (exact + near-duplicate
                     # perceptual hash), BEFORE any grounding, VLM captioning,
                     # JSON metadata write, or chunking/indexing happens for
                     # this image. Repeated logos, headers, footers, decorative
                     # assets, and any other pixel-identical/near-identical
                     # repeat are collapsed onto their earlier canonical copy;
-                    # genuinely different images are never touched.
+                    # genuinely different images (including visually similar
+                    # portraits of different people) are never touched, since
+                    # the hash comparison is purely pixel-content based.
                     canonical_seq = dedup_registry.check_and_register(new_png_path, seq_name)
+
+                    # Safety net: only ever treat this as a duplicate if the
+                    # canonical copy it would be merged into still physically
+                    # exists. If it doesn't (e.g. removed by an earlier,
+                    # unrelated cleanup pass), this image is promoted back to
+                    # being its own canonical -- we must never delete the only
+                    # remaining copy of a unique image.
+                    if canonical_seq is not None:
+                        canonical_png_path = output_dir / "05_images" / f"{canonical_seq}.png"
+                        if not canonical_png_path.exists():
+                            logger.warning(
+                                f"Dedup registry pointed image {seq_name} (Page {img_meta.page_number}) at "
+                                f"canonical {canonical_seq}, but that file is missing on disk. Keeping "
+                                f"{seq_name} as its own canonical copy instead of deleting the only copy."
+                            )
+                            canonical_seq = None
+
                     if canonical_seq is not None:
                         from src.rag.image_deduplicator import merge_duplicate_page_into_canonical
                         canonical_json_path = output_dir / "05_images" / f"{canonical_seq}.json"
@@ -777,7 +836,9 @@ class MultimodalExtractor:
                             pass
                         # Remove from every structure chunk_builder / master doc
                         # will read, so the duplicate is invisible to chunking
-                        # and indexing (not merely undescribed).
+                        # and indexing (not merely undescribed) -- the canonical
+                        # file and its own JSON/chunk/index entries are left
+                        # completely untouched.
                         master_structured_doc.images.pop(f"b{batch_index}_{img_id}", None)
                         batch_structured_doc.images.pop(img_id, None)
                         batch_structured_doc.elements = [
@@ -788,10 +849,15 @@ class MultimodalExtractor:
                             )
                         ]
                         logger.info(
-                            f"Duplicate image detected: {seq_name} (Page {img_meta.page_number}) "
-                            f"merged into canonical {canonical_seq}; excluded from chunking/indexing."
+                            "Image pipeline | global_id=%s | page=%s | file=%s | status=DUPLICATE | canonical=%s",
+                            seq_name, img_meta.page_number, f"{seq_name}.png", canonical_seq,
                         )
                         continue
+
+                    logger.info(
+                        "Image pipeline | global_id=%s | page=%s | file=%s | status=UNIQUE | canonical=%s",
+                        seq_name, img_meta.page_number, f"{seq_name}.png", seq_name,
+                    )
 
                     # Step 3: Hierarchical Caption Detection & Layout Association
                     page_elements = [
@@ -1106,13 +1172,23 @@ class MultimodalExtractor:
                         except Exception as e:
                             logger.warning(f"Could not remove non-canonical file {f.name}: {e}")
 
-        # Image deduplication summary: total extracted -> duplicates removed -> unique retained -> images indexed
+        # Full image pipeline funnel: extracted -> overwrites prevented ->
+        # duplicates removed -> unique retained -> indexed. Every image's
+        # filename/id is assigned from global_image_seq (a run-wide counter,
+        # never Docling's per-batch local numbering) and every raw batch
+        # extraction is written under its own batch_tag before any renaming
+        # -- see the per-image loop above and ImageProcessor.process_image's
+        # filename_prefix -- so a same-name cross-batch overwrite is
+        # structurally impossible rather than merely rare; this line reports
+        # that guarantee alongside the real dedup/indexing counts for audit.
         dedup_stats = dedup_registry.summary()
         images_indexed = agent.stats.get("by_type", {}).get("image", 0)
         logger.info(
-            "Image pipeline summary | total extracted: %d -> duplicates removed: %d -> "
-            "unique retained: %d -> images indexed: %d",
+            "Image pipeline summary | extracted: %d -> overwrites prevented: %d (globally-unique "
+            "naming, batch-tagged raw extraction) -> duplicates removed: %d -> unique retained: %d "
+            "-> images indexed: %d (entity/chunk linking logged separately by entity_linker)",
             dedup_stats["total_extracted"],
+            global_image_seq,
             dedup_stats["duplicates_removed"],
             dedup_stats["unique_retained"],
             images_indexed,

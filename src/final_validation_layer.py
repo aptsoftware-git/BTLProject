@@ -215,19 +215,33 @@ class FinalValidationLayer:
             if conf < self.min_apostrophe_confidence:
                 return "rejected", Reason.UNCERTAIN_APOSTROPHE_SUGGESTION
 
-        # Authoritative grounding: either the token was verified against the
-        # real PDF page text (pdf_grounded, see src/pdf_bbox_resolver.py) or
-        # against the source sentence text (grounding_verified, see
-        # src/finding_mapper.py's original_found_in_sentence check). A bare
-        # `source_bbox` is only carried-through Docling element provenance
-        # (never itself checked against the finding's `original` text) and
-        # must never be treated as evidence on its own -- doing so let
-        # stale/hallucinated candidates through as long as *some* bbox
-        # metadata existed, regardless of whether the reported token was
-        # ever actually found anywhere.
+        # Authoritative grounding. A bare `source_bbox` is only
+        # carried-through Docling element provenance (never itself checked
+        # against the finding's `original` text) and must never be treated
+        # as evidence on its own -- doing so let stale/hallucinated
+        # candidates through as long as *some* bbox metadata existed,
+        # regardless of whether the reported token was ever actually found
+        # anywhere.
+        #
+        # When a real source PDF exists, pdf_bbox_resolver.resolve_bboxes
+        # always runs an independent, genuine search for `original` directly
+        # against that PDF's own extracted text (pdf_checked=True on every
+        # finding it processes). That result is authoritative: a candidate
+        # whose text the real PDF search could not find (pdf_grounded=False)
+        # must be rejected even if a cached/stale sentence_text string
+        # happens to still contain it (grounding_verified=True) -- a cached
+        # match is not "independent PDF verification". grounding_verified is
+        # only accepted as sufficient evidence on its own when there was no
+        # real PDF to check at all (pdf_checked=False, e.g. a DOCX/TXT
+        # original), which is the one case independent PDF verification is
+        # not possible.
         grounding_verified = bool(finding.get("grounding_verified"))
         pdf_grounded = bool(finding.get("pdf_grounded"))
-        if not grounding_verified and not pdf_grounded:
+        pdf_checked = bool(finding.get("pdf_checked"))
+        if pdf_checked:
+            if not pdf_grounded:
+                return "rejected", Reason.NO_PDF_OR_SOURCE_EVIDENCE
+        elif not grounding_verified:
             return "rejected", Reason.NO_PDF_OR_SOURCE_EVIDENCE
 
         if confidence is not None and confidence < self.min_confidence:

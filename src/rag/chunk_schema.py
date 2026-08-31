@@ -30,6 +30,7 @@ class ChunkMetadata(BaseModel):
     entity_id: Optional[str] = Field(None, description="Stable document-scoped entity/person key, shared between a portrait's image chunk and every text chunk that discusses the same person")
     entity_ids: List[str] = Field(default_factory=list, description="All document-scoped entity keys this chunk's own text mentions (a text chunk may discuss more than one grounded person)")
     linked_text_chunk_ids: List[str] = Field(default_factory=list, description="Chunk IDs of the text chunks (biography/qualifications/experience) that discuss this image's grounded entity -- populated on image chunks only")
+    linked_image_ids: List[str] = Field(default_factory=list, description="image_id(s) of the portrait/photo chunk(s) depicting an entity this text chunk mentions -- the reverse of linked_text_chunk_ids, populated on text chunks only, so a text-only query can also surface the associated image")
     text_before: Optional[str] = Field(None, description="Immediate textual context preceding the image")
     text_after: Optional[str] = Field(None, description="Immediate textual context succeeding the image")
     nearby_text: Optional[str] = Field(None, description="Selected adjacent profile/text block content used for spatial grounding")

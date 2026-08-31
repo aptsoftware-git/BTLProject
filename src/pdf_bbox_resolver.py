@@ -143,16 +143,28 @@ def resolve_bboxes(findings: List[Dict[str, Any]], pdf_path: Optional[Path]) -> 
 
     A per-finding resolution failure never raises -- that finding is simply
     left ungrounded. Only a totally unusable/missing PDF short-circuits the
-    whole batch to ungrounded (no exception escapes this function)."""
+    whole batch to ungrounded (no exception escapes this function).
+
+    Every returned finding also carries `pdf_checked`: True whenever a real
+    PDF was actually opened and a genuine per-finding search was attempted
+    against it (regardless of whether that search succeeded), False when no
+    real PDF was available to check at all (e.g. a DOCX/TXT source). This
+    lets a downstream gate (final_validation_layer) tell "we searched the
+    real PDF and the text truly isn't there" -- which must be an
+    authoritative rejection, never overridable by a merely-cached
+    sentence-text match -- apart from "there was no PDF to check", where
+    falling back to sentence-text evidence is the correct, and only
+    possible, behavior.
+    """
     if not pdf_path or not str(pdf_path).lower().endswith(".pdf") or not Path(pdf_path).exists():
-        return [{**f, "bbox": None, "pdf_grounded": False} for f in findings]
+        return [{**f, "bbox": None, "pdf_grounded": False, "pdf_checked": False} for f in findings]
 
     import fitz
 
     try:
         doc = fitz.open(str(pdf_path))
     except Exception:
-        return [{**f, "bbox": None, "pdf_grounded": False} for f in findings]
+        return [{**f, "bbox": None, "pdf_grounded": False, "pdf_checked": False} for f in findings]
 
     try:
         occurrence_counters: Dict[Tuple[Any, Any, str], int] = {}
@@ -186,7 +198,7 @@ def resolve_bboxes(findings: List[Dict[str, Any]], pdf_path: Optional[Path]) -> 
                 bbox_out = None
                 grounded = False
 
-            results.append({**f, "bbox": bbox_out, "pdf_grounded": grounded})
+            results.append({**f, "bbox": bbox_out, "pdf_grounded": grounded, "pdf_checked": True})
         return results
     finally:
         doc.close()

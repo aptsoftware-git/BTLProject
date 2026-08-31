@@ -109,6 +109,11 @@ def link_entities_across_chunks(chunks: List[Dict[str, Any]], document_id: str) 
 
     text_chunks = [c for c in chunks if (c.get("metadata") or {}).get("chunk_type") != "image"]
     text_chunk_entities: Dict[str, set] = {}
+    # Reverse direction of linked_text_chunk_ids: which image(s) depict a
+    # given entity, so a text-only query ("What are X's qualifications?")
+    # can also surface the associated portrait, not just the other way
+    # around -- see link_person_entities_for_document's docstring.
+    entity_to_image_ids: Dict[str, set] = {}
 
     for img_chunk in image_chunks:
         meta = img_chunk.setdefault("metadata", {})
@@ -118,6 +123,10 @@ def link_entities_across_chunks(chunks: List[Dict[str, Any]], document_id: str) 
             continue
 
         meta["entity_id"] = entity_key
+        image_id = meta.get("image_id")
+        if image_id:
+            entity_to_image_ids.setdefault(entity_key, set()).add(image_id)
+
         linked_ids: List[str] = []
         for t_chunk in text_chunks:
             t_meta = t_chunk.get("metadata") or {}
@@ -141,7 +150,8 @@ def link_entities_across_chunks(chunks: List[Dict[str, Any]], document_id: str) 
             len(meta["linked_text_chunk_ids"]), meta["linked_text_chunk_ids"],
         )
 
-    # Stamp the resolved entity id(s) onto each matched text chunk, deterministically.
+    # Stamp the resolved entity id(s), and every image depicting them, onto
+    # each matched text chunk, deterministically.
     for t_chunk in text_chunks:
         t_meta = t_chunk.get("metadata") or {}
         t_chunk_id = t_meta.get("chunk_id")
@@ -151,6 +161,9 @@ def link_entities_across_chunks(chunks: List[Dict[str, Any]], document_id: str) 
         ordered = sorted(keys)
         t_meta["entity_ids"] = ordered
         t_meta["entity_id"] = ordered[0]
+        linked_image_ids = sorted({img_id for key in keys for img_id in entity_to_image_ids.get(key, ())})
+        if linked_image_ids:
+            t_meta["linked_image_ids"] = linked_image_ids
 
     return stats
 
@@ -226,6 +239,7 @@ def link_person_entities_for_document(
                 touched_chunk_updates[chunk_id] = {
                     "entity_id": meta["entity_id"],
                     "entity_ids": json.dumps(meta.get("entity_ids", [])),
+                    "linked_image_ids": json.dumps(meta.get("linked_image_ids", [])),
                 }
 
         _write_chunks_file(chunks_path, data)
