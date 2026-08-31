@@ -211,9 +211,24 @@ export default function Reports({ activeDocId }) {
 
   const docLabel = activeDoc?.filename || documents.find(d => d.id === selectedDocId)?.filename || selectedDocId;
 
-  const reviewSummarySentence = totalIssues === 0
-    ? "No issues were found in this document."
-    : `${totalIssues} issue${totalIssues === 1 ? "" : "s"} ${totalIssues === 1 ? "was" : "were"} identified that may require your attention.`;
+  // Three explicit states, derived from the backend's own report status --
+  // never from "0 findings" alone. finalRep.isReady only becomes true once
+  // /api/reports/{id}/final-report actually returned report data, which
+  // only happens once generation genuinely completed (see
+  // checkStatusAndReports above); while it's still generating/waiting,
+  // findingsList/totalIssues are just empty defaults, not a real "zero
+  // issues" result, so they must never be presented as one.
+  const isReviewInProgress = !finalRep.isReady;
+  const reviewState = isReviewInProgress
+    ? "processing"
+    : (totalIssues > 0 ? "completed_with_findings" : "completed_zero");
+
+  const reviewSummarySentence =
+    reviewState === "processing"
+      ? "Document review is still in progress. Findings will appear when complete."
+      : reviewState === "completed_zero"
+        ? "No issues were found in this document."
+        : `${totalIssues} issue${totalIssues === 1 ? "" : "s"} ${totalIssues === 1 ? "was" : "were"} identified that may require your attention.`;
 
   function renderFindingCard(f, idx) {
     const priority = priorityInfo(f.severity);
@@ -347,37 +362,46 @@ export default function Reports({ activeDocId }) {
           <h2 style={styles.sectionTitleText}>Document Review Summary</h2>
           <p style={styles.reviewSentence}>{reviewSummarySentence}</p>
 
-          <div style={styles.summaryStatsRow}>
-            <div style={styles.statTile}>
-              <span style={{ ...styles.statDot, background: "#dc2626" }} />
-              <div>
-                <div style={styles.statNumber}>{highCount}</div>
-                <div style={styles.statLabel}>High priority</div>
-              </div>
+          {reviewState === "processing" ? (
+            <div style={{ ...styles.statusBanner, background: "#eff6ff", borderColor: "#bfdbfe" }}>
+              <span style={{ ...styles.statusBadge, color: "#1d4ed8" }}>⏳ In progress</span>
+              <span style={{ fontSize: 13, color: "#334155" }}>Check back shortly, or leave this page open -- it updates automatically.</span>
             </div>
-            <div style={styles.statTile}>
-              <span style={{ ...styles.statDot, background: "#b45309" }} />
-              <div>
-                <div style={styles.statNumber}>{medCount}</div>
-                <div style={styles.statLabel}>Medium priority</div>
+          ) : (
+            <>
+              <div style={styles.summaryStatsRow}>
+                <div style={styles.statTile}>
+                  <span style={{ ...styles.statDot, background: "#dc2626" }} />
+                  <div>
+                    <div style={styles.statNumber}>{highCount}</div>
+                    <div style={styles.statLabel}>High priority</div>
+                  </div>
+                </div>
+                <div style={styles.statTile}>
+                  <span style={{ ...styles.statDot, background: "#b45309" }} />
+                  <div>
+                    <div style={styles.statNumber}>{medCount}</div>
+                    <div style={styles.statLabel}>Medium priority</div>
+                  </div>
+                </div>
+                <div style={styles.statTile}>
+                  <span style={{ ...styles.statDot, background: "#166534" }} />
+                  <div>
+                    <div style={styles.statNumber}>{lowCount}</div>
+                    <div style={styles.statLabel}>Low priority</div>
+                  </div>
+                </div>
               </div>
-            </div>
-            <div style={styles.statTile}>
-              <span style={{ ...styles.statDot, background: "#166534" }} />
-              <div>
-                <div style={styles.statNumber}>{lowCount}</div>
-                <div style={styles.statLabel}>Low priority</div>
-              </div>
-            </div>
-          </div>
 
-          <div style={{ ...styles.statusBanner, background: statusStyle.bg, borderColor: statusStyle.border }}>
-            <span style={{ ...styles.statusBadge, color: statusStyle.color }}>{overallStatusLabel}</span>
-            <span style={{ fontSize: 13, color: "#334155" }}>{overallStatusAction}</span>
-          </div>
+              <div style={{ ...styles.statusBanner, background: statusStyle.bg, borderColor: statusStyle.border }}>
+                <span style={{ ...styles.statusBadge, color: statusStyle.color }}>{overallStatusLabel}</span>
+                <span style={{ fontSize: 13, color: "#334155" }}>{overallStatusAction}</span>
+              </div>
+            </>
+          )}
         </div>
 
-        {totalIssues > 0 && (
+        {reviewState === "completed_with_findings" && (
           <div style={styles.sectionBlock}>
             <div style={styles.sectionHeaderRow}>
               <h2 style={styles.sectionTitleText}>Issues Found ({totalIssues})</h2>

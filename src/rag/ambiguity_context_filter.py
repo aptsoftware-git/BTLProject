@@ -72,6 +72,106 @@ PLACEHOLDER_LEAKAGE_TERMS = [
     "no direct evidence", "the claims and entities"
 ]
 
+# Generic, document-agnostic person/organization-name-like pattern: an
+# optional honorific followed by 2-4 consecutive Title-Case words (e.g.
+# "Mr. Ravi Todi", "Sunil Kumar Mittra", "BTL EPC Limited"). Used only to
+# sanity-check whether two evidence quotes being compared actually concern
+# the same named subject -- never to identify a specific person by a fixed
+# roster.
+_NAME_LIKE_RE = re.compile(
+    r"\b(?:Mr\.?|Mrs\.?|Ms\.?|Dr\.?|Shri|Smt\.?)?\s*"
+    r"[A-Z][a-zA-Z']+(?:\s+[A-Z][a-zA-Z'.]+){1,3}\b"
+)
+
+# Generic defined-terms/determiners that are capitalized in formal document
+# prose (sentence-initial "The", legal defined terms like "the Company"/
+# "the Board") but are NOT proper names. A candidate made up ENTIRELY of
+# these words is discarded -- it isn't evidence of a specific named
+# person/organization, so it must never trigger the same-subject rejection
+# below (that would itself be a false positive: two genuinely-the-same-
+# entity references like "the Company" vs "the Corporation" are exactly
+# the kind of real terminology-inconsistency finding this pipeline should
+# still be able to report).
+_GENERIC_TERM_WORDS = frozenset({
+    "the", "this", "that", "these", "those", "such", "said",
+    "company", "corporation", "corp", "entity", "board", "committee",
+    "management", "government", "authority", "group", "organization",
+    "organisation", "firm", "enterprise", "institution", "department",
+    "ministry", "agency", "council", "office", "division", "unit", "team",
+    "directors", "director", "holding", "holdings", "subsidiary", "parent",
+})
+
+
+def _extract_name_like_candidates(text: str) -> set:
+    """Generic candidate-name extraction for the same-subject sanity check
+    below -- not a roster lookup, purely a capitalization/shape heuristic
+    that works identically on any document. Candidates made up entirely of
+    generic defined-terms/determiners (see _GENERIC_TERM_WORDS) are
+    excluded, since those aren't proper names."""
+    from src.rag.entity_linker import normalize_entity_text
+
+    candidates = set()
+    for m in _NAME_LIKE_RE.finditer(text or ""):
+        norm = normalize_entity_text(m.group(0))
+        if not norm or len(norm.split()) < 2:
+            continue
+        if all(w in _GENERIC_TERM_WORDS for w in norm.split()):
+            continue
+        candidates.add(norm)
+    return candidates
+
+
+def _names_overlap(a: set, b: set) -> bool:
+    """True if any candidate from `a` and `b` refer to the same name --
+    exact match, or one is a strict superset of the other's words (handles
+    "Ravi Todi" vs "Mr. Ravi Todi" vs "Ravi Kumar Todi"-style partial forms)."""
+    for na in a:
+        na_words = set(na.split())
+        for nb in b:
+            if na == nb:
+                return True
+            nb_words = set(nb.split())
+            if na_words <= nb_words or nb_words <= na_words:
+                return True
+    return False
+
+
+def is_same_subject_across_evidence(finding: Dict[str, Any]) -> Tuple[bool, Optional[str]]:
+    """Rejects a cross-evidence conflict claim (terminology/role/value/date
+    inconsistency, contradiction, etc.) when the cited evidence items each
+    name a *different*, non-overlapping specific person/organization --
+    the classic false positive of an LLM mixing up two distinct named
+    entities and mislabeling the mismatch as an inconsistency about "the
+    same" subject. Only fires when there are 2+ evidence items and BOTH
+    sides actually contain a detectable name-like candidate; if either side
+    has none (e.g. a generic role/term with no proper noun, or a single
+    piece of evidence), this check does not apply and other gates decide.
+    """
+    evidence_items: List[Dict[str, Any]] = list(finding.get("evidence") or [])
+    quotes = [str(ev.get("quote") or "") for ev in evidence_items if ev.get("quote")]
+    if len(quotes) < 2:
+        return True, None
+
+    name_sets = [_extract_name_like_candidates(q) for q in quotes]
+    non_empty = [s for s in name_sets if s]
+    if len(non_empty) < 2:
+        return True, None
+
+    # Every non-empty side must share at least one name with every other
+    # non-empty side; a single disjoint pair is enough to flag a likely
+    # different-entity mixup.
+    for i in range(len(non_empty)):
+        for j in range(i + 1, len(non_empty)):
+            if not _names_overlap(non_empty[i], non_empty[j]):
+                return False, (
+                    "evidence items name different, non-overlapping entities "
+                    f"({sorted(non_empty[i])} vs {sorted(non_empty[j])}) -- this reads as two "
+                    "distinct people/organizations rather than one entity described "
+                    "inconsistently; rejecting to avoid a false terminology/attribute conflict"
+                )
+
+    return True, None
+
 
 def _normalize_year(raw: str) -> str:
     raw = raw.strip()
@@ -229,6 +329,14 @@ def is_genuine_ambiguity(finding: Dict[str, Any]) -> Tuple[bool, Optional[str]]:
     rel_ok, rel_reason = is_evidence_relevant_to_claim(finding)
     if not rel_ok:
         return False, rel_reason
+
+    # 4b. Same-subject check: reject a cross-evidence conflict claim when
+    # the two sides actually name different, non-overlapping people/
+    # organizations (a common LLM mixup mislabeled as an inconsistency
+    # about "the same" entity -- see is_same_subject_across_evidence).
+    subject_ok, subject_reason = is_same_subject_across_evidence(finding)
+    if not subject_ok:
+        return False, subject_reason
 
     # 5. Pronoun / Entity-reference ambiguity validation (single-quote valid)
     if category == "Pronoun / entity-reference ambiguity":
