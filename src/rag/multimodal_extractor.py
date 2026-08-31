@@ -250,10 +250,125 @@ class MultimodalExtractor:
             "mode": "digital" if is_digital else "scanned"
         }
 
+    @staticmethod
+    def _bbox_to_topleft_tuple(bbox: BoundingBox, page_height: float) -> Optional[Tuple[float, float, float, float]]:
+        """Normalizes any BoundingBox (Docling's default BOTTOMLEFT or an
+        already-TOPLEFT one, e.g. from PyMuPDF) to a TOPLEFT (x0, y0, x1, y1)
+        tuple, y increasing downward -- matching PyMuPDF's page space."""
+        if bbox is None or bbox.l is None or bbox.t is None or bbox.r is None or bbox.b is None:
+            return None
+        coord_origin = str(getattr(bbox, "coord_origin", None) or "BOTTOMLEFT").upper()
+        if coord_origin == "TOPLEFT":
+            y0, y1 = bbox.t, bbox.b
+        else:
+            y0, y1 = page_height - bbox.t, page_height - bbox.b
+        y0, y1 = min(y0, y1), max(y0, y1)
+        x0, x1 = min(bbox.l, bbox.r), max(bbox.l, bbox.r)
+        return (x0, y0, x1, y1)
+
+    @staticmethod
+    def _bbox_overlap_ratio(a: Tuple[float, float, float, float], b: Tuple[float, float, float, float]) -> float:
+        """Intersection area / smaller-box area -- deliberately not IoU, since
+        a real embedded image and Docling's own (sometimes tighter or looser)
+        detected region for the same picture can differ in extent; what
+        matters here is "do these two regions clearly refer to the same
+        picture", not precise area agreement."""
+        ax0, ay0, ax1, ay1 = a
+        bx0, by0, bx1, by1 = b
+        ix0, iy0 = max(ax0, bx0), max(ay0, by0)
+        ix1, iy1 = min(ax1, bx1), min(ay1, by1)
+        if ix1 <= ix0 or iy1 <= iy0:
+            return 0.0
+        inter = (ix1 - ix0) * (iy1 - iy0)
+        area_a = max(1e-6, (ax1 - ax0) * (ay1 - ay0))
+        area_b = max(1e-6, (bx1 - bx0) * (by1 - by0))
+        return inter / min(area_a, area_b)
+
+    def _supplement_missing_images_from_pdf(
+        self,
+        batch_structured_doc: StructuredDocument,
+        temp_pdf_path: Path,
+    ) -> int:
+        """
+        Cross-checks Docling's own PictureItem detection for a *successfully
+        converted* batch against a raw PyMuPDF embedded-image enumeration
+        (page.get_image_info), and adds an ImageMetadata entry for any real
+        embedded image Docling's layout classifier didn't surface.
+
+        Docling's picture detector is a confidence-based ML layout
+        classifier, not a raw XObject scan -- it can under-detect (small
+        images, decorative-looking regions, low-confidence calls) even on a
+        batch that otherwise converts successfully. The fully-failed-batch
+        fallback path (_build_fallback_structured_document_for_batch) already
+        does this same raw enumeration, but only runs when Docling's
+        conversion fails outright; this makes the same guarantee -- every
+        embedded raster image the PDF itself contains gets at least one
+        ImageMetadata entry -- hold on the success path too, so a document
+        never silently ends up with fewer extracted images than it actually
+        contains just because Docling's classifier was unsure about some of
+        them. Added entries get image_path left unset, so the per-image
+        loop's existing "crop directly from source PDF" fallback fills them
+        in exactly like every other image.
+
+        Returns the number of images added.
+        """
+        added = 0
+        try:
+            import fitz
+            existing_by_page: Dict[int, List[Tuple[float, float, float, float]]] = {}
+            with fitz.open(temp_pdf_path) as doc:
+                for img_meta in batch_structured_doc.images.values():
+                    page_idx = img_meta.page_number - 1
+                    if 0 <= page_idx < doc.page_count:
+                        norm = self._bbox_to_topleft_tuple(img_meta.bbox, doc[page_idx].rect.height)
+                        if norm:
+                            existing_by_page.setdefault(img_meta.page_number, []).append(norm)
+
+                for page_idx in range(doc.page_count):
+                    page = doc[page_idx]
+                    local_page_num = page_idx + 1
+                    try:
+                        image_infos = page.get_image_info(xrefs=True) or []
+                    except Exception as img_info_err:
+                        logger.debug(f"Supplementary image scan failed on page {local_page_num}: {img_info_err}")
+                        continue
+                    if not image_infos:
+                        continue
+
+                    existing_bboxes = existing_by_page.setdefault(local_page_num, [])
+                    for img_idx, info in enumerate(image_infos):
+                        raw_bbox = info.get("bbox")
+                        if not raw_bbox or len(raw_bbox) != 4:
+                            continue
+                        x0, y0, x1, y1 = raw_bbox
+                        if x1 <= x0 or y1 <= y0:
+                            continue
+                        candidate = (x0, y0, x1, y1)
+                        if any(self._bbox_overlap_ratio(candidate, eb) > 0.5 for eb in existing_bboxes):
+                            continue  # Docling already detected this same picture region.
+
+                        new_id = f"#/pictures/supplement_{page_idx}_{img_idx}"
+                        batch_structured_doc.images[new_id] = ImageMetadata(
+                            image_id=new_id,
+                            page_number=local_page_num,
+                            bbox=BoundingBox(l=x0, t=y0, r=x1, b=y1, coord_origin="TOPLEFT"),
+                        )
+                        existing_bboxes.append(candidate)
+                        added += 1
+        except Exception as e:
+            logger.warning(f"Supplementary image enumeration failed for batch: {e}")
+
+        if added:
+            logger.info(
+                "Supplementary PyMuPDF scan found %d image(s) Docling's own detector missed in this batch.",
+                added,
+            )
+        return added
+
     def _build_fallback_structured_document_for_batch(
-        self, 
-        file_path: Path, 
-        start_page: int, 
+        self,
+        file_path: Path,
+        start_page: int,
         end_page: int,
         file_name: str,
         file_type: str
@@ -680,6 +795,11 @@ class MultimodalExtractor:
                     file_name=file_name,
                     file_type=file_type
                 )
+            elif temp_pdf_path.exists():
+                # Docling succeeded, but its own picture classifier can still
+                # under-detect real embedded images -- cross-check against a
+                # raw PyMuPDF scan before the temp batch PDF is deleted below.
+                self._supplement_missing_images_from_pdf(batch_structured_doc, temp_pdf_path)
 
             # Cleanup temp batch PDF
             if temp_pdf_path.exists() and temp_pdf_path != file_path:
